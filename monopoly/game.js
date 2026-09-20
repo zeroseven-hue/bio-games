@@ -8,14 +8,14 @@
 
 // 8 大 Zootopia 競賽隊伍 / 角色設定
 const ALL_TEAMS = [
-  { id: 0, name: "茱蒂兔兔隊", icon: "🐰", color: "#3498db" },
-  { id: 1, name: "尼克狐狸隊", icon: "🦊", color: "#e67e22" },
-  { id: 2, name: "快快樹懶隊", icon: "🦥", color: "#f1c40f" },
-  { id: 3, name: "蠻牛局長隊", icon: "🦬", color: "#2c3e50" },
-  { id: 4, name: "獅丁市長隊", icon: "🦁", color: "#e74c3c" },
-  { id: 5, name: "洪金豹警官隊", icon: "🐆", color: "#f39c12" },
-  { id: 6, name: "狼群警衛隊", icon: "🐺", color: "#7f8c8d" },
-  { id: 7, name: "羊駝探險隊", icon: "🦙", color: "#9b59b6" }
+  { id: 0, name: "茱蒂兔兔隊", icon: "🐰", color: "#38bdf8" },
+  { id: 1, name: "尼克狐狸隊", icon: "🦊", color: "#f97316" },
+  { id: 2, name: "快快樹懶隊", icon: "🦥", color: "#eab308" },
+  { id: 3, name: "蠻牛局長隊", icon: "🦬", color: "#38bdf8" },
+  { id: 4, name: "獅丁市長隊", icon: "🦁", color: "#ef4444" },
+  { id: 5, name: "洪金豹警官隊", icon: "🐆", color: "#f59e0b" },
+  { id: 6, name: "狼群警衛隊", icon: "🐺", color: "#94a3b8" },
+  { id: 7, name: "羊駝探險隊", icon: "🦙", color: "#c084fc" }
 ];
 
 // 12+ 閃亮機會卡 (生態良好獎勵)
@@ -92,6 +92,7 @@ let rawQuestionsByUnit = {};
 let questionPoolByUnit = {};
 let currentActiveQuestion = null;
 let currentPendingBuildCellId = null;
+let usedBuildingNames = new Set();
 let gameHistory = [];
 let countdownTimer = null;
 let cellCoordinates = [];
@@ -353,6 +354,7 @@ function initTeamsAndBoard() {
 
   currentTurnIndex = 0;
   currentTileIndex = 0;
+  usedBuildingNames = new Set();
 
   modeTag.textContent = gameMode === "group" ? `👥 小組競賽 (${activeTeamCount} 隊)` : `👤 個人抽籤模式`;
   renderScoreBar();
@@ -622,7 +624,7 @@ function handleQuizSelect(selectedIndex, btnEl) {
   }
 }
 
-// 9. 答對建立生態領地 (帶隊伍頭像與色彩)
+// 9. 答對建立生態領地 (帶隊伍頭像與色彩、不重複建築名稱機制)
 function openBuildModal() {
   const curTeam = teams[currentTurnIndex];
   currentPendingBuildCellId = curTeam.pos;
@@ -631,23 +633,44 @@ function openBuildModal() {
   buildModalTitle.textContent = `🎉 ${curTeam.name} 建立專屬生態領地！`;
   recommendBuildList.innerHTML = "";
 
+  let defaultUnusedName = "";
+
   RECOMMEND_BUILDINGS.forEach(bName => {
+    const isUsed = usedBuildingNames.has(bName);
     const chip = document.createElement("span");
-    chip.className = "build-chip";
-    chip.textContent = bName;
-    chip.onclick = () => { inputBuildName.value = bName; };
+    chip.className = `build-chip ${isUsed ? "used-chip" : ""}`;
+    
+    if (isUsed) {
+      chip.textContent = `🔒 ${bName} (已建立)`;
+      chip.style.opacity = "0.45";
+      chip.style.cursor = "not-allowed";
+      chip.style.textDecoration = "line-through";
+      chip.style.background = "#e2e8f0";
+      chip.style.color = "#64748b";
+    } else {
+      chip.textContent = bName;
+      chip.onclick = () => { inputBuildName.value = bName; };
+      if (!defaultUnusedName) defaultUnusedName = bName;
+    }
     recommendBuildList.appendChild(chip);
   });
 
-  inputBuildName.value = RECOMMEND_BUILDINGS[Math.floor(Math.random() * RECOMMEND_BUILDINGS.length)];
+  inputBuildName.value = defaultUnusedName || "獨特生物保育站";
   openModal(buildModal);
 }
 
 function confirmBuildHouse() {
   const curTeam = teams[currentTurnIndex];
   const bName = inputBuildName.value.trim() || "生態研究站";
-  const buildArea = document.getElementById(`build-${currentPendingBuildCellId}`);
 
+  if (usedBuildingNames.has(bName)) {
+    alert(`⚠️ 建築名稱『${bName}』已經在動物城被建立過了！\n請發揮創意選擇或輸入一個獨一無二的生態建築名稱！`);
+    return;
+  }
+
+  usedBuildingNames.add(bName);
+
+  const buildArea = document.getElementById(`build-${currentPendingBuildCellId}`);
   if (buildArea) {
     const badge = document.createElement("div");
     badge.className = "building-badge";
@@ -749,14 +772,15 @@ function saveSnapshot() {
     activeTeamCount,
     currentTurnIndex,
     teams,
+    usedBuildingNames: Array.from(usedBuildingNames),
     gameHistory,
     time: Date.now()
   };
-  localStorage.setItem("monopoly_snapshot_v3.8", JSON.stringify(snapshot));
+  localStorage.setItem("monopoly_snapshot_v3.9", JSON.stringify(snapshot));
 }
 
 function checkSnapshotOnLoad() {
-  const raw = localStorage.getItem("monopoly_snapshot_v3.8");
+  const raw = localStorage.getItem("monopoly_snapshot_v3.9");
   if (raw) {
     try {
       const snap = JSON.parse(raw);
@@ -769,13 +793,14 @@ function checkSnapshotOnLoad() {
 
 function restoreSnapshot() {
   closeModal(snapshotModal);
-  const raw = localStorage.getItem("monopoly_snapshot_v3.8");
+  const raw = localStorage.getItem("monopoly_snapshot_v3.9");
   if (raw) {
     const snap = JSON.parse(raw);
     gameMode = snap.gameMode || "group";
     activeTeamCount = snap.activeTeamCount || 4;
     currentTurnIndex = snap.currentTurnIndex || 0;
     teams = snap.teams || [];
+    usedBuildingNames = new Set(snap.usedBuildingNames || []);
     gameHistory = snap.gameHistory || [];
     renderScoreBar();
     generateBoardGrid();
