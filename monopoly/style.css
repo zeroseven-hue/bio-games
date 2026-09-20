@@ -1,4 +1,4 @@
-/* Monopoly Zootopia Bio Style CSS (V3.6) */
+/* Monopoly Zootopia Bio Style CSS (V3.7) */
 
 :root {
   --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -50,9 +50,9 @@ body {
 
 .game-wrapper {
   width: 98vw;
-  max-width: 1200px;
-  height: 95vh;
-  max-height: 850px;
+  max-width: 1240px;
+  height: 96vh;
+  max-height: 870px;
   display: flex;
   flex-direction: column;
   background: var(--panel-bg);
@@ -61,7 +61,7 @@ body {
   overflow: hidden;
 }
 
-/* Header */
+/* Header Navbar */
 .game-header {
   display: flex;
   justify-content: space-between;
@@ -104,7 +104,7 @@ body {
 }
 
 .turn-icon {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
 }
 
 .turn-name {
@@ -116,14 +116,14 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn-tool {
   background: #334155;
   color: #ffffff;
   border: 1px solid rgba(255,255,255,0.2);
-  padding: 6px 12px;
+  padding: 6px 11px;
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.85rem;
@@ -136,6 +136,7 @@ body {
   transform: translateY(-2px);
 }
 
+.btn-green { background: #16a34a; }
 .btn-purple { background: #9333ea; }
 .btn-orange { background: #ea580c; }
 .btn-blue { background: #0284c7; }
@@ -146,22 +147,22 @@ body {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   grid-template-rows: repeat(8, 1fr);
-  gap: 3px;
+  gap: 4px;
   padding: 6px;
-  background: #cbd5e1;
+  background: #94a3b8;
   position: relative;
 }
 
 /* Grid Cells */
 .cell {
   background: #ffffff;
-  border-radius: 6px;
-  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  border: 1px solid #64748b;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 3px;
+  padding: 4px;
   position: relative;
   overflow: hidden;
   user-select: none;
@@ -176,14 +177,14 @@ body {
 .cell.destiny { background: #fbcfe8; border-color: #ec4899; }
 
 .cell-icon {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   margin-top: 2px;
 }
 
 .cell-text {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #0f172a;
   text-align: center;
   line-height: 1.1;
 }
@@ -198,12 +199,17 @@ body {
 
 .building-badge {
   background: #1e293b;
-  color: #fbbf24;
-  font-size: 0.62rem;
-  font-weight: 800;
-  padding: 1px 4px;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid rgba(255,255,255,0.4);
+  text-shadow: 0 1px 2px #000;
 }
 
 .cell-highlight {
@@ -212,56 +218,56 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  border: 3px solid #f59e0b;
-  background: rgba(245, 158, 11, 0.25);
+  border: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.3);
   pointer-events: none;
   display: none;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-/* Zootopia Animal Character Tokens */
+/* Zootopia Animal Character Tokens (48px ~ 54px Big Cute Faces) */
 .animal-token {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #0f172a;
+  border: 3px solid #0f172a;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-  z-index: 20;
+  font-size: 1.7rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+  z-index: 25;
   transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  margin-left: -16px;
-  margin-top: -16px;
+  margin-left: -24px;
+  margin-top: -24px;
   pointer-events: none;
 }
 
 .animal-token.is-hopping {
-  animation: tokenHop 0.3s ease-out;
+  animation: tokenHop 0.35s ease-out;
 }
 
 @keyframes tokenHop {
   0% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.3) translateY(-14px); }
+  50% { transform: scale(1.35) translateY(-18px); }
   100% { transform: scale(1) translateY(0); }
 }
 
-/* Center Board Control Area */
+/* Center Control Area (Bright Vibrant Cartoon Theme) */
 .center-area {
   grid-column: 2 / 10;
   grid-row: 2 / 8;
   background: #ffffff;
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
-  border: 2px solid #e2e8f0;
+  border: 3px solid #94a3b8;
 }
 
 .center-title-box {
@@ -269,15 +275,15 @@ body {
 }
 
 .center-title-box h2 {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   color: #0f172a;
   letter-spacing: 1px;
 }
 
 .center-title-box p {
-  font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 600;
+  font-size: 0.82rem;
+  color: #475569;
+  font-weight: 700;
 }
 
 .unit-selector-bar {
@@ -285,8 +291,8 @@ body {
   align-items: center;
   gap: 8px;
   background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  padding: 6px 14px;
+  border: 1.5px solid #86efac;
+  padding: 5px 14px;
   border-radius: 20px;
 }
 
@@ -299,14 +305,14 @@ body {
 .styled-unit-select {
   padding: 4px 8px;
   border-radius: 8px;
-  border: 1px solid #86efac;
+  border: 1px solid #4ade80;
   font-size: 0.85rem;
   font-weight: bold;
   color: #14532d;
   background: #ffffff;
 }
 
-/* Team Score Cards Bar */
+/* Team Score Bar (Displays Points & Building Count 🏠) */
 .team-score-bar {
   display: flex;
   flex-wrap: wrap;
@@ -317,13 +323,13 @@ body {
 
 .score-card {
   background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #cbd5e1;
   padding: 6px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.82rem;
+  gap: 8px;
+  font-size: 0.85rem;
   font-weight: 800;
 }
 
@@ -331,13 +337,22 @@ body {
   border-color: #f59e0b;
   background: #fef3c7;
   transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
+.score-card .b-count {
+  background: #1e293b;
+  color: #fbbf24;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
 }
 
 .dice-control-box {
   display: flex;
   gap: 10px;
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
 }
 
 .btn-dice-roll {
@@ -347,10 +362,10 @@ body {
   border: none;
   padding: 12px;
   border-radius: var(--radius-md);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
   transition: all 0.2s ease;
 }
 
@@ -394,7 +409,7 @@ body {
   text-align: center;
 }
 
-/* Modals High Contrast Pure White */
+/* Modals */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -415,7 +430,7 @@ body {
   background: #ffffff;
   border-radius: var(--radius-lg);
   width: 90%;
-  max-width: 540px;
+  max-width: 550px;
   padding: 24px;
   box-shadow: 0 16px 40px rgba(0,0,0,0.4);
   animation: modalPop 0.3s ease-out;
@@ -433,6 +448,12 @@ body {
   margin-bottom: 10px;
 }
 
+.modal-title-bar {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #166534;
+}
+
 .modal-badge {
   background: #f0fdf4;
   color: #166534;
@@ -448,6 +469,25 @@ body {
   font-size: 0.8rem;
   font-weight: bold;
 }
+
+.rules-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.rule-item {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border-left: 5px solid #16a34a;
+}
+.rule-item.green { background: #f0fdf4; border-color: #16a34a; }
+.rule-item.yellow { background: #fefce8; border-color: #f59e0b; }
+.rule-item.pink { background: #fdf2f8; border-color: #ec4899; }
+
+.rule-item b { display: block; margin-bottom: 3px; font-size: 0.95rem; }
+.rule-item p { font-size: 0.85rem; color: #334155; line-height: 1.4; margin: 0; }
 
 .timer-banner {
   background: #fef3c7;
@@ -513,6 +553,15 @@ body {
   font-weight: 900;
 }
 
+/* Text Zoom Safeguard for Quiz Box */
+#quizBox.zoomed-text .quiz-stem {
+  font-size: 1.65rem;
+}
+#quizBox.zoomed-text .btn-option {
+  font-size: 1.3rem;
+  padding: 18px;
+}
+
 .btn-action {
   width: 100%;
   padding: 12px;
@@ -546,9 +595,9 @@ body {
 .build-chip {
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
 }

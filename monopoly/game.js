@@ -1,10 +1,10 @@
 /**
- * 動物方城市生物大富翁 (Zootopia Bio Monopoly) - 專業教學強固版引擎 V3.6
- * 1. 8 大 Zootopia 動物城角色 Token (茱蒂 🐰, 尼克 🦊, 樹懶 🦥, 蠻牛 🦬, 獅丁 🦁, 洪金豹 🐆, 狼群 🐺, 羊駝 🦙)。
- * 2. 100% 對接中央生物題庫 (questions/ 10大單元) + Fisher-Yates 不重複洗牌佇列。
- * 3. 擴充 12+ 閃亮機會卡、12+ 驚奇命運卡、10+ 課堂新奇互動任務與 20+ 生態建築推薦。
- * 4. 支援 👥 小組競賽 (2~8 隊) 與 👤 個人隨機抽籤雙模式。
- * 5. 課堂防呆：老師 Spacebar 全場凍結、名單匯入、高對比純白卡片與 CSV 戰報匯出。
+ * 動物方城市生物大富翁 (Zootopia Bio Monopoly) - 專業教學強固版引擎 V3.7
+ * 1. 8 大 Zootopia 大臉可愛動物 Token (48px~56px 超大清晰，茱蒂 🐰, 尼克 🦊, 樹懶 🦥, 蠻牛 🦬, 獅丁 🦁, 洪金豹 🐆, 狼群 🐺, 羊駝 🦙)。
+ * 2. 領地建築顯示【隊伍頭像 + 建築名稱】(如 🐰 🏠 警局總部)，配上隊伍色彩！
+ * 3. 中央計分板雙指標：即時顯示【得分】與【🏠 房屋棟數】！
+ * 4. 修復右上角 🔍 放大題目按鈕與新增 📖 遊戲規則選單！
+ * 5. 100% 對接中央生物題庫 (questions/ 10大單元) + Fisher-Yates 不重複洗牌佇列。
  */
 
 // 8 大 Zootopia 競賽隊伍 / 角色設定
@@ -51,7 +51,7 @@ const DESTINY_CARDS = [
   "🗑️ 【廢棄物污染】遭遇微塑膠污染，請全隊大聲喊出生物保護宣言！"
 ];
 
-// 10+ 課堂新奇互動任務 (非死板題目的趣味課堂活動)
+// 10+ 課堂新奇互動任務
 const NOVELTY_TASKS = [
   "👏 與隔壁隊伍擊掌齊喊：我們是生物大富翁霸主！",
   "💨 做一次光合作用深深吸氣與吐氣動作！",
@@ -111,6 +111,7 @@ const btnShuffle = document.getElementById("btnShuffle");
 const diceResultBanner = document.getElementById("diceResultBanner");
 
 const btnZoomText = document.getElementById("btnZoomText");
+const btnRules = document.getElementById("btnRules");
 const btnFreeze = document.getElementById("btnFreeze");
 const btnSound = document.getElementById("btnSound");
 const btnTimer = document.getElementById("btnTimer");
@@ -118,6 +119,9 @@ const btnHistory = document.getElementById("btnHistory");
 const btnSettings = document.getElementById("btnSettings");
 
 // Modals
+const rulesModal = document.getElementById("rulesModal");
+const btnCloseRules = document.getElementById("btnCloseRules");
+
 const quizModal = document.getElementById("quizModal");
 const quizBox = document.getElementById("quizBox");
 const quizUnitBadge = document.getElementById("quizUnitBadge");
@@ -142,6 +146,8 @@ const noveltyTask = document.getElementById("noveltyTask");
 const btnCloseNovelty = document.getElementById("btnCloseNovelty");
 
 const buildModal = document.getElementById("buildModal");
+const buildTeamIcon = document.getElementById("buildTeamIcon");
+const buildModalTitle = document.getElementById("buildModalTitle");
 const recommendBuildList = document.getElementById("recommendBuildList");
 const inputBuildName = document.getElementById("inputBuildName");
 const btnConfirmBuild = document.getElementById("btnConfirmBuild");
@@ -165,7 +171,7 @@ const snapshotModal = document.getElementById("snapshotModal");
 const btnRestoreSnapshot = document.getElementById("btnRestoreSnapshot");
 const btnDiscardSnapshot = document.getElementById("btnDiscardSnapshot");
 
-// 初始化
+// 頁面初始化
 window.addEventListener("DOMContentLoaded", async () => {
   initEventListeners();
   await loadManifestAndUnits();
@@ -198,6 +204,9 @@ function initEventListeners() {
     quizBox.classList.toggle("zoomed-text", isTextZoomed);
   });
 
+  btnRules.addEventListener("click", () => openModal(rulesModal));
+  btnCloseRules.addEventListener("click", () => closeModal(rulesModal));
+
   btnFreeze.addEventListener("click", toggleTeacherFreeze);
   btnUnfreeze.addEventListener("click", toggleTeacherFreeze);
 
@@ -227,7 +236,7 @@ function initEventListeners() {
   btnRestoreSnapshot.addEventListener("click", restoreSnapshot);
   btnDiscardSnapshot.addEventListener("click", () => {
     closeModal(snapshotModal);
-    localStorage.removeItem("monopoly_snapshot_v3.6");
+    localStorage.removeItem("monopoly_snapshot_v3.7");
   });
 }
 
@@ -331,7 +340,7 @@ function initTeamsAndBoard() {
     ...t,
     score: 0,
     pos: 0,
-    buildings: []
+    buildingsCount: 0
   }));
 
   currentTurnIndex = 0;
@@ -342,6 +351,7 @@ function initTeamsAndBoard() {
   generateBoardGrid();
 }
 
+// 計分板雙指標：顯示得分與 🏠 房屋棟數
 function renderScoreBar() {
   teamScoreBar.innerHTML = "";
   teams.forEach((t, idx) => {
@@ -351,6 +361,7 @@ function renderScoreBar() {
     card.innerHTML = `
       <span>${t.icon} ${t.name}</span>
       <span style="color:#e67e22;"><b>${t.score}</b> 分</span>
+      <span class="b-count">🏠 ${t.buildingsCount} 棟</span>
     `;
     teamScoreBar.appendChild(card);
   });
@@ -367,12 +378,11 @@ function renderScoreBar() {
 function generateBoardGrid() {
   document.querySelectorAll(".cell").forEach(e => e.remove());
 
-  // 28 格座標 (順時針邊界)
   const coords = [];
-  for (let i = 1; i <= 10; i++) coords.push({ c: i, r: 1 }); // 頂邊 10 格
-  for (let i = 2; i <= 7; i++) coords.push({ c: 10, r: i }); // 右邊 6 格
-  for (let i = 10; i >= 1; i--) coords.push({ c: i, r: 8 }); // 底邊 10 格
-  for (let i = 7; i >= 2; i--) coords.push({ c: 1, r: i }); // 左邊 6 格
+  for (let i = 1; i <= 10; i++) coords.push({ c: i, r: 1 });
+  for (let i = 2; i <= 7; i++) coords.push({ c: 10, r: i });
+  for (let i = 10; i >= 1; i--) coords.push({ c: i, r: 8 });
+  for (let i = 7; i >= 2; i--) coords.push({ c: 1, r: i });
 
   coords.forEach((pos, idx) => {
     const cell = document.createElement("div");
@@ -399,7 +409,6 @@ function generateBoardGrid() {
     board.appendChild(cell);
   });
 
-  // 控制 8 個動物角色 Token 的顯示/隱藏
   for (let i = 0; i < 8; i++) {
     const tok = document.getElementById(`token-${i}`);
     if (tok) tok.style.display = i < activeTeamCount ? "flex" : "none";
@@ -419,13 +428,12 @@ function updateCoordinates() {
     }
   }
 
-  // 更新各隊 Token 位置 (帶散開偏移避免重疊)
   teams.forEach((t, idx) => {
     const tok = document.getElementById(`token-${t.id}`);
     if (tok && cellCoordinates[t.pos]) {
       const coord = cellCoordinates[t.pos];
-      const offsetX = (idx % 3 - 1) * 8;
-      const offsetY = (Math.floor(idx / 3) - 1) * 8;
+      const offsetX = (idx % 3 - 1) * 10;
+      const offsetY = (Math.floor(idx / 3) - 1) * 10;
       tok.style.left = `${coord.x + offsetX}px`;
       tok.style.top = `${coord.y + offsetY}px`;
     }
@@ -441,7 +449,7 @@ function startDraw(isQuick = false) {
   const diceVal = Math.floor(Math.random() * 6) + 1;
   const stepsToMove = diceVal + (isQuick ? 0 : 14);
 
-  diceResultBanner.textContent = `🎲 ${teams[currentTurnIndex].name} 擲出了 ${diceVal} 點！正在躍進移動中...`;
+  diceResultBanner.textContent = `🎲 ${teams[currentTurnIndex].name} 擲出了 ${diceVal} 點！正在前進邁進...`;
   startJumping(stepsToMove, isQuick);
 }
 
@@ -459,8 +467,8 @@ function startJumping(steps, isQuick) {
 
     if (cellCoordinates[curTeam.pos]) {
       const coord = cellCoordinates[curTeam.pos];
-      const offsetX = (currentTurnIndex % 3 - 1) * 8;
-      const offsetY = (Math.floor(currentTurnIndex / 3) - 1) * 8;
+      const offsetX = (currentTurnIndex % 3 - 1) * 10;
+      const offsetY = (Math.floor(currentTurnIndex / 3) - 1) * 10;
       tok.style.left = `${coord.x + offsetX}px`;
       tok.style.top = `${coord.y + offsetY}px`;
 
@@ -486,7 +494,6 @@ function handleTileLanding() {
   const pos = curTeam.pos;
 
   if ([0, 14].includes(pos)) {
-    // 踩中 ✨ 閃亮機會
     playWinSound();
     const cardText = CHANCE_CARDS[Math.floor(Math.random() * CHANCE_CARDS.length)];
     chanceDesc.textContent = cardText;
@@ -495,7 +502,6 @@ function handleTileLanding() {
     openModal(chanceModal);
 
   } else if ([7, 21].includes(pos)) {
-    // 踩中 💢 驚奇命運
     playWrongSound();
     const cardText = DESTINY_CARDS[Math.floor(Math.random() * DESTINY_CARDS.length)];
     destinyDesc.textContent = cardText;
@@ -503,9 +509,7 @@ function handleTileLanding() {
     openModal(destinyModal);
 
   } else {
-    // 踩中 生態問答領地格
     if (Math.random() < 0.25) {
-      // 25% 機率觸發 💡 課堂新奇互動任務
       const taskText = NOVELTY_TASKS[Math.floor(Math.random() * NOVELTY_TASKS.length)];
       noveltyTask.textContent = taskText;
       addHistoryLog(curTeam.name, `💡 觸發【新奇互動任務】：${taskText}`);
@@ -599,9 +603,13 @@ function handleQuizSelect(selectedIndex, btnEl) {
   }
 }
 
-// 8. 答對建立生態領地地標
+// 8. 答對建立生態領地 (帶隊伍頭像與色彩)
 function openBuildModal() {
-  currentPendingBuildCellId = teams[currentTurnIndex].pos;
+  const curTeam = teams[currentTurnIndex];
+  currentPendingBuildCellId = curTeam.pos;
+
+  buildTeamIcon.textContent = curTeam.icon;
+  buildModalTitle.textContent = `🎉 ${curTeam.name} 建立專屬生態領地！`;
   recommendBuildList.innerHTML = "";
 
   RECOMMEND_BUILDINGS.forEach(bName => {
@@ -617,18 +625,20 @@ function openBuildModal() {
 }
 
 function confirmBuildHouse() {
+  const curTeam = teams[currentTurnIndex];
   const bName = inputBuildName.value.trim() || "生態研究站";
   const buildArea = document.getElementById(`build-${currentPendingBuildCellId}`);
 
   if (buildArea) {
     const badge = document.createElement("div");
     badge.className = "building-badge";
-    badge.textContent = `🏠 ${bName}`;
-    badge.style.backgroundColor = teams[currentTurnIndex].color;
+    badge.innerHTML = `${curTeam.icon} 🏠 ${bName}`;
+    badge.style.backgroundColor = curTeam.color;
     buildArea.appendChild(badge);
   }
 
-  addHistoryLog(teams[currentTurnIndex].name, `🏰 成功建立領地：【${bName}】`);
+  curTeam.buildingsCount += 1;
+  addHistoryLog(curTeam.name, `🏰 成功建立領地：【${curTeam.icon} ${bName}】`);
   closeModal(buildModal);
   endTurn();
 }
@@ -723,11 +733,11 @@ function saveSnapshot() {
     gameHistory,
     time: Date.now()
   };
-  localStorage.setItem("monopoly_snapshot_v3.6", JSON.stringify(snapshot));
+  localStorage.setItem("monopoly_snapshot_v3.7", JSON.stringify(snapshot));
 }
 
 function checkSnapshotOnLoad() {
-  const raw = localStorage.getItem("monopoly_snapshot_v3.6");
+  const raw = localStorage.getItem("monopoly_snapshot_v3.7");
   if (raw) {
     try {
       const snap = JSON.parse(raw);
@@ -740,7 +750,7 @@ function checkSnapshotOnLoad() {
 
 function restoreSnapshot() {
   closeModal(snapshotModal);
-  const raw = localStorage.getItem("monopoly_snapshot_v3.6");
+  const raw = localStorage.getItem("monopoly_snapshot_v3.7");
   if (raw) {
     const snap = JSON.parse(raw);
     gameMode = snap.gameMode || "group";

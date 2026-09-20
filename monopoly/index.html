@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>動物方城市生物大富翁 - Zootopia Bio Monopoly</title>
-  <link rel="stylesheet" href="style.css?v=3.6">
+  <link rel="stylesheet" href="style.css?v=3.7">
   <!-- XLSX Library for Roster Import -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -13,7 +13,7 @@
   <div class="portrait-warning">👉 最佳教學體驗：請將 iPad / 螢幕旋轉為「橫向模式」！</div>
 
   <div class="game-wrapper">
-    <!-- 頂部主控列 -->
+    <!-- 頂部主控列 (包含顯眼的 📖 遊戲規則 按鈕) -->
     <header class="game-header">
       <div class="header-left">
         <h1 class="game-logo">🐰 動物城生物大富翁 🦊</h1>
@@ -28,11 +28,12 @@
       </div>
 
       <div class="header-right">
-        <button id="btnZoomText" class="btn-tool" title="放大題目字體">🔍 放大題目</button>
+        <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
+        <button id="btnRules" class="btn-tool btn-green" title="查看遊戲規則與玩法">📖 遊戲規則</button>
         <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
-        <button id="btnSound" class="btn-tool" title="音效切換">🔊</button>
-        <button id="btnTimer" class="btn-tool" title="計時器切換">⏱️</button>
-        <button id="btnHistory" class="btn-tool btn-orange" title="查看戰報">📜 戰報</button>
+        <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
+        <button id="btnTimer" class="btn-tool" title="計時器開關">⏱️</button>
+        <button id="btnHistory" class="btn-tool btn-orange" title="查看課堂戰報">📜 戰報</button>
         <button id="btnSettings" class="btn-tool btn-blue" title="遊戲設定">⚙️ 設定</button>
       </div>
     </header>
@@ -40,7 +41,7 @@
     <!-- 棋盤與中央互動區 -->
     <div class="board-container" id="board">
 
-      <!-- 8 個 Zootopia 動物城角色 Token -->
+      <!-- 8 個 Zootopia 大臉可愛動物 Token (48px~56px 超大清晰) -->
       <div class="animal-token token-judy" id="token-0" title="茱蒂兔警官 🐰">🐰</div>
       <div class="animal-token token-nick" id="token-1" title="尼克紅狐 🦊">🦊</div>
       <div class="animal-token token-flash" id="token-2" title="快快樹懶 🦥">🦥</div>
@@ -50,7 +51,7 @@
       <div class="animal-token token-wolf" id="token-6" title="狼群警衛隊 🐺">🐺</div>
       <div class="animal-token token-alpaca" id="token-7" title="羊駝探險隊 🦙">🦙</div>
 
-      <!-- 中央控制看板與擲骰子區 -->
+      <!-- 中央控制看板與擲骰子區 (高彩度活潑卡通風格) -->
       <div class="center-area">
         <div class="center-title-box">
           <h2>ZOOTOPIA BIO-MONOPOLY</h2>
@@ -62,9 +63,9 @@
           <select id="selectUnit" class="styled-unit-select"></select>
         </div>
 
-        <!-- 各隊分數與領地計分板 -->
+        <!-- 各隊得分與 🏠 房屋棟數雙指標計分板 -->
         <div class="team-score-bar" id="teamScoreBar">
-          <!-- JS 動態渲染隊伍分數卡 -->
+          <!-- JS 動態渲染各隊分數與房屋棟數卡 -->
         </div>
 
         <div class="dice-control-box">
@@ -80,7 +81,31 @@
 
   <!-- ==================== 彈窗系統 ==================== -->
 
-  <!-- 1. 生物題目作答 Modal -->
+  <!-- 1. 📖 遊戲規則 Modal -->
+  <div class="modal-overlay hidden" id="rulesModal">
+    <div class="modal-box rules-box">
+      <div class="modal-header">
+        <h2 class="modal-title-bar">📖 動物城大富翁 課堂闖關指南</h2>
+      </div>
+      <div class="rules-content">
+        <div class="rule-item green">
+          <b>🎲 1. 擲骰前進與跳躍</b>
+          <p>點選中央<b>「🎲 點我擲骰子」</b>，動物城夥伴會在棋盤上彈跳邁進，到達指定格子。</p>
+        </div>
+        <div class="rule-item yellow">
+          <b>🏠 2. 生物答題與建立領地</b>
+          <p>踩中問答格時，需在時間內討論並回答生物題目。答對可選擇並命名生態建築（如「警局總部 🚓」），標上<b>專屬隊伍頭像與色彩</b>！</p>
+        </div>
+        <div class="rule-item pink">
+          <b>✨ 3. 閃亮機會與驚奇考驗</b>
+          <p>踩中四角格子觸發特殊的生態機會（如有利突變、互利共生）或趣味考驗（如氣候變遷、天擇考驗），隨時可能逆轉勝！</p>
+        </div>
+      </div>
+      <button id="btnCloseRules" class="btn-action btn-success">我知道了，開始闖關！ 🚀</button>
+    </div>
+  </div>
+
+  <!-- 2. 生物題目作答 Modal (支援 🔍 放大題目) -->
   <div class="modal-overlay hidden" id="quizModal">
     <div class="modal-box quiz-box" id="quizBox">
       <div class="modal-header">
@@ -93,19 +118,18 @@
 
       <div class="quiz-options-grid" id="quizOptions"></div>
 
-      <!-- 答對/答錯解析看板 -->
       <div class="quiz-explanation hidden" id="quizExplanation">
         <h4>💡 生物觀念解析：</h4>
         <p id="explanationText"></p>
       </div>
 
       <div class="modal-actions" id="quizActions">
-        <button id="btnConfirmAnswer" class="btn-action btn-success hidden">✅ 確認解析，進行建設</button>
+        <button id="btnConfirmAnswer" class="btn-action btn-success hidden">✅ 確認解析，建立領地</button>
       </div>
     </div>
   </div>
 
-  <!-- 2. ✨ 閃亮機會 Modal -->
+  <!-- 3. ✨ 閃亮機會 Modal -->
   <div class="modal-overlay hidden" id="chanceModal">
     <div class="modal-box chance-box">
       <div class="event-icon">✨</div>
@@ -115,7 +139,7 @@
     </div>
   </div>
 
-  <!-- 3. 💢 驚奇命運 Modal -->
+  <!-- 4. 💢 驚奇命運 Modal -->
   <div class="modal-overlay hidden" id="destinyModal">
     <div class="modal-box destiny-box">
       <div class="event-icon">💢</div>
@@ -125,7 +149,7 @@
     </div>
   </div>
 
-  <!-- 4. 💡 新奇題目 (課堂互動任務) Modal -->
+  <!-- 5. 💡 新奇題目 (課堂互動任務) Modal -->
   <div class="modal-overlay hidden" id="noveltyModal">
     <div class="modal-box novelty-box">
       <div class="event-icon">💡</div>
@@ -135,11 +159,11 @@
     </div>
   </div>
 
-  <!-- 5. 🏠 答對建設領地 Modal -->
+  <!-- 6. 🏠 答對建設領地 Modal (帶隊伍頭像) -->
   <div class="modal-overlay hidden" id="buildModal">
     <div class="modal-box build-box">
-      <div class="event-icon">🏗️</div>
-      <h2>🎉 答對囉！建立專屬生態領地</h2>
+      <div class="event-icon" id="buildTeamIcon">🐰</div>
+      <h2 id="buildModalTitle">🎉 答對囉！建立專屬生態領地</h2>
       <p>請選擇或輸入此領地的建築名稱：</p>
       
       <div class="recommend-build-list" id="recommendBuildList"></div>
@@ -152,7 +176,7 @@
     </div>
   </div>
 
-  <!-- 6. ⚙️ 設定 Modal (模式切換、人數、名單匯入) -->
+  <!-- 7. ⚙️ 設定 Modal -->
   <div class="modal-overlay hidden" id="settingsModal">
     <div class="modal-box settings-box">
       <h2>⚙️ 動物城大富翁 課堂設定</h2>
@@ -199,7 +223,7 @@
     </div>
   </div>
 
-  <!-- 7. 📜 課堂戰報 Modal (含 CSV 下載) -->
+  <!-- 8. 📜 課堂戰報 Modal (含 CSV 下載) -->
   <div class="modal-overlay hidden" id="historyModal">
     <div class="modal-box history-box">
       <h2>📜 本堂課戰報與領地紀錄</h2>
@@ -222,7 +246,7 @@
     </div>
   </div>
 
-  <!-- 8. 教師一鍵凍結 Modal -->
+  <!-- 9. 教師一鍵凍結 Modal -->
   <div class="modal-overlay hidden" id="teacherFreezeModal">
     <div class="modal-box freeze-box">
       <div class="freeze-icon">⏸️</div>
@@ -232,7 +256,7 @@
     </div>
   </div>
 
-  <!-- 9. LocalStorage 快照恢復 Modal -->
+  <!-- 10. LocalStorage 快照恢復 Modal -->
   <div class="modal-overlay hidden" id="snapshotModal">
     <div class="modal-box snapshot-box">
       <div class="snapshot-icon">💾</div>
@@ -245,6 +269,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=3.6"></script>
+  <script src="game.js?v=3.7"></script>
 </body>
 </html>
