@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>動物方城市生物大富翁 - Zootopia Bio Monopoly</title>
-  <link rel="stylesheet" href="style.css?v=3.7">
+  <link rel="stylesheet" href="style.css?v=3.8">
   <!-- XLSX Library for Roster Import -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -13,7 +13,7 @@
   <div class="portrait-warning">👉 最佳教學體驗：請將 iPad / 螢幕旋轉為「橫向模式」！</div>
 
   <div class="game-wrapper">
-    <!-- 頂部主控列 (包含顯眼的 📖 遊戲規則 按鈕) -->
+    <!-- 頂部主控列 (包含 🔍 放大題目、📖 遊戲規則 按鈕) -->
     <header class="game-header">
       <div class="header-left">
         <h1 class="game-logo">🐰 動物城生物大富翁 🦊</h1>
@@ -38,10 +38,10 @@
       </div>
     </header>
 
-    <!-- 棋盤與中央互動區 -->
+    <!-- 棋盤與中央互動區 (平板/電腦自適應 100% 防裁切) -->
     <div class="board-container" id="board">
 
-      <!-- 8 個 Zootopia 大臉可愛動物 Token (48px~56px 超大清晰) -->
+      <!-- 8 個 Zootopia 大臉可愛動物 Token (48px 超大清晰) -->
       <div class="animal-token token-judy" id="token-0" title="茱蒂兔警官 🐰">🐰</div>
       <div class="animal-token token-nick" id="token-1" title="尼克紅狐 🦊">🦊</div>
       <div class="animal-token token-flash" id="token-2" title="快快樹懶 🦥">🦥</div>
@@ -51,7 +51,7 @@
       <div class="animal-token token-wolf" id="token-6" title="狼群警衛隊 🐺">🐺</div>
       <div class="animal-token token-alpaca" id="token-7" title="羊駝探險隊 🦙">🦙</div>
 
-      <!-- 中央控制看板與擲骰子區 (高彩度活潑卡通風格) -->
+      <!-- 中央控制看板與擲骰子區 -->
       <div class="center-area">
         <div class="center-title-box">
           <h2>ZOOTOPIA BIO-MONOPOLY</h2>
@@ -64,9 +64,7 @@
         </div>
 
         <!-- 各隊得分與 🏠 房屋棟數雙指標計分板 -->
-        <div class="team-score-bar" id="teamScoreBar">
-          <!-- JS 動態渲染各隊分數與房屋棟數卡 -->
-        </div>
+        <div class="team-score-bar" id="teamScoreBar"></div>
 
         <div class="dice-control-box">
           <button class="btn-dice-roll" id="btnRollDice">🎲 點我擲骰子前進</button>
@@ -105,7 +103,7 @@
     </div>
   </div>
 
-  <!-- 2. 生物題目作答 Modal (支援 🔍 放大題目) -->
+  <!-- 2. 生物題目作答 Modal (答錯 100% 鎖死蓋房) -->
   <div class="modal-overlay hidden" id="quizModal">
     <div class="modal-box quiz-box" id="quizBox">
       <div class="modal-header">
@@ -118,13 +116,16 @@
 
       <div class="quiz-options-grid" id="quizOptions"></div>
 
+      <!-- 觀念解析區 -->
       <div class="quiz-explanation hidden" id="quizExplanation">
         <h4>💡 生物觀念解析：</h4>
         <p id="explanationText"></p>
       </div>
 
+      <!-- 嚴格控管動作按鈕 (答錯絕對禁止蓋房) -->
       <div class="modal-actions" id="quizActions">
-        <button id="btnConfirmAnswer" class="btn-action btn-success hidden">✅ 確認解析，建立領地</button>
+        <button id="btnConfirmAnswer" class="btn-action btn-success hidden">✅ 答對成功！前往建立領地 🏰</button>
+        <button id="btnCloseWrong" class="btn-action btn-danger hidden">❌ 答錯扣分！關閉結束本輪 ➡️</button>
       </div>
     </div>
   </div>
@@ -223,7 +224,7 @@
     </div>
   </div>
 
-  <!-- 8. 📜 課堂戰報 Modal (含 CSV 下載) -->
+  <!-- 8. 📜 課堂戰報 Modal -->
   <div class="modal-overlay hidden" id="historyModal">
     <div class="modal-box history-box">
       <h2>📜 本堂課戰報與領地紀錄</h2>
@@ -269,6 +270,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=3.7"></script>
+  <script src="game.js?v=3.8"></script>
 </body>
 </html>

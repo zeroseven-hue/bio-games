@@ -1,10 +1,9 @@
 /**
- * 動物方城市生物大富翁 (Zootopia Bio Monopoly) - 專業教學強固版引擎 V3.7
- * 1. 8 大 Zootopia 大臉可愛動物 Token (48px~56px 超大清晰，茱蒂 🐰, 尼克 🦊, 樹懶 🦥, 蠻牛 🦬, 獅丁 🦁, 洪金豹 🐆, 狼群 🐺, 羊駝 🦙)。
- * 2. 領地建築顯示【隊伍頭像 + 建築名稱】(如 🐰 🏠 警局總部)，配上隊伍色彩！
- * 3. 中央計分板雙指標：即時顯示【得分】與【🏠 房屋棟數】！
- * 4. 修復右上角 🔍 放大題目按鈕與新增 📖 遊戲規則選單！
- * 5. 100% 對接中央生物題庫 (questions/ 10大單元) + Fisher-Yates 不重複洗牌佇列。
+ * 動物方城市生物大富翁 (Zootopia Bio Monopoly) - 專業教學強固版引擎 V3.8
+ * 1. 嚴格鎖死答錯蓋房漏洞：答錯 100% 隱藏蓋房按鈕，只顯示「❌ 答錯扣分關閉」，絕無法進入蓋房流程。
+ * 2. 跨裝置響應式 10x8 網格防裁切：電腦與 iPad 橫向模式下，最底部 8 列與動物 Token 100% 完整呈現在畫面上！
+ * 3. 徹底修復「🔍 放大題目」按鈕：全域動態連動，點擊後題目與選項字體強制放大 150%！
+ * 4. 8 大 Zootopia 大臉 Token + 領地頭像標籤 + 中央計分板【得分 + 🏠 房屋棟數】雙指標。
  */
 
 // 8 大 Zootopia 競賽隊伍 / 角色設定
@@ -132,6 +131,7 @@ const quizOptions = document.getElementById("quizOptions");
 const quizExplanation = document.getElementById("quizExplanation");
 const explanationText = document.getElementById("explanationText");
 const btnConfirmAnswer = document.getElementById("btnConfirmAnswer");
+const btnCloseWrong = document.getElementById("btnCloseWrong");
 
 const chanceModal = document.getElementById("chanceModal");
 const chanceDesc = document.getElementById("chanceDesc");
@@ -199,8 +199,11 @@ function initEventListeners() {
   btnQuickRoll.addEventListener("click", () => startDraw(true));
   btnShuffle.addEventListener("click", shuffleTeams);
 
+  // 全域連動「放大題目」按鈕
   btnZoomText.addEventListener("click", () => {
     isTextZoomed = !isTextZoomed;
+    btnZoomText.classList.toggle("active-zoom", isTextZoomed);
+    btnZoomText.textContent = isTextZoomed ? "🔍 題目已放大" : "🔍 放大題目";
     quizBox.classList.toggle("zoomed-text", isTextZoomed);
   });
 
@@ -228,6 +231,11 @@ function initEventListeners() {
     openBuildModal();
   });
 
+  btnCloseWrong.addEventListener("click", () => {
+    closeModal(quizModal);
+    endTurn();
+  });
+
   btnConfirmBuild.addEventListener("click", confirmBuildHouse);
 
   btnCloseHistory.addEventListener("click", () => closeModal(historyModal));
@@ -236,7 +244,7 @@ function initEventListeners() {
   btnRestoreSnapshot.addEventListener("click", restoreSnapshot);
   btnDiscardSnapshot.addEventListener("click", () => {
     closeModal(snapshotModal);
-    localStorage.removeItem("monopoly_snapshot_v3.7");
+    localStorage.removeItem("monopoly_snapshot_v3.8");
   });
 }
 
@@ -417,14 +425,18 @@ function generateBoardGrid() {
   setTimeout(updateCoordinates, 250);
 }
 
+// 精準防裁切座標計算 (Clamp 避免 Token 超出底部)
 function updateCoordinates() {
   cellCoordinates = [];
   const bRect = board.getBoundingClientRect();
+
   for (let idx = 0; idx < 28; idx++) {
     const cell = document.getElementById(`cell-${idx}`);
     if (cell) {
       const r = cell.getBoundingClientRect();
-      cellCoordinates.push({ x: r.left - bRect.left + r.width / 2, y: r.top - bRect.top + r.height / 2 });
+      const cx = r.left - bRect.left + r.width / 2;
+      const cy = Math.min(bRect.height - 24, Math.max(24, r.top - bRect.top + r.height / 2));
+      cellCoordinates.push({ x: cx, y: cy });
     }
   }
 
@@ -432,8 +444,8 @@ function updateCoordinates() {
     const tok = document.getElementById(`token-${t.id}`);
     if (tok && cellCoordinates[t.pos]) {
       const coord = cellCoordinates[t.pos];
-      const offsetX = (idx % 3 - 1) * 10;
-      const offsetY = (Math.floor(idx / 3) - 1) * 10;
+      const offsetX = (idx % 3 - 1) * 8;
+      const offsetY = (Math.floor(idx / 3) - 1) * 8;
       tok.style.left = `${coord.x + offsetX}px`;
       tok.style.top = `${coord.y + offsetY}px`;
     }
@@ -467,8 +479,8 @@ function startJumping(steps, isQuick) {
 
     if (cellCoordinates[curTeam.pos]) {
       const coord = cellCoordinates[curTeam.pos];
-      const offsetX = (currentTurnIndex % 3 - 1) * 10;
-      const offsetY = (Math.floor(currentTurnIndex / 3) - 1) * 10;
+      const offsetX = (currentTurnIndex % 3 - 1) * 8;
+      const offsetY = (Math.floor(currentTurnIndex / 3) - 1) * 8;
       tok.style.left = `${coord.x + offsetX}px`;
       tok.style.top = `${coord.y + offsetY}px`;
 
@@ -539,7 +551,10 @@ function triggerQuizEvent() {
   quizStem.innerHTML = htmlStem;
   quizOptions.innerHTML = "";
   quizExplanation.classList.add("hidden");
+
+  // 重設按鈕顯示狀態 (防翻車)
   btnConfirmAnswer.classList.add("hidden");
+  btnCloseWrong.classList.add("hidden");
 
   currentActiveQuestion.options.forEach((optText, idx) => {
     const btn = document.createElement("button");
@@ -549,13 +564,16 @@ function triggerQuizEvent() {
     quizOptions.appendChild(btn);
   });
 
+  // 確保彈窗套用放大字體狀態
+  quizBox.classList.toggle("zoomed-text", isTextZoomed);
+
   startCountdownTimer();
   openModal(quizModal);
 }
 
 function startCountdownTimer() {
   if (!timerEnabled) {
-    quizTimerBanner.textContent = "⏱️ 計時器：無壓力開啟中";
+    quizTimerBanner.textContent = "⏱️ 計時器：無限制時間";
     return;
   }
   let timeLeft = 30;
@@ -572,7 +590,7 @@ function startCountdownTimer() {
   }, 1000);
 }
 
-// 作答選擇與建設
+// 8. 答題結算 (答錯 100% 鎖死蓋房，絕無法點選建立領地)
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(countdownTimer);
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
@@ -582,7 +600,10 @@ function handleQuizSelect(selectedIndex, btnEl) {
     playFanfare();
     explanationText.textContent = currentActiveQuestion.explanation || "恭喜答對！獲得建置生態領地的資格！";
     quizExplanation.classList.remove("hidden");
+
+    // 答對才顯示「進行建設」按鈕，隱藏關閉按鈕
     btnConfirmAnswer.classList.remove("hidden");
+    btnCloseWrong.classList.add("hidden");
 
     teams[currentTurnIndex].score += 15;
     addHistoryLog(teams[currentTurnIndex].name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+15分)`);
@@ -593,17 +614,15 @@ function handleQuizSelect(selectedIndex, btnEl) {
     explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請詳閱觀念解析再接再厲！";
     quizExplanation.classList.remove("hidden");
 
-    const btnClose = document.createElement("button");
-    btnClose.className = "btn-action btn-secondary";
-    btnClose.textContent = "我懂了，結束本輪 ➡️";
-    btnClose.onclick = () => { closeModal(quizModal); endTurn(); };
-    quizOptions.appendChild(btnClose);
+    // 答錯 100% 鎖死蓋房！隱藏蓋房按鈕，只顯示關閉按鈕
+    btnConfirmAnswer.classList.add("hidden");
+    btnCloseWrong.classList.remove("hidden");
 
     addHistoryLog(teams[currentTurnIndex].name, `❌ 答錯題目：【${currentActiveQuestion.question.slice(0, 15)}...】`);
   }
 }
 
-// 8. 答對建立生態領地 (帶隊伍頭像與色彩)
+// 9. 答對建立生態領地 (帶隊伍頭像與色彩)
 function openBuildModal() {
   const curTeam = teams[currentTurnIndex];
   currentPendingBuildCellId = curTeam.pos;
@@ -656,7 +675,7 @@ function shuffleTeams() {
   updateCoordinates();
 }
 
-// 9. 戰報紀錄與 CSV 下載
+// 10. 戰報紀錄與 CSV 下載
 function addHistoryLog(target, detail) {
   const now = new Date();
   const timeStr = `${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}:${now.getSeconds().toString().padStart(2,"0")}`;
@@ -680,7 +699,7 @@ function exportHistoryCSV() {
   link.click();
 }
 
-// 10. 教師一鍵凍結與設定
+// 11. 教師一鍵凍結與設定
 function toggleTeacherFreeze() {
   isTeacherFrozen = !isTeacherFrozen;
   if (isTeacherFrozen) {
@@ -723,7 +742,7 @@ function handleFileUpload(e) {
   reader.readAsBinaryString(file);
 }
 
-// 11. LocalStorage 快照機制
+// 12. LocalStorage 快照機制
 function saveSnapshot() {
   const snapshot = {
     gameMode,
@@ -733,11 +752,11 @@ function saveSnapshot() {
     gameHistory,
     time: Date.now()
   };
-  localStorage.setItem("monopoly_snapshot_v3.7", JSON.stringify(snapshot));
+  localStorage.setItem("monopoly_snapshot_v3.8", JSON.stringify(snapshot));
 }
 
 function checkSnapshotOnLoad() {
-  const raw = localStorage.getItem("monopoly_snapshot_v3.7");
+  const raw = localStorage.getItem("monopoly_snapshot_v3.8");
   if (raw) {
     try {
       const snap = JSON.parse(raw);
@@ -750,7 +769,7 @@ function checkSnapshotOnLoad() {
 
 function restoreSnapshot() {
   closeModal(snapshotModal);
-  const raw = localStorage.getItem("monopoly_snapshot_v3.7");
+  const raw = localStorage.getItem("monopoly_snapshot_v3.8");
   if (raw) {
     const snap = JSON.parse(raw);
     gameMode = snap.gameMode || "group";
