@@ -1,9 +1,10 @@
 /**
- * 超級馬力歐生物闖關 (Mario Bio-Quest) - 專業教學強固版核心引擎 V3.3
- * 1. 4 大主題關卡背景 (森林 🌲 ➔ 洞穴 🪨 ➔ 海底 🌊 ➔ 城堡 🌋) 依進度自動切換。
- * 2. 100% 不重複洗牌佇列 (Fisher-Yates Shuffle Queue)：單元內絕對不重複出現同一題！
- * 3. 程式自動驅動瑪利歐朝右奔跑 ➔ 躍進頂擊 ❓ 問號方塊 ➔ 彈出金幣/香菇 + 8-bit 金幣音效。
- * 4. 融合教育與課堂經營：老師 Spacebar 全場凍結、關卡派發、Google Classroom 防偽證書生成。
+ * 超級馬力歐生物闖關 (Mario Bio-Quest) - 專業教學強固版核心引擎 V3.4
+ * 1. 4 大主題關卡與專屬生物裝飾 (森林 🌲 ➔ 洞穴 🦇 ➔ 海底 🐠 ➔ 城堡 🔥)。
+ * 2. 洞穴/海底/城堡 100% 移除雲朵，加入蝙蝠、老鼠、魚群、水泡與火焰粒子！
+ * 3. 100% 不重複 Fisher-Yates 洗牌佇列，單元內絕對不出重複題。
+ * 4. 冒險火柴人 (Stickman Runner) 朝右奔跑跳躍，頂擊 ❓ 方塊彈出金幣音效。
+ * 5. 高對比標籤文字防護，確保黑底與岩漿色彩下 100% 清晰可讀。
  */
 
 // 4 大主題關卡設定
@@ -39,6 +40,7 @@ const heartBox = document.getElementById("heartBox");
 const stageBadge = document.getElementById("stageBadge");
 const coinCount = document.getElementById("coinCount");
 const stageScene = document.getElementById("stageScene");
+const bgDecor = document.getElementById("bgDecor");
 const marioChar = document.getElementById("marioChar");
 const steppedPath = document.getElementById("steppedPath");
 
@@ -99,11 +101,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 // 1. 初始化事件監聽
 function initEventListeners() {
-  // Safari / iPad 音效解鎖
   document.addEventListener("click", unlockAudioContext, { once: true });
   document.addEventListener("touchstart", unlockAudioContext, { once: true });
 
-  // 老師 Spacebar 空白鍵凍結全場
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT") {
       e.preventDefault();
@@ -165,7 +165,7 @@ function initEventListeners() {
   btnRestoreSnapshot.addEventListener("click", restoreSnapshot);
   btnDiscardSnapshot.addEventListener("click", () => {
     closeModal(snapshotModal);
-    localStorage.removeItem("mario_snapshot_v3.3");
+    localStorage.removeItem("mario_snapshot_v3.4");
     startNewGame();
   });
 }
@@ -198,14 +198,8 @@ function playTone(freq, type, duration, delay = 0, vol = 0.1) {
 }
 
 function playCoinSound() {
-  playTone(987.77, "square", 0.08, 0, 0.12); // B5
-  playTone(1318.51, "square", 0.25, 0.08, 0.15); // E6
-}
-
-function playPowerupSound() {
-  [330, 392, 659, 523, 587, 784].forEach((freq, idx) => {
-    playTone(freq, "triangle", 0.08, idx * 0.06, 0.1);
-  });
+  playTone(987.77, "square", 0.08, 0, 0.12);
+  playTone(1318.51, "square", 0.25, 0.08, 0.15);
 }
 
 function playWrongSound() {
@@ -227,7 +221,6 @@ async function loadManifestAndUnits() {
     const manifest = await res.json();
     allManifestUnits = manifest.units || [];
 
-    // 預先載入所有題庫
     for (const u of allManifestUnits) {
       const qRes = await fetch(`../questions/${u.file}`);
       if (qRes.ok) {
@@ -260,7 +253,6 @@ function applyTeacherSettings() {
   STAGE_CONFIG[2].unitFile = selectStageC.value;
   STAGE_CONFIG[3].unitFile = selectStageD.value;
 
-  // 重設該題庫佇列
   questionPoolByUnit = {};
   teacherPanel.classList.add("hidden");
   startNewGame();
@@ -290,7 +282,7 @@ function getFallbackQuestions() {
   ];
 }
 
-// 5. 遊戲主流程與 UI 更新
+// 5. 遊戲主流程與 UI / 背景裝飾動態更新
 function startNewGame() {
   currentStageIndex = 0;
   currentStepInStage = 0;
@@ -315,9 +307,11 @@ function updateUI() {
   stageScene.className = `mario-stage-scene ${currentStage.bgClass}`;
   coinCount.textContent = coins;
 
+  // 更新關卡專屬裝飾 (森林白雲 / 洞穴蝙蝠 / 海底熱帶魚水泡 / 城堡火焰)
+  updateStageDecorations(currentStageIndex);
+
   // 階梯地圖與方塊狀態
   const steps = steppedPath.querySelectorAll(".step");
-  const stepWidth = 100 / (steps.length - 1);
 
   steps.forEach((st, idx) => {
     const qBlock = st.querySelector(".q-block");
@@ -331,11 +325,44 @@ function updateUI() {
     }
   });
 
-  // 計算瑪利歐位置 (絕對靠左比例，精準定位在當前 Step 上)
+  // 計算火柴人位置
   const leftPercent = Math.min(90, Math.max(5, currentStepInStage * 18 + 5));
   marioChar.style.left = `${leftPercent}%`;
 
   saveSnapshot();
+}
+
+// 關卡專屬背景裝飾渲染 (洞穴/海底/城堡 100% 無雲朵！)
+function updateStageDecorations(stageIdx) {
+  bgDecor.innerHTML = "";
+
+  if (stageIdx === 0) {
+    // 第 1 關：森林 (漂浮白雲)
+    bgDecor.innerHTML = `
+      <div class="cloud c1">☁️</div>
+      <div class="cloud c2">☁️</div>
+    `;
+  } else if (stageIdx === 1) {
+    // 第 2 關：地底洞穴 (飛翔蝙蝠 + 穿梭老鼠，無雲朵)
+    bgDecor.innerHTML = `
+      <div class="cave-bat">🦇</div>
+      <div class="cave-mouse">🐀</div>
+    `;
+  } else if (stageIdx === 2) {
+    // 第 3 關：水底世界 (熱帶魚 + 上升透明水泡，無雲朵)
+    bgDecor.innerHTML = `
+      <div class="sea-fish f1">🐠</div>
+      <div class="sea-fish f2">🐟</div>
+      <div class="sea-bubble b1">🫧</div>
+      <div class="sea-bubble b2">🫧</div>
+    `;
+  } else if (stageIdx === 3) {
+    // 第 4 關：岩漿城堡 (上升火焰火花粒子，無雲朵)
+    bgDecor.innerHTML = `
+      <div class="fire-spark s1">🔥</div>
+      <div class="fire-spark s2">💥</div>
+    `;
+  }
 }
 
 // 6. 渲染當前題目
@@ -343,7 +370,6 @@ function renderCurrentQuestion() {
   const currentStage = STAGE_CONFIG[currentStageIndex];
   const unitFile = currentStage.unitFile;
 
-  // 取得單元標題
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
   currentUnitTitle.textContent = unitObj ? `${unitObj.id.toUpperCase()} ‧ ${unitObj.title}` : currentStage.title;
 
@@ -352,7 +378,6 @@ function renderCurrentQuestion() {
 
   currentActiveQuestion = getNextQuestionFromPool(unitFile);
 
-  // 題目關鍵字高亮
   let htmlStem = currentActiveQuestion.question;
   HIGHLIGHT_KEYWORDS.forEach(kw => {
     if (htmlStem.includes(kw)) {
@@ -383,7 +408,7 @@ function handleOptionSelect(selectedIndex, btnEl) {
     btnEl.classList.add("correct");
     playCoinSound();
 
-    // 1. 瑪利歐躍進跳躍動畫
+    // 1. 火柴人向上躍進動畫
     marioChar.classList.add("jumping");
     setTimeout(() => marioChar.classList.remove("jumping"), 600);
 
@@ -398,7 +423,6 @@ function handleOptionSelect(selectedIndex, btnEl) {
           qBlock.classList.add("bumped");
         }, 300);
 
-        // 3. 彈出金幣 / 香菇特效
         spawnPopItem(currentStepEl, Math.random() > 0.3 ? "🪙" : "🍄");
       }
     }
@@ -407,7 +431,6 @@ function handleOptionSelect(selectedIndex, btnEl) {
     currentStepInStage += 1;
     updateUI();
 
-    // 判斷是否通關
     setTimeout(() => {
       if (currentStepInStage >= 5) {
         handleStageComplete();
@@ -421,7 +444,6 @@ function handleOptionSelect(selectedIndex, btnEl) {
     btnEl.classList.add("incorrect");
     playWrongSound();
 
-    // 彈出毒菇
     const currentStepEl = steppedPath.querySelector(`.step[data-step="${currentStepInStage}"]`);
     if (currentStepEl) spawnPopItem(currentStepEl, "🟣");
 
@@ -439,7 +461,6 @@ function handleOptionSelect(selectedIndex, btnEl) {
   }
 }
 
-// 彈出浮動寶物特效
 function spawnPopItem(parentEl, emoji) {
   const item = document.createElement("div");
   item.className = "pop-item-anim";
@@ -453,10 +474,8 @@ function handleStageComplete() {
   playStageClearSound();
 
   if (currentStageIndex >= STAGE_CONFIG.length - 1) {
-    // 四關全破！
     openModal(studentIdModal);
   } else {
-    // 晉級下一關
     const nextStg = STAGE_CONFIG[currentStageIndex + 1];
     stageClearTitle.textContent = `🎉 晉級！${nextStg.title}`;
     stageClearDesc.textContent = `太棒了！已闖過第 ${currentStageIndex + 1} 關，獲得 10 🪙，即將開啟下一個主題世界！`;
@@ -508,11 +527,11 @@ function saveSnapshot() {
     coins,
     time: Date.now()
   };
-  localStorage.setItem("mario_snapshot_v3.3", JSON.stringify(snapshot));
+  localStorage.setItem("mario_snapshot_v3.4", JSON.stringify(snapshot));
 }
 
 function checkSnapshotOnLoad() {
-  const raw = localStorage.getItem("mario_snapshot_v3.3");
+  const raw = localStorage.getItem("mario_snapshot_v3.4");
   if (raw) {
     try {
       const snap = JSON.parse(raw);
@@ -525,7 +544,7 @@ function checkSnapshotOnLoad() {
 
 function restoreSnapshot() {
   closeModal(snapshotModal);
-  const raw = localStorage.getItem("mario_snapshot_v3.3");
+  const raw = localStorage.getItem("mario_snapshot_v3.4");
   if (raw) {
     const snap = JSON.parse(raw);
     currentStageIndex = snap.currentStageIndex || 0;

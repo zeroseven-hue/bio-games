@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>超級馬力歐生物闖關 - Mario Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=3.3">
+  <link rel="stylesheet" href="style.css?v=3.4">
 </head>
 <body>
   <div class="game-wrapper">
@@ -60,12 +60,13 @@
 
     <!-- 闖關地圖舞台 (支援 4 大動態主題切換: .stage-forest, .stage-cave, .stage-water, .stage-castle) -->
     <section class="mario-stage-scene stage-forest" id="stageScene">
+      <!-- 依照關卡動態渲染的背景裝飾元素 (森林白雲 / 洞穴蝙蝠 / 海底熱帶魚水泡 / 城堡火焰) -->
       <div class="bg-decorations" id="bgDecor">
         <div class="cloud c1">☁️</div>
         <div class="cloud c2">☁️</div>
       </div>
 
-      <!-- 頂部懸空 ❓ 問號方塊與階梯地面 -->
+      <!-- 頂部懸空 ❓ 問號方塊與階梯地面 (高對比字體防黑底模糊) -->
       <div class="stepped-path" id="steppedPath">
         <div class="step step-0 active" data-step="0">
           <div class="q-block-wrapper"><div class="q-block bumped">🏁</div></div>
@@ -93,37 +94,33 @@
         </div>
       </div>
 
-      <!-- 高質感 Vector SVG 瑪利歐冒險家角色 (強制朝右 facing right) -->
+      <!-- 高質感 Vector 冒險火柴人角色 (白色圓頭 + 鮮紅冒險帽 + 朝右跑步 posture) -->
       <div class="mario-character" id="marioChar">
-        <svg class="mario-svg-sprite" viewBox="0 0 40 50" width="48" height="60">
-          <!-- 冒險帽子 -->
-          <path d="M 8 16 Q 20 6 34 16 L 36 20 L 6 20 Z" fill="#e74c3c" stroke="#b71c1c" stroke-width="1.5"/>
-          <ellipse cx="20" cy="14" rx="4" ry="2" fill="#ffffff"/>
-          <!-- 圓圓臉部與大鬍子 -->
-          <circle cx="20" cy="22" r="8" fill="#ffdfc4" stroke="#d7ccc8" stroke-width="1"/>
-          <!-- 大鼻與黑睛朝右看 -->
-          <circle cx="25" cy="22" r="3.5" fill="#f8bbd0"/>
-          <circle cx="23" cy="20" r="1.5" fill="#2c3e50"/>
-          <!-- 經典大鬍子 -->
-          <path d="M 16 25 Q 22 28 28 25 Q 26 27 20 27 Z" fill="#4a2c11"/>
-          <!-- 藍色吊帶褲與紅色上衣 -->
-          <path d="M 12 30 L 28 30 L 30 42 L 10 42 Z" fill="#2980b9" stroke="#1b4f72" stroke-width="1.5"/>
-          <path d="M 8 28 L 12 30 L 12 38 L 8 36 Z" fill="#e74c3c"/>
-          <path d="M 28 30 L 32 28 L 32 36 L 28 38 Z" fill="#e74c3c"/>
-          <!-- 吊帶鈕扣 -->
-          <circle cx="15" cy="33" r="1.5" fill="#f1c40f"/>
-          <circle cx="25" cy="33" r="1.5" fill="#f1c40f"/>
-          <!-- 雙手 -->
-          <circle cx="6" cy="34" r="3" fill="#ffffff" stroke="#ccc" stroke-width="1"/>
-          <circle cx="34" cy="32" r="3" fill="#ffffff" stroke="#ccc" stroke-width="1"/>
-          <!-- 褐色鞋子朝右向前 -->
-          <ellipse cx="14" cy="45" rx="5" ry="3" fill="#5d4037"/>
-          <ellipse cx="27" cy="45" rx="6" ry="3" fill="#5d4037"/>
+        <svg class="stickman-svg" viewBox="0 0 40 50" width="46" height="58">
+          <!-- 冒險帽子 (紅帽) -->
+          <path d="M 6 15 Q 20 5 34 15 L 36 19 L 4 19 Z" fill="#e74c3c" stroke="#b71c1c" stroke-width="1.5"/>
+          <circle cx="20" cy="12" r="2" fill="#ffffff"/>
+          <!-- 白色圓頭 -->
+          <circle cx="20" cy="22" r="7.5" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
+          <!-- 朝右看的亮眼黑睛與微笑 -->
+          <circle cx="23" cy="21" r="1.5" fill="#2c3e50"/>
+          <path d="M 21 24 Q 24 26 26 24" fill="none" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- 火柴人身體 (藍色) -->
+          <line x1="20" y1="29.5" x2="20" y2="40" stroke="#2980b9" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- 雙臂 (朝右奔跑擺動姿態) -->
+          <line x1="20" y1="32" x2="12" y2="37" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+          <line x1="20" y1="32" x2="30" y2="28" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+          <!-- 雙腿 (邁步跨越姿態) -->
+          <line x1="20" y1="40" x2="13" y2="48" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
+          <line x1="20" y1="40" x2="28" y2="46" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
+          <!-- 鞋子 -->
+          <circle cx="12" cy="48" r="2.5" fill="#5d4037"/>
+          <circle cx="29" cy="46" r="2.5" fill="#5d4037"/>
         </svg>
       </div>
     </section>
 
-    <!-- 題目作答區域 (iPad 最佳化：大按鈕、防誤觸、關鍵字高亮) -->
+    <!-- 題目作答區域 (高清晰純白背景、iPad 大字體、高對比解析) -->
     <main class="quiz-card-container" id="quizContainer">
       <div class="quiz-top-info">
         <span class="unit-label" id="currentUnitTitle">載入單元中...</span>
@@ -133,7 +130,7 @@
       <h2 class="quiz-question-stem" id="quizStem">題目加載中...</h2>
 
       <div class="quiz-options-grid" id="quizOptions">
-        <!-- 4 個選項按鈕由 JS 生成 -->
+        <!-- 4 個選項按鈕由 JS 動態生成 -->
       </div>
     </main>
 
@@ -162,16 +159,16 @@
       </div>
     </div>
 
-    <!-- 闖關失敗彈窗 (3顆心扣光) -->
+    <!-- 闖關失敗彈窗 -->
     <div class="modal-overlay hidden" id="failModal">
       <div class="modal-box fail-box">
         <h2>💀 體力耗盡！</h2>
-        <p>別灰心！瑪力歐吃了「救命蘑菇」，體力已補滿，重試本關吧！</p>
+        <p>別灰心！火柴人吃了「救命蘑菇」，體力已補滿，重試本關吧！</p>
         <button id="btnRetryStage" class="btn-action btn-danger">重試本關 🔄</button>
       </div>
     </div>
 
-    <!-- 登錄座號彈窗 (全破後第一步) -->
+    <!-- 登錄座號彈窗 -->
     <div class="modal-overlay hidden" id="studentIdModal">
       <div class="modal-box id-input-box">
         <h2>🎉 恭喜闖破 4 大關卡！</h2>
@@ -209,7 +206,7 @@
               <span class="meta-val" id="certCoins">20 🪙</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">通關榮耀</span>
+              <span class="meta-label">通关榮耀</span>
               <span class="meta-val">森林/洞穴/海底/城堡 4關全破</span>
             </div>
           </div>
@@ -248,6 +245,6 @@
 
   </div>
 
-  <script src="game.js?v=3.3"></script>
+  <script src="game.js?v=3.4"></script>
 </body>
 </html>
