@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>侏羅紀叢林逃生記 - 專業教學強固版</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-wrapper">
+    <!-- 頂部標題與主控列 -->
+    <header class="game-header">
+      <div class="header-titles">
+        <h1>🦖 侏羅紀叢林逃生記 🏃‍♂️</h1>
+        <input type="text" id="unitSubtitle" class="unit-subtitle" value="國中自然科學 ‧ 課堂複習逃生戰" title="點擊可自訂課堂單元名稱">
+      </div>
+
+      <div class="header-controls">
+        <!-- 題庫單元動態載入 -->
+        <div class="control-group">
+          <label for="unitSelect">挑戰單元：</label>
+          <select id="unitSelect" class="styled-select">
+            <option value="">載入單元清單中...</option>
+          </select>
+        </div>
+
+        <!-- 遊玩模式切換 -->
+        <div class="control-group">
+          <label for="gameModeSelect">遊玩模式：</label>
+          <select id="gameModeSelect" class="styled-select">
+            <option value="group-tablet">👥 各組平板輪流競賽</option>
+            <option value="projector">🖥️ 全班大螢幕投影主持</option>
+            <option value="solo">🧑‍🚀 個人單機自主挑戰</option>
+          </select>
+        </div>
+
+        <div class="control-buttons">
+          <button id="btnZoomFont" class="btn-tool btn-zoom">🔍 放大字體</button>
+          <button id="btnFreeze" class="btn-tool btn-freeze" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+          <button id="btnRules" class="btn-tool btn-rules">📖 逃生指南</button>
+          <button id="btnManualMove" class="btn-tool btn-manual hidden">🔢 指定步數</button>
+          <button id="btnReset" class="btn-tool btn-reset">🚀 重新開始</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主要內容區：左側 6x6 叢林棋盤 + 右側控制與排行榜儀表板 -->
+    <main class="game-main">
+      <!-- 叢林逃生棋盤 -->
+      <section class="board-container">
+        <div class="board-frame" id="boardFrame">
+          <!-- 36 格由 JS 動態生成 -->
+          <div class="board-grid" id="boardGrid"></div>
+          <!-- SVG 畫布：繪製攀升藤蔓與暴龍爪痕軌跡 -->
+          <svg id="svgCanvas" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        </div>
+      </section>
+
+      <!-- 右側儀表板 -->
+      <aside class="dashboard-panel">
+        <!-- 計時器與音效開關 -->
+        <div class="timer-card">
+          <div class="timer-header">
+            <span class="timer-label">⏳ 叢林崩塌倒數</span>
+            <label class="sound-toggle" title="開啟/關閉音效">
+              <input type="checkbox" id="soundToggle" checked> 🔊
+            </label>
+          </div>
+          <div class="timer-clock" id="timerClock">15:00</div>
+          <div class="rush-badge hidden" id="rushBadge">🔥 終極逃生模式啟動中！</div>
+        </div>
+
+        <!-- 當前行動提示卡 -->
+        <div class="turn-status-card" id="turnStatusCard">
+          <div class="turn-caption">當前行動探險隊</div>
+          <div class="turn-team-name" id="currentTeamName">紅隊 探險隊</div>
+          <div class="turn-role-note" id="currentRoleNote">本回合答題手：第 1 棒組員</div>
+        </div>
+
+        <!-- 擲骰子互動區 -->
+        <div class="dice-box">
+          <button id="btnRollDice" class="btn-dice">🎲 點我擲骰子</button>
+          <div class="dice-result-val" id="diceResultDisplay">-</div>
+        </div>
+
+        <!-- 即時動態提示訊息 -->
+        <div class="event-msg-box" id="eventMsgBox">歡迎來到侏羅紀叢林！請點擊擲骰子開始逃生！</div>
+
+        <!-- 排行榜與各隊進度 -->
+        <div class="leaderboard-card">
+          <h3>📊 逃生進度排行榜</h3>
+          <ul class="team-rank-list" id="teamRankList">
+            <!-- 隊伍排名項目由 JS 動態生成 -->
+          </ul>
+        </div>
+
+        <!-- 戰報下載 -->
+        <button id="btnDownloadLog" class="btn-download">📥 下載本堂課戰報與錯題分析</button>
+      </aside>
+    </main>
+
+    <!-- ==================== 彈窗系統 ==================== -->
+
+    <!-- 1. 探險家逃生指南 (規則彈窗) -->
+    <div class="modal-overlay hidden" id="rulesModal">
+      <div class="modal-dialog rules-dialog">
+        <button class="modal-close-btn" data-close="rulesModal">&times;</button>
+        <h2 class="rules-title">📖 探險家逃生指南（課堂遊戲規則）</h2>
+        <div class="rules-content">
+          <div class="rule-section">
+            <h3>🎯 獲勝目標</h3>
+            <p>突破沿途險阻與生物挑戰，小隊（或個人）<b>率先抵達第 36 格【逃生直升機】</b>即可成功獲救贏得勝利！</p>
+          </div>
+
+          <div class="rule-section">
+            <h3>🗺️ 叢林格子圖解</h3>
+            <div class="rule-tiles-legend">
+              <div class="legend-item">
+                <span class="legend-badge tile-normal-demo">綠 / 黃 / 藍格</span>
+                <span><b>安全林道</b>：地勢平坦，平安停留整備。</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-badge tile-vine-demo">🌿 演化藤蔓</span>
+                <span><b>攀升捷徑</b>：踩到藤蔓起點將抽一題生物題。答對攀爬躍進！答錯留在原地。</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-badge tile-dino-demo">🦖 暴龍尾巴</span>
+                <span><b>致命危機</b>：驚動暴龍！觸發高難度生存挑戰題。答對麻醉暴龍留在原地；答錯遭擊落跌退！</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-badge tile-red-demo">🟥 環境變遷卡</span>
+                <span><b>命運考驗</b>：觸發 10 種大自然考驗（可能獲得免疫護盾、突飛猛進，也可能遭遇乾旱倒退）。</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rule-section">
+            <h3>⏰ 終極逃生模式（壓軸高潮）</h3>
+            <p>當時間剩最後 <b>100 秒</b> 時，全場警報響起！骰子全面升級只會出現大點數（4～6），抵達終點不反彈，全力破門逃生！</p>
+          </div>
+        </div>
+        <button class="btn-confirm-rule" data-close="rulesModal">了解規則，進入叢林 🚀</button>
+      </div>
+    </div>
+
+    <!-- 2. 生物挑戰題與觀念解析彈窗 -->
+    <div class="modal-overlay hidden" id="quizModal">
+      <div class="modal-dialog quiz-dialog">
+        <div class="quiz-top-bar">
+          <span class="quiz-type-tag" id="quizTypeTag">🌿 演化藤蔓挑戰</span>
+          <span class="quiz-diff-tag" id="quizDiffTag">難度：中</span>
+          <span class="quiz-timer-num" id="quizTimerNum">30s</span>
+        </div>
+
+        <div class="quiz-main-area">
+          <h3 class="quiz-stem" id="quizStem">題目加載中...</h3>
+          <div class="quiz-choices" id="quizChoices">
+            <!-- 4 個選項按鈕 -->
+          </div>
+        </div>
+
+        <!-- 答題反饋與觀念解析卡 (答題後滑出) -->
+        <div class="quiz-feedback-box hidden" id="quizFeedbackBox">
+          <div class="feedback-banner" id="feedbackBanner">
+            <!-- 對錯狀態 -->
+          </div>
+          <div class="feedback-memo">
+            <h4>💡 茱蒂老師的小筆記（觀念解析）：</h4>
+            <p id="feedbackMemoText">解析文字...</p>
+          </div>
+          <button id="btnFinishQuiz" class="btn-action-continue">看懂了，繼續前進 ➡️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 環境變遷卡抽卡彈窗 -->
+    <div class="modal-overlay hidden" id="cardModal">
+      <div class="modal-dialog card-dialog">
+        <h2 class="card-dialog-title">🌋 觸發環境變遷考驗！</h2>
+        <div class="nature-card" id="natureCardBox">
+          <div class="card-glow"></div>
+          <div class="nature-card-icon" id="natureCardIcon">🧬</div>
+          <div class="nature-card-name" id="natureCardName">卡片名稱</div>
+          <div class="nature-card-desc" id="natureCardDesc">卡片描述文字...</div>
+        </div>
+        <button id="btnAcceptCard" class="btn-action-continue">接受命運 ➡️</button>
+      </div>
+    </div>
+
+    <!-- 4. 教師一鍵凍結 Modal -->
+    <div class="modal-overlay hidden" id="teacherFreezeModal">
+      <div class="modal-dialog freeze-dialog">
+        <div class="freeze-icon">⏸️</div>
+        <h2>全場暫停 ‧ 焦點回歸老師</h2>
+        <p>老師已凍結遊戲畫面與音效，請全班保持安靜，注意力看向教室大螢幕或老師！</p>
+        <button id="btnUnfreeze" class="btn-unfreeze">▶️ 解除凍結，繼續遊戲</button>
+      </div>
+    </div>
+
+    <!-- 5. 課堂 Top 3 錯題統計與結算 Modal -->
+    <div class="modal-overlay hidden" id="summaryModal">
+      <div class="modal-dialog summary-dialog">
+        <h2>🏆 課堂戰局結算與觀念總結 📊</h2>
+        <div id="summaryWinnerBox" class="summary-winner-box"></div>
+        <div class="summary-section">
+          <h3>💡 本堂課 Top 3 高頻錯題觀念覆盤</h3>
+          <div id="top3WrongBox" class="top3-wrong-box"></div>
+        </div>
+        <div class="summary-actions">
+          <button id="btnDownloadLogModal" class="btn-action-continue" style="background:#0288d1;">📥 下載實況戰報 TXT</button>
+          <button id="btnRestartFromSummary" class="btn-action-continue">🚀 開始新一輪戰局</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. LocalStorage 快照恢復 Modal -->
+    <div class="modal-overlay hidden" id="snapshotModal">
+      <div class="modal-dialog snapshot-dialog">
+        <div class="snapshot-icon">💾</div>
+        <h2>偵測到上次未完成的戰局進度</h2>
+        <p id="snapshotInfoText">包含隊伍位置與分數紀錄，請問是否要恢復繼續遊玩？</p>
+        <div class="snapshot-buttons">
+          <button id="btnRestoreSnapshot" class="btn-snapshot btn-restore">✅ 恢復戰局進度</button>
+          <button id="btnDiscardSnapshot" class="btn-snapshot btn-discard">❌ 清除，重新開局</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

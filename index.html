@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國中生物網頁遊戲平台 - bio-games</title>
+  <link rel="stylesheet" href="lobby.css">
+  <!-- QRCode.js CDN for QR Code Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="lobby-container">
+    <header class="lobby-header">
+      <div class="logo-area">
+        <h1>🌱 國中生物課堂網頁遊戲平台 <code>bio-games</code></h1>
+        <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式</p>
+      </div>
+    </header>
+
+    <main class="lobby-main">
+      <!-- 遊戲卡片區域 -->
+      <section class="games-section">
+        <h2>🎮 課堂遊戲大廳</h2>
+        <div class="game-cards-grid">
+
+          <!-- 遊戲 1: 侏羅紀逃生記 -->
+          <div class="game-card card-jurassic">
+            <div class="card-badge">熱門推薦</div>
+            <div class="card-icon">🦖</div>
+            <h3>侏羅紀叢林逃生記</h3>
+            <p class="card-desc">探險隊在叢林中避開暴龍爪痕、攀爬攀藤升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。</p>
+            <div class="card-tags">
+              <span>👥 小組輪流</span>
+              <span>🖥️ 投影主持</span>
+              <span>📄 錯題戰報 TXT</span>
+            </div>
+            <div class="card-actions">
+              <a href="jurassic/index.html" class="btn-play">🚀 直接進入遊戲</a>
+            </div>
+          </div>
+
+          <!-- 遊戲 2: 動物方城市大富翁 -->
+          <div class="game-card card-monopoly">
+            <div class="card-badge bg-orange">熱烈迴響</div>
+            <div class="card-icon">🐰</div>
+            <h3>動物方城市生物大富翁</h3>
+            <p class="card-desc">茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！</p>
+            <div class="card-tags">
+              <span>🎲 隨機抽籤</span>
+              <span>🏠 答題蓋房</span>
+              <span>✨ 閃亮機會</span>
+            </div>
+            <div class="card-actions">
+              <a href="monopoly/index.html" class="btn-play btn-orange">🎲 直接進入遊戲</a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 👨‍🏫 教師派發與 QR Code 產生器面板 -->
+      <section class="dispatch-section">
+        <div class="dispatch-card">
+          <h2>👨‍🏫 教師一鍵課堂派發與 QR Code 產生器</h2>
+          <p class="dispatch-subtitle">設定好單元與模式後，生成二維碼供學生使用 iPad / 手機掃碼直接進入對應挑戰！</p>
+
+          <div class="dispatch-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="selectGame">1. 選擇遊戲：</label>
+                <select id="selectGame" class="styled-select">
+                  <option value="jurassic/index.html">🦖 侏羅紀叢林逃生記</option>
+                  <option value="monopoly/index.html">🐰 動物方城市大富翁</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="selectUnit">2. 選擇生物題庫單元：</label>
+                <select id="selectUnit" class="styled-select">
+                  <option value="">載入單元清單中...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="selectMode">3. 遊玩模式：</label>
+                <select id="selectMode" class="styled-select">
+                  <option value="group-tablet">👥 各組平板輪流競賽</option>
+                  <option value="projector">🖥️ 全班大螢幕投影主持</option>
+                  <option value="solo">🧑‍🚀 個人單機自主挑戰</option>
+                </select>
+              </div>
+
+              <div class="form-group checkbox-group">
+                <label class="toggle-label">
+                  <input type="checkbox" id="checkTimerOff">
+                  <span class="toggle-custom"></span>
+                  <strong>🧩 特教友善模式 (`timer=off`)</strong>
+                </label>
+                <small class="help-text">取消答題 30 秒倒數壓力，適合資源班及需無壓力思考的學生。</small>
+              </div>
+            </div>
+
+            <div class="dispatch-buttons">
+              <button id="btnGenerateQR" class="btn-dispatch">📱 生成派發 QR Code 與網址</button>
+              <button id="btnCopyUrl" class="btn-dispatch btn-secondary">🔗 複製派發網址</button>
+            </div>
+
+            <!-- QR Code 與網址顯示區 -->
+            <div id="qrResultArea" class="qr-result-area hidden">
+              <div class="qr-code-box">
+                <div id="qrcode"></div>
+                <p class="qr-hint">請學生開啟相機或掃描器對準二維碼即可開始</p>
+              </div>
+              <div class="url-box">
+                <label>派發網址：</label>
+                <input type="text" id="generatedUrlInput" readonly>
+                <a id="btnDirectLaunch" href="#" target="_blank" class="btn-launch-link">🚀 以此設定立即啟動</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- 題庫索引列表與簡介 -->
+      <section class="manifest-overview-section">
+        <h2>📚 國中七年級生物中央共用題庫索引</h2>
+        <div class="unit-badges-grid" id="unitBadgesGrid">
+          <!-- 由 JS 動態繪製 -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="lobby-footer">
+      <p>bio-games 國中生物網頁遊戲平台 &copy; 2026 | 專為 GitHub Pages 部署設計 | 相容 Windows, iPad & 觸控大螢幕</p>
+    </footer>
+  </div>
+
+  <script src="lobby.js"></script>
+</body>
+</html>

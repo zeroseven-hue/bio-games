@@ -1,0 +1,388 @@
+/* 大廳響應式 CSS - bio-games */
+:root {
+  --primary-color: #2e7d32;
+  --primary-hover: #1b5e20;
+  --accent-orange: #ef6c00;
+  --accent-blue: #0288d1;
+  --bg-gradient: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  --card-bg: #ffffff;
+  --text-main: #2c3e50;
+  --text-muted: #607d8b;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.lobby-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.lobby-header {
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 24px 16px;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border-top: 6px solid var(--primary-color);
+}
+
+.lobby-header h1 {
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.lobby-header code {
+  background: #e8f5e9;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 1.8rem;
+}
+
+.lobby-header p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+/* 遊戲卡片區域 */
+.games-section {
+  margin-bottom: 40px;
+}
+
+.games-section h2 {
+  font-size: 1.5rem;
+  color: var(--text-main);
+  margin-bottom: 20px;
+}
+
+.game-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.game-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid transparent;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  border-color: #a5d6a7;
+}
+
+.card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--primary-color);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.card-badge.bg-orange {
+  background: var(--accent-orange);
+}
+
+.card-icon {
+  font-size: 3.5rem;
+  margin-bottom: 12px;
+}
+
+.game-card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: var(--text-main);
+}
+
+.card-desc {
+  color: #546e7a;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.card-tags span {
+  background: #f1f8e9;
+  color: #33691e;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.btn-play {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--primary-color);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.05rem;
+  transition: background 0.2s ease;
+}
+
+.btn-play:hover {
+  background: var(--primary-hover);
+}
+
+.btn-play.btn-orange {
+  background: var(--accent-orange);
+}
+
+.btn-play.btn-orange:hover {
+  background: #e65100;
+}
+
+/* 教師派發面板 */
+.dispatch-section {
+  margin-bottom: 40px;
+}
+
+.dispatch-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  border-left: 6px solid var(--accent-blue);
+}
+
+.dispatch-card h2 {
+  color: var(--accent-blue);
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+
+.dispatch-subtitle {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.dispatch-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: bold;
+  color: #37474f;
+}
+
+.styled-select {
+  padding: 12px;
+  border: 2px solid #cfd8dc;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  background: #fafafa;
+  transition: border-color 0.2s ease;
+  outline: none;
+}
+
+.styled-select:focus {
+  border-color: var(--accent-blue);
+}
+
+.checkbox-group {
+  justify-content: center;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent-blue);
+}
+
+.help-text {
+  color: #78909c;
+  font-size: 0.85rem;
+}
+
+.dispatch-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-dispatch {
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  font-size: 1.05rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex: 1;
+  min-width: 200px;
+}
+
+.btn-dispatch:hover {
+  background: #0277bd;
+}
+
+.btn-dispatch.btn-secondary {
+  background: #546e7a;
+}
+
+.btn-dispatch.btn-secondary:hover {
+  background: #37474f;
+}
+
+/* QR Code 顯示區 */
+.qr-result-area {
+  margin-top: 24px;
+  padding: 24px;
+  background: #f0f4c3;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  justify-content: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.qr-code-box {
+  background: white;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.qr-hint {
+  font-size: 0.85rem;
+  color: #558b2f;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.url-box {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.url-box input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #9e9d24;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background: white;
+  color: #33691e;
+  font-family: monospace;
+}
+
+.btn-launch-link {
+  display: inline-block;
+  background: #689f38;
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 題庫 Badge 列表 */
+.manifest-overview-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.manifest-overview-section h2 {
+  font-size: 1.3rem;
+  color: var(--text-main);
+  margin-bottom: 16px;
+}
+
+.unit-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.unit-badge-item {
+  background: #f1f8e9;
+  border: 1px solid #c8e6c9;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.lobby-footer {
+  text-align: center;
+  margin-top: 40px;
+  color: #78909c;
+  font-size: 0.9rem;
+}
