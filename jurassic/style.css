@@ -1,34 +1,37 @@
 /* ==========================================================================
-   侏羅紀叢林逃生記 - 課堂大螢幕與學生平板高對比樣式 (V2 修正版)
+   侏羅紀叢林逃生記 - 專業教學版完整重構 CSS (V3)
+   1. 採用跨平台原生系統字型 (無外部字型檔負擔)
+   2. 精緻火柴人 (Stickman Token) 彩色小人繪製與攀爬/跑步動畫
+   3. 恐龍 Sepia 土色濾鏡、咆哮、沉睡與抓痕劃過動畫
+   4. SVG 綠色藤蔓曲劃 (fill:none) + 葉子裝飾
    ========================================================================== */
 
 :root {
-  --jungle-dark: #0f1f13;
-  --jungle-bg: #1e3822;
-  --board-wood: #4e342e;
-  --board-border: #3e2723;
+  --base-w: 680px;
+  --theme-dark: #0f1f13;
+  --theme-bg: #1e3822;
+  --board-wood: #3e2723;
   --accent-gold: #f1c40f;
   --accent-green: #2ecc71;
   --accent-red: #e74c3c;
   --accent-blue: #3498db;
-  --panel-bg: #f7f5ed;
+  --panel-bg: #f4f1ea;
   --text-dark: #2c3e50;
   --radius-lg: 16px;
   --radius-md: 10px;
-  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.45);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background-color: var(--jungle-dark);
-  background-image: radial-gradient(circle at center, var(--jungle-bg) 0%, var(--jungle-dark) 100%);
+  background-color: var(--theme-dark);
+  background-image: radial-gradient(circle at center, #2e4b31 0%, #0d1a10 100%);
   color: #ffffff;
   min-height: 100vh;
   display: flex;
@@ -44,11 +47,11 @@ body {
   height: 96vh;
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   padding: 12px;
   gap: 12px;
 }
@@ -82,11 +85,12 @@ body {
   background: transparent;
   border: none;
   border-bottom: 1px dashed rgba(241, 196, 15, 0.5);
-  color: #dcedc8;
+  color: #aed581;
   font-size: 0.85rem;
   padding: 2px 4px;
   outline: none;
   width: 260px;
+  font-weight: bold;
 }
 
 .unit-subtitle:focus {
@@ -135,9 +139,7 @@ body {
   transition: all 0.2s;
 }
 
-.btn-tool:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
+.btn-tool:hover { background: rgba(255, 255, 255, 0.3); }
 
 .btn-zoom { background: #009688 !important; }
 .btn-freeze { background: #3f51b5 !important; }
@@ -154,7 +156,7 @@ body {
   min-height: 0;
 }
 
-/* 左側 6x6 叢林棋盤 */
+/* 棋盤區 */
 .board-container {
   display: flex;
   justify-content: center;
@@ -170,18 +172,18 @@ body {
   max-width: 680px;
   aspect-ratio: 1 / 1;
   position: relative;
-  background: var(--board-wood);
-  border: 8px solid var(--board-border);
+  background: #5d4037;
+  border: 10px solid #3e2723;
   border-radius: 12px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 8px 20px rgba(0, 0, 0, 0.5);
-  padding: 6px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 8px 24px rgba(0, 0, 0, 0.5);
+  padding: 4px;
 }
 
 .board-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(6, 1fr);
-  gap: 4px;
+  gap: 3px;
   width: 100%;
   height: 100%;
 }
@@ -193,28 +195,73 @@ body {
   flex-direction: column;
   justify-content: space-between;
   padding: 4px;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
   user-select: none;
+  font-weight: 900;
+  overflow: hidden;
 }
 
-.cell-green { background: linear-gradient(135deg, #a8e6cf 0%, #56ab2f 100%); color: #1b4332; }
-.cell-yellow { background: linear-gradient(135deg, #ffd3b6 0%, #f8b500 100%); color: #5c3d00; }
-.cell-blue { background: linear-gradient(135deg, #81d4fa 0%, #0288d1 100%); color: #013a63; }
-.cell-red { background: linear-gradient(135deg, #ff8a80 0%, #d32f2f 100%); color: #4a0000; }
+.cell-green { background: linear-gradient(135deg, #dcedc8 0%, #aed581 100%); color: #1b5e20; }
+.cell-yellow { background: linear-gradient(135deg, #fff9c4 0%, #ffd54f 100%); color: #5c3d00; }
+.cell-blue { background: linear-gradient(135deg, #b3e5fc 0%, #4fc3f7 100%); color: #013a63; }
+.cell-red { background: linear-gradient(135deg, #ffcdd2 0%, #e57373 100%); border: 2px solid #d32f2f; color: #4a0000; }
 
 .cell-number {
-  font-size: 0.9rem;
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 0.85rem;
   font-weight: 900;
-  opacity: 0.85;
+  color: rgba(0, 0, 0, 0.5);
+  z-index: 3;
 }
 
-.cell-emoji {
-  font-size: 1.6rem;
-  align-self: center;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+.emoji {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 1.8rem;
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+  z-index: 1;
 }
 
-/* SVG 軌跡 (修正黑塊 BUG: fill 必須為 none!) */
+/* 恐龍 Sepia 濾鏡與咆哮/沉睡動畫 */
+.dino-container {
+  display: inline-block;
+  transform-origin: bottom center;
+  transition: all 0.3s;
+  filter: sepia(0.7) hue-rotate(320deg) saturate(2) brightness(0.85);
+}
+
+.dino-bite {
+  animation: dinoRoar 0.3s infinite alternate;
+  filter: sepia(0.7) hue-rotate(320deg) saturate(2.5) brightness(0.7) drop-shadow(0 0 15px #ff1744);
+}
+
+.dino-sleep {
+  transform: rotate(-75deg) translateY(20%) scale(0.8);
+  filter: sepia(0.3) grayscale(60%) brightness(0.6);
+  opacity: 0.7;
+}
+
+@keyframes dinoRoar {
+  0% { transform: scale(1.1) rotate(-8deg); }
+  100% { transform: scale(1.35) rotate(8deg); }
+}
+
+/* 震動特效 */
+.board-frame.shake {
+  animation: shake-animation 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake-animation {
+  10%, 90% { transform: translate3d(-4px, 0, 0); }
+  20%, 80% { transform: translate3d(5px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+  40%, 60% { transform: translate3d(8px, 0, 0); }
+}
+
+/* SVG 畫布 (藤蔓與爪痕) */
 #svgCanvas {
   position: absolute;
   top: 0;
@@ -225,92 +272,91 @@ body {
   z-index: 5;
 }
 
-.ladder-path {
-  stroke: #2ecc71;
-  stroke-width: 3.5px;
-  stroke-dasharray: 6 3;
-  fill: none !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+/* SVG 爪痕動畫 */
+@keyframes slash {
+  to { stroke-dashoffset: 0; }
 }
 
-.snake-path {
-  stroke: #e74c3c;
-  stroke-width: 3.5px;
-  stroke-dasharray: 8 4;
-  fill: none !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+.do-slash {
+  animation: slash 0.3s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
 }
 
-/* 棋子 (Token) */
+/* 火柴人小人 (Stickman Token) 樣式 */
 .token {
+  width: 3.5%;
+  height: 7%;
   position: absolute;
-  width: 24px;
-  height: 38px;
+  background-color: transparent;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 10;
-  transition: left 0.4s ease-in-out, top 0.4s ease-in-out, transform 0.3s ease;
   pointer-events: none;
-}
-
-.token.climbing {
-  animation: climbPulse 0.5s infinite alternate;
-}
-
-.token.falling {
-  animation: fallShake 0.4s infinite;
-}
-
-@keyframes climbPulse {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 8px #2ecc71); }
-  100% { transform: scale(1.2) translateY(-6px); filter: drop-shadow(0 0 16px #2ecc71); }
-}
-
-@keyframes fallShake {
-  0% { transform: rotate(-10deg) scale(1.1); filter: drop-shadow(0 0 8px #e74c3c); }
-  50% { transform: rotate(10deg) scale(0.9); }
-  100% { transform: rotate(-10deg) scale(1.1); filter: drop-shadow(0 0 12px #e74c3c); }
+  transform-origin: center bottom;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
 }
 
 .stick-part {
   position: absolute;
+  border-style: solid;
   box-sizing: border-box;
+  border-width: 0;
+  transition: transform 0.1s linear;
+  filter: brightness(1.1);
 }
 
 .stick-head {
-  width: 12px;
-  height: 12px;
+  width: 50%;
+  height: 28%;
   border-radius: 50%;
-  border: 2px solid;
+  border-width: 2.5px;
   top: 0;
-  left: 6px;
+  left: 25%;
+  background-color: #ffffff;
 }
 
 .stick-body {
-  width: 2px;
-  height: 14px;
-  background: currentColor;
-  top: 12px;
-  left: 11px;
+  width: 0;
+  height: 40%;
+  border-left-width: 3px;
+  top: 25%;
+  left: 50%;
 }
 
-.stick-arm {
-  width: 10px;
-  height: 2px;
-  background: currentColor;
-  top: 16px;
+.stick-arm, .stick-leg {
+  width: 0;
+  height: 28%;
+  border-left-width: 2.5px;
+  transform-origin: top center;
 }
 
-.stick-arm-l { left: 2px; transform: rotate(-20deg); }
-.stick-arm-r { right: 2px; transform: rotate(20deg); }
+.stick-arm-l { top: 28%; left: 50%; transform: rotate(50deg); }
+.stick-arm-r { top: 28%; left: 50%; transform: rotate(-50deg); }
+.stick-leg-l { top: 62%; left: 50%; transform: rotate(15deg); }
+.stick-leg-r { top: 62%; left: 50%; transform: rotate(-15deg); }
 
-.stick-leg {
-  width: 2px;
-  height: 12px;
-  background: currentColor;
-  top: 25px;
-}
+/* 跑步與攀爬動畫 */
+.token.running .stick-leg-l { animation: stickRunL 0.2s infinite alternate linear; }
+.token.running .stick-leg-r { animation: stickRunR 0.2s infinite alternate linear; }
+.token.running .stick-arm-l { animation: stickArmL 0.2s infinite alternate linear; }
+.token.running .stick-arm-r { animation: stickArmR 0.2s infinite alternate linear; }
+.token.running { animation: stickBounce 0.2s infinite alternate linear; }
 
-.stick-leg-l { left: 7px; transform: rotate(25deg); }
-.stick-leg-r { right: 7px; transform: rotate(-25deg); }
+@keyframes stickRunL { 0% { transform: rotate(50deg); } 100% { transform: rotate(-50deg); } }
+@keyframes stickRunR { 0% { transform: rotate(-50deg); } 100% { transform: rotate(50deg); } }
+@keyframes stickArmL { 0% { transform: rotate(-60deg); } 100% { transform: rotate(60deg); } }
+@keyframes stickArmR { 0% { transform: rotate(60deg); } 100% { transform: rotate(-60deg); } }
+@keyframes stickBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-4px); } }
+
+.token.climbing { animation: stickClimb 0.2s infinite alternate linear !important; }
+.token.climbing .stick-arm-l { animation: climbArmL 0.2s infinite alternate linear !important; }
+.token.climbing .stick-arm-r { animation: climbArmR 0.2s infinite alternate linear !important; }
+.token.climbing .stick-leg-l { animation: climbLegL 0.2s infinite alternate linear !important; }
+.token.climbing .stick-leg-r { animation: climbLegR 0.2s infinite alternate linear !important; }
+
+@keyframes climbArmL { 0% { transform: rotate(-160deg); } 100% { transform: rotate(-60deg); } }
+@keyframes climbArmR { 0% { transform: rotate(160deg); } 100% { transform: rotate(60deg); } }
+@keyframes climbLegL { 0% { transform: rotate(10deg); top:65%;} 100% { transform: rotate(40deg); top:55%;} }
+@keyframes climbLegR { 0% { transform: rotate(-40deg); top:55%;} 100% { transform: rotate(-10deg); top:65%;} }
+@keyframes stickClimb { 0% { transform: translateX(-3px) translateY(0); } 100% { transform: translateX(3px) translateY(-5px); } }
 
 /* 右側儀表板 */
 .dashboard-panel {
@@ -344,7 +390,7 @@ body {
 .timer-clock {
   font-size: 1.8rem;
   font-weight: 900;
-  color: #2e7d32;
+  color: #2c3e50;
   font-family: monospace;
 }
 
@@ -374,6 +420,7 @@ body {
   border-radius: 8px;
   padding: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
 }
 
 .turn-caption { font-size: 0.75rem; color: #757575; }
@@ -403,8 +450,8 @@ body {
   transition: transform 0.1s;
 }
 
-.btn-dice:active { transform: scale(0.96); }
-.btn-dice:disabled { background: #b0bec5; box-shadow: none; cursor: not-allowed; }
+.btn-dice:active { transform: translateY(6px); }
+.btn-dice:disabled { background: #b0bec5 !important; box-shadow: none !important; cursor: not-allowed; opacity: 0.8; }
 
 .dice-result-val {
   width: 44px;
@@ -421,12 +468,12 @@ body {
 }
 
 .event-msg-box {
-  background: #e8f5e9;
-  border: 1px solid #c8e6c9;
+  background: #fff3e0;
+  border: 1px dashed #e67e22;
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 0.85rem;
-  color: #1b5e20;
+  color: #c0392b;
   min-height: 42px;
 }
 
@@ -449,20 +496,27 @@ body {
   background: #f5f5f5;
   border-radius: 6px;
   font-size: 0.85rem;
+  font-weight: bold;
+  position: relative;
 }
 
-.rank-item.active { background: #e0f2f1; border: 1px solid #26a69a; font-weight: bold; }
+.rank-item.active {
+  background-color: #fffde7 !important;
+  border: 2px solid var(--pulse-color) !important;
+  transform: scale(1.02) translateX(3px);
+}
 
 .rank-color-badge {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
   display: inline-block;
   margin-right: 6px;
+  border: 1px solid rgba(0,0,0,0.2);
 }
 
 .btn-download {
-  background: #546e7a;
+  background: #2980b9;
   color: #fff;
   border: none;
   padding: 10px;
@@ -470,7 +524,10 @@ body {
   font-size: 0.85rem;
   font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 4px 0 #21618c;
 }
+
+.btn-download:hover { background: #3498db; }
 
 /* Modals */
 .modal-overlay {
@@ -478,7 +535,7 @@ body {
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
-  z-index: 100;
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -488,13 +545,14 @@ body {
 .hidden { display: none !important; }
 
 .modal-dialog {
-  background: #ffffff;
-  color: var(--text-dark);
+  background: #fffde7;
+  color: #3e2723;
+  border: 6px solid #546e7a;
   border-radius: var(--radius-lg);
   padding: 24px;
   max-width: 600px;
   width: 100%;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
   position: relative;
 }
 
@@ -525,6 +583,7 @@ body {
   margin-bottom: 16px;
   line-height: 1.5;
   color: #1a237e;
+  font-weight: bold;
 }
 
 .quiz-choices {
@@ -534,7 +593,7 @@ body {
 }
 
 .btn-choice {
-  background: #f5f5f5;
+  background: #ffffff;
   border: 2px solid #e0e0e0;
   padding: 12px 16px;
   border-radius: 8px;
@@ -543,6 +602,7 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   color: #333;
+  font-weight: bold;
 }
 
 .btn-choice:hover:not(:disabled) { background: #e3f2fd; border-color: #2196f3; }
@@ -616,3 +676,23 @@ body.font-zoomed .btn-choice { font-size: 1.2rem !important; padding: 14px !impo
 .wrong-item-ans { color: #2e7d32; font-weight: bold; margin-bottom: 4px; }
 .wrong-item-exp { font-size: 0.95rem; color: #555; line-height: 1.5; }
 .summary-actions { display: flex; gap: 16px; justify-content: center; }
+
+/* 環境變遷卡樣式 */
+.card-box {
+  padding: 25px;
+  border-radius: 15px;
+  border: 4px solid #ccc;
+  background: #fff;
+  margin-bottom: 15px;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-good { border-color: #f1c40f; background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%); }
+.card-bad { border-color: #9b59b6; background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); }
+
+.card-title { font-size: 24px; font-weight: 900; margin-bottom: 15px; position: relative; z-index: 1; }
+.card-good .card-title { color: #d35400; }
+.card-bad .card-title { color: #8e44ad; }
+.card-desc { font-size: 18px; font-weight: bold; color: #34495e; line-height: 1.6; position: relative; z-index: 1; }

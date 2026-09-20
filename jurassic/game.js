@@ -1,39 +1,56 @@
 /**
- * 侏羅紀叢林逃生記 - 專業教學強固版核心引擎 V2
- * 1. 全場所有格子 (1~35) 踩中均會觸發生物題目問答！
- * 2. 藤蔓格 (Vine)：答對觸發動畫順著綠色藤蔓攀爬至上方格子！
- * 3. 暴龍格 (Dino)：答錯驚動暴龍，畫面震動並沿著紅色軌跡跌落至下方格子！
- * 4. 修正 SVG 軌跡滿填黑塊 Bug (強制 fill="none")。
+ * 侏羅紀叢林逃生記 - 專業教學版完整重構引擎 (V3)
+ * 1. 完全復原原始精緻火柴人 (Stickman Token)、白色圓頭 + 12 隊彩色線條。
+ * 2. 綠色曲劃藤蔓 + 真實 SVG 葉子元件，答對發出螢光綠亮光 (`#76ff03`) 與攀爬動畫。
+ * 3. 恐龍 Sepia 質感濾鏡、咆哮沉睡切換，答錯觸發三道紅色爪痕切割 (`do-slash`) 跌落動畫。
+ * 4. 支援 2 ~ 12 隊彈性人數選單，3x4 散開矩陣防止小人重疊擋住。
+ * 5. 跨平台無外部字種，iPad/iPhone 音效自動觸解鎖，全狀態嚴格鎖定防連點出錯。
  */
 
-// 1. 基礎設定與常數
+// 1. 常數與設定
 const TOTAL_CELLS = 36;
 const JUMPS = { 3: 17, 10: 13, 18: 31, 22: 28, 14: 8, 20: 15, 33: 27, 35: 29 };
 const RED_TILES = [5, 9, 12, 16, 23, 27, 30];
 
-const TEAM_PRESETS = [
+// 12 隊彩繪小人配色與名稱
+const ALL_TEAM_COLORS = [
   { name: "紅隊 探險隊", color: "#e74c3c" },
   { name: "藍隊 探險隊", color: "#3498db" },
   { name: "綠隊 探險隊", color: "#2ecc71" },
   { name: "黃隊 探險隊", color: "#f1c40f" },
   { name: "紫隊 探險隊", color: "#9b59b6" },
-  { name: "橘隊 探險隊", color: "#e67e22" }
+  { name: "橘隊 探險隊", color: "#e67e22" },
+  { name: "青隊 探險隊", color: "#1abc9c" },
+  { name: "粉隊 探險隊", color: "#fd79a8" },
+  { name: "棕隊 探險隊", color: "#8d6e63" },
+  { name: "灰隊 探險隊", color: "#95a5a6" },
+  { name: "黑隊 探險隊", color: "#2c3e50" },
+  { name: "白隊 探險隊", color: "#ecf0f1" }
 ];
 
+// 12 隊在同一個格子內的 3x4 散開矩陣偏移量
+const TEAM_OFFSETS = [
+  { x: -4, y: -4 }, { x: -1.5, y: -4 }, { x: 1, y: -4 },
+  { x: -4, y: 0 },  { x: -1.5, y: 0 },  { x: 1, y: 0 },
+  { x: -4, y: 4 },  { x: -1.5, y: 4 },  { x: 1, y: 4 },
+  { x: -4, y: 8 },  { x: -1.5, y: 8 },  { x: 1, y: 8 }
+];
+
+// 12 種結構化環境變遷卡
 const ENVIRONMENT_CARDS = [
   {
-    id: "card_immune", name: "有利突變 🛡️", icon: "🛡️", isGood: true,
-    desc: "個體產生了有利防禦特徵！獲得「暴龍免疫護盾」一張，下次遭遇暴龍直接抵消跌落傷害！",
+    id: "card_immune", name: "有利突變 🛡️", isGood: true,
+    desc: "個體產生有利防禦特徵！獲得「暴龍免疫卡」一張，下次遭遇暴龍直接抵銷跌落傷害！",
     action: (player) => { player.immune = true; }
   },
   {
-    id: "card_energy", name: "物資豐沛 ⚡", icon: "⚡", isGood: true,
-    desc: "尋獲高熱量能量補給！活力充沛，本隊直接獲得「額外回合（再擲一次）」！",
+    id: "card_energy", name: "物資補給 ⚡", isGood: true,
+    desc: "尋獲高熱量能量補給！活力充沛，本隊直接獲得「再骰一次（額外回合）」！",
     action: (player) => { player.extraTurn = true; }
   },
   {
-    id: "card_mutualism", name: "互利共生 🤝", icon: "🤝", isGood: true,
-    desc: "發揮同儕互助與群體適應！帶領目前排在最後一名的隊伍共同「前進 2 步」！",
+    id: "card_mutualism", name: "同儕共生 🤝", isGood: true,
+    desc: "發揮同儕互助愛！帶領目前排在最後一名的隊伍共同「前進相同步數」！",
     action: (player, allPlayers) => {
       const sorted = [...allPlayers].sort((a, b) => a.pos - b.pos);
       const lastPlayer = sorted[0];
@@ -44,7 +61,7 @@ const ENVIRONMENT_CARDS = [
     }
   },
   {
-    id: "card_selection", name: "天擇優勢 🏃", icon: "🏃", isGood: true,
+    id: "card_selection", name: "天擇優勢 🏃", isGood: true,
     desc: "高度適應叢林地形！步伐輕盈敏捷，全隊立刻「向前躍進 2 步」！",
     action: (player) => {
       player.pos = Math.min(TOTAL_CELLS, player.pos + 2);
@@ -52,12 +69,12 @@ const ENVIRONMENT_CARDS = [
     }
   },
   {
-    id: "card_gene_swap", name: "優勢基因 🧬", icon: "🧬", isGood: true,
-    desc: "演化大躍進！與目前領先在本隊前方的一支隊伍「互換位置」！(若已是第一名則前進 1 步)",
+    id: "card_gene_swap", name: "優勢基因 🧬", isGood: true,
+    desc: "演化大躍進！與前方最近的隊伍「互換位置」！(若已是第一名則前進 1 步)",
     action: (player, allPlayers) => {
-      const aheadPlayers = allPlayers.filter(p => p.pos > player.pos).sort((a, b) => a.pos - b.pos);
-      if (aheadPlayers.length > 0) {
-        const target = aheadPlayers[0];
+      const ahead = allPlayers.filter(p => p.pos > player.pos).sort((a, b) => a.pos - b.pos);
+      if (ahead.length > 0) {
+        const target = ahead[0];
         const temp = player.pos;
         player.pos = target.pos;
         target.pos = temp;
@@ -70,15 +87,15 @@ const ENVIRONMENT_CARDS = [
     }
   },
   {
-    id: "card_drought", name: "氣候乾旱 🌪️", icon: "🌪️", isGood: false,
-    desc: "極端氣候帶來乾旱缺水！全隊體力消耗過大，隊伍暫停移動「後退 1 步」！",
+    id: "card_drought", name: "氣候乾旱 🌪️", isGood: false,
+    desc: "極端氣候帶來乾旱缺水！體力消耗過大，全隊「後退 1 步」！",
     action: (player) => {
       player.pos = Math.max(0, player.pos - 1);
       updateTokenPosition(player);
     }
   },
   {
-    id: "card_acid_rain", name: "酸雨侵襲 🌧️", icon: "🌧️", isGood: false,
+    id: "card_acid_rain", name: "酸雨侵襲 🌧️", isGood: false,
     desc: "環境污染導致酸雨落山！路面溼滑難行，全隊「後退 2 步」！",
     action: (player) => {
       player.pos = Math.max(0, player.pos - 2);
@@ -86,12 +103,12 @@ const ENVIRONMENT_CARDS = [
     }
   },
   {
-    id: "card_invasive", name: "外來種入侵 🦗", icon: "🦗", isGood: false,
-    desc: "外來物種搶奪大量食糧！本隊深受干擾，暫停一回合行動整備！",
+    id: "card_invasive", name: "外來種入侵 🦗", isGood: false,
+    desc: "外來物種掠奪食糧！本隊深受干擾，下回合「暫停行動」一次！",
     action: (player) => { player.skipTurn = true; }
   },
   {
-    id: "card_volcano", name: "火山灰遮日 🌋", icon: "🌋", isGood: false,
+    id: "card_volcano", name: "火山灰遮日 🌋", isGood: false,
     desc: "火山噴發遮蔽日光，視野迷茫！全隊迷失方向「後退 2 步」！",
     action: (player) => {
       player.pos = Math.max(0, player.pos - 2);
@@ -99,8 +116,8 @@ const ENVIRONMENT_CARDS = [
     }
   },
   {
-    id: "card_epidemic", name: "植物病蟲害 🐛", icon: "🐛", isGood: false,
-    desc: "森林遭受病蟲害干擾，路徑受阻！拖累自身與相鄰隊伍「各後退 1 步」！",
+    id: "card_epidemic", name: "植物病蟲害 🐛", isGood: false,
+    desc: "森林遭受病蟲害干擾！拖累自身與相鄰隊伍「各後退 1 步」！",
     action: (player, allPlayers) => {
       player.pos = Math.max(0, player.pos - 1);
       updateTokenPosition(player);
@@ -112,13 +129,33 @@ const ENVIRONMENT_CARDS = [
         updateTokenPosition(nearest);
       }
     }
+  },
+  {
+    id: "card_tsunami", name: "沿海海嘯 🌊", isGood: false,
+    desc: "巨大海嘯突襲叢林小徑！全班所有隊伍強制「各後退 1 步」！",
+    action: (player, allPlayers) => {
+      allPlayers.forEach(p => {
+        if (p.pos > 0) {
+          p.pos = Math.max(0, p.pos - 1);
+          updateTokenPosition(p);
+        }
+      });
+    }
+  },
+  {
+    id: "card_earthquake", name: "強烈地震 💥", isGood: false,
+    desc: "地殼變動引發走山坍方！本隊受到衝擊「後退 3 步」！",
+    action: (player) => {
+      player.pos = Math.max(0, player.pos - 3);
+      updateTokenPosition(player);
+    }
   }
 ];
 
 // 2. 狀態與全域變數
 let players = [];
 let currentPlayerIndex = 0;
-let isMoving = false;
+let isMoving = false; // 嚴格狀態鎖定，防止連點與出錯
 let roundCounter = 1;
 let gameLog = [];
 let errorQuestionsLog = [];
@@ -137,6 +174,7 @@ let currentCardCallback = null;
 let audioCtx = null;
 
 // DOM
+const teamCountSelect = document.getElementById("teamCountSelect");
 const unitSelect = document.getElementById("unitSelect");
 const gameModeSelect = document.getElementById("gameModeSelect");
 const btnRules = document.getElementById("btnRules");
@@ -214,6 +252,10 @@ function parseUrlParameters() {
 }
 
 function initEventListeners() {
+  // 解鎖 iPad / iPhone / Safari Web Audio
+  document.body.addEventListener("touchstart", unlockAudio, { once: true });
+  document.body.addEventListener("click", unlockAudio, { once: true });
+
   btnRollDice.addEventListener("click", handleRollDice);
   btnReset.addEventListener("click", resetGame);
   btnManualMove.addEventListener("click", handleManualMove);
@@ -224,7 +266,11 @@ function initEventListeners() {
 
   btnZoomFont.addEventListener("click", () => {
     document.body.classList.toggle("font-zoomed");
-    btnZoomFont.textContent = document.body.classList.contains("font-zoomed") ? "🔍 標準字體" : "🔍 放大字體";
+    btnZoomFont.textContent = document.body.classList.contains("font-zoomed") ? "🔍 標準字體" : "🔍 放大題目";
+  });
+
+  teamCountSelect.addEventListener("change", () => {
+    resetGame();
   });
 
   window.addEventListener("keydown", (e) => {
@@ -270,6 +316,15 @@ function initEventListeners() {
     startGame();
   });
   document.getElementById("btnDownloadLogModal")?.addEventListener("click", downloadGameLog);
+}
+
+function unlockAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
 }
 
 function toggleFreeze() {
@@ -346,7 +401,7 @@ async function loadSingleUnit(fileName) {
   }
 }
 
-// 5. 棋盤建立與 SVG 連結繪製 (徹底解決黑色陰影/黑塊 Bug!)
+// 5. 棋盤建立與 SVG 綠色藤蔓 (含葉子) & 爪痕畫布
 function createBoardStructure() {
   boardGrid.innerHTML = "";
   let cellNums = [];
@@ -368,12 +423,12 @@ function createBoardStructure() {
 
     if (JUMPS[num]) {
       if (JUMPS[num] > num) {
-        cellEl.innerHTML += `<div class="cell-emoji" title="藤蔓上升捷徑">🌿</div>`;
+        cellEl.innerHTML += `<div class="emoji" title="藤蔓攀升捷徑">🌿</div>`;
       } else {
-        cellEl.innerHTML += `<div class="cell-emoji" id="dino-${num}" title="暴龍襲擊陷阱">🦖</div>`;
+        cellEl.innerHTML += `<div class="emoji dino-container" id="dino-${num}" title="暴龍襲擊陷阱">🦖</div>`;
       }
     } else if (num === TOTAL_CELLS) {
-      cellEl.innerHTML += `<div class="cell-emoji">🚁</div>`;
+      cellEl.innerHTML += `<div class="emoji">🏆</div>`;
     }
 
     boardGrid.appendChild(cellEl);
@@ -392,30 +447,90 @@ function getCellCenterCoords(cellNum) {
   return { x, y };
 }
 
+// 完全復原原始精緻 SVG 曲劃綠色藤蔓 + 蔓延葉子 + 爪痕動畫群組
 function drawConnections() {
   svgCanvas.innerHTML = "";
   Object.keys(JUMPS).forEach(startStr => {
-    const startCell = parseInt(startStr);
+    const startCell = parseInt(startStr, 10);
     const endCell = JUMPS[startCell];
     const p1 = getCellCenterCoords(startCell);
     const p2 = getCellCenterCoords(endCell);
 
     const isLadder = endCell > startCell;
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
     if (isLadder) {
-      path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
-      path.setAttribute("class", "ladder-path");
-      path.setAttribute("fill", "none"); // 關鍵：確保 fill 為 none
-    } else {
-      const midX = (p1.x + p2.x) / 2 + (startCell % 2 === 0 ? 8 : -8);
-      const midY = (p1.y + p2.y) / 2 - 8;
-      path.setAttribute("d", `M ${p1.x} ${p1.y} Q ${midX} ${midY} ${p2.x} ${p2.y}`);
-      path.setAttribute("class", "snake-path");
-      path.setAttribute("fill", "none"); // 關鍵：確保 fill 為 none
-    }
+      // 🌿 綠色藤蔓捷徑 (帶著彎曲與發光特性)
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const pad = 7;
 
-    svgCanvas.appendChild(path);
+      const startX = p1.x + (dx / dist) * pad;
+      const startY = p1.y + (dy / dist) * pad;
+      const endX = p2.x - (dx / dist) * pad;
+      const endY = p2.y - (dy / dist) * pad;
+
+      const cx = (startX + endX) / 2;
+      const cy = (startY + endY) / 2;
+      const offsetX = -dy * 0.15;
+      const offsetY = dx * 0.15;
+
+      const vineFg = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      vineFg.id = `vine-${startCell}-fg`;
+      vineFg.setAttribute("d", `M ${startX} ${startY} Q ${cx - offsetX} ${cy - offsetY} ${endX} ${endY}`);
+      vineFg.setAttribute("stroke", "#8bc34a");
+      vineFg.setAttribute("stroke-width", "2.5");
+      vineFg.setAttribute("stroke-dasharray", "5, 4");
+      vineFg.setAttribute("fill", "none");
+      vineFg.setAttribute("stroke-linecap", "round");
+      vineFg.style.filter = "drop-shadow(1px 1px 2px rgba(0,0,0,0.5))";
+      vineFg.style.transition = "all 0.3s ease";
+      svgCanvas.appendChild(vineFg);
+
+      // 藤蔓葉子元素
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      const leavesData = [
+        { dx: offsetX * 0.4, dy: offsetY * 0.4, path: "M0,0 Q2,-4 5,0 Q2,4 0,0", color: "#aed581", rot: angle - 30 },
+        { dx: -offsetX * 0.5, dy: -offsetY * 0.5, path: "M0,0 Q-2,4 -5,0 Q-2,-4 0,0", color: "#7cb342", rot: angle + 45 }
+      ];
+
+      leavesData.forEach(l => {
+        const leaf = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        leaf.setAttribute("d", l.path);
+        leaf.setAttribute("fill", l.color);
+        leaf.setAttribute("transform", `translate(${cx + l.dx}, ${cy + l.dy}) rotate(${l.rot})`);
+        leaf.style.filter = "drop-shadow(0 1px 1px rgba(0,0,0,0.3))";
+        svgCanvas.appendChild(leaf);
+      });
+    } else {
+      // 🦖 暴龍襲擊爪痕群組 (答錯切割動畫)
+      const fallGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      fallGroup.id = `fall-${startCell}`;
+      fallGroup.style.display = "none";
+      fallGroup.style.opacity = "1";
+
+      const cx = (p1.x + p2.x) / 2 + 5;
+      const cy = (p1.y + p2.y) / 2 - 15;
+
+      for (let i = -1; i <= 1; i++) {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const oX = i * 2;
+        const oY = i * 1.2;
+        path.setAttribute("d", `M ${p1.x + oX} ${p1.y + oY} Q ${cx + oX} ${cy + oY} ${p2.x + oX} ${p2.y + oY}`);
+        path.setAttribute("stroke", "#e74c3c");
+        path.setAttribute("stroke-width", "1.5");
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke-linecap", "round");
+        path.style.opacity = "0.75";
+        path.style.filter = "drop-shadow(0 0 2px rgba(231, 76, 60, 0.5))";
+
+        path.setAttribute("stroke-dasharray", "150");
+        path.setAttribute("stroke-dashoffset", "150");
+        path.classList.add("claw-path");
+        fallGroup.appendChild(path);
+      }
+      svgCanvas.appendChild(fallGroup);
+    }
   });
 }
 
@@ -427,22 +542,23 @@ function startGame() {
   errorQuestionsLog = [];
   roundCounter = 1;
   isRushMode = false;
+  isMoving = false;
   rushBadge.classList.add("hidden");
   timerClock.classList.remove("rush");
 
-  let teamCount = (currentMode === "solo") ? 1 : 4;
-  const offsets = [
-    { x: -3.5, y: -3.5 }, { x: 0, y: -3.5 }, { x: 3.5, y: -3.5 },
-    { x: -3.5, y: 3.5 },  { x: 0, y: 3.5 },  { x: 3.5, y: 3.5 }
-  ];
+  let teamCount = parseInt(teamCountSelect.value, 10);
+  if (isNaN(teamCount) || teamCount < 2) teamCount = 4;
+
+  if (currentMode === "solo") teamCount = 1;
 
   for (let i = 0; i < teamCount; i++) {
+    const preset = ALL_TEAM_COLORS[i % ALL_TEAM_COLORS.length];
     players.push({
       id: i,
-      name: (currentMode === "solo") ? "自主探險家" : TEAM_PRESETS[i].name,
-      color: TEAM_PRESETS[i].color,
+      name: (currentMode === "solo") ? "自主探險家" : preset.name,
+      color: preset.color,
       pos: 0,
-      offset: offsets[i],
+      offset: TEAM_OFFSETS[i % TEAM_OFFSETS.length],
       immune: false,
       skipTurn: false,
       extraTurn: false,
@@ -463,7 +579,7 @@ function startGame() {
 
   initPlayerTokens();
   updateLeaderboard();
-  addLog(`=== 遊戲開始 (模式：${getModeDisplayName()}) ===`);
+  addLog(`=== 遊戲開始 (參賽隊伍：${players.length}隊，模式：${getModeDisplayName()}) ===`);
 
   currentPlayerIndex = 0;
   nextTurn(true);
@@ -475,6 +591,7 @@ function getModeDisplayName() {
   return "各組平板輪流競賽";
 }
 
+// 復原火柴人小人畫法 (圓形白頭 + 彩色線條身體與四肢)
 function initPlayerTokens() {
   document.querySelectorAll(".token").forEach(t => t.remove());
 
@@ -493,7 +610,7 @@ function initPlayerTokens() {
       const partEl = document.createElement("div");
       partEl.className = c;
       partEl.style.borderColor = p.color;
-      if (c.includes("stick-head")) partEl.style.backgroundColor = "#fff";
+      if (c.includes("stick-head")) partEl.style.backgroundColor = "#ffffff";
       tokenEl.appendChild(partEl);
     });
 
@@ -547,6 +664,7 @@ function nextTurn(isFirstTurn = false) {
   }
 
   turnStatusCard.style.borderLeftColor = curPlayer.color;
+  turnStatusCard.style.backgroundColor = `color-mix(in srgb, ${curPlayer.color} 15%, white)`;
   currentTeamName.textContent = curPlayer.name;
   currentTeamName.style.color = curPlayer.color;
 
@@ -557,8 +675,11 @@ function nextTurn(isFirstTurn = false) {
     currentRoleNote.textContent = "輪到本隊投擲骰子！";
   }
 
+  isMoving = false;
   btnRollDice.disabled = false;
   btnRollDice.style.backgroundColor = curPlayer.color;
+  btnRollDice.style.color = (curPlayer.color === "#f1c40f" || curPlayer.color === "#ecf0f1") ? "#333" : "#fff";
+
   updateMessage(`請 【${curPlayer.name}】 點擊擲骰子開始前進！`);
 }
 
@@ -566,6 +687,8 @@ function handleRollDice() {
   if (isMoving || isTeacherFrozen) return;
   isMoving = true;
   btnRollDice.disabled = true;
+
+  unlockAudio();
 
   let steps;
   if (isRushMode) {
@@ -590,6 +713,7 @@ function handleRollDice() {
 }
 
 function handleManualMove() {
+  if (isMoving || isTeacherFrozen) return;
   const stepsStr = prompt("【教師專用】請輸入欲指定前進的步數 (1~6)：", "3");
   if (!stepsStr) return;
   const steps = parseInt(stepsStr, 10);
@@ -597,13 +721,14 @@ function handleManualMove() {
     alert("請輸入有效的 1~6 數字！");
     return;
   }
+  isMoving = true;
   btnRollDice.disabled = true;
   diceResultDisplay.textContent = steps;
   addLog(`[教師指定] 【${players[currentPlayerIndex].name}】 前進 ${steps} 步`);
   movePlayer(players[currentPlayerIndex], steps);
 }
 
-// 核心移動：移動到目標格後，【每格子均會觸發生物問答】！
+// 核心移動：到達該格後，全場每一格均會觸發生物問答！
 function movePlayer(player, steps) {
   let targetPos = player.pos + steps;
   const tokenEl = document.getElementById(`token-${player.id}`);
@@ -633,7 +758,7 @@ function movePlayer(player, steps) {
       return;
     }
 
-    // ⭐ 每一格均觸發題目問答！根據格子類型給予不同的題型與攀爬/跌落效果！
+    // ⭐ 每格均觸發題目問答事件！
     triggerTileQuizEvent(player);
 
   }, 700);
@@ -662,11 +787,11 @@ function getQuestionByDifficulty(preferredDiff, player) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// ⭐ 【每格觸發問答】並結合藤蔓攀爬與暴龍跌落動畫
+// ⭐ 【全場每格問答】 + 藤蔓螢光發光攀爬 + 暴龍咆哮爪痕劃過跌落
 function triggerTileQuizEvent(player) {
   const cellNum = player.pos;
 
-  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對攀爬上升！
+  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對發出綠光並攀爬！
   if (JUMPS[cellNum] && JUMPS[cellNum] > cellNum) {
     const jumpTarget = JUMPS[cellNum];
     const question = getQuestionByDifficulty("中", player) || getQuestionByDifficulty("易", player);
@@ -680,19 +805,30 @@ function triggerTileQuizEvent(player) {
         player.consecutiveErrors = 0;
         playClimbTone();
 
-        // 攀爬動畫
+        const vineFg = document.getElementById(`vine-${cellNum}-fg`);
+        if (vineFg) {
+          vineFg.setAttribute("stroke", "#76ff03");
+          vineFg.setAttribute("stroke-width", "4");
+          vineFg.style.filter = "drop-shadow(0 0 10px #76ff03)";
+        }
+
         const tokenEl = document.getElementById(`token-${player.id}`);
         if (tokenEl) tokenEl.classList.add("climbing");
 
         player.pos = jumpTarget;
         updateTokenPosition(player);
-        updateMessage(`✅ 【${player.name}】 解答正確！順著藤蔓成功攀爬上升至第 ${jumpTarget} 格！`);
+        updateMessage(`✅ 【${player.name}】 解答正確！順著發光藤蔓攀爬上升至第 ${jumpTarget} 格！`);
         addLog(`  -> 🌿 攀升成功：解答正確，攀爬升至第 ${jumpTarget} 格。`);
 
         setTimeout(() => {
           if (tokenEl) tokenEl.classList.remove("climbing");
+          if (vineFg) {
+            vineFg.setAttribute("stroke", "#8bc34a");
+            vineFg.setAttribute("stroke-width", "2.5");
+            vineFg.style.filter = "drop-shadow(1px 1px 2px rgba(0,0,0,0.5))";
+          }
           finishTurn();
-        }, 1000);
+        }, 1200);
       } else {
         player.consecutiveErrors++;
         updateMessage(`❌ 【${player.name}】 答錯了，錯失藤蔓攀爬機會，留在原第 ${cellNum} 格。`);
@@ -703,14 +839,15 @@ function triggerTileQuizEvent(player) {
     return;
   }
 
-  // 情況 B: 暴龍陷阱格 (14, 20, 33, 35) -> 答錯驚動暴龍跌落！
+  // 情況 B: 暴龍陷阱格 (14, 20, 33, 35) -> 答錯驚動暴龍，三道爪痕切割+跌落！
   if (JUMPS[cellNum] && JUMPS[cellNum] < cellNum) {
     const jumpTarget = JUMPS[cellNum];
+    const dinoEl = document.getElementById(`dino-${cellNum}`);
 
     if (player.immune) {
       player.immune = false;
-      updateMessage(`🛡️ 【${player.name}】 消耗「暴龍免疫護盾」，抵銷攻擊安全留在原地！`);
-      addLog(`  -> 🛡️ 免疫護盾抵銷暴龍傷害，留在第 ${player.pos} 格。`);
+      updateMessage(`🛡️ 【${player.name}】 消耗「暴龍免疫卡」，抵銷傷害安全留在原地！`);
+      addLog(`  -> 🛡️ 免疫卡發動，抵銷暴龍傷害。`);
       finishTurn();
       return;
     }
@@ -724,28 +861,68 @@ function triggerTileQuizEvent(player) {
       if (isCorrect) {
         player.correctAnswers++;
         player.consecutiveErrors = 0;
+        playSleepTone();
+
+        if (dinoEl) {
+          dinoEl.classList.remove("dino-bite");
+          dinoEl.classList.add("dino-sleep");
+          dinoEl.textContent = "🦖💤";
+        }
+
         updateMessage(`💤 【${player.name}】 解題精準！成功施打麻醉劑安撫暴龍，安全留在第 ${cellNum} 格！`);
-        addLog(`  -> 🦖 暴龍危機化解：成功留在第 ${cellNum} 格。`);
-        finishTurn();
+        addLog(`  -> 🦖 暴龍危機化解：安撫暴龍，留在第 ${cellNum} 格。`);
+
+        setTimeout(() => {
+          if (dinoEl) {
+            dinoEl.classList.remove("dino-sleep");
+            dinoEl.textContent = "🦖";
+          }
+          finishTurn();
+        }, 1500);
       } else {
         player.consecutiveErrors++;
         playDinoRoarTone();
-        boardFrame.classList.add("board-shake");
 
-        const tokenEl = document.getElementById(`token-${player.id}`);
-        if (tokenEl) tokenEl.classList.add("falling");
+        if (dinoEl) {
+          dinoEl.textContent = "🦖🔥";
+          dinoEl.classList.add("dino-bite");
+        }
 
-        setTimeout(() => boardFrame.classList.remove("board-shake"), 500);
+        boardFrame.classList.add("shake");
+
+        // 觸發三道紅色爪痕切割動畫
+        const fallGroup = document.getElementById(`fall-${cellNum}`);
+        if (fallGroup) {
+          fallGroup.style.display = "block";
+          fallGroup.style.opacity = "1";
+          Array.from(fallGroup.children).forEach(path => {
+            path.classList.remove("do-slash");
+            void path.offsetWidth;
+            path.classList.add("do-slash");
+          });
+        }
 
         player.pos = jumpTarget;
         updateTokenPosition(player);
-        updateMessage(`💥 【${player.name}】 答錯驚動暴龍！慘遭重擊滑落跌退至第 ${jumpTarget} 格！`);
+        updateMessage(`💥 【${player.name}】 答錯驚動暴龍！慘遭爪痕重擊滑落跌退至第 ${jumpTarget} 格！`);
         addLog(`  -> 🦖 暴龍重擊：跌落至第 ${jumpTarget} 格。`);
 
         setTimeout(() => {
-          if (tokenEl) tokenEl.classList.remove("falling");
+          boardFrame.classList.remove("shake");
+          if (dinoEl) {
+            dinoEl.classList.remove("dino-bite");
+            dinoEl.textContent = "🦖";
+          }
+          if (fallGroup) {
+            fallGroup.style.transition = "opacity 1s ease";
+            fallGroup.style.opacity = "0";
+            setTimeout(() => {
+              fallGroup.style.display = "none";
+              fallGroup.style.transition = "none";
+            }, 1000);
+          }
           finishTurn();
-        }, 1000);
+        }, 1500);
       }
     });
     return;
@@ -766,14 +943,14 @@ function triggerTileQuizEvent(player) {
         triggerEnvironmentCard(player);
       } else {
         player.consecutiveErrors++;
-        updateMessage(`❌ 【${player.name}】 答錯了，錯失環境變遷機會，平安停留。`);
+        updateMessage(`❌ 【${player.name}】 答錯了，錯失環境變遷試煉，平安停留。`);
         finishTurn();
       }
     });
     return;
   }
 
-  // 情況 D: 普通安全格 -> 通過普通生物生存題
+  // 情況 D: 普通安全格 -> 通過普通生物題
   const question = getQuestionByDifficulty("易", player) || getQuestionByDifficulty("中", player);
   quizTypeTag.textContent = "🔍 叢林生物生存問答";
   quizTypeTag.style.color = "#0288d1";
@@ -875,14 +1052,14 @@ function handleQuizFinish() {
 
 function triggerEnvironmentCard(player) {
   const card = ENVIRONMENT_CARDS[Math.floor(Math.random() * ENVIRONMENT_CARDS.length)];
-  natureCardIcon.textContent = card.icon;
+  natureCardIcon.textContent = card.isGood ? "🌟" : "🌋";
   natureCardName.textContent = card.name;
   natureCardDesc.textContent = card.desc;
 
   if (card.isGood) {
-    natureCardBox.classList.remove("bad-card");
+    natureCardBox.className = "card-box card-good";
   } else {
-    natureCardBox.classList.add("bad-card");
+    natureCardBox.className = "card-box card-bad";
   }
 
   currentCardCallback = () => {
@@ -935,7 +1112,7 @@ function activateRushMode() {
 
 function handleGameOver(winner) {
   clearInterval(gameTimer);
-  updateMessage(`🏆 🎉 恭喜【${winner.name}】率先抵達第 36 格，成功逃出侏羅紀叢林！`);
+  updateMessage(`🏆 🎉 恭喜【${winner.name}】率先抵達第 36 格登上直升機，成功逃出侏羅紀叢林！`);
   addLog(`🎉 遊戲結束！冠軍為：${winner.name}`);
   showSummaryModal(winner);
 }
@@ -978,6 +1155,9 @@ function updateLeaderboard() {
   sorted.forEach((p, idx) => {
     const li = document.createElement("li");
     li.className = `rank-item ${p.id === players[currentPlayerIndex]?.id ? "active" : ""}`;
+    if (p.id === players[currentPlayerIndex]?.id) {
+      li.style.setProperty("--pulse-color", p.color);
+    }
     const shield = p.immune ? "🛡️" : "";
     li.innerHTML = `
       <div style="display:flex; align-items:center;">
@@ -1090,9 +1270,10 @@ function restoreSnapshot() {
   }
 }
 
-// Web Audio
+// Web Audio (解鎖解除了 iPhone/iPad Safari 限制)
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
 function playTone(freq, type, duration, delay = 0, vol = 0.1) {
@@ -1110,7 +1291,8 @@ function playTone(freq, type, duration, delay = 0, vol = 0.1) {
   osc.stop(audioCtx.currentTime + delay + duration);
 }
 
-function playDiceTone() { playTone(550, "sine", 0.08, 0); }
-function playClimbTone() { for (let i = 0; i < 4; i++) playTone(320 + i * 110, "triangle", 0.15, i * 0.08); }
-function playDinoRoarTone() { for (let i = 0; i < 5; i++) playTone(220 - i * 35, "sawtooth", 0.15, i * 0.08, 0.15); }
-function playRushAlarmTone() { playTone(440, "square", 0.1, 0); playTone(660, "square", 0.1, 0.1); playTone(880, "square", 0.35, 0.2); }
+function playDiceTone() { playTone(600, "sine", 0.1, 0); playTone(800, "sine", 0.1, 0.08); }
+function playClimbTone() { for (let i = 0; i < 4; i++) playTone(300 + i * 100, "triangle", 0.15, i * 0.08); }
+function playDinoRoarTone() { for (let i = 0; i < 6; i++) playTone(250 - i * 40, "sawtooth", 0.15, i * 0.08, 0.15); }
+function playSleepTone() { playTone(200, "sine", 0.3, 0); playTone(150, "sine", 0.4, 0.3); }
+function playRushAlarmTone() { playTone(400, "square", 0.1, 0); playTone(600, "square", 0.1, 0.1); playTone(800, "square", 0.4, 0.2); }

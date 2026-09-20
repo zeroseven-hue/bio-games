@@ -11,12 +11,28 @@
     <!-- 頂部標題與主控列 -->
     <header class="game-header">
       <div class="header-titles">
-        <h1>🦖 侏羅紀叢林逃生記 🏃‍♂️</h1>
-        <input type="text" id="unitSubtitle" class="unit-subtitle" value="國中自然科學 ‧ 課堂複習逃生戰" title="點擊可自訂課堂單元名稱">
+        <h1>🦕 侏羅紀叢林逃生記 🏃‍♂️</h1>
+        <input type="text" id="unitSubtitle" class="unit-subtitle" value="自然科學 / 課堂複習逃生戰" title="點擊可自訂課堂單元名稱">
       </div>
 
       <div class="header-controls">
-        <!-- 題庫單元動態載入 -->
+        <div class="control-group">
+          <label for="teamCountSelect">隊伍數：</label>
+          <select id="teamCountSelect" class="styled-select">
+            <option value="2">2 隊</option>
+            <option value="3">3 隊</option>
+            <option value="4" selected>4 隊</option>
+            <option value="5">5 隊</option>
+            <option value="6">6 隊</option>
+            <option value="7">7 隊</option>
+            <option value="8">8 隊</option>
+            <option value="9">9 隊</option>
+            <option value="10">10 隊</option>
+            <option value="11">11 隊</option>
+            <option value="12">12 隊</option>
+          </select>
+        </div>
+
         <div class="control-group">
           <label for="unitSelect">挑戰單元：</label>
           <select id="unitSelect" class="styled-select">
@@ -24,7 +40,6 @@
           </select>
         </div>
 
-        <!-- 遊玩模式切換 -->
         <div class="control-group">
           <label for="gameModeSelect">遊玩模式：</label>
           <select id="gameModeSelect" class="styled-select">
@@ -35,7 +50,7 @@
         </div>
 
         <div class="control-buttons">
-          <button id="btnZoomFont" class="btn-tool btn-zoom">🔍 放大字體</button>
+          <button id="btnZoomFont" class="btn-tool btn-zoom">🔍 放大題目</button>
           <button id="btnFreeze" class="btn-tool btn-freeze" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
           <button id="btnRules" class="btn-tool btn-rules">📖 逃生指南</button>
           <button id="btnManualMove" class="btn-tool btn-manual hidden">🔢 指定步數</button>
@@ -51,7 +66,7 @@
         <div class="board-frame" id="boardFrame">
           <!-- 36 格由 JS 動態生成 -->
           <div class="board-grid" id="boardGrid"></div>
-          <!-- SVG 畫布：繪製攀升藤蔓與暴龍爪痕軌跡 -->
+          <!-- SVG 畫布：繪製攀升綠藤蔓與暴龍爪痕軌跡 -->
           <svg id="svgCanvas" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
         </div>
       </section>
@@ -95,7 +110,7 @@
         </div>
 
         <!-- 戰報下載 -->
-        <button id="btnDownloadLog" class="btn-download">📥 下載本堂課戰報與錯題分析</button>
+        <button id="btnDownloadLog" class="btn-download">📥 下載本堂課戰報 (TXT)</button>
       </aside>
     </main>
 
@@ -109,7 +124,7 @@
         <div class="rules-content">
           <div class="rule-section">
             <h3>🎯 獲勝目標</h3>
-            <p>突破沿途險阻與生物挑戰，小隊（或個人）<b>率先抵達第 36 格【逃生直升機】</b>即可成功獲救贏得勝利！</p>
+            <p>小隊（或個人）<b>率先抵達第 36 格【逃生直升機】</b>即可成功獲救贏得勝利！</p>
           </div>
 
           <div class="rule-section">
@@ -117,26 +132,26 @@
             <div class="rule-tiles-legend">
               <div class="legend-item">
                 <span class="legend-badge tile-normal-demo">綠 / 黃 / 藍格</span>
-                <span><b>安全林道</b>：地勢平坦，平安停留整備。</span>
+                <span><b>叢林生存問答</b>：答對安全停留整備。</span>
               </div>
               <div class="legend-item">
                 <span class="legend-badge tile-vine-demo">🌿 演化藤蔓</span>
-                <span><b>攀升捷徑</b>：踩到藤蔓起點將抽一題生物題。答對攀爬躍進！答錯留在原地。</span>
+                <span><b>攀升捷徑</b>：答對題目觸發藤蔓攀爬動畫，攀升躍進！</span>
               </div>
               <div class="legend-item">
                 <span class="legend-badge tile-dino-demo">🦖 暴龍尾巴</span>
-                <span><b>致命危機</b>：驚動暴龍！觸發高難度生存挑戰題。答對麻醉暴龍留在原地；答錯遭擊落跌退！</span>
+                <span><b>致命危機</b>：答錯觸發暴龍怒吼與紅色爪痕切割，跌落谷底！</span>
               </div>
               <div class="legend-item">
                 <span class="legend-badge tile-red-demo">🟥 環境變遷卡</span>
-                <span><b>命運考驗</b>：觸發 10 種大自然考驗（可能獲得免疫護盾、突飛猛進，也可能遭遇乾旱倒退）。</span>
+                <span><b>命運考驗</b>：答對觸發 12 種自然考驗（可能獲得免疫卡、再骰一次、同儕前進，也可能遭遇乾旱或外來種）。</span>
               </div>
             </div>
           </div>
 
           <div class="rule-section">
             <h3>⏰ 終極逃生模式（壓軸高潮）</h3>
-            <p>當時間剩最後 <b>100 秒</b> 時，全場警報響起！骰子全面升級只會出現大點數（4～6），抵達終點不反彈，全力破門逃生！</p>
+            <p>當倒數進入壓軸階段時，全場警報響起！骰子升級大點數（4～6），抵達終點不反彈！</p>
           </div>
         </div>
         <button class="btn-confirm-rule" data-close="rulesModal">了解規則，進入叢林 🚀</button>
@@ -159,13 +174,13 @@
           </div>
         </div>
 
-        <!-- 答題反饋與觀念解析卡 (答題後滑出) -->
+        <!-- 答題反饋與觀念解析卡 -->
         <div class="quiz-feedback-box hidden" id="quizFeedbackBox">
           <div class="feedback-banner" id="feedbackBanner">
             <!-- 對錯狀態 -->
           </div>
           <div class="feedback-memo">
-            <h4>💡 茱蒂老師的小筆記（觀念解析）：</h4>
+            <h4>💡 觀念解析：</h4>
             <p id="feedbackMemoText">解析文字...</p>
           </div>
           <button id="btnFinishQuiz" class="btn-action-continue">看懂了，繼續前進 ➡️</button>
@@ -192,7 +207,7 @@
       <div class="modal-dialog freeze-dialog">
         <div class="freeze-icon">⏸️</div>
         <h2>全場暫停 ‧ 焦點回歸老師</h2>
-        <p>老師已凍結遊戲畫面與音效，請全班保持安靜，注意力看向教室大螢幕或老師！</p>
+        <p>老師已凍結遊戲畫面與音效，請全班保持安靜看向教室大螢幕！</p>
         <button id="btnUnfreeze" class="btn-unfreeze">▶️ 解除凍結，繼續遊戲</button>
       </div>
     </div>
