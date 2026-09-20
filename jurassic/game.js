@@ -1,7 +1,9 @@
 /**
- * 侏羅紀叢林逃生記 - 專業教學強固版核心引擎
- * 支援 URL 參數解析、融合教育特教 (timer=off, 關鍵字高亮, 字體放大)、
- * LocalStorage 快照恢復、教師 Spacebar 凍結與課堂 Top 3 錯題統計總結。
+ * 侏羅紀叢林逃生記 - 專業教學強固版核心引擎 V2
+ * 1. 全場所有格子 (1~35) 踩中均會觸發生物題目問答！
+ * 2. 藤蔓格 (Vine)：答對觸發動畫順著綠色藤蔓攀爬至上方格子！
+ * 3. 暴龍格 (Dino)：答錯驚動暴龍，畫面震動並沿著紅色軌跡跌落至下方格子！
+ * 4. 修正 SVG 軌跡滿填黑塊 Bug (強制 fill="none")。
  */
 
 // 1. 基礎設定與常數
@@ -125,7 +127,7 @@ let currentMode = "group-tablet";
 let gameTimer = null;
 let timeLeft = 15 * 60;
 let isRushMode = false;
-let isTimerDisabled = false; // 特教模式 timer=off
+let isTimerDisabled = false;
 let isTeacherFrozen = false;
 let currentActiveQuestion = null;
 let quizTimerInterval = null;
@@ -225,7 +227,6 @@ function initEventListeners() {
     btnZoomFont.textContent = document.body.classList.contains("font-zoomed") ? "🔍 標準字體" : "🔍 放大字體";
   });
 
-  // 空白鍵一鍵凍結
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
       e.preventDefault();
@@ -258,7 +259,6 @@ function initEventListeners() {
   btnFinishQuiz.addEventListener("click", handleQuizFinish);
   btnAcceptCard.addEventListener("click", handleCardAccept);
 
-  // Snapshot modal buttons
   document.getElementById("btnRestoreSnapshot")?.addEventListener("click", restoreSnapshot);
   document.getElementById("btnDiscardSnapshot")?.addEventListener("click", () => {
     localStorage.removeItem("jurassic_snapshot");
@@ -346,7 +346,7 @@ async function loadSingleUnit(fileName) {
   }
 }
 
-// 5. 棋盤建立
+// 5. 棋盤建立與 SVG 連結繪製 (徹底解決黑色陰影/黑塊 Bug!)
 function createBoardStructure() {
   boardGrid.innerHTML = "";
   let cellNums = [];
@@ -368,9 +368,9 @@ function createBoardStructure() {
 
     if (JUMPS[num]) {
       if (JUMPS[num] > num) {
-        cellEl.innerHTML += `<div class="cell-emoji">🌿</div>`;
+        cellEl.innerHTML += `<div class="cell-emoji" title="藤蔓上升捷徑">🌿</div>`;
       } else {
-        cellEl.innerHTML += `<div class="cell-emoji" id="dino-${num}">🦖</div>`;
+        cellEl.innerHTML += `<div class="cell-emoji" id="dino-${num}" title="暴龍襲擊陷阱">🦖</div>`;
       }
     } else if (num === TOTAL_CELLS) {
       cellEl.innerHTML += `<div class="cell-emoji">🚁</div>`;
@@ -406,11 +406,13 @@ function drawConnections() {
     if (isLadder) {
       path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
       path.setAttribute("class", "ladder-path");
+      path.setAttribute("fill", "none"); // 關鍵：確保 fill 為 none
     } else {
-      const midX = (p1.x + p2.x) / 2 + 10;
-      const midY = (p1.y + p2.y) / 2 - 10;
+      const midX = (p1.x + p2.x) / 2 + (startCell % 2 === 0 ? 8 : -8);
+      const midY = (p1.y + p2.y) / 2 - 8;
       path.setAttribute("d", `M ${p1.x} ${p1.y} Q ${midX} ${midY} ${p2.x} ${p2.y}`);
       path.setAttribute("class", "snake-path");
+      path.setAttribute("fill", "none"); // 關鍵：確保 fill 為 none
     }
 
     svgCanvas.appendChild(path);
@@ -601,6 +603,7 @@ function handleManualMove() {
   movePlayer(players[currentPlayerIndex], steps);
 }
 
+// 核心移動：移動到目標格後，【每格子均會觸發生物問答】！
 function movePlayer(player, steps) {
   let targetPos = player.pos + steps;
   const tokenEl = document.getElementById(`token-${player.id}`);
@@ -630,18 +633,9 @@ function movePlayer(player, steps) {
       return;
     }
 
-    if (JUMPS[player.pos]) {
-      const jumpTarget = JUMPS[player.pos];
-      if (jumpTarget > player.pos) {
-        triggerVineChallenge(player, jumpTarget);
-      } else {
-        triggerDinoCrisis(player, jumpTarget);
-      }
-    } else if (RED_TILES.includes(player.pos)) {
-      triggerEnvironmentCard(player);
-    } else {
-      finishTurn();
-    }
+    // ⭐ 每一格均觸發題目問答！根據格子類型給予不同的題型與攀爬/跌落效果！
+    triggerTileQuizEvent(player);
+
   }, 700);
 }
 
@@ -668,66 +662,133 @@ function getQuestionByDifficulty(preferredDiff, player) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function triggerVineChallenge(player, jumpTarget) {
-  const question = getQuestionByDifficulty("中", player) || getQuestionByDifficulty("易", player);
-  if (!question) {
-    updateMessage("題庫已空，直接通過！");
-    finishTurn();
+// ⭐ 【每格觸發問答】並結合藤蔓攀爬與暴龍跌落動畫
+function triggerTileQuizEvent(player) {
+  const cellNum = player.pos;
+
+  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對攀爬上升！
+  if (JUMPS[cellNum] && JUMPS[cellNum] > cellNum) {
+    const jumpTarget = JUMPS[cellNum];
+    const question = getQuestionByDifficulty("中", player) || getQuestionByDifficulty("易", player);
+    quizTypeTag.textContent = "🌿 演化藤蔓攀升考驗！";
+    quizTypeTag.style.color = "#2e7d32";
+
+    setupQuizModal(question, (isCorrect) => {
+      player.totalAnswers++;
+      if (isCorrect) {
+        player.correctAnswers++;
+        player.consecutiveErrors = 0;
+        playClimbTone();
+
+        // 攀爬動畫
+        const tokenEl = document.getElementById(`token-${player.id}`);
+        if (tokenEl) tokenEl.classList.add("climbing");
+
+        player.pos = jumpTarget;
+        updateTokenPosition(player);
+        updateMessage(`✅ 【${player.name}】 解答正確！順著藤蔓成功攀爬上升至第 ${jumpTarget} 格！`);
+        addLog(`  -> 🌿 攀升成功：解答正確，攀爬升至第 ${jumpTarget} 格。`);
+
+        setTimeout(() => {
+          if (tokenEl) tokenEl.classList.remove("climbing");
+          finishTurn();
+        }, 1000);
+      } else {
+        player.consecutiveErrors++;
+        updateMessage(`❌ 【${player.name}】 答錯了，錯失藤蔓攀爬機會，留在原第 ${cellNum} 格。`);
+        addLog(`  -> 🌿 攀升失敗：留在第 ${cellNum} 格。`);
+        finishTurn();
+      }
+    });
     return;
   }
 
-  quizTypeTag.textContent = "🌿 演化藤蔓攀升挑戰";
-  quizTypeTag.style.color = "#2e7d32";
+  // 情況 B: 暴龍陷阱格 (14, 20, 33, 35) -> 答錯驚動暴龍跌落！
+  if (JUMPS[cellNum] && JUMPS[cellNum] < cellNum) {
+    const jumpTarget = JUMPS[cellNum];
 
-  setupQuizModal(question, (isCorrect) => {
-    player.totalAnswers++;
-    if (isCorrect) {
-      player.correctAnswers++;
-      player.consecutiveErrors = 0;
-      playClimbTone();
-      player.pos = jumpTarget;
-      updateTokenPosition(player);
-      updateMessage(`✅ 【${player.name}】 解答正確！順利攀升至第 ${jumpTarget} 格！`);
-      addLog(`  -> 🌿 攀升成功：躍升至第 ${jumpTarget} 格。`);
-    } else {
-      player.consecutiveErrors++;
-      updateMessage(`❌ 【${player.name}】 答錯了，安全留在原地。`);
-      addLog(`  -> 🌿 攀升失敗：留在原第 ${player.pos} 格。`);
+    if (player.immune) {
+      player.immune = false;
+      updateMessage(`🛡️ 【${player.name}】 消耗「暴龍免疫護盾」，抵銷攻擊安全留在原地！`);
+      addLog(`  -> 🛡️ 免疫護盾抵銷暴龍傷害，留在第 ${player.pos} 格。`);
+      finishTurn();
+      return;
     }
-    finishTurn();
-  });
-}
 
-function triggerDinoCrisis(player, jumpTarget) {
-  if (player.immune) {
-    player.immune = false;
-    updateMessage(`🛡️ 【${player.name}】 消耗「暴龍免疫護盾」，抵銷攻擊安全留在原地！`);
-    addLog(`  -> 🛡️ 免疫護盾抵銷暴龍傷害，留在第 ${player.pos} 格。`);
-    finishTurn();
+    const question = getQuestionByDifficulty("難", player) || getQuestionByDifficulty("中", player);
+    quizTypeTag.textContent = "🦖 暴龍襲擊生存挑戰！";
+    quizTypeTag.style.color = "#b71c1c";
+
+    setupQuizModal(question, (isCorrect) => {
+      player.totalAnswers++;
+      if (isCorrect) {
+        player.correctAnswers++;
+        player.consecutiveErrors = 0;
+        updateMessage(`💤 【${player.name}】 解題精準！成功施打麻醉劑安撫暴龍，安全留在第 ${cellNum} 格！`);
+        addLog(`  -> 🦖 暴龍危機化解：成功留在第 ${cellNum} 格。`);
+        finishTurn();
+      } else {
+        player.consecutiveErrors++;
+        playDinoRoarTone();
+        boardFrame.classList.add("board-shake");
+
+        const tokenEl = document.getElementById(`token-${player.id}`);
+        if (tokenEl) tokenEl.classList.add("falling");
+
+        setTimeout(() => boardFrame.classList.remove("board-shake"), 500);
+
+        player.pos = jumpTarget;
+        updateTokenPosition(player);
+        updateMessage(`💥 【${player.name}】 答錯驚動暴龍！慘遭重擊滑落跌退至第 ${jumpTarget} 格！`);
+        addLog(`  -> 🦖 暴龍重擊：跌落至第 ${jumpTarget} 格。`);
+
+        setTimeout(() => {
+          if (tokenEl) tokenEl.classList.remove("falling");
+          finishTurn();
+        }, 1000);
+      }
+    });
     return;
   }
 
-  const question = getQuestionByDifficulty("難", player) || getQuestionByDifficulty("中", player);
-  quizTypeTag.textContent = "🦖 暴龍尾巴生存挑戰！";
-  quizTypeTag.style.color = "#b71c1c";
+  // 情況 C: 紅色環境變遷卡格 (5, 9, 12, 16, 23, 27, 30) -> 答對抽環境卡！
+  if (RED_TILES.includes(cellNum)) {
+    const question = getQuestionByDifficulty("中", player);
+    quizTypeTag.textContent = "🌋 自然環境考驗挑戰！";
+    quizTypeTag.style.color = "#d32f2f";
+
+    setupQuizModal(question, (isCorrect) => {
+      player.totalAnswers++;
+      if (isCorrect) {
+        player.correctAnswers++;
+        player.consecutiveErrors = 0;
+        updateMessage(`✅ 【${player.name}】 解答正確！觸發環境變遷卡試煉！`);
+        triggerEnvironmentCard(player);
+      } else {
+        player.consecutiveErrors++;
+        updateMessage(`❌ 【${player.name}】 答錯了，錯失環境變遷機會，平安停留。`);
+        finishTurn();
+      }
+    });
+    return;
+  }
+
+  // 情況 D: 普通安全格 -> 通過普通生物生存題
+  const question = getQuestionByDifficulty("易", player) || getQuestionByDifficulty("中", player);
+  quizTypeTag.textContent = "🔍 叢林生物生存問答";
+  quizTypeTag.style.color = "#0288d1";
 
   setupQuizModal(question, (isCorrect) => {
     player.totalAnswers++;
     if (isCorrect) {
       player.correctAnswers++;
       player.consecutiveErrors = 0;
-      updateMessage(`💤 【${player.name}】 解題精準！成功安撫暴龍，安全留在原地！`);
-      addLog(`  -> 🦖 暴龍危機化解：成功留在第 ${player.pos} 格。`);
+      updateMessage(`✅ 【${player.name}】 答對生物題！安全在第 ${cellNum} 格整備休息！`);
+      addLog(`  -> 🔍 【${player.name}】 答對題目，平安留在第 ${cellNum} 格。`);
     } else {
       player.consecutiveErrors++;
-      playDinoRoarTone();
-      boardFrame.classList.add("board-shake");
-      setTimeout(() => boardFrame.classList.remove("board-shake"), 500);
-
-      player.pos = jumpTarget;
-      updateTokenPosition(player);
-      updateMessage(`💥 【${player.name}】 驚動暴龍慘遭擊退！跌退回第 ${jumpTarget} 格！`);
-      addLog(`  -> 🦖 暴龍重擊：跌退至第 ${jumpTarget} 格。`);
+      updateMessage(`❌ 【${player.name}】 答錯囉！請詳閱觀念解析加強學習！`);
+      addLog(`  -> 🔍 【${player.name}】 答錯題目，留在第 ${cellNum} 格。`);
     }
     finishTurn();
   });
@@ -893,7 +954,6 @@ function showSummaryModal(winner) {
   if (errorQuestionsLog.length === 0) {
     top3WrongBox.innerHTML = '<div style="color:#2e7d32; font-weight:bold;">🎉 全班表現優異！本次答題完全無錯題紀錄！</div>';
   } else {
-    // 前 3 題錯題展示
     const top3 = errorQuestionsLog.slice(0, 3);
     top3.forEach((item, idx) => {
       const card = document.createElement("div");
@@ -985,7 +1045,7 @@ function resetGame() {
   startGame();
 }
 
-// 8. LocalStorage 快照機制
+// LocalStorage 快照機制
 function saveSnapshot() {
   try {
     const snapshot = {
@@ -1030,7 +1090,7 @@ function restoreSnapshot() {
   }
 }
 
-// 9. Web Audio
+// Web Audio
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
