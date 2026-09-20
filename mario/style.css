@@ -1,0 +1,510 @@
+/* ==========================================================================
+   超級馬力歐生物闖關 - 復古像素與現代觸控平板高對比風格
+   ========================================================================== */
+
+:root {
+  --mario-red: #e52521;
+  --mario-blue: #009bde;
+  --mario-green: #43b047;
+  --mario-gold: #fbd000;
+  --brick-brown: #d35400;
+  --sky-blue: #61bdf5;
+  --text-dark: #2c3e50;
+  --panel-bg: #ffffff;
+  --border-radius-lg: 16px;
+  --border-radius-md: 10px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: #2b2b2b;
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  padding: 8px;
+}
+
+.game-wrapper {
+  width: 98vw;
+  max-width: 1000px;
+  height: 96vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--sky-blue);
+  border: 6px solid #222;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 頂部資訊列 */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 16px;
+  color: #fff;
+  z-index: 10;
+}
+
+.status-left, .status-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heart-box {
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+}
+
+.stage-badge {
+  background: var(--mario-red);
+  color: #fff;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.coin-counter {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--mario-gold);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.btn-tool {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+/* 老師專屬關卡指派選單 */
+.teacher-panel {
+  background: #fff;
+  padding: 14px;
+  border-bottom: 4px solid #ccc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 20;
+}
+
+.teacher-panel h3 {
+  font-size: 1rem;
+  color: var(--mario-blue);
+  margin-bottom: 10px;
+}
+
+.stage-assign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.assign-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.unit-select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 2px solid #bcd0db;
+}
+
+.panel-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-save-settings {
+  background: var(--mario-green);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 舞台階梯動畫區 */
+.mario-stage-scene {
+  height: 180px;
+  background: linear-gradient(to bottom, #61bdf5 0%, #b2e2f8 100%);
+  position: relative;
+  border-bottom: 6px solid #5c940d;
+  overflow: hidden;
+}
+
+.sky-clouds {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+}
+
+.cloud {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.8;
+}
+.c1 { left: 10%; }
+.c2 { right: 20%; }
+
+.stepped-path {
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  right: 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.step {
+  width: 16%;
+  height: 38px;
+  background: var(--brick-brown);
+  color: #fff;
+  border-top: 4px solid #f39c12;
+  border-left: 2px solid #ba4a00;
+  border-right: 2px solid #ba4a00;
+  text-align: center;
+  line-height: 34px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 4px 4px 0 0;
+  transition: transform 0.2s;
+}
+
+.step.goal-flag {
+  background: #e74c3c;
+  border-top-color: #f1c40f;
+}
+
+.step.completed {
+  filter: brightness(0.85);
+}
+
+.mario-character {
+  position: absolute;
+  bottom: 38px;
+  left: 6%;
+  font-size: 2.2rem;
+  transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), bottom 0.2s ease;
+  z-index: 5;
+  filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.3));
+}
+
+.mario-character.jump {
+  animation: marioJumpAnim 0.4s ease forwards;
+}
+
+@keyframes marioJumpAnim {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-40px); }
+  100% { transform: translateY(0); }
+}
+
+/* 題目與作答區 (針對 iPad 加大與防手滑) */
+.quiz-card-container {
+  flex: 1;
+  background: #fdfdfd;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 12px;
+}
+
+.quiz-top-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.unit-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #7f8c8d;
+}
+
+.btn-text-zoom {
+  background: #ecf0f1;
+  border: 1px solid #bdc3c7;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.quiz-question-stem {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: #1a252f;
+  margin-top: 4px;
+  transition: font-size 0.2s;
+}
+
+/* 關鍵字高亮 */
+.quiz-question-stem .keyword-highlight {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 0 4px;
+  border-radius: 4px;
+  border-bottom: 2px solid #ffeeba;
+  font-weight: 900;
+}
+
+.quiz-options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn-option {
+  min-height: 52px; /* 滿足 iPad 觸控標準 (>48px) */
+  padding: 12px 16px;
+  font-size: 1.05rem;
+  text-align: left;
+  background: #f8fafc;
+  border: 2px solid #cfd8dc;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.btn-option:active {
+  transform: scale(0.98);
+}
+
+.btn-option.correct {
+  background: #d4edda !important;
+  border-color: var(--mario-green) !important;
+  color: #155724 !important;
+  font-weight: bold;
+}
+
+.btn-option.wrong {
+  background: #f8d7da !important;
+  border-color: var(--mario-red) !important;
+  color: #721c24 !important;
+}
+
+/* 彈窗樣式 */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: var(--border-radius-lg);
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  text-align: center;
+}
+
+.memo-box {
+  border-top: 8px solid var(--mario-gold);
+}
+
+.memo-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #d35400;
+}
+
+.memo-content {
+  background: #fef9e7;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #f9e79f;
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.btn-action {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.05rem;
+  font-weight: bold;
+  background: var(--mario-blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background: var(--mario-red);
+}
+
+/* 輸入座號樣式 */
+.input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.input-row input {
+  padding: 8px;
+  font-size: 1.1rem;
+  width: 120px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* Google Classroom 專用證書卡片 */
+.cert-card {
+  max-width: 550px;
+  background: #fffde7;
+  border: 4px solid var(--mario-gold);
+  padding: 16px;
+}
+
+.cert-border {
+  border: 2px dashed #d4ac0d;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.cert-ribbon {
+  background: var(--mario-red);
+  color: #fff;
+  font-weight: 900;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.cert-title {
+  font-size: 1.4rem;
+  color: #7d6608;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.cert-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f9e79f;
+  margin-bottom: 14px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.meta-label {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.meta-val {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.cert-code {
+  color: var(--mario-red);
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 2px;
+}
+
+.cert-footer {
+  font-size: 0.85rem;
+  color: #5d6d7e;
+  line-height: 1.4;
+}
+
+.cert-timestamp {
+  display: block;
+  font-size: 0.75rem;
+  color: #95a5a6;
+  margin-top: 4px;
+}
+
+.btn-secondary-close {
+  background: #7f8c8d;
+  margin-top: 12px;
+}
+
+.hidden {
+  display: none !important;
+}/* ?��??��?師�?結擴?�樣�?*/
+.keyword-highlight {
+  background-color: #fff176;
+  color: #bf360c;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+body.font-zoomed .quiz-question-stem {
+  font-size: 1.6rem !important;
+  line-height: 1.5 !important;
+}
+
+body.font-zoomed .btn-option {
+  font-size: 1.25rem !important;
+  padding: 16px !important;
+}
+
+.btn-freeze {
+  background: #3f51b5 !important;
+  border-color: #7986cb !important;
+}

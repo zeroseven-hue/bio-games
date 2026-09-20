@@ -13,14 +13,14 @@
     <header class="lobby-header">
       <div class="logo-area">
         <h1>🌱 國中生物課堂網頁遊戲平台 <code>bio-games</code></h1>
-        <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式</p>
+        <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式與 Google Classroom 作業繳交</p>
       </div>
     </header>
 
     <main class="lobby-main">
       <!-- 遊戲卡片區域 -->
       <section class="games-section">
-        <h2>🎮 課堂遊戲大廳</h2>
+        <h2>🎮 課堂遊戲大廳 (三款生物主題遊戲)</h2>
         <div class="game-cards-grid">
 
           <!-- 遊戲 1: 侏羅紀逃生記 -->
@@ -55,6 +55,22 @@
             </div>
           </div>
 
+          <!-- 遊戲 3: 超級馬力歐生物闖關 -->
+          <div class="game-card card-mario">
+            <div class="card-badge bg-red">全新登場</div>
+            <div class="card-icon">🍄</div>
+            <h3>超級馬力歐生物闖關</h3>
+            <p class="card-desc">冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼供截圖繳交！</p>
+            <div class="card-tags">
+              <span>🏃 4大關卡闖關</span>
+              <span>🪙 金幣積累</span>
+              <span>📜 GC 截圖繳交</span>
+            </div>
+            <div class="card-actions">
+              <a href="mario/index.html" class="btn-play btn-red">🍄 直接進入遊戲</a>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -71,6 +87,7 @@
                 <select id="selectGame" class="styled-select">
                   <option value="jurassic/index.html">🦖 侏羅紀叢林逃生記</option>
                   <option value="monopoly/index.html">🐰 動物方城市大富翁</option>
+                  <option value="mario/index.html">🍄 超級馬力歐生物闖關</option>
                 </select>
               </div>
 
@@ -98,7 +115,7 @@
                   <span class="toggle-custom"></span>
                   <strong>🧩 特教友善模式 (`timer=off`)</strong>
                 </label>
-                <small class="help-text">取消答題 30 秒倒數壓力，適合資源班及需無壓力思考的學生。</small>
+                <small class="help-text">取消答題時間限制，適合資源班及需無壓力思考的學生。</small>
               </div>
             </div>
 
@@ -116,7 +133,7 @@
               <div class="url-box">
                 <label>派發網址：</label>
                 <input type="text" id="generatedUrlInput" readonly>
-                <a id="btnDirectLaunch" href="#" target="_blank" class="btn-launch-link">🚀 以此設定立即啟動</a>
+                <a id="btnDirectLaunch" href="#" target="_blank" class="btn-launch-link">🚀 以此設定開啟遊戲</a>
               </div>
             </div>
 

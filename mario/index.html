@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>超級馬力歐生物闖關 - Mario Bio-Quest</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-wrapper">
+    <!-- 頂部資訊列：生命值、關卡進度、金幣、老師設定按鈕 -->
+    <header class="game-header">
+      <div class="status-left">
+        <div class="heart-box" id="heartBox" title="剩餘生命值">
+          <span class="heart">❤️</span>
+          <span class="heart">❤️</span>
+          <span class="heart">❤️</span>
+        </div>
+        <div class="stage-badge" id="stageBadge">關卡 1-1 (A關)</div>
+      </div>
+
+      <div class="status-center">
+        <div class="coin-counter">🪙 <span id="coinCount">0</span></div>
+      </div>
+
+      <div class="status-right">
+        <button id="btnZoomText" class="btn-tool">🔍 放大題目</button>
+        <button id="btnFreeze" class="btn-tool btn-freeze" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+        <button id="btnToggleTeacher" class="btn-tool">⚙️ 關卡指派</button>
+        <button id="btnSound" class="btn-tool">🔊</button>
+        <button id="btnReset" class="btn-tool">🔄</button>
+      </div>
+    </header>
+
+    <!-- 老師專屬隱藏/展開設定選單 -->
+    <section class="teacher-panel hidden" id="teacherPanel">
+      <h3>👨‍🏫 老師專屬關卡單元指派 (A、B、C、D 四關)</h3>
+      <div class="stage-assign-grid">
+        <div class="assign-item">
+          <label for="selectStageA">關卡 A (第 1 關)：</label>
+          <select id="selectStageA" class="unit-select"></select>
+        </div>
+        <div class="assign-item">
+          <label for="selectStageB">關卡 B (第 2 關)：</label>
+          <select id="selectStageB" class="unit-select"></select>
+        </div>
+        <div class="assign-item">
+          <label for="selectStageC">關卡 C (第 3 關)：</label>
+          <select id="selectStageC" class="unit-select"></select>
+        </div>
+        <div class="assign-item">
+          <label for="selectStageD">關卡 D (第 4 關)：</label>
+          <select id="selectStageD" class="unit-select"></select>
+        </div>
+      </div>
+      <div class="panel-actions">
+        <button id="btnApplyTeacherSettings" class="btn-save-settings">💾 套用並開始闖關</button>
+      </div>
+    </section>
+
+    <!-- 經典像素風格闖關地圖舞台 -->
+    <section class="mario-stage-scene" id="stageScene">
+      <div class="sky-clouds">
+        <div class="cloud c1">☁️</div>
+        <div class="cloud c2">☁️</div>
+      </div>
+      <!-- 闖關地圖階梯 -->
+      <div class="stepped-path" id="steppedPath">
+        <div class="step step-0 active" data-step="0">🏁 起點</div>
+        <div class="step step-1" data-step="1">🧱 ?</div>
+        <div class="step step-2" data-step="2">🧱 ?</div>
+        <div class="step step-3" data-step="3">🧱 ?</div>
+        <div class="step step-4" data-step="4">🧱 ?</div>
+        <div class="step step-5 goal-flag" data-step="5">🚩 城堡</div>
+      </div>
+
+      <!-- 馬力歐角色小偶 -->
+      <div class="mario-character" id="marioChar">🍄🏃</div>
+    </section>
+
+    <!-- 題目作答區域 (iPad 最佳化：大按鈕、防誤觸、字體放大) -->
+    <main class="quiz-card-container">
+      <div class="quiz-top-info">
+        <span class="unit-label" id="currentUnitTitle">單元名稱載入中...</span>
+      </div>
+
+      <h2 class="quiz-question-stem" id="quizStem">題目加載中...</h2>
+
+      <div class="quiz-options-grid" id="quizOptions">
+        <!-- 4 個選項按鈕由 JS 生成 -->
+      </div>
+    </main>
+
+    <!-- 觀念解析彈窗 (扣心時強制閱讀) -->
+    <div class="modal-overlay hidden" id="memoModal">
+      <div class="modal-box memo-box">
+        <div class="memo-header">
+          <span class="memo-icon">⚠️</span>
+          <h3>哎呀，答錯囉！扣除 1 顆心！</h3>
+        </div>
+        <div class="memo-content">
+          <h4>💡 茱蒂老師的小筆記（觀念解析）：</h4>
+          <p id="memoText">觀念解析文字...</p>
+        </div>
+        <button id="btnCloseMemo" class="btn-action">我吸收了，繼續挑戰 ➡️</button>
+      </div>
+    </div>
+
+    <!-- 闖關失敗彈窗 (3顆心扣光) -->
+    <div class="modal-overlay hidden" id="failModal">
+      <div class="modal-box fail-box">
+        <h2>💀 體力耗盡！</h2>
+        <p>別灰心！瑪力歐吃到了「救命蘑菇」，本關卡難度已調降，重新挑戰這關吧！</p>
+        <button id="btnRetryStage" class="btn-action btn-danger">重試本關 🔄</button>
+      </div>
+    </div>
+
+    <!-- 登錄座號彈窗 (全破後第一步) -->
+    <div class="modal-overlay hidden" id="studentIdModal">
+      <div class="modal-box id-input-box">
+        <h2>🎉 恭喜救出公主！</h2>
+        <p>請輸入班級與座號以領取「破關認證證書」：</p>
+        <div class="input-row">
+          <label for="inputClass">班級：</label>
+          <input type="text" id="inputClass" placeholder="例: 701" maxlength="6">
+        </div>
+        <div class="input-row">
+          <label for="inputSeat">座號：</label>
+          <input type="number" id="inputSeat" placeholder="01~35" min="1" max="50">
+        </div>
+        <button id="btnGenerateCert" class="btn-action">產生成績證書 📜</button>
+      </div>
+    </div>
+
+    <!-- Google Classroom 截圖繳交證書彈窗 -->
+    <div class="modal-overlay hidden" id="certModal">
+      <div class="modal-box cert-card" id="certCard">
+        <div class="cert-border">
+          <div class="cert-ribbon">🏆 頂尖生物冒險王證書 🏆</div>
+          <h1 class="cert-title">SUPER MARIO BIO-QUEST</h1>
+          
+          <div class="cert-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">通關勇士</span>
+              <span class="meta-val" id="certStudentInfo">701 班 15 號</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">防偽驗證碼</span>
+              <span class="meta-val cert-code" id="certCode">M-9842</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">收集金幣</span>
+              <span class="meta-val" id="certCoins">20 🪙</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">完成關卡</span>
+              <span class="meta-val">A、B、C、D 四關全破</span>
+            </div>
+          </div>
+
+          <div class="cert-footer">
+            <p>📸 <b>請截圖此畫面，繳交至 Google Classroom 作業區</b> 📸</p>
+            <span class="cert-timestamp" id="certTimestamp">2026/09/20 10:30</span>
+          </div>
+        </div>
+        <button id="btnCloseCert" class="btn-action btn-secondary-close">返回遊戲大廳</button>
+      </div>
+    </div>
+
+    <!-- 教師一鍵凍結 Modal -->
+    <div class="modal-overlay hidden" id="teacherFreezeModal">
+      <div class="modal-box freeze-box" style="background:#1a237e; color:#fff; text-align:center;">
+        <div style="font-size:3.5rem; margin-bottom:10px;">⏸️</div>
+        <h2 style="color:#ffca28; margin-bottom:10px;">全場暫停 ‧ 焦點回歸老師</h2>
+        <p style="margin-bottom:20px;">老師已凍結遊戲畫面與音效，請保持安靜看向教室大螢幕！</p>
+        <button id="btnUnfreeze" class="btn-action" style="background:#4caf50;">▶️ 解除凍結，繼續遊戲</button>
+      </div>
+    </div>
+
+    <!-- LocalStorage 快照恢復 Modal -->
+    <div class="modal-overlay hidden" id="snapshotModal">
+      <div class="modal-box snapshot-box" style="text-align:center;">
+        <div style="font-size:3rem; margin-bottom:10px;">💾</div>
+        <h2>偵測到上次未完成的闖關進度</h2>
+        <p style="margin-bottom:20px;">包含當前關卡與已獲得金幣，是否要繼續遊玩？</p>
+        <div style="display:flex; gap:12px;">
+          <button id="btnRestoreSnapshot" class="btn-action" style="background:#4caf50; flex:1;">✅ 繼續冒險</button>
+          <button id="btnDiscardSnapshot" class="btn-action" style="background:#e53935; flex:1;">❌ 重新開局</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

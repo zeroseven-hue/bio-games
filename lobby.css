@@ -386,3 +386,14 @@ body {
   color: #78909c;
   font-size: 0.9rem;
 }
+.card-badge.bg-red {
+  background: #e52521 !important;
+}
+
+.btn-play.btn-red {
+  background: #e52521 !important;
+}
+
+.btn-play.btn-red:hover {
+  background: #c62828 !important;
+}
