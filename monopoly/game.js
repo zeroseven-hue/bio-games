@@ -461,9 +461,9 @@ function startDraw(isQuick = false) {
   isDrawing = true;
 
   const diceVal = Math.floor(Math.random() * 6) + 1;
-  const stepsToMove = diceVal + (isQuick ? 0 : 14);
+  const stepsToMove = diceVal;
 
-  diceResultBanner.textContent = `🎲 ${teams[currentTurnIndex].name} 擲出了 ${diceVal} 點！正在前進邁進...`;
+  diceResultBanner.textContent = `🎲 ${teams[currentTurnIndex].name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
   startJumping(stepsToMove, isQuick);
 }
 
