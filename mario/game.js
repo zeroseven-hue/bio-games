@@ -1,9 +1,9 @@
 /**
- * 超級馬力歐生物闖關 (Mario Bio-Quest) - 專業教學強固版核心引擎 V3.4
- * 1. 4 大主題關卡與專屬生物裝飾 (森林 🌲 ➔ 洞穴 🦇 ➔ 海底 🐠 ➔ 城堡 🔥)。
- * 2. 洞穴/海底/城堡 100% 移除雲朵，加入蝙蝠、老鼠、魚群、水泡與火焰粒子！
- * 3. 100% 不重複 Fisher-Yates 洗牌佇列，單元內絕對不出重複題。
- * 4. 冒險火柴人 (Stickman Runner) 朝右奔跑跳躍，頂擊 ❓ 方塊彈出金幣音效。
+ * 超級馬力歐生物闖關 (Mario Bio-Quest) - 專業教學強固版核心引擎 V3.5
+ * 1. 火柴人肢體跑步與跳躍動畫 (邁步擺臂 `.running` + 躍進頂磚 `.jumping`)。
+ * 2. 4 大主題關卡與專屬生物裝飾 (森林 🌲 ➔ 洞穴 🦇 ➔ 海底 🐠 ➔ 城堡 🔥)。
+ * 3. 洞穴/海底/城堡 100% 移除雲朵，加入蝙蝠、老鼠、魚群、水泡與火焰粒子！
+ * 4. 100% 不重複 Fisher-Yates 洗牌佇列，單元內絕對不出重複題。
  * 5. 高對比標籤文字防護，確保黑底與岩漿色彩下 100% 清晰可讀。
  */
 
@@ -165,7 +165,7 @@ function initEventListeners() {
   btnRestoreSnapshot.addEventListener("click", restoreSnapshot);
   btnDiscardSnapshot.addEventListener("click", () => {
     closeModal(snapshotModal);
-    localStorage.removeItem("mario_snapshot_v3.4");
+    localStorage.removeItem("mario_snapshot_v3.5");
     startNewGame();
   });
 }
@@ -307,7 +307,7 @@ function updateUI() {
   stageScene.className = `mario-stage-scene ${currentStage.bgClass}`;
   coinCount.textContent = coins;
 
-  // 更新關卡專屬裝飾 (森林白雲 / 洞穴蝙蝠 / 海底熱帶魚水泡 / 城堡火焰)
+  // 更新關卡專屬裝飾
   updateStageDecorations(currentStageIndex);
 
   // 階梯地圖與方塊狀態
@@ -325,9 +325,14 @@ function updateUI() {
     }
   });
 
-  // 計算火柴人位置
+  // 計算火柴人位置並啟動手腳跑步動態 (`.running`)
   const leftPercent = Math.min(90, Math.max(5, currentStepInStage * 18 + 5));
   marioChar.style.left = `${leftPercent}%`;
+  
+  marioChar.classList.add("running");
+  setTimeout(() => {
+    marioChar.classList.remove("running");
+  }, 650);
 
   saveSnapshot();
 }
@@ -337,19 +342,16 @@ function updateStageDecorations(stageIdx) {
   bgDecor.innerHTML = "";
 
   if (stageIdx === 0) {
-    // 第 1 關：森林 (漂浮白雲)
     bgDecor.innerHTML = `
       <div class="cloud c1">☁️</div>
       <div class="cloud c2">☁️</div>
     `;
   } else if (stageIdx === 1) {
-    // 第 2 關：地底洞穴 (飛翔蝙蝠 + 穿梭老鼠，無雲朵)
     bgDecor.innerHTML = `
       <div class="cave-bat">🦇</div>
       <div class="cave-mouse">🐀</div>
     `;
   } else if (stageIdx === 2) {
-    // 第 3 關：水底世界 (熱帶魚 + 上升透明水泡，無雲朵)
     bgDecor.innerHTML = `
       <div class="sea-fish f1">🐠</div>
       <div class="sea-fish f2">🐟</div>
@@ -357,7 +359,6 @@ function updateStageDecorations(stageIdx) {
       <div class="sea-bubble b2">🫧</div>
     `;
   } else if (stageIdx === 3) {
-    // 第 4 關：岩漿城堡 (上升火焰火花粒子，無雲朵)
     bgDecor.innerHTML = `
       <div class="fire-spark s1">🔥</div>
       <div class="fire-spark s2">💥</div>
@@ -408,9 +409,9 @@ function handleOptionSelect(selectedIndex, btnEl) {
     btnEl.classList.add("correct");
     playCoinSound();
 
-    // 1. 火柴人向上躍進動畫
-    marioChar.classList.add("jumping");
-    setTimeout(() => marioChar.classList.remove("jumping"), 600);
+    // 1. 火柴人向上躍進與肢體伸展動畫
+    marioChar.classList.add("jumping", "running");
+    setTimeout(() => marioChar.classList.remove("jumping", "running"), 600);
 
     // 2. 頂擊 ❓ 問號方塊
     const currentStepEl = steppedPath.querySelector(`.step[data-step="${currentStepInStage + 1}"]`);
@@ -527,11 +528,11 @@ function saveSnapshot() {
     coins,
     time: Date.now()
   };
-  localStorage.setItem("mario_snapshot_v3.4", JSON.stringify(snapshot));
+  localStorage.setItem("mario_snapshot_v3.5", JSON.stringify(snapshot));
 }
 
 function checkSnapshotOnLoad() {
-  const raw = localStorage.getItem("mario_snapshot_v3.4");
+  const raw = localStorage.getItem("mario_snapshot_v3.5");
   if (raw) {
     try {
       const snap = JSON.parse(raw);
@@ -544,7 +545,7 @@ function checkSnapshotOnLoad() {
 
 function restoreSnapshot() {
   closeModal(snapshotModal);
-  const raw = localStorage.getItem("mario_snapshot_v3.4");
+  const raw = localStorage.getItem("mario_snapshot_v3.5");
   if (raw) {
     const snap = JSON.parse(raw);
     currentStageIndex = snap.currentStageIndex || 0;

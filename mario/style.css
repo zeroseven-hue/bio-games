@@ -1,4 +1,4 @@
-/* Mario Bio-Quest Style CSS (V3.4) */
+/* Mario Bio-Quest Style CSS (V3.5) */
 
 :root {
   --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -343,7 +343,7 @@ body {
   font-size: 1.8rem;
 }
 
-/* High Contrast Step Label Safeguard (High Readability against dark Cave/Castle) */
+/* High Contrast Step Label Safeguard */
 .step-label {
   background: rgba(15, 23, 42, 0.85);
   color: #ffffff;
@@ -391,6 +391,44 @@ body {
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
 }
 
+/* Stickman Limb Motion Keyframes & Transform Origins */
+.mario-character .arm-left { transform-origin: 20px 32px; }
+.mario-character .arm-right { transform-origin: 20px 32px; }
+.mario-character .leg-left { transform-origin: 20px 40px; }
+.mario-character .leg-right { transform-origin: 20px 40px; }
+
+/* Running Limb Swing Animations */
+.mario-character.running .arm-left {
+  animation: armRunLeft 0.22s infinite alternate ease-in-out;
+}
+.mario-character.running .arm-right {
+  animation: armRunRight 0.22s infinite alternate ease-in-out;
+}
+.mario-character.running .leg-left {
+  animation: legRunLeft 0.22s infinite alternate ease-in-out;
+}
+.mario-character.running .leg-right {
+  animation: legRunRight 0.22s infinite alternate ease-in-out;
+}
+
+@keyframes armRunLeft {
+  0% { transform: rotate(-35deg); }
+  100% { transform: rotate(35deg); }
+}
+@keyframes armRunRight {
+  0% { transform: rotate(35deg); }
+  100% { transform: rotate(-35deg); }
+}
+@keyframes legRunLeft {
+  0% { transform: rotate(35deg); }
+  100% { transform: rotate(-35deg); }
+}
+@keyframes legRunRight {
+  0% { transform: rotate(-35deg); }
+  100% { transform: rotate(35deg); }
+}
+
+/* Jumping Posture Animations */
 .mario-character.jumping {
   animation: marioJump 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -401,7 +439,20 @@ body {
   100% { transform: translateY(0) scaleX(1); }
 }
 
-/* Quiz Card Container (Ultra High Contrast Pure White) */
+.mario-character.jumping .arm-left {
+  transform: rotate(-60deg);
+}
+.mario-character.jumping .arm-right {
+  transform: rotate(-70deg);
+}
+.mario-character.jumping .leg-left {
+  transform: rotate(30deg);
+}
+.mario-character.jumping .leg-right {
+  transform: rotate(-20deg);
+}
+
+/* Quiz Card Container */
 .quiz-card-container {
   flex: 1;
   padding: 24px;

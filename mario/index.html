@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>超級馬力歐生物闖關 - Mario Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=3.4">
+  <link rel="stylesheet" href="style.css?v=3.5">
 </head>
 <body>
   <div class="game-wrapper">
@@ -58,15 +58,14 @@
       </div>
     </section>
 
-    <!-- 闖關地圖舞台 (支援 4 大動態主題切換: .stage-forest, .stage-cave, .stage-water, .stage-castle) -->
+    <!-- 闖關地圖舞台 (支援 4 大動態主題切換) -->
     <section class="mario-stage-scene stage-forest" id="stageScene">
-      <!-- 依照關卡動態渲染的背景裝飾元素 (森林白雲 / 洞穴蝙蝠 / 海底熱帶魚水泡 / 城堡火焰) -->
       <div class="bg-decorations" id="bgDecor">
         <div class="cloud c1">☁️</div>
         <div class="cloud c2">☁️</div>
       </div>
 
-      <!-- 頂部懸空 ❓ 問號方塊與階梯地面 (高對比字體防黑底模糊) -->
+      <!-- 頂部懸空 ❓ 問號方塊與階梯地面 (高對比標籤) -->
       <div class="stepped-path" id="steppedPath">
         <div class="step step-0 active" data-step="0">
           <div class="q-block-wrapper"><div class="q-block bumped">🏁</div></div>
@@ -94,33 +93,30 @@
         </div>
       </div>
 
-      <!-- 高質感 Vector 冒險火柴人角色 (白色圓頭 + 鮮紅冒險帽 + 朝右跑步 posture) -->
+      <!-- 高質感 Vector 冒險火柴人 (動態肢體擺動骨架) -->
       <div class="mario-character" id="marioChar">
         <svg class="stickman-svg" viewBox="0 0 40 50" width="46" height="58">
-          <!-- 冒險帽子 (紅帽) -->
+          <!-- 冒險紅帽 -->
           <path d="M 6 15 Q 20 5 34 15 L 36 19 L 4 19 Z" fill="#e74c3c" stroke="#b71c1c" stroke-width="1.5"/>
           <circle cx="20" cy="12" r="2" fill="#ffffff"/>
-          <!-- 白色圓頭 -->
+          <!-- 白色圓頭與亮眼大睛 -->
           <circle cx="20" cy="22" r="7.5" fill="#ffffff" stroke="#2c3e50" stroke-width="2"/>
-          <!-- 朝右看的亮眼黑睛與微笑 -->
           <circle cx="23" cy="21" r="1.5" fill="#2c3e50"/>
           <path d="M 21 24 Q 24 26 26 24" fill="none" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round"/>
-          <!-- 火柴人身體 (藍色) -->
+          <!-- 軀幹 -->
           <line x1="20" y1="29.5" x2="20" y2="40" stroke="#2980b9" stroke-width="3.5" stroke-linecap="round"/>
-          <!-- 雙臂 (朝右奔跑擺動姿態) -->
-          <line x1="20" y1="32" x2="12" y2="37" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
-          <line x1="20" y1="32" x2="30" y2="28" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
-          <!-- 雙腿 (邁步跨越姿態) -->
-          <line x1="20" y1="40" x2="13" y2="48" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
-          <line x1="20" y1="40" x2="28" y2="46" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
-          <!-- 鞋子 -->
-          <circle cx="12" cy="48" r="2.5" fill="#5d4037"/>
-          <circle cx="29" cy="46" r="2.5" fill="#5d4037"/>
+          <!-- 可擺動的手臂與腿部肢體 -->
+          <g class="stickman-limbs">
+            <line class="limb arm arm-left" x1="20" y1="32" x2="12" y2="37" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+            <line class="limb arm arm-right" x1="20" y1="32" x2="29" y2="28" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+            <line class="limb leg leg-left" x1="20" y1="40" x2="12" y2="48" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
+            <line class="limb leg leg-right" x1="20" y1="40" x2="28" y2="46" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
+          </g>
         </svg>
       </div>
     </section>
 
-    <!-- 題目作答區域 (高清晰純白背景、iPad 大字體、高對比解析) -->
+    <!-- 題目作答區域 (高對比純白卡片) -->
     <main class="quiz-card-container" id="quizContainer">
       <div class="quiz-top-info">
         <span class="unit-label" id="currentUnitTitle">載入單元中...</span>
@@ -130,11 +126,11 @@
       <h2 class="quiz-question-stem" id="quizStem">題目加載中...</h2>
 
       <div class="quiz-options-grid" id="quizOptions">
-        <!-- 4 個選項按鈕由 JS 動態生成 -->
+        <!-- 4 個選項按鈕由 JS 生成 -->
       </div>
     </main>
 
-    <!-- 觀念解析彈窗 (扣心時強制閱讀) -->
+    <!-- 觀念解析彈窗 -->
     <div class="modal-overlay hidden" id="memoModal">
       <div class="modal-box memo-box">
         <div class="memo-header">
@@ -206,7 +202,7 @@
               <span class="meta-val" id="certCoins">20 🪙</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">通关榮耀</span>
+              <span class="meta-label">通關榮耀</span>
               <span class="meta-val">森林/洞穴/海底/城堡 4關全破</span>
             </div>
           </div>
@@ -245,6 +241,6 @@
 
   </div>
 
-  <script src="game.js?v=3.4"></script>
+  <script src="game.js?v=3.5"></script>
 </body>
 </html>
