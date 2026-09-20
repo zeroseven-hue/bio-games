@@ -1,15 +1,16 @@
 /**
- * 侏羅紀叢林逃生記 - 專業教學版完整重構引擎 (V3)
- * 1. 完全復原原始精緻火柴人 (Stickman Token)、白色圓頭 + 12 隊彩色線條。
- * 2. 綠色曲劃藤蔓 + 真實 SVG 葉子元件，答對發出螢光綠亮光 (`#76ff03`) 與攀爬動畫。
- * 3. 恐龍 Sepia 質感濾鏡、咆哮沉睡切換，答錯觸發三道紅色爪痕切割 (`do-slash`) 跌落動畫。
- * 4. 支援 2 ~ 12 隊彈性人數選單，3x4 散開矩陣防止小人重疊擋住。
- * 5. 跨平台無外部字種，iPad/iPhone 音效自動觸解鎖，全狀態嚴格鎖定防連點出錯。
+ * 侏羅紀叢林逃生記 - 專業教學強固版核心引擎 V3.2 (嚴格審核版)
+ * 1. 修正選隊 Bug：精準讀取選單人數 (支援 2~12 隊)。
+ * 2. 修正捷徑：18 號藤蔓調整為攀升至 29 號 (18 ➜ 29)。
+ * 3. 修正火柴人配色：頭部白底彩框、身體與四肢手腳 100% 填入小隊色彩。
+ * 4. 題庫無重複洗牌機制：單元內題庫絕不連續重複抽到同一題！
+ * 5. 還原 SVG 曲劃綠色藤蔓 + 蔓延葉子 + 暴龍爪痕切割動畫。
  */
 
 // 1. 常數與設定
 const TOTAL_CELLS = 36;
-const JUMPS = { 3: 17, 10: 13, 18: 31, 22: 28, 14: 8, 20: 15, 33: 27, 35: 29 };
+// 18 號格修訂為攀升至 29 號格
+const JUMPS = { 3: 17, 10: 13, 18: 29, 22: 28, 14: 8, 20: 15, 33: 27, 35: 29 };
 const RED_TILES = [5, 9, 12, 16, 23, 27, 30];
 
 // 12 隊彩繪小人配色與名稱
@@ -28,7 +29,7 @@ const ALL_TEAM_COLORS = [
   { name: "白隊 探險隊", color: "#ecf0f1" }
 ];
 
-// 12 隊在同一個格子內的 3x4 散開矩陣偏移量
+// 12 隊在同一個格子內的 3x4 散開矩陣偏移量 (防止小人遮擋)
 const TEAM_OFFSETS = [
   { x: -4, y: -4 }, { x: -1.5, y: -4 }, { x: 1, y: -4 },
   { x: -4, y: 0 },  { x: -1.5, y: 0 },  { x: 1, y: 0 },
@@ -160,6 +161,8 @@ let roundCounter = 1;
 let gameLog = [];
 let errorQuestionsLog = [];
 let questionBank = [];
+let questionPool = []; // ⭐ 不放回洗牌抽題池 (保證一輪內絕不重複出現同一題!)
+
 let currentMode = "group-tablet";
 let gameTimer = null;
 let timeLeft = 15 * 60;
@@ -252,7 +255,6 @@ function parseUrlParameters() {
 }
 
 function initEventListeners() {
-  // 解鎖 iPad / iPhone / Safari Web Audio
   document.body.addEventListener("touchstart", unlockAudio, { once: true });
   document.body.addEventListener("click", unlockAudio, { once: true });
 
@@ -339,7 +341,7 @@ function toggleFreeze() {
 function openModal(el) { if (el) el.classList.remove("hidden"); }
 function closeModal(el) { if (el) el.classList.add("hidden"); }
 
-// 4. 動態題庫載入
+// 4. 動態題庫載入與洗牌池重置
 async function loadManifestAndInitBank() {
   try {
     const res = await fetch("../questions/manifest.json");
@@ -393,6 +395,8 @@ async function loadSingleUnit(fileName) {
     if (!res.ok) throw new Error("題庫讀取失敗");
     const data = await res.json();
     questionBank = data.questions;
+    // 重置洗牌抽題池
+    questionPool = [...questionBank].sort(() => Math.random() - 0.5);
     updateMessage(`單元題庫載入成功！共收錄 ${questionBank.length} 題。`);
     startGame();
   } catch (err) {
@@ -447,7 +451,6 @@ function getCellCenterCoords(cellNum) {
   return { x, y };
 }
 
-// 完全復原原始精緻 SVG 曲劃綠色藤蔓 + 蔓延葉子 + 爪痕動畫群組
 function drawConnections() {
   svgCanvas.innerHTML = "";
   Object.keys(JUMPS).forEach(startStr => {
@@ -459,7 +462,6 @@ function drawConnections() {
     const isLadder = endCell > startCell;
 
     if (isLadder) {
-      // 🌿 綠色藤蔓捷徑 (帶著彎曲與發光特性)
       const dx = p2.x - p1.x;
       const dy = p2.y - p1.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -487,7 +489,6 @@ function drawConnections() {
       vineFg.style.transition = "all 0.3s ease";
       svgCanvas.appendChild(vineFg);
 
-      // 藤蔓葉子元素
       const angle = Math.atan2(dy, dx) * 180 / Math.PI;
       const leavesData = [
         { dx: offsetX * 0.4, dy: offsetY * 0.4, path: "M0,0 Q2,-4 5,0 Q2,4 0,0", color: "#aed581", rot: angle - 30 },
@@ -503,7 +504,6 @@ function drawConnections() {
         svgCanvas.appendChild(leaf);
       });
     } else {
-      // 🦖 暴龍襲擊爪痕群組 (答錯切割動畫)
       const fallGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
       fallGroup.id = `fall-${startCell}`;
       fallGroup.style.display = "none";
@@ -534,7 +534,7 @@ function drawConnections() {
   });
 }
 
-// 6. 遊戲開始與流程
+// 6. 遊戲開始與流程 (⭐ 精準讀取選單隊伍數量，支援 2~12 隊!)
 function startGame() {
   clearInterval(gameTimer);
   players = [];
@@ -546,9 +546,9 @@ function startGame() {
   rushBadge.classList.add("hidden");
   timerClock.classList.remove("rush");
 
+  // ⭐ 修正隊伍數讀取 Bug
   let teamCount = parseInt(teamCountSelect.value, 10);
   if (isNaN(teamCount) || teamCount < 2) teamCount = 4;
-
   if (currentMode === "solo") teamCount = 1;
 
   for (let i = 0; i < teamCount; i++) {
@@ -591,7 +591,7 @@ function getModeDisplayName() {
   return "各組平板輪流競賽";
 }
 
-// 復原火柴人小人畫法 (圓形白頭 + 彩色線條身體與四肢)
+// 復原原版火柴人小人畫法 (圓形白頭 + 各隊專屬顏色線條與手腳全彩)
 function initPlayerTokens() {
   document.querySelectorAll(".token").forEach(t => t.remove());
 
@@ -610,7 +610,11 @@ function initPlayerTokens() {
       const partEl = document.createElement("div");
       partEl.className = c;
       partEl.style.borderColor = p.color;
-      if (c.includes("stick-head")) partEl.style.backgroundColor = "#ffffff";
+      if (c.includes("stick-head")) {
+        partEl.style.backgroundColor = "#ffffff";
+      } else {
+        partEl.style.backgroundColor = p.color;
+      }
       tokenEl.appendChild(partEl);
     });
 
@@ -728,7 +732,6 @@ function handleManualMove() {
   movePlayer(players[currentPlayerIndex], steps);
 }
 
-// 核心移動：到達該格後，全場每一格均會觸發生物問答！
 function movePlayer(player, steps) {
   let targetPos = player.pos + steps;
   const tokenEl = document.getElementById(`token-${player.id}`);
@@ -758,13 +761,12 @@ function movePlayer(player, steps) {
       return;
     }
 
-    // ⭐ 每格均觸發題目問答事件！
     triggerTileQuizEvent(player);
 
   }, 700);
 }
 
-// 7. 題目高亮與特教輔助
+// 7. 題目高亮與不重複洗牌抽題演算法
 function highlightKeywords(text) {
   if (!text) return "";
   const keywords = ["不屬於", "屬於", "錯誤的是", "正確的是", "缺乏", "過多", "最適", "無法", "最多", "最少", "主要", "次要", "不包含", "包含"];
@@ -776,25 +778,33 @@ function highlightKeywords(text) {
   return result;
 }
 
-function getQuestionByDifficulty(preferredDiff, player) {
+// ⭐ 【不重複洗牌抽題】：一輪內絕對不重複出現同一題！
+function getNextQuestion(preferredDiff, player) {
   if (!questionBank || questionBank.length === 0) return null;
-  if (player && player.consecutiveErrors >= 2) {
-    const easyPool = questionBank.filter(q => q.difficulty === "易");
-    if (easyPool.length > 0) return easyPool[Math.floor(Math.random() * easyPool.length)];
+
+  if (!questionPool || questionPool.length === 0) {
+    questionPool = [...questionBank].sort(() => Math.random() - 0.5);
+    addLog("🔄 單元題庫已完答一輪，系統自動重新洗牌！");
   }
-  let pool = questionBank.filter(q => q.difficulty === preferredDiff);
-  if (pool.length === 0) pool = questionBank;
-  return pool[Math.floor(Math.random() * pool.length)];
+
+  if (player && player.consecutiveErrors >= 2) {
+    const easyIdx = questionPool.findIndex(q => q.difficulty === "易");
+    if (easyIdx !== -1) {
+      return questionPool.splice(easyIdx, 1)[0];
+    }
+  }
+
+  return questionPool.pop();
 }
 
 // ⭐ 【全場每格問答】 + 藤蔓螢光發光攀爬 + 暴龍咆哮爪痕劃過跌落
 function triggerTileQuizEvent(player) {
   const cellNum = player.pos;
 
-  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對發出綠光並攀爬！
+  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對發出綠光並攀爬 (18 ➜ 29)!
   if (JUMPS[cellNum] && JUMPS[cellNum] > cellNum) {
     const jumpTarget = JUMPS[cellNum];
-    const question = getQuestionByDifficulty("中", player) || getQuestionByDifficulty("易", player);
+    const question = getNextQuestion("中", player) || getNextQuestion("易", player);
     quizTypeTag.textContent = "🌿 演化藤蔓攀升考驗！";
     quizTypeTag.style.color = "#2e7d32";
 
@@ -852,7 +862,7 @@ function triggerTileQuizEvent(player) {
       return;
     }
 
-    const question = getQuestionByDifficulty("難", player) || getQuestionByDifficulty("中", player);
+    const question = getNextQuestion("難", player) || getNextQuestion("中", player);
     quizTypeTag.textContent = "🦖 暴龍襲擊生存挑戰！";
     quizTypeTag.style.color = "#b71c1c";
 
@@ -930,7 +940,7 @@ function triggerTileQuizEvent(player) {
 
   // 情況 C: 紅色環境變遷卡格 (5, 9, 12, 16, 23, 27, 30) -> 答對抽環境卡！
   if (RED_TILES.includes(cellNum)) {
-    const question = getQuestionByDifficulty("中", player);
+    const question = getNextQuestion("中", player);
     quizTypeTag.textContent = "🌋 自然環境考驗挑戰！";
     quizTypeTag.style.color = "#d32f2f";
 
@@ -951,7 +961,7 @@ function triggerTileQuizEvent(player) {
   }
 
   // 情況 D: 普通安全格 -> 通過普通生物題
-  const question = getQuestionByDifficulty("易", player) || getQuestionByDifficulty("中", player);
+  const question = getNextQuestion("易", player) || getNextQuestion("中", player);
   quizTypeTag.textContent = "🔍 叢林生物生存問答";
   quizTypeTag.style.color = "#0288d1";
 
@@ -1078,7 +1088,7 @@ function handleCardAccept() {
 }
 
 function finishTurn() {
-  isMoving = false;
+  isMoving = false; // 解鎖狀態
   updateLeaderboard();
   nextTurn();
 }
@@ -1270,7 +1280,7 @@ function restoreSnapshot() {
   }
 }
 
-// Web Audio (解鎖解除了 iPhone/iPad Safari 限制)
+// Web Audio (iPhone / iPad Safari 解鎖機制)
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume();
