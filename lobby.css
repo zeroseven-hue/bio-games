@@ -196,6 +196,35 @@ body {
   background: #7e22ce;
 }
 
+.btn-play.btn-green {
+  background: #16a34a;
+}
+
+.btn-play.btn-green:hover {
+  background: #15803d;
+}
+
+.card-badge.bg-green {
+  background: #16a34a;
+}
+
+.btn-timer-link {
+  background: #0284c7;
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-timer-link:hover {
+  background: #0369a1;
+  transform: translateY(-2px);
+}
+
 /* 教師派發面板 */
 .dispatch-section {
   margin-bottom: 40px;

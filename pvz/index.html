@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>植物大戰殭屍：細胞防衛戰 - Plants vs. Zombies Cell Defense</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+
+  <div class="portrait-warning">👉 最佳防衛體驗：請將 iPad / 螢幕旋轉為「橫向模式」！</div>
+
+  <div class="game-wrapper">
+    <!-- 頂部主控列 (包含 ☀️ 陽光、⏱️ 波次計時器與工具列) -->
+    <header class="game-header">
+      <div class="header-left">
+        <h1 class="game-logo">🌱 細胞防衛戰</h1>
+        <div class="mode-tag" id="modeTag">👥 小組競賽 (第 1 棒植物召喚師)</div>
+      </div>
+
+      <div class="header-center">
+        <div class="status-pill">
+          <span class="pill-item">☀️ 陽光能量: <b id="sunDisplay">150</b></span>
+          <span class="pill-item">⏱️ 波次時間: <b id="waveTimerText">12:00</b></span>
+          <span class="pill-item">🌊 當前波次: <b id="waveText">第 1 / 3 波</b></span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
+        <button id="btnRules" class="btn-tool btn-green" title="查看防衛指南">📖 遊戲指南</button>
+        <button id="btnFlashMode" class="btn-tool btn-orange" title="切換5分鐘快閃模式">⚡ 5分鐘快閃</button>
+        <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+        <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
+      </div>
+    </header>
+
+    <!-- 題庫單元 Bar -->
+    <div class="unit-bar">
+      <div class="unit-info" id="unitInfoText">🌱 當前細胞生物防衛關卡：單元載入中...</div>
+      <div class="unit-selector-box">
+        <label for="selectUnit">📚 生物題庫單元：</label>
+        <select id="selectUnit" class="styled-unit-select"></select>
+      </div>
+    </div>
+
+    <!-- 草地戰場 (3 路大草地戰場 100% 響應式防裁切) -->
+    <div class="lawn-container" id="lawnContainer">
+      <div class="lawn-grid" id="lawnGrid">
+        <!-- 由 JS 動態生成 3 行 x 6 列草地格子 -->
+      </div>
+    </div>
+
+    <!-- 下方巨型觸控按鈕部署區 (iPad 友善免拖曳 > 60px 按鈕) -->
+    <div class="deployment-control-panel">
+      <!-- 植物卡片選擇 -->
+      <div class="plant-cards-row">
+        <div class="plant-card active" id="cardPea" onclick="selectPlantType('pea')">
+          <span class="card-icon">🟢</span>
+          <div class="card-info">
+            <b>胞器豌豆射手</b>
+            <small>☀️ 50 陽光</small>
+          </div>
+        </div>
+        <div class="plant-card" id="cardNut" onclick="selectPlantType('nut')">
+          <span class="card-icon">🌰</span>
+          <div class="card-info">
+            <b>堅果細胞壁</b>
+            <small>☀️ 75 陽光</small>
+          </div>
+        </div>
+        <div class="plant-card" id="cardSun" onclick="selectPlantType('sun')">
+          <span class="card-icon">🌻</span>
+          <div class="card-info">
+            <b>葉綠體葵花</b>
+            <small>☀️ 25 陽光</small>
+          </div>
+        </div>
+
+        <button id="btnStartQuiz" class="btn-trigger-quiz">❓ 答題賺陽光與部署植物！</button>
+      </div>
+
+      <!-- 巨型 3 路部署大按鈕 (> 60px 高度) -->
+      <div class="giant-lane-buttons">
+        <button id="btnDeployLane0" class="btn-giant-lane" onclick="deploySelectedPlantToLane(0)">
+          🌿【第 1 路】直接部署植物！
+        </button>
+        <button id="btnDeployLane1" class="btn-giant-lane" onclick="deploySelectedPlantToLane(1)">
+          🌿【第 2 路】直接部署植物！
+        </button>
+        <button id="btnDeployLane2" class="btn-giant-lane" onclick="deploySelectedPlantToLane(2)">
+          🌿【第 3 路】直接部署植物！
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 彈窗系統 ==================== -->
+
+  <!-- 1. 生物題目作答 Modal (題目開啟時殭屍自動 10% 龜速緩速) -->
+  <div class="modal-overlay hidden" id="quizModal">
+    <div class="modal-box quiz-box" id="quizBox">
+      <div class="modal-header">
+        <span class="modal-badge" id="quizUnitBadge">單元載入中...</span>
+        <span class="pool-left-badge" id="poolLeftBadge">題庫剩餘: -- 題</span>
+      </div>
+
+      <div class="quiz-top-bar">
+        <div class="timer-banner" id="quizTimerBanner">⏱️ 倒數計時：30 秒 (殭屍已龜速緩速中)</div>
+        <div class="summoner-badge" id="summonerBadge">🎯 本回合植物召喚師：第 1 棒組員</div>
+      </div>
+
+      <h2 class="quiz-stem" id="quizStem">題目加載中...</h2>
+
+      <div class="quiz-options-grid" id="quizOptions"></div>
+
+      <!-- 💡 小筆記觀念解析區 -->
+      <div class="quiz-explanation hidden" id="quizExplanation">
+        <h4>💡 生物觀念解析小筆記：</h4>
+        <p id="explanationText"></p>
+      </div>
+
+      <!-- 動作按鈕區 -->
+      <div class="modal-actions" id="quizActions">
+        <button id="btnConfirmQuiz" class="btn-action btn-success hidden">✅ 答對獲得 50 陽光！前往選擇草地部署 🌻</button>
+        <button id="btnCloseWrong" class="btn-action btn-danger hidden">❌ 答錯植物萎蔫 3 秒！接續戰鬥 ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 🎉 通關證書 Modal (包含防偽認證碼與心得填寫) -->
+  <div class="modal-overlay hidden" id="victoryModal">
+    <div class="modal-box victory-box">
+      <div class="victory-header">
+        <div class="trophy-icon">🏆</div>
+        <h2>🎉 細胞防線大獲全勝！成功擊退所有病原體殭屍！</h2>
+        <p>全班齊心守護細胞膜防線，完成細胞構造與生物觀念挑戰！</p>
+      </div>
+
+      <!-- 防偽認證與心得填寫 -->
+      <div class="cert-form-wrapper">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inputSeatNo">1. 班級座號 / 小組名：</label>
+            <input type="text" id="inputSeatNo" class="styled-input" placeholder="例如: 701-05號 或 第2組">
+          </div>
+          <div class="form-group">
+            <label for="inputStudentName">2. 學生姓名 / 召喚師名：</label>
+            <input type="text" id="inputStudentName" class="styled-input" placeholder="例如: 林小華">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputReflection">3. 📝 本堂課學習心得與錯題討論紀錄：</label>
+          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="寫下今天印象深刻的生物胞器或與組員討論的心得..."></textarea>
+        </div>
+
+        <!-- 防偽驗證卡 -->
+        <div class="cert-code-box">
+          <span class="cert-label">🌱 Google Classroom 防偽驗證證書：</span>
+          <div class="cert-code-value" id="certCodeValue">PVZ-7712-70105</div>
+          <small class="cert-subtext">包含通關時間、剩餘陽光與防偽驗證雜湊碼，請截圖本畫面上傳作業！</small>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="btnCopyCert" class="btn-action btn-gold">📋 複製驗證文字</button>
+        <button id="btnRestartGame" class="btn-action btn-secondary">🔄 開啟新防線</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 📖 防衛指南 Modal -->
+  <div class="modal-overlay hidden" id="rulesModal">
+    <div class="modal-box rules-box">
+      <div class="modal-header">
+        <h2>📖 植物大戰殭屍：細胞防衛戰 遊戲指南</h2>
+      </div>
+      <div class="rules-content">
+        <div class="rule-item green">
+          <b>🌱 1. 答題賺陽光與部署</b>
+          <p>點擊<b>「❓ 答題賺陽光」</b>答對生物題目可獲得 50 陽光能量，並點選下方<b>【第 1/2/3 路 🌿】巨型按鈕</b>精準部署植物！</p>
+        </div>
+        <div class="rule-item yellow">
+          <b>🐢 2. 讀題殭屍 10% 龜速緩速</b>
+          <p>題目彈窗開啟時，草地殭屍移動速度強制降低為 10%（龜速緩速），留給全組充裕讀題討論時間，絕不焦慮盲猜！</p>
+        </div>
+        <div class="rule-item pink">
+          <b>🥀 3. 答錯萎蔫與小筆記</b>
+          <p>答錯時植物暫時萎蔫 3 秒並顯示<b>💡 小筆記解析</b>，下一題自動派發簡單題保底！</p>
+        </div>
+      </div>
+      <button id="btnCloseRules" class="btn-action btn-success">開始細胞防衛！ 🚀</button>
+    </div>
+  </div>
+
+  <!-- 4. 教師一鍵凍結 Modal -->
+  <div class="modal-overlay hidden" id="teacherFreezeModal">
+    <div class="modal-box freeze-box">
+      <div class="freeze-icon">⏸️</div>
+      <h2>全場暫停 ‧ 焦點回歸老師</h2>
+      <p>老師已凍結細胞防衛畫面與音效，請保持安靜看向教室大螢幕！</p>
+      <button id="btnUnfreeze" class="btn-action btn-success">▶️ 解除凍結，繼續戰鬥</button>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>

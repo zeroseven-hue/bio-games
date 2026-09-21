@@ -15,12 +15,15 @@
         <h1>🌱 國中生物課堂網頁遊戲平台 <code>bio-games</code></h1>
         <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式與 Google Classroom 作業繳交</p>
       </div>
+      <div class="header-nav">
+        <a href="timer/index.html" class="btn-timer-link">⏱️ 課堂專注計時器</a>
+      </div>
     </header>
 
     <main class="lobby-main">
       <!-- 遊戲卡片區域 -->
       <section class="games-section">
-        <h2>🎮 課堂遊戲大廳 (三款生物主題遊戲)</h2>
+        <h2>🎮 課堂遊戲大廳 (五款生物主題遊戲 ‧ 專注計時)</h2>
         <div class="game-cards-grid">
 
           <!-- 遊戲 1: 侏羅紀逃生記 -->
@@ -57,7 +60,7 @@
 
           <!-- 遊戲 3: 超級馬力歐生物闖關 -->
           <div class="game-card card-mario">
-            <div class="card-badge bg-red">全新登場</div>
+            <div class="card-badge bg-red">熱門登場</div>
             <div class="card-icon">🍄</div>
             <h3>超級馬力歐生物闖關</h3>
             <p class="card-desc">冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼供截圖繳交！</p>
@@ -87,6 +90,22 @@
             </div>
           </div>
 
+          <!-- 遊戲 5: 植物大戰殭屍 細胞防衛戰 -->
+          <div class="game-card card-pvz">
+            <div class="card-badge bg-green">最新強檔</div>
+            <div class="card-icon">🌱</div>
+            <h3>植物大戰殭屍：細胞防衛戰</h3>
+            <p class="card-desc">答對題目賺陽光部署胞器植物！巨型觸控按鈕免拖曳、讀題10%龜速緩速防焦慮，12分鐘波次防衛與美式卡通防偽證書！</p>
+            <div class="card-tags">
+              <span>🌱 3路細胞防線</span>
+              <span>🐢 讀題10%龜速緩速</span>
+              <span>📜 PVZ-7712防偽證書</span>
+            </div>
+            <div class="card-actions">
+              <a href="pvz/index.html" class="btn-play btn-green">🌱 直接進入防衛</a>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -99,12 +118,14 @@
           <div class="dispatch-form">
             <div class="form-row">
               <div class="form-group">
-                <label for="selectGame">1. 選擇遊戲：</label>
+                <label for="selectGame">1. 選擇遊戲或工具：</label>
                 <select id="selectGame" class="styled-select">
+                  <option value="pvz/index.html">🌱 植物大戰殭屍：細胞防衛戰 (PVZ)</option>
                   <option value="rpg/index.html">🗡️ 樂透大冒險：生物勇者傳奇 (RPG)</option>
                   <option value="jurassic/index.html">🦖 侏羅紀叢林逃生記</option>
                   <option value="monopoly/index.html">🐰 動物方城市大富翁</option>
                   <option value="mario/index.html">🍄 超級馬力歐生物闖關</option>
+                  <option value="timer/index.html">⏱️ 課堂專注計時器 (Timer)</option>
                 </select>
               </div>
 
