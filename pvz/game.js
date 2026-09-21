@@ -587,6 +587,14 @@ function startQuizCountdownTimer() {
 
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(quizCountdownTimer);
+
+  // 一字鎖死：答一次後立即禁用所有選項按鈕，防止答錯後再次點選正確選項套利！
+  const allOptBtns = quizOptions.querySelectorAll(".btn-option");
+  allOptBtns.forEach(b => {
+    b.style.pointerEvents = "none";
+    b.style.cursor = "default";
+  });
+
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
 
   if (isCorrect) {
@@ -600,6 +608,11 @@ function handleQuizSelect(selectedIndex, btnEl) {
   } else {
     btnEl.classList.add("incorrect");
     playZombieHit();
+
+    // 標示出正確答案供學生複習
+    const correctBtn = allOptBtns[currentActiveQuestion.answer];
+    if (correctBtn) correctBtn.classList.add("correct");
+
     explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，植物萎蔫 3 秒！請閱覽筆記解析後再接再厲！";
     quizExplanation.classList.remove("hidden");
     btnConfirmQuiz.classList.add("hidden");
