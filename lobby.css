@@ -112,6 +112,14 @@ body {
   background: var(--accent-orange);
 }
 
+.card-badge.bg-red {
+  background: #dc2626;
+}
+
+.card-badge.bg-purple {
+  background: #9333ea;
+}
+
 .card-icon {
   font-size: 3.5rem;
   margin-bottom: 12px;
@@ -170,6 +178,22 @@ body {
 
 .btn-play.btn-orange:hover {
   background: #e65100;
+}
+
+.btn-play.btn-red {
+  background: #dc2626;
+}
+
+.btn-play.btn-red:hover {
+  background: #b91c1c;
+}
+
+.btn-play.btn-purple {
+  background: #9333ea;
+}
+
+.btn-play.btn-purple:hover {
+  background: #7e22ce;
 }
 
 /* 教師派發面板 */

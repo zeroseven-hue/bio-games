@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>樂透大冒險：生物勇者傳奇 - RPG Bio-Quest</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+
+  <!-- 平板直向提醒標籤 -->
+  <div class="portrait-warning">👉 最佳冒險體驗：請將 iPad / 螢幕旋轉為「橫向模式」！</div>
+
+  <div class="game-wrapper">
+    <!-- 頂部冒險狀態與主控列 -->
+    <header class="game-header">
+      <div class="header-left">
+        <h1 class="game-logo">🗡️ 生物勇者傳奇</h1>
+        <div class="mode-tag" id="modeTag">👥 小組競賽 (第 1 棒作答)</div>
+      </div>
+
+      <!-- 勇者血條與裝備狀態展示 -->
+      <div class="header-center">
+        <div class="hero-status-pill">
+          <div class="stat-item">
+            <span class="stat-label">❤️ HP:</span>
+            <div class="hp-bar-bg">
+              <div class="hp-bar-fill" id="heroHpFill" style="width: 100%;"></div>
+            </div>
+            <span class="stat-text" id="heroHpText">100 / 100</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">🪙 金幣:</span>
+            <span class="gold-text" id="goldDisplay">0 g</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">⚔️ 武器:</span>
+            <span class="equip-text" id="weaponDisplay">🪵 木劍 (+0)</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">🛡️ 防具:</span>
+            <span class="equip-text" id="armorDisplay">👕 布衣 (+0)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
+        <button id="btnRules" class="btn-tool btn-green" title="查看冒險指南">📖 冒險指南</button>
+        <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+        <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
+        <button id="btnTimer" class="btn-tool" title="計時器開關">⏱️</button>
+      </div>
+    </header>
+
+    <!-- 關卡標題與題庫單元 Bar -->
+    <div class="stage-bar">
+      <div class="stage-info" id="stageInfoText">🌿 第 1 關：草原小徑 ‧ 目標：擊敗 2 隻黏黏史萊姆！</div>
+      <div class="unit-selector-box">
+        <label for="selectUnit">📚 冒險單元：</label>
+        <select id="selectUnit" class="styled-unit-select"></select>
+      </div>
+    </div>
+
+    <!-- 冒險主要舞台區域 (戰鬥畫面 vs 營地補給畫面) -->
+    <div class="main-stage-container">
+
+      <!-- 1. ⚔️ 戰鬥舞台 (Battle Scene) -->
+      <div class="battle-scene" id="battleScene">
+
+        <!-- 左側：生物勇者與隊伍夥伴 -->
+        <div class="hero-character-box">
+          <div class="hero-avatar-wrapper">
+            <div class="hero-aura aura-wood" id="heroAura"></div>
+            <div class="hero-avatar" id="heroAvatar">🗡️🧑‍🚀</div>
+          </div>
+          <div class="hero-name-badge" id="heroNameBadge">生物勇者 (第 1 棒)</div>
+          
+          <!-- 救出的隊友小精靈列表 -->
+          <div class="companions-box">
+            <div class="companion-badge locked" id="badgeLele" title="尚未解救守護犬樂樂">🐶 樂樂 (未救援)</div>
+            <div class="companion-badge locked" id="badgePudding" title="尚未解救智慧貓布丁">🐱 布丁 (未救援)</div>
+          </div>
+        </div>
+
+        <!-- 中間：戰鬥橫幅與動作按鈕 -->
+        <div class="center-action-box">
+          <div class="battle-log-banner" id="battleBanner">遭遇野外怪獸！準備進入作答戰鬥！</div>
+
+          <div class="battle-controls">
+            <button id="btnStartBattle" class="btn-battle-launch">⚔️ 勇者出擊 ‧ 展開答題戰鬥！</button>
+          </div>
+        </div>
+
+        <!-- 右側：怪獸 / Boss 區域 -->
+        <div class="enemy-character-box">
+          <div class="enemy-avatar-wrapper">
+            <div class="enemy-avatar" id="enemyAvatar">🟢</div>
+          </div>
+          <div class="enemy-info-card">
+            <div class="enemy-name" id="enemyName">黏黏史萊姆 #1</div>
+            <div class="enemy-hp-box">
+              <div class="hp-bar-bg">
+                <div class="hp-bar-fill enemy-hp-fill" id="enemyHpFill" style="width: 100%;"></div>
+              </div>
+              <span class="enemy-hp-text" id="enemyHpText">50 / 50</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. 🏕️ 勇者營地補給站 (Camp Scene - 預設隱藏) -->
+      <div class="camp-scene hidden" id="campScene">
+        <div class="camp-header">
+          <h2>🏕️ 勇者營地補給站 ‧ 武器裝備升級</h2>
+          <p>開寶箱獲得的金幣可在這裡購買神器，提升勇者攻擊力與生命上限！</p>
+        </div>
+
+        <div class="shop-grid">
+          <!-- 武器區 -->
+          <div class="shop-card">
+            <div class="item-icon">⚔️</div>
+            <div class="item-details">
+              <h3>精鋼劍 (ATK +15)</h3>
+              <p>鍛造鋼鐵打造的利刃，能對史萊姆與 Boss 造成更高傷害。</p>
+              <div class="item-price">🪙 50 金幣</div>
+            </div>
+            <button id="btnBuySteelSword" class="btn-buy">購買裝備</button>
+          </div>
+
+          <div class="shop-card">
+            <div class="item-icon">🗡️✨</div>
+            <div class="item-details">
+              <h3>勇者聖劍 (ATK +35)</h3>
+              <p>注入聖光神力的絕世寶劍，揮砍時自帶璀璨黃金光芒！</p>
+              <div class="item-price">🪙 120 金幣</div>
+            </div>
+            <button id="btnBuyHolySword" class="btn-buy">購買裝備</button>
+          </div>
+
+          <!-- 防具區 -->
+          <div class="shop-card">
+            <div class="item-icon">🛡️</div>
+            <div class="item-details">
+              <h3>鎖子甲 (Max HP +30)</h3>
+              <p>密合金屬環編織的護甲，顯著提高勇者最大生命值！</p>
+              <div class="item-price">🪙 40 金幣</div>
+            </div>
+            <button id="btnBuyChainArmor" class="btn-buy">購買裝備</button>
+          </div>
+
+          <div class="shop-card">
+            <div class="item-icon">🐉</div>
+            <div class="item-details">
+              <h3>龍鱗護甲 (Max HP +70)</h3>
+              <p>傳說巨龍鱗片縫製的頂級鎧甲，賦予強大防禦生命！</p>
+              <div class="item-price">🪙 100 金幣</div>
+            </div>
+            <button id="btnBuyDragonArmor" class="btn-buy">購買裝備</button>
+          </div>
+        </div>
+
+        <div class="camp-actions">
+          <button id="btnLeaveCamp" class="btn-action btn-gold">⚔️ 裝備完畢，踏上下一關冒險！ 🚀</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 彈窗系統 ==================== -->
+
+  <!-- 1. 生物題目作答 Modal -->
+  <div class="modal-overlay hidden" id="quizModal">
+    <div class="modal-box quiz-box" id="quizBox">
+      <div class="modal-header">
+        <span class="modal-badge" id="quizUnitBadge">單元載入中...</span>
+        <span class="pool-left-badge" id="poolLeftBadge">題庫剩餘: -- 題</span>
+      </div>
+
+      <div class="quiz-top-bar">
+        <div class="timer-banner" id="quizTimerBanner">⏱️ 倒數計時：30 秒</div>
+        <div class="companion-skill-bar">
+          <button id="btnUsePuddingSkill" class="btn-skill hidden">🐱 布丁二選一 (刪除2錯誤)</button>
+          <span id="leleShieldNotice" class="shield-notice hidden">🛡️ 樂樂護盾生效中</span>
+        </div>
+      </div>
+
+      <h2 class="quiz-stem" id="quizStem">題目加載中...</h2>
+
+      <div class="quiz-options-grid" id="quizOptions"></div>
+
+      <!-- 💡 小筆記觀念解析區 -->
+      <div class="quiz-explanation hidden" id="quizExplanation">
+        <h4>💡 生物觀念解析小筆記：</h4>
+        <p id="explanationText"></p>
+      </div>
+
+      <!-- 動作按鈕區 -->
+      <div class="modal-actions" id="quizActions">
+        <button id="btnAttackBoss" class="btn-action btn-success hidden">⚔️ 答對發動重擊！繼續戰鬥 💥</button>
+        <button id="btnCloseWrong" class="btn-action btn-danger hidden">❌ 受到怪獸反擊！接續戰鬥 ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 🎉 通關大獲全勝 Modal (含防偽認證碼與心得填寫) -->
+  <div class="modal-overlay hidden" id="victoryModal">
+    <div class="modal-box victory-box">
+      <div class="victory-header">
+        <div class="trophy-icon">🏆</div>
+        <h2>🎉 冒險大獲全勝！擊敗紅色三眼大魔王！</h2>
+        <p>全班齊心合力完成生物闖關挑戰，成功救出樂樂與布丁！</p>
+      </div>
+
+      <!-- 防偽認證與心得填寫 -->
+      <div class="cert-form-wrapper">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inputSeatNo">1. 班級座號 / 小組名：</label>
+            <input type="text" id="inputSeatNo" class="styled-input" placeholder="例如: 701-05號 或 第3組">
+          </div>
+          <div class="form-group">
+            <label for="inputStudentName">2. 學生姓名 / 隊員名：</label>
+            <input type="text" id="inputStudentName" class="styled-input" placeholder="例如: 王大明">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputReflection">3. 📝 本堂課學習心得與錯題討論紀錄：</label>
+          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="請寫下今天最印象深刻的生物觀念或與同儕討論心得..."></textarea>
+        </div>
+
+        <!-- 認證碼 display -->
+        <div class="cert-code-box">
+          <span class="cert-label">🛡️ Google Classroom 防偽驗證卡：</span>
+          <div class="cert-code-value" id="certCodeValue">RPG-8821-70105</div>
+          <small class="cert-subtext">包含了完成時間、最終裝備與驗證雜湊碼，請截圖本畫面上傳作業！</small>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="btnCopyCert" class="btn-action btn-gold">📋 複製驗證文字</button>
+        <button id="btnRestartGame" class="btn-action btn-secondary">🔄 重開新冒險</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 📖 冒險指南 Modal -->
+  <div class="modal-overlay hidden" id="rulesModal">
+    <div class="modal-box rules-box">
+      <div class="modal-header">
+        <h2>📖 樂透大冒險：生物勇者傳奇 冒險指南</h2>
+      </div>
+      <div class="rules-content">
+        <div class="rule-item green">
+          <b>⚔️ 1. 答題發動攻擊</b>
+          <p>答對生物題目可發動勇者攻擊，擊敗 2 隻史萊姆與紅色三眼魔王。答錯會遭受怪獸反擊扣血！</p>
+        </div>
+        <div class="rule-item yellow">
+          <b>🏕️ 2. 營地補給與神兵裝備</b>
+          <p>第 1、2 關通關後進入營地，可用開寶箱獲得的金幣購買<b>精鋼劍 ⚔️、勇者聖劍 🗡️✨ 與龍鱗護甲 🐉</b>，實時改變武器外觀與攻擊力！</p>
+        </div>
+        <div class="rule-item pink">
+          <b>🐶🐱 3. 拯救夥伴技能</b>
+          <p>解救<b>樂樂 🐶</b>獲護盾自動抵擋 1 次答錯傷害；解救<b>布丁 🐱</b>可發動 50/50 技能直接刪除 2 個錯誤選項！</p>
+        </div>
+      </div>
+      <button id="btnCloseRules" class="btn-action btn-success">開始勇者冒險！ 🚀</button>
+    </div>
+  </div>
+
+  <!-- 4. 教師一鍵凍結 Modal -->
+  <div class="modal-overlay hidden" id="teacherFreezeModal">
+    <div class="modal-box freeze-box">
+      <div class="freeze-icon">⏸️</div>
+      <h2>全場暫停 ‧ 焦點回歸老師</h2>
+      <p>老師已凍結冒險畫面與音效，請保持安靜看向教室大螢幕！</p>
+      <button id="btnUnfreeze" class="btn-action btn-success">▶️ 解除凍結，繼續冒險</button>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>
