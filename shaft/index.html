@@ -64,9 +64,19 @@
 
       <!-- iPad 左右半屏盲操指示微光 (前3秒閃爍提示) -->
       <div class="touch-guide-overlay" id="touchGuideOverlay">
-        <div class="touch-zone touch-left">◀ 按住往左</div>
-        <div class="touch-zone touch-right">按住往右 ▶</div>
+        <div class="touch-zone touch-left">◀ 往左 (選項A)</div>
+        <div class="touch-zone touch-right">往右 (選項B) ▶</div>
       </div>
+    </div>
+
+    <!-- 巨型 iPad 盲操實體按鈕列 (> 54px 高度) -->
+    <div class="giant-touch-bar">
+      <button id="btnTouchLeft" class="btn-giant-touch btn-touch-left">
+        ⬅️ 往左降落【選項 🅰️】
+      </button>
+      <button id="btnTouchRight" class="btn-giant-touch btn-touch-right">
+        往右降落【選項 🅱️】 ➡️
+      </button>
     </div>
   </div>
 
@@ -79,11 +89,11 @@
       <div class="rules-grid">
         <div class="rule-item blue">
           <b>🏃 1. 移動控制</b>
-          <p>鍵盤使用 <b>`←` / `→`</b> 或 <b>`A` / `D`</b>；iPad 直接<b>按住螢幕左半區往左，按住右半區往右</b>！</p>
+          <p>鍵盤使用 <b>`←` / `→`</b> 或 <b>`A` / `D`</b>；iPad 直接<b>按下方巨型左/右按鈕</b>或<b>按住螢幕左/右半區</b>！</p>
         </div>
         <div class="rule-item green">
-          <b>🪜 2. 命運階梯與子彈時間</b>
-          <p>遇到「❓ 命運階梯」時，畫面自動減速為 28% 超慢子彈時間！踩中正解發動無敵衝刺，踩錯階梯碎裂扣心。</p>
+          <b>🪜 2. 二選一命運階梯與子彈時間</b>
+          <p>遇到「❓ 命運問答」時，速度減速為 28% 超慢子彈時間！看清題幹，降落選擇<b>左邊 🅰️</b> 或 <b>右邊 🅱️</b>！踩對發動無敵衝刺，踩錯扣心並有安全階梯接住！</p>
         </div>
         <div class="rule-item orange">
           <b>🌪️ 3. 深淵熱氣流救援保底</b>
@@ -143,6 +153,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=1.0"></script>
+  <script src="game.js?v=2.0"></script>
 </body>
 </html>
