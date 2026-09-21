@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>生物大墜落：細胞深淵下樓梯 - Bio-Shaft: Cell Abyss</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+
+  <!-- iPad 直屏橫屏警示 -->
+  <div class="portrait-warning">👉 最佳下樓梯體驗：請將 iPad / 螢幕旋轉為「橫向模式」！</div>
+
+  <div class="game-wrapper">
+    <!-- 頂部主控列 (HUD) -->
+    <header class="game-header">
+      <div class="header-left">
+        <h1 class="game-logo">🧬 深淵下樓梯</h1>
+        <div class="mode-tag" id="modeTag">👥 小組競賽 (第 1 棒下樓梯探險家)</div>
+      </div>
+
+      <div class="header-center">
+        <div class="status-pill">
+          <span class="pill-item">💖 生命: <b id="heartsDisplay">❤️❤️❤️❤️❤️</b></span>
+          <span class="pill-item">🪜 最深層數: <b id="depthDisplay">B0 樓</b></span>
+          <span class="pill-item">⏱️ 時間: <b id="timerDisplay">00:00</b></span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="speed-selector">
+          <label for="selectSpeed">⚡ 速度檔位:</label>
+          <select id="selectSpeed" class="styled-speed-select">
+            <option value="0.75">⚡ 0.75x 悠閒</option>
+            <option value="1.0" selected>⚡ 1.0x 標準</option>
+            <option value="1.25">⚡ 1.25x 挑戰</option>
+          </select>
+        </div>
+        <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
+        <button id="btnRules" class="btn-tool btn-green" title="查看指南">📖 探險指南</button>
+        <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+        <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
+      </div>
+    </header>
+
+    <!-- 題庫單元選擇 Bar -->
+    <div class="unit-bar">
+      <div class="unit-info" id="unitInfoText">🌱 當前關卡：全單元綜合大亂鬥 (1~10單元混合)</div>
+      <div class="unit-selector-box">
+        <label for="selectUnit">📚 生物題庫單元：</label>
+        <select id="selectUnit" class="styled-unit-select"></select>
+      </div>
+    </div>
+
+    <!-- 頂部浮動觀念筆記提示 (答錯時不擋住下樓梯，即時提示觀念) -->
+    <div class="concept-toast-banner hidden" id="conceptToast">
+      <span class="toast-icon">💡</span>
+      <span class="toast-text" id="conceptToastText">生物觀念解析：...</span>
+    </div>
+
+    <!-- 主遊戲 Canvas 畫布容器 -->
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+      <!-- iPad 左右半屏盲操指示微光 (前3秒閃爍提示) -->
+      <div class="touch-guide-overlay" id="touchGuideOverlay">
+        <div class="touch-zone touch-left">◀ 按住往左</div>
+        <div class="touch-zone touch-right">按住往右 ▶</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 彈窗系統 ==================== -->
+
+  <!-- 1. 探險指南 Modal -->
+  <div class="modal-overlay hidden" id="rulesModal">
+    <div class="modal-box rules-box">
+      <h2>🧬 《生物大墜落：細胞深淵下樓梯》探險指南</h2>
+      <div class="rules-grid">
+        <div class="rule-item blue">
+          <b>🏃 1. 移動控制</b>
+          <p>鍵盤使用 <b>`←` / `→`</b> 或 <b>`A` / `D`</b>；iPad 直接<b>按住螢幕左半區往左，按住右半區往右</b>！</p>
+        </div>
+        <div class="rule-item green">
+          <b>🪜 2. 命運階梯與子彈時間</b>
+          <p>遇到「❓ 命運階梯」時，畫面自動減速為 28% 超慢子彈時間！踩中正解發動無敵衝刺，踩錯階梯碎裂扣心。</p>
+        </div>
+        <div class="rule-item orange">
+          <b>🌪️ 3. 深淵熱氣流救援保底</b>
+          <p>若不小心掉落畫面底部，系統會發動「深淵熱氣流」大彈跳救援回到頂部，扣 1 心保保底！</p>
+        </div>
+      </div>
+      <button id="btnCloseRules" class="btn-action btn-success">開始深淵探險！ 🚀</button>
+    </div>
+  </div>
+
+  <!-- 2. 🎉 探險通關 / 結算證書 Modal -->
+  <div class="modal-overlay hidden" id="victoryModal">
+    <div class="modal-box victory-box">
+      <div class="victory-header">
+        <div class="trophy-icon">🏆</div>
+        <h2 id="victoryTitle">🎉 細胞深淵探險成功！創下深淵紀錄！</h2>
+      </div>
+
+      <div class="cert-form-wrapper">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inputSeatNo">👤 班級與座號 (例: 70105號)</label>
+            <input type="text" id="inputSeatNo" class="styled-input" placeholder="70105號">
+          </div>
+          <div class="form-group">
+            <label for="inputStudentName">✍️ 探險家姓名</label>
+            <input type="text" id="inputStudentName" class="styled-input" placeholder="探險家同學">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputReflection">📝 課堂生物學習心得與檢討 (可直接繳交 Google Classroom)</label>
+          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="今天下樓梯探險中，我複習了葉綠體與細胞壁的差異..."></textarea>
+        </div>
+
+        <div class="cert-code-box">
+          <div>Google Classroom 官方防偽認證碼：</div>
+          <div class="cert-code-value" id="certCodeValue">SHAFT-0000-70105</div>
+          <div class="cert-subtext">包含防偽雜湊標記，請截圖上傳或點擊下方按鈕複製內文</div>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="btnCopyCert" class="btn-action btn-gold">📋 複製通關心得與認證碼</button>
+        <button id="btnRestartGame" class="btn-action btn-success">🔄 再次探險</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 教師一鍵凍結 Modal -->
+  <div class="modal-overlay hidden" id="teacherFreezeModal">
+    <div class="modal-box freeze-box">
+      <div class="freeze-icon">⏸️</div>
+      <h2>全場暫停 ‧ 焦點回歸老師</h2>
+      <p>老師已凍結深淵下樓梯畫面與音效，請保持安靜看向教室大螢幕！</p>
+      <button id="btnUnfreeze" class="btn-action btn-success">▶️ 解除凍結，繼續戰鬥</button>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>

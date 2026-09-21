@@ -204,8 +204,20 @@ body {
   background: #15803d;
 }
 
+.btn-play.btn-cyan {
+  background: #0891b2;
+}
+
+.btn-play.btn-cyan:hover {
+  background: #0e7490;
+}
+
 .card-badge.bg-green {
   background: #16a34a;
+}
+
+.card-badge.bg-cyan {
+  background: #0891b2;
 }
 
 .btn-timer-link {
