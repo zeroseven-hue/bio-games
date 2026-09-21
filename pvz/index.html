@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>植物大戰殭屍：細胞防衛戰 - Plants vs. Zombies Cell Defense</title>
-  <link rel="stylesheet" href="style.css?v=1.1">
+  <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
 
@@ -66,30 +66,43 @@
           <span class="card-icon">🌰</span>
           <div class="card-info">
             <b>堅果細胞壁</b>
-            <small>☀️ 75 陽光</small>
+            <small>☀️ 60 陽光</small>
           </div>
         </div>
         <div class="plant-card" id="cardSun" onclick="selectPlantType('sun')">
           <span class="card-icon">🌻</span>
           <div class="card-info">
             <b>葉綠體葵花</b>
-            <small>☀️ 25 陽光</small>
+            <small>☀️ 30 陽光</small>
+          </div>
+        </div>
+        <div class="plant-card" id="cardCherry" onclick="selectPlantType('cherry')">
+          <span class="card-icon">🍒</span>
+          <div class="card-info">
+            <b>櫻桃胞器爆彈</b>
+            <small>☀️ 100 陽光 (大招)</small>
           </div>
         </div>
 
         <button id="btnStartQuiz" class="btn-trigger-quiz">❓ 答題賺陽光與部署植物！</button>
       </div>
 
-      <!-- 巨型 3 路部署大按鈕 (> 60px 高度) -->
-      <div class="giant-lane-buttons">
+      <!-- 巨型 5 路部署大按鈕 (兩排式，> 60px 高度) -->
+      <div class="giant-lane-buttons-5lane">
         <button id="btnDeployLane0" class="btn-giant-lane" onclick="deploySelectedPlantToLane(0)">
-          🌿【第 1 路】直接部署植物！
+          🌿【第 1 路】直接部署
         </button>
         <button id="btnDeployLane1" class="btn-giant-lane" onclick="deploySelectedPlantToLane(1)">
-          🌿【第 2 路】直接部署植物！
+          🌿【第 2 路】直接部署
         </button>
         <button id="btnDeployLane2" class="btn-giant-lane" onclick="deploySelectedPlantToLane(2)">
-          🌿【第 3 路】直接部署植物！
+          🌿【第 3 路】直接部署
+        </button>
+        <button id="btnDeployLane3" class="btn-giant-lane btn-lane-row2" onclick="deploySelectedPlantToLane(3)">
+          🌿【第 4 路】直接部署
+        </button>
+        <button id="btnDeployLane4" class="btn-giant-lane btn-lane-row2" onclick="deploySelectedPlantToLane(4)">
+          🌿【第 5 路】直接部署
         </button>
       </div>
     </div>

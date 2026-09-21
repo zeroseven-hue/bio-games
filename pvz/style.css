@@ -140,14 +140,14 @@ body {
 .unit-selector-box { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
 .styled-unit-select { padding: 3px 8px; border-radius: 6px; border: 1px solid #94a3b8; background: #ffffff; font-weight: bold; }
 
-/* Lawn Container (3 Lanes Grid) */
+/* Lawn Container (5 Lanes Grid) */
 .lawn-container {
   flex: 1;
   min-height: 0;
   position: relative;
   background: #15803d;
-  background-image: repeating-linear-gradient(0deg, #15803d 0px, #15803d 100px, #166534 100px, #166534 200px);
-  padding: 8px;
+  background-image: repeating-linear-gradient(0deg, #15803d 0px, #15803d 60px, #166534 60px, #166534 120px);
+  padding: 6px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -155,20 +155,20 @@ body {
 
 .lawn-grid {
   display: grid;
-  grid-template-rows: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-rows: repeat(5, 1fr);
+  gap: 4px;
   height: 100%;
 }
 
 .lawn-lane {
   background: rgba(255, 255, 255, 0.12);
-  border: 2px dashed rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   position: relative;
   align-items: center;
-  padding: 4px;
+  padding: 2px;
 }
 
 .cell-slot {
@@ -287,24 +287,24 @@ body {
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
-/* Giant Lane Buttons (> 60px height for iPad) */
-.giant-lane-buttons {
+/* Giant Lane Buttons (5 Lanes, 2-Row Layout, > 60px height for iPad) */
+.giant-lane-buttons-5lane {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 6px;
 }
 
 .btn-giant-lane {
-  height: 64px;
-  min-height: 64px;
+  height: 54px;
+  min-height: 54px;
   background: linear-gradient(135deg, #16a34a, #15803d);
   color: #ffffff;
   border: 2px solid #86efac;
-  border-radius: 12px;
-  font-size: 1.05rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(22, 163, 74, 0.35);
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.35);
   transition: all 0.15s ease;
 }
 
