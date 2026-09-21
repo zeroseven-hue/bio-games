@@ -1,8 +1,8 @@
 /**
- * 植物大戰殭屍：細胞防衛戰 (PVZ Cell Defense) - 遊戲引擎 V2.2 旗艦極限版
- * 1. 5 路草地戰場 (5 行 x 8 列)，支援 > 60px 巨型觸控按鈕與雙排式自適應排版。
- * 2. 4 大病原體殭屍：普通 🧟、路障 🧫、飛天跳躍 🪰、巨型噬菌體魔王 🦠！
- * 3. 飛天噬菌體殭屍 (🪰) 主動越過前排堅果細胞壁，直撲後排葵花與豌豆射手！
+ * 植物大戰殭屍：細胞防衛戰 (PVZ Cell Defense) - 遊戲引擎 V2.3 旗艦極致版
+ * 1. 5 路草地戰場 (5 行 x 10 列)，縮窄植物間距、呈現精緻傳統 PVZ 戰場體驗。
+ * 2. 豌豆射手火力與射速平衡：發射頻率調整為 ~1.25 秒/發 (傷害 20)，單一射手不再能秒殺殭屍！
+ * 3. 飛天噬菌體殭屍 (🪰) 跳躍推進 2.2 個格子，直撲後排葵花與豌豆射手！
  * 4. 嚴格 4 重答錯鎖定與防套利機制：
  *    - isQuizAnsweredCorrectly 布林值狀態雙重驗證，未答對絕不發放陽光。
  *    - 答錯觸發「❓ 答題賺陽光」主按鈕 10 秒強烈冷卻懲罰 (⏳ 10s)，防止盲猜刷新題庫！
@@ -14,7 +14,7 @@
 
 // 植物性狀與成本
 const PLANT_TYPES = {
-  pea: { id: "pea", name: "胞器豌豆射手", icon: "🪴", cost: 50, maxHp: 100, atk: 25 },
+  pea: { id: "pea", name: "胞器豌豆射手", icon: "🪴", cost: 50, maxHp: 100, atk: 20 },
   nut: { id: "nut", name: "堅果細胞壁", icon: "🌰", cost: 60, maxHp: 350, atk: 0 },
   sun: { id: "sun", name: "葉綠體葵花", icon: "🌻", cost: 40, maxHp: 80, atk: 0 },
   cherry: { id: "cherry", name: "櫻桃胞器爆彈", icon: "🍒", cost: 100, maxHp: 1, atk: 999 }
@@ -42,13 +42,13 @@ let isQuizCooldown = false;
 let quizCooldownTimer = null;
 let quizCooldownSecondsLeft = 0;
 
-// 5 行 x 8 列戰場陣列
+// 5 行 x 10 列戰場陣列
 let lawnState = [
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null]
+  [null, null, null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null, null, null]
 ];
 
 let activeZombies = [];
@@ -297,7 +297,7 @@ function getFallbackQuestions() {
   ];
 }
 
-// 初始化 5 路 x 8 列草地戰場
+// 初始化 5 路 x 10 列密集草地戰場
 function initLawnGrid() {
   lawnGrid.innerHTML = "";
   for (let r = 0; r < 5; r++) {
@@ -305,7 +305,7 @@ function initLawnGrid() {
     laneEl.className = "lawn-lane";
     laneEl.id = `lane-${r}`;
 
-    for (let c = 0; c < 8; c++) {
+    for (let c = 0; c < 10; c++) {
       const slotEl = document.createElement("div");
       slotEl.className = "cell-slot";
       slotEl.id = `slot-${r}-${c}`;
@@ -334,11 +334,11 @@ function resetGameState() {
   btnStartQuiz.textContent = "❓ 答題賺陽光與部署植物！";
 
   lawnState = [
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null]
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null]
   ];
 
   document.querySelectorAll(".zombie-sprite, .pea-bullet, .plant-sprite").forEach(el => el.remove());
@@ -369,7 +369,7 @@ function selectPlantType(key) {
   if (cardCherry) cardCherry.classList.toggle("active", key === "cherry");
 }
 
-// 巨型觸控按鈕：一鍵部署植物至指定路
+// 巨型觸控按鈕：一鍵部署植物至指定路 (10列密集草地)
 function deploySelectedPlantToLane(laneIdx) {
   if (wiltedLanes[laneIdx]) {
     alert(`⚠️ 第 ${laneIdx + 1} 路植物正在萎蔫卡彈中，請稍後再部署！`);
@@ -391,7 +391,7 @@ function deploySelectedPlantToLane(laneIdx) {
     }
   }
 
-  // 🍒 櫻桃爆彈大招一擊清空路線
+  // 🍒 櫻桃胞器爆彈大招一擊清空路線
   if (selectedPlantKey === "cherry") {
     sunEnergy -= pData.cost;
     updateUI();
@@ -416,8 +416,9 @@ function deploySelectedPlantToLane(laneIdx) {
     return;
   }
 
+  // 尋找 10 列中的第一個空位
   let emptyCol = -1;
-  for (let c = 0; c < 8; c++) {
+  for (let c = 0; c < 10; c++) {
     if (!lawnState[laneIdx][c]) {
       emptyCol = c;
       break;
@@ -425,7 +426,7 @@ function deploySelectedPlantToLane(laneIdx) {
   }
 
   if (emptyCol === -1) {
-    alert(`⚠️ 第 ${laneIdx + 1} 路 8 列防線已滿！`);
+    alert(`⚠️ 第 ${laneIdx + 1} 路 10 列防線已滿！`);
     return;
   }
 
@@ -479,7 +480,7 @@ function startTimers() {
     if (isTeacherFrozen) return;
     sunEnergy += 5;
     for (let r = 0; r < 5; r++) {
-      for (let c = 0; c < 8; c++) {
+      for (let c = 0; c < 10; c++) {
         if (lawnState[r][c] && lawnState[r][c].key === "sun") {
           sunEnergy += 8;
         }
@@ -496,14 +497,15 @@ function triggerNextWave(waveNum) {
   updateUI();
 }
 
-// 遊戲主迴圈
+// 遊戲主迴圈 (10列精準碰撞、1.25秒/發射速降頻與飛天跳躍)
 function gameLoop() {
   if (isTeacherFrozen) return;
 
   const containerRect = lawnContainer.getBoundingClientRect();
   const speedFactor = isQuizOpen ? 0.1 : 1.0;
-  const colWidth = containerRect.width / 8;
+  const colWidth = containerRect.width / 10; // 10 列精準寬度
 
+  // 1. 動態升級波次隨機生成殭屍
   const spawnRate = isQuizOpen ? 0.01 : (0.05 + currentWave * 0.035);
   if (Math.random() < spawnRate) {
     const lane = Math.floor(Math.random() * 5);
@@ -536,17 +538,20 @@ function gameLoop() {
     });
   }
 
+  // 2. 移動殭屍與啃食 / 飛天跳躍越過堅果
   for (let zIdx = activeZombies.length - 1; zIdx >= 0; zIdx--) {
     const z = activeZombies[zIdx];
     let isEating = false;
 
+    // 精準計算 10 列當前格子
     const targetCol = Math.floor(z.posX / colWidth);
-    if (targetCol >= 0 && targetCol < 8 && lawnState[z.lane][targetCol]) {
+    if (targetCol >= 0 && targetCol < 10 && lawnState[z.lane][targetCol]) {
       const plant = lawnState[z.lane][targetCol];
 
+      // 飛天噬菌體殭屍 (🪰) 主動越過前排堅果，直撲後排！
       if (z.isVaulting && !z.hasVaulted) {
         z.hasVaulted = true;
-        z.posX -= colWidth * 1.8;
+        z.posX -= colWidth * 2.2; // 飛越 2.2 個格子直達後排
       } else {
         isEating = true;
         plant.hp -= z.atk * 0.1;
@@ -572,18 +577,20 @@ function gameLoop() {
     }
   }
 
+  // 3. 10列 豌豆射手發射子彈 (射速下調為 0.08 ≈ 1.25秒/發，傷害 20)
   for (let r = 0; r < 5; r++) {
-    for (let c = 0; c < 8; c++) {
+    for (let c = 0; c < 10; c++) {
       const p = lawnState[r][c];
       if (p && p.key === "pea" && !wiltedLanes[r]) {
         const hasZombieInLane = activeZombies.some(z => z.lane === r && z.posX > (c * colWidth));
-        if (hasZombieInLane && Math.random() < 0.28) {
+        if (hasZombieInLane && Math.random() < 0.08) { // 機率下調為 0.08
           firePeaBullet(r, c, colWidth);
         }
       }
     }
   }
 
+  // 4. 反向陣列迴圈修正子彈軌跡與碰撞
   for (let bIdx = activeBullets.length - 1; bIdx >= 0; bIdx--) {
     const b = activeBullets[bIdx];
     b.posX += 18;
@@ -595,7 +602,7 @@ function gameLoop() {
     for (let zIdx = activeZombies.length - 1; zIdx >= 0; zIdx--) {
       const z = activeZombies[zIdx];
       if (z.lane === b.lane && Math.abs(z.posX - b.posX) < 35) {
-        z.hp -= 25;
+        z.hp -= 20; // 傷害調整為 20
         playZombieHit();
         hit = true;
 
@@ -624,12 +631,12 @@ function firePeaBullet(lane, col, colWidth) {
   bEl.className = "pea-bullet";
   bEl.id = bId;
   bEl.textContent = "🟢";
-  bEl.style.left = `${col * colWidth + 25}px`;
+  bEl.style.left = `${col * colWidth + 20}px`;
 
   const laneEl = document.getElementById(`lane-${lane}`);
   if (laneEl) {
     laneEl.appendChild(bEl);
-    activeBullets.push({ id: bId, lane, posX: col * colWidth + 25 });
+    activeBullets.push({ id: bId, lane, posX: col * colWidth + 20 });
     playPeaPop();
   }
 }
@@ -683,7 +690,7 @@ function startQuizCountdownTimer() {
     if (timeLeft <= 0) {
       clearInterval(quizCountdownTimer);
       quizTimerBanner.textContent = "🚨 時間到！超過 30 秒自動判定答錯並發動冷卻懲罰！";
-      handleQuizSelect(-1, null); // 時間到視同答錯處理！
+      handleQuizSelect(-1, null);
     }
   }, 1000);
 }
@@ -692,7 +699,6 @@ function startQuizCountdownTimer() {
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(quizCountdownTimer);
 
-  // 1. 一字鎖死所有選項
   const allOptBtns = quizOptions.querySelectorAll(".btn-option");
   allOptBtns.forEach(b => {
     b.disabled = true;
@@ -723,7 +729,6 @@ function handleQuizSelect(selectedIndex, btnEl) {
     }
     playZombieHit();
 
-    // 標示出正確答案供學生複習
     const correctBtn = allOptBtns[currentActiveQuestion.answer];
     if (correctBtn) {
       correctBtn.classList.add("correct");
@@ -731,25 +736,21 @@ function handleQuizSelect(selectedIndex, btnEl) {
 
     explanationText.innerHTML = `<b style="color:#dc2626;">❌ 答錯囉！無獲得陽光，且觸發 10 秒答題冷卻懲罰與第 1 路植物 3 秒萎蔫！</b><br><br>💡 正確觀念解析：${currentActiveQuestion.explanation || "請仔細查看觀念筆記！"}`;
     quizExplanation.classList.remove("hidden");
-    btnConfirmQuiz.classList.add("hidden"); // 嚴格隱藏答對發放按鈕
-    btnCloseWrong.classList.remove("hidden"); // 僅顯示答錯關閉按鈕
+    btnConfirmQuiz.classList.add("hidden");
+    btnCloseWrong.classList.remove("hidden");
 
-    // 觸發第 1 路植物萎蔫 3 秒
     wiltedLanes[0] = true;
     setTimeout(() => { wiltedLanes[0] = false; }, 3000);
 
-    // 觸發「答題賺陽光」主按鈕 10 秒懲罰冷卻！
     startQuizCooldownPenalty(10);
   }
 
-  // 小組棒次輪換
   if (gameMode === "group") {
     currentTurnMember = (currentTurnMember % 4) + 1;
     updateUI();
   }
 }
 
-// 觸發答題 10 秒懲罰冷卻
 function startQuizCooldownPenalty(seconds = 10) {
   isQuizCooldown = true;
   quizCooldownSecondsLeft = seconds;
@@ -774,7 +775,6 @@ function startQuizCooldownPenalty(seconds = 10) {
   }, 1000);
 }
 
-// 結算與防偽認證碼
 function openVictoryModal() {
   updateCertCode();
   openModal(victoryModal);
