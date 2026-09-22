@@ -9,6 +9,8 @@
     { "id": "unit07", "title": "單元 07：生物體的構造層級", "file": "unit07_biological_hierarchy.json" },
     { "id": "unit08", "title": "單元 08：尺度與微觀測量", "file": "unit08_scale_measurement.json" },
     { "id": "unit09", "title": "單元 09：養分、能量與食物檢驗", "file": "unit09_nutrients_energy.json" },
-    { "id": "unit10", "title": "單元 10：酵素與酵素作用", "file": "unit10_enzymes.json" }
+    { "id": "unit10", "title": "單元 10：酵素與酵素作用", "file": "unit10_enzymes.json" },
+    { "id": "quick45", "title": "⚡ 01. 科學方法 (45題快速作答版)", "file": "01_科學方法_45題快速作答版.json" },
+    { "id": "quick50", "title": "🔥 Unit 1～10 快問快答 (50題)", "file": "unit01_10_quick_quiz_50.json" }
   ]
 }

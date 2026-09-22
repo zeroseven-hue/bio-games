@@ -1,0 +1,502 @@
+{
+  "title": "01. 科學方法｜45題快速作答版",
+  "description": "依45題優化版改寫為短題幹的是非題／二選一，適合國中七年級快速作答。",
+  "instructions": "是非題請填 O／X；二選一請填 A／B。",
+  "questions": [
+    {
+      "id": 1,
+      "type": "是非",
+      "question": "藥物試驗屬於「設計與進行實驗」。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "藥物試驗是在實際操作並觀察結果。"
+    },
+    {
+      "id": 2,
+      "type": "是非",
+      "question": "「低溫下吐司較不易發霉」屬於假說。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是可透過實驗驗證的可能解釋。"
+    },
+    {
+      "id": 3,
+      "type": "是非",
+      "question": "實驗結果不支持假說時，可以修改實驗數據。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 1,
+      "explanation": "應修正假說或重新設計實驗，不可竄改數據。"
+    },
+    {
+      "id": 4,
+      "type": "是非",
+      "question": "科學探究的流程是：觀察→提問→假說→實驗。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是本題原教材所採用的基本流程。"
+    },
+    {
+      "id": 5,
+      "type": "是非",
+      "question": "實驗中刻意改變的因素叫做操作變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "操作變因是實驗者刻意改變的因素。"
+    },
+    {
+      "id": 6,
+      "type": "是非",
+      "question": "除了操作變因，其他需維持一致的條件叫控制變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "控制變因是實驗中盡量維持一致的條件。"
+    },
+    {
+      "id": 7,
+      "type": "二選一",
+      "question": "探究葉片有無對蒸散的影響時，兩組植物的根應相同。",
+      "options": [
+        "A",
+        "B"
+      ],
+      "answer": 0,
+      "explanation": "要公平比較葉片有無，其他重要條件應一致。"
+    },
+    {
+      "id": 8,
+      "type": "是非",
+      "question": "未接受實驗處理、用來比較的組別叫對照組。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "對照組提供比較基準。"
+    },
+    {
+      "id": 9,
+      "type": "是非",
+      "question": "「青黴菌可能產生物質抑制細菌」屬於假說。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是對觀察現象提出的可檢驗解釋。"
+    },
+    {
+      "id": 10,
+      "type": "是非",
+      "question": "研究水袋透明度時，透明度是操作變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "實驗刻意改變的是透明度。"
+    },
+    {
+      "id": 11,
+      "type": "是非",
+      "question": "科學探究通常先從觀察開始。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "本題依原題庫的科學方法流程設定。"
+    },
+    {
+      "id": 12,
+      "type": "是非",
+      "question": "吐司大小、水分都維持相同，屬於控制變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這些條件被維持一致。"
+    },
+    {
+      "id": 13,
+      "type": "是非",
+      "question": "可能改變或影響實驗結果的因素統稱為變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "變因是可能影響結果的因素。"
+    },
+    {
+      "id": 14,
+      "type": "是非",
+      "question": "對照組的主要作用是提供比較基準。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "可用來比較實驗組與對照組的差異。"
+    },
+    {
+      "id": 15,
+      "type": "是非",
+      "question": "「螞蟻可能受到化學物質引導」屬於觀察。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 1,
+      "explanation": "這是針對觀察現象提出的假說。"
+    },
+    {
+      "id": 16,
+      "type": "是非",
+      "question": "科學理論是由大量證據支持的科學解釋架構。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "科學理論建立於長期累積的證據。"
+    },
+    {
+      "id": 17,
+      "type": "是非",
+      "question": "研究葉片有無時，兩組植物應盡量保持其他條件一致。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這符合控制變因原則。"
+    },
+    {
+      "id": 18,
+      "type": "是非",
+      "question": "查閱相關書籍與資料屬於參考文獻資料。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "查閱前人資料是參考文獻資料。"
+    },
+    {
+      "id": 19,
+      "type": "是非",
+      "question": "研究溫度影響細菌時，應使用相同種類的細菌。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "細菌種類應作為控制變因。"
+    },
+    {
+      "id": 20,
+      "type": "是非",
+      "question": "給予藥物並記錄腫瘤變化，屬於進行實驗。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是實際操作與記錄結果的過程。"
+    },
+    {
+      "id": 21,
+      "type": "是非",
+      "question": "研究光線強弱時，兩組昆蟲的種類與數量應相同。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "除了操作變因外，其他條件應盡量一致。"
+    },
+    {
+      "id": 22,
+      "type": "是非",
+      "question": "研究光照對植物的影響時，兩組的光照條件應相同。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 1,
+      "explanation": "光照與否就是操作變因。"
+    },
+    {
+      "id": 23,
+      "type": "是非",
+      "question": "「水分是否影響黴菌生長？」屬於提出問題。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是針對現象提出的疑問。"
+    },
+    {
+      "id": 24,
+      "type": "是非",
+      "question": "「孑孓浮上水面可能為了呼吸」屬於形成假說。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是對觀察現象提出的可能解釋。"
+    },
+    {
+      "id": 25,
+      "type": "是非",
+      "question": "對照組注射無菌生理食鹽水，是為了提供比較基準。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "可排除注射行為或溶劑造成的影響。"
+    },
+    {
+      "id": 26,
+      "type": "是非",
+      "question": "單一變因實驗中，實驗組與對照組應只有一項操作變因不同。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "其餘重要條件應盡量一致。"
+    },
+    {
+      "id": 27,
+      "type": "是非",
+      "question": "研究澆水頻率時，兩盆植物應使用相同土壤。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "土壤應作為控制變因。"
+    },
+    {
+      "id": 28,
+      "type": "是非",
+      "question": "「潮濕可能促進黴菌生長」屬於假說。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是可檢驗的可能解釋。"
+    },
+    {
+      "id": 29,
+      "type": "是非",
+      "question": "看到點心減少、嘴角有麵包屑，屬於觀察。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這些是直接觀察到的現象。"
+    },
+    {
+      "id": 30,
+      "type": "是非",
+      "question": "「濕地污染可能造成黑面琵鷺減少」屬於假說。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是針對現象提出的可能原因。"
+    },
+    {
+      "id": 31,
+      "type": "是非",
+      "question": "對照組可用來判斷銀離子是否可能造成細菌數量差異。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "對照組提供比較基準。"
+    },
+    {
+      "id": 32,
+      "type": "是非",
+      "question": "實驗者刻意改變的溫度屬於操作變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "溫度是本實驗刻意調整的因素。"
+    },
+    {
+      "id": 33,
+      "type": "是非",
+      "question": "用碘液呈色深淺表示澱粉生成情形，屬於應變變因指標。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "它用來表示實驗結果。"
+    },
+    {
+      "id": 34,
+      "type": "是非",
+      "question": "比較冷藏、冷凍與室溫的麵包發霉速度時，溫度是操作變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "不同組別刻意改變的是溫度。"
+    },
+    {
+      "id": 35,
+      "type": "是非",
+      "question": "「光照是否影響牽牛花開花？」屬於提出問題。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "這是針對觀察現象提出的疑問。"
+    },
+    {
+      "id": 36,
+      "type": "是非",
+      "question": "不同人重複實驗得到相近結果，表示具有可重複性。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "相近結果代表實驗具有良好重複性。"
+    },
+    {
+      "id": 37,
+      "type": "二選一",
+      "question": "澱粉＋唾液組是實驗組，澱粉＋純水組是對照組。",
+      "options": [
+        "A",
+        "B"
+      ],
+      "answer": 0,
+      "explanation": "唾液是被探究的處理，純水組作為比較基準。"
+    },
+    {
+      "id": 38,
+      "type": "是非",
+      "question": "本氏液呈現的顏色差異可作為應變變因指標。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "顏色差異用來表示實驗結果。"
+    },
+    {
+      "id": 39,
+      "type": "是非",
+      "question": "在本實驗條件下，pH越低，綠豆萌發數量越少。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "pH3、5、7的萌發數量依序增加。"
+    },
+    {
+      "id": 40,
+      "type": "是非",
+      "question": "在本實驗條件下，糖濃度較高時產生較多二氧化碳。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "三組其他條件相同，結果呈現此趨勢。"
+    },
+    {
+      "id": 41,
+      "type": "是非",
+      "question": "死綠豆組可用來比較石灰水混濁是否與活綠豆呼吸有關。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "死綠豆不進行正常呼吸，可作比較。"
+    },
+    {
+      "id": 42,
+      "type": "是非",
+      "question": "探究幼苗向光性時，光源照射方向是操作變因。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "各組刻意改變的是光源方向。"
+    },
+    {
+      "id": 43,
+      "type": "是非",
+      "question": "洗滌蔬菜前統一農藥前處理，是為了讓各組初始條件一致。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "可提高後續比較的公平性。"
+    },
+    {
+      "id": 44,
+      "type": "是非",
+      "question": "在本實驗條件下，水分是綠豆萌發所需要的條件。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "有水組萌發、無水組未萌發。"
+    },
+    {
+      "id": 45,
+      "type": "是非",
+      "question": "硬幣組與無硬幣組孑孓存活率相近，表示結果不支持硬幣大量致死的假說。",
+      "options": [
+        "O",
+        "X"
+      ],
+      "answer": 0,
+      "explanation": "兩組存活率相近，不支持原假說。"
+    }
+  ]
+}

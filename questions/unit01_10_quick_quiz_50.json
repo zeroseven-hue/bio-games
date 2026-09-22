@@ -1,0 +1,716 @@
+{
+  "unitId": "units01_10_quick_quiz_50",
+  "unitTitle": "Unit 1～10 快問快答（50題）",
+  "quizId": "units01_10_quick_quiz_50",
+  "quizTitle": "國中生物 Unit 1～10 快問快答",
+  "description": "每單元 5 題，共 50 題；包含是非題與二選一題。",
+  "questionCount": 50,
+  "selection": {
+    "units": 10,
+    "questionsPerUnit": 5,
+    "trueFalseCount": 25,
+    "twoChoiceCount": 25
+  },
+  "questions": [
+    {
+      "unitId": "unit01",
+      "sourceQuestionId": 11,
+      "type": "true_false",
+      "question": "科學探究通常從觀察現象開始。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "觀察可引發問題，進而形成可驗證的假說。",
+      "id": 1
+    },
+    {
+      "unitId": "unit01",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "結果不支持假說時，應怎麼做？",
+      "options": [
+        "刪除數據",
+        "修改假說"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "應檢查方法、修改假說並重新驗證，不能任意刪除不合預期的數據。",
+      "id": 2
+    },
+    {
+      "unitId": "unit01",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "實驗者刻意改變的因素是？",
+      "options": [
+        "操作變因",
+        "控制變因"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "操作變因是研究者刻意改變、用來比較的因素。",
+      "id": 3
+    },
+    {
+      "unitId": "unit01",
+      "sourceQuestionId": 14,
+      "type": "true_false",
+      "question": "對照組不具有比較作用。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "對照組正是比較基準，可協助判斷操作變因是否造成差異。",
+      "id": 4
+    },
+    {
+      "unitId": "unit01",
+      "sourceQuestionId": 33,
+      "type": "two_choice",
+      "question": "實驗中量測到的結果是？",
+      "options": [
+        "操作變因",
+        "應變變因"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "應變變因是隨操作變因改變而被觀察或量測的結果。",
+      "id": 5
+    },
+    {
+      "unitId": "unit02",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "換用高倍物鏡後，視野通常更亮。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "倍率升高時，影像變大、視野變小且通常較暗。",
+      "id": 6
+    },
+    {
+      "unitId": "unit02",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "顯微鏡鏡頭應用拭鏡紙清潔。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "專用拭鏡紙較不容易刮傷鏡片或留下棉絮。",
+      "id": 7
+    },
+    {
+      "unitId": "unit02",
+      "sourceQuestionId": 18,
+      "type": "two_choice",
+      "question": "物像往右上移，玻片應往哪移？",
+      "options": [
+        "右上",
+        "左下"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "複式顯微鏡的物像與玻片移動方向相反；要追回物像，玻片應朝物像離開的方向移動。",
+      "id": 8
+    },
+    {
+      "unitId": "unit02",
+      "sourceQuestionId": 20,
+      "type": "true_false",
+      "question": "玻片材料愈厚，愈容易讓光線穿透。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "玻片材料應切薄，才有助光線穿透並形成清楚影像。",
+      "id": 9
+    },
+    {
+      "unitId": "unit02",
+      "sourceQuestionId": 30,
+      "type": "two_choice",
+      "question": "觀察整隻昆蟲外形，選哪一種？",
+      "options": [
+        "複式顯微鏡",
+        "解剖顯微鏡"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "解剖顯微鏡適合觀察較大物體的立體外形。",
+      "id": 10
+    },
+    {
+      "unitId": "unit03",
+      "sourceQuestionId": 4,
+      "type": "two_choice",
+      "question": "倉鼠生下幼鼠屬於哪種現象？",
+      "options": [
+        "生殖",
+        "生長"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "產生下一代屬於生殖現象。",
+      "id": 11
+    },
+    {
+      "unitId": "unit03",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "遇冷發抖屬於哪種現象？",
+      "options": [
+        "生殖",
+        "感應與運動"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "身體感受低溫刺激並產生發抖反應，屬於感應與運動。",
+      "id": 12
+    },
+    {
+      "unitId": "unit03",
+      "sourceQuestionId": 8,
+      "type": "two_choice",
+      "question": "幼蟲蛻皮、體型變大屬於？",
+      "options": [
+        "生長與發育",
+        "排泄"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "體型增大與形態改變屬於生長與發育。",
+      "id": 13
+    },
+    {
+      "unitId": "unit03",
+      "sourceQuestionId": 15,
+      "type": "true_false",
+      "question": "機器人會轉彎，就能判定是生物。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "單一動作不能證明具有完整生命現象。",
+      "id": 14
+    },
+    {
+      "unitId": "unit03",
+      "sourceQuestionId": 21,
+      "type": "true_false",
+      "question": "生物圈包含有生物存在的陸地與水域。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "生物圈涵蓋地球上有生物存在的部分大氣、陸地、水域與地下環境。",
+      "id": 15
+    },
+    {
+      "unitId": "unit04",
+      "sourceQuestionId": 3,
+      "type": "true_false",
+      "question": "細胞是生物體構造與功能的基本單位。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "這是細胞學說的重要概念。",
+      "id": 16
+    },
+    {
+      "unitId": "unit04",
+      "sourceQuestionId": 15,
+      "type": "true_false",
+      "question": "虎克在軟木栓中看到的是活細胞。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "軟木栓細胞已死亡，虎克主要看到規則排列的細胞壁空腔。",
+      "id": 17
+    },
+    {
+      "unitId": "unit04",
+      "sourceQuestionId": 9,
+      "type": "true_false",
+      "question": "鯨魚和小蝦都由細胞構成。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "體型雖不同，兩者仍都以細胞作為基本組成單位。",
+      "id": 18
+    },
+    {
+      "unitId": "unit04",
+      "sourceQuestionId": 11,
+      "type": "two_choice",
+      "question": "神經細胞的長突起主要用來？",
+      "options": [
+        "儲存脂肪",
+        "傳遞訊息"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "神經細胞的突起有助接收與傳遞訊息。",
+      "id": 19
+    },
+    {
+      "unitId": "unit04",
+      "sourceQuestionId": 19,
+      "type": "two_choice",
+      "question": "哪種細胞具有細胞壁？",
+      "options": [
+        "洋蔥表皮細胞",
+        "口腔皮膜細胞"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "植物細胞具有細胞壁，動物細胞沒有細胞壁。",
+      "id": 20
+    },
+    {
+      "unitId": "unit05",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "洋蔥鱗葉內側表皮通常有許多葉綠體。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "這部分通常不行光合作用，因此一般觀察不到葉綠體。",
+      "id": 21
+    },
+    {
+      "unitId": "unit05",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "多數真核細胞的 DNA 主要位於？",
+      "options": [
+        "液胞",
+        "細胞核"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "細胞核含有多數遺傳物質。",
+      "id": 22
+    },
+    {
+      "unitId": "unit05",
+      "sourceQuestionId": 9,
+      "type": "two_choice",
+      "question": "有氧呼吸主要在哪個胞器進行？",
+      "options": [
+        "粒線體",
+        "葉綠體"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "粒線體是有氧呼吸產生 ATP 的主要場所。",
+      "id": 23
+    },
+    {
+      "unitId": "unit05",
+      "sourceQuestionId": 13,
+      "type": "two_choice",
+      "question": "成熟植物細胞儲水的主要構造是？",
+      "options": [
+        "細胞核",
+        "液胞"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "大型中央液胞可儲存水與多種物質。",
+      "id": 24
+    },
+    {
+      "unitId": "unit05",
+      "sourceQuestionId": 23,
+      "type": "true_false",
+      "question": "所有活細胞都具有細胞膜。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "細胞膜是原核與真核活細胞共同具有的基本界線。",
+      "id": 25
+    },
+    {
+      "unitId": "unit06",
+      "sourceQuestionId": 2,
+      "type": "true_false",
+      "question": "蘿蔔加鹽出水與滲透作用有關。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "外界鹽濃度升高後，水會由細胞內淨移向外界。",
+      "id": 26
+    },
+    {
+      "unitId": "unit06",
+      "sourceQuestionId": 26,
+      "type": "true_false",
+      "question": "肺泡中的氣體交換主要靠主動運輸。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "肺泡與微血管間的氧氣和二氧化碳主要靠擴散移動。",
+      "id": 27
+    },
+    {
+      "unitId": "unit06",
+      "sourceQuestionId": 27,
+      "type": "two_choice",
+      "question": "紅血球放入低張溶液會？",
+      "options": [
+        "吸水膨脹",
+        "失水皺縮"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "低張溶液會使水淨移入紅血球，嚴重時可能溶血。",
+      "id": 28
+    },
+    {
+      "unitId": "unit06",
+      "sourceQuestionId": 33,
+      "type": "true_false",
+      "question": "細胞膜會阻擋所有物質進出。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "細胞膜不是完全封閉，而具有選擇性通透性。",
+      "id": 29
+    },
+    {
+      "unitId": "unit06",
+      "sourceQuestionId": 36,
+      "type": "two_choice",
+      "question": "細胞膜的基本雙層骨架是？",
+      "options": [
+        "纖維素",
+        "磷脂質"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "細胞膜的基本骨架是磷脂雙層。",
+      "id": 30
+    },
+    {
+      "unitId": "unit07",
+      "sourceQuestionId": 1,
+      "type": "two_choice",
+      "question": "哪一個是單細胞完整個體？",
+      "options": [
+        "新月藻",
+        "神經細胞"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "新月藻的單一細胞就是完整個體；神經細胞是多細胞生物的一部分。",
+      "id": 31
+    },
+    {
+      "unitId": "unit07",
+      "sourceQuestionId": 2,
+      "type": "true_false",
+      "question": "依國中課本，植物具有器官系統層次。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "臺灣國中課本的簡化層次中，植物到器官，動物另有器官系統。",
+      "id": 32
+    },
+    {
+      "unitId": "unit07",
+      "sourceQuestionId": 12,
+      "type": "two_choice",
+      "question": "胃與小腸共同組成？",
+      "options": [
+        "消化組織",
+        "消化系統"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "多個消化器官共同合作，構成消化系統。",
+      "id": 33
+    },
+    {
+      "unitId": "unit07",
+      "sourceQuestionId": 31,
+      "type": "true_false",
+      "question": "蘋果果實屬於生殖器官。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "植物的花、果實與種子歸為生殖器官。",
+      "id": 34
+    },
+    {
+      "unitId": "unit07",
+      "sourceQuestionId": 44,
+      "type": "two_choice",
+      "question": "依課本分類，胸肌主要屬於？",
+      "options": [
+        "肌肉組織",
+        "器官系統"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "國中課本將大量肌纖維組成的胸肌歸為肌肉組織。",
+      "id": 35
+    },
+    {
+      "unitId": "unit08",
+      "sourceQuestionId": 4,
+      "type": "two_choice",
+      "question": "細菌大小常用哪個單位？",
+      "options": [
+        "公里",
+        "微米"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "一般細菌多為微米尺度。",
+      "id": 36
+    },
+    {
+      "unitId": "unit08",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "光年是表示時間的單位。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "光年是光在真空中前進一年的距離，屬於長度單位。",
+      "id": 37
+    },
+    {
+      "unitId": "unit08",
+      "sourceQuestionId": 9,
+      "type": "true_false",
+      "question": "顯微照片也可以標示比例尺。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "比例尺可用於巨觀與微觀影像。",
+      "id": 38
+    },
+    {
+      "unitId": "unit08",
+      "sourceQuestionId": 22,
+      "type": "two_choice",
+      "question": "比例尺 50 μm，細胞長三倍，實長？",
+      "options": [
+        "150 μm",
+        "15 μm"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "50 μm×3＝150 μm。",
+      "id": 39
+    },
+    {
+      "unitId": "unit08",
+      "sourceQuestionId": 34,
+      "type": "true_false",
+      "question": "1 微米等於 1000 奈米。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "1 μm＝1000 nm。",
+      "id": 40
+    },
+    {
+      "unitId": "unit09",
+      "sourceQuestionId": 4,
+      "type": "two_choice",
+      "question": "檢驗葡萄糖常用哪種試劑？",
+      "options": [
+        "碘液",
+        "本氏液"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "本氏液隔水加熱可檢驗葡萄糖等還原糖。",
+      "id": 41
+    },
+    {
+      "unitId": "unit09",
+      "sourceQuestionId": 15,
+      "type": "two_choice",
+      "question": "碘液遇澱粉會變成？",
+      "options": [
+        "藍黑色",
+        "淡藍色"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "碘液遇澱粉會呈藍黑色。",
+      "id": 42
+    },
+    {
+      "unitId": "unit09",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "水、維生素與礦物質都能提供熱量。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "它們不產生熱量，但仍是維持正常生理機能所需的養分。",
+      "id": 43
+    },
+    {
+      "unitId": "unit09",
+      "sourceQuestionId": 26,
+      "type": "true_false",
+      "question": "蛋白質可作為構成與修補組織的原料。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "蛋白質的主要功能之一是構成與修補身體組織。",
+      "id": 44
+    },
+    {
+      "unitId": "unit09",
+      "sourceQuestionId": 43,
+      "type": "two_choice",
+      "question": "每公克脂質約可產生幾大卡？",
+      "options": [
+        "4 大卡",
+        "9 大卡"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "脂質每公克約產生 9 大卡，醣類與蛋白質約 4 大卡。",
+      "id": 45
+    },
+    {
+      "unitId": "unit10",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "酵素通常具有哪項特性？",
+      "options": [
+        "專一性",
+        "通用性"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "不同酵素通常只催化特定受質的特定反應。",
+      "id": 46
+    },
+    {
+      "unitId": "unit10",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "酵素完成一次反應後就會被消耗。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "酵素在催化反應中不會像受質一樣被消耗，通常可再次作用。",
+      "id": 47
+    },
+    {
+      "unitId": "unit10",
+      "sourceQuestionId": 14,
+      "type": "true_false",
+      "question": "低溫通常只會暫時減慢酵素反應。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "若酵素未被破壞，回到適宜溫度後活性通常可恢復。",
+      "id": 48
+    },
+    {
+      "unitId": "unit10",
+      "sourceQuestionId": 32,
+      "type": "true_false",
+      "question": "不同酵素適合的酸鹼值可能不同。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "例如胃蛋白酶適合酸性環境，其他消化酵素可能適合中性或弱鹼性環境。",
+      "id": 49
+    },
+    {
+      "unitId": "unit10",
+      "sourceQuestionId": 47,
+      "type": "two_choice",
+      "question": "澱粉加純水的一組是？",
+      "options": [
+        "實驗組",
+        "對照組"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "純水組可確認澱粉不會在相同條件下自行明顯分解。",
+      "id": 50
+    }
+  ]
+}
