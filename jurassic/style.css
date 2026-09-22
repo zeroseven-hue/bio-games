@@ -294,6 +294,18 @@ body {
   filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
 }
 
+.token.retreating {
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  filter: drop-shadow(0 0 12px #dc2626) brightness(0.85) !important;
+  animation: tokenRetreatBounce 0.6s ease-in-out;
+}
+
+@keyframes tokenRetreatBounce {
+  0% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.35) translateY(-14px) rotate(-15deg); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); }
+}
+
 .stick-part {
   position: absolute;
   border-style: solid;

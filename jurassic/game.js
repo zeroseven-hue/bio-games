@@ -798,6 +798,28 @@ function getNextQuestion(preferredDiff, player) {
   return questionPool.pop();
 }
 
+// 7. 答錯動態退回本回合原點 (帶紅色警示光芒與倒退走動畫)
+function handleWrongAnswerRetreat(player, originPos, message, logText) {
+  player.consecutiveErrors++;
+  player.pos = originPos;
+  updateTokenPosition(player);
+  updateLeaderboard();
+
+  const tokenEl = document.getElementById(`token-${player.id}`);
+  if (tokenEl) {
+    tokenEl.classList.remove("retreating");
+    void tokenEl.offsetWidth;
+    tokenEl.classList.add("retreating");
+    setTimeout(() => {
+      if (tokenEl) tokenEl.classList.remove("retreating");
+    }, 700);
+  }
+
+  updateMessage(message);
+  addLog(logText);
+  finishTurn();
+}
+
 // ⭐ 【全場每格問答】 (方案 A：答錯動態退回本回合擲骰前原格 originPos) + 藤蔓攀爬 + 暴龍爪痕跌落
 function triggerTileQuizEvent(player, originPos) {
   const cellNum = player.pos;
@@ -842,13 +864,12 @@ function triggerTileQuizEvent(player, originPos) {
           finishTurn();
         }, 1200);
       } else {
-        player.consecutiveErrors++;
-        player.pos = originPos;
-        updateTokenPosition(player);
-        updateLeaderboard();
-        updateMessage(`❌ 【${player.name}】 答錯挑戰失敗！錯失藤蔓攀爬，退回第 ${originPos} 格原點！`);
-        addLog(`  -> 🌿 攀升失敗：答錯退回第 ${originPos} 格原點。`);
-        finishTurn();
+        handleWrongAnswerRetreat(
+          player,
+          originPos,
+          `❌ 【${player.name}】 答錯挑戰失敗！錯失藤蔓攀爬，倒退回第 ${originPos} 格原點！`,
+          `  -> 🌿 攀升失敗：答錯倒退回第 ${originPos} 格原點。`
+        );
       }
     });
     return;
@@ -958,13 +979,12 @@ function triggerTileQuizEvent(player, originPos) {
         updateMessage(`✅ 【${player.name}】 解答正確！觸發環境變遷卡試煉！`);
         triggerEnvironmentCard(player);
       } else {
-        player.consecutiveErrors++;
-        player.pos = originPos;
-        updateTokenPosition(player);
-        updateLeaderboard();
-        updateMessage(`❌ 【${player.name}】 答錯挑戰失敗，錯失環境變遷試煉，退回第 ${originPos} 格原點！`);
-        addLog(`  -> 🌋 試煉失敗：答錯退回第 ${originPos} 格原點。`);
-        finishTurn();
+        handleWrongAnswerRetreat(
+          player,
+          originPos,
+          `❌ 【${player.name}】 答錯挑戰失敗，錯失環境變遷試煉，倒退回第 ${originPos} 格原點！`,
+          `  -> 🌋 試煉失敗：答錯倒退回第 ${originPos} 格原點。`
+        );
       }
     });
     return;
@@ -983,14 +1003,13 @@ function triggerTileQuizEvent(player, originPos) {
       updateMessage(`✅ 【${player.name}】 答對生物題！安全在第 ${cellNum} 格整備休息！`);
       addLog(`  -> 🔍 【${player.name}】 答對題目，平安留在第 ${cellNum} 格。`);
     } else {
-      player.consecutiveErrors++;
-      player.pos = originPos;
-      updateTokenPosition(player);
-      updateLeaderboard();
-      updateMessage(`❌ 【${player.name}】 答錯挑戰失敗！退回第 ${originPos} 格原點，下回合再接再勵！`);
-      addLog(`  -> 🔍 【${player.name}】 答錯題目，退回第 ${originPos} 格原點。`);
+      handleWrongAnswerRetreat(
+        player,
+        originPos,
+        `❌ 【${player.name}】 答錯挑戰失敗！倒退回第 ${originPos} 格原點，下回合再接再勵！`,
+        `  -> 🔍 【${player.name}】 答錯題目，倒退回第 ${originPos} 格原點。`
+      );
     }
-    finishTurn();
   });
 }
 
