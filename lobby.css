@@ -220,6 +220,18 @@ body {
   background: #0891b2;
 }
 
+.card-badge.bg-gold {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.btn-play.btn-gold {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.btn-play.btn-gold:hover {
+  background: linear-gradient(135deg, #b45309, #92400e);
+}
+
 .btn-timer-link {
   background: #0284c7;
   color: #ffffff;

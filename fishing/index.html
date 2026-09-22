@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>生物大釣手：黃金深海大捕撈 - Bio-Fishing</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+  <div class="fishing-app">
+    <!-- 頂部 HUD 看板 -->
+    <header class="hud-header">
+      <div class="hud-left">
+        <div class="hud-pill depth-pill">🌊 深度 <span id="depthDisplay">150m</span></div>
+        <div class="hud-pill score-pill">🏆 積分：<span id="scoreDisplay">0</span></div>
+      </div>
+
+      <div class="hud-center">
+        <div class="hud-pill timer-pill">⏳ <span id="timerDisplay">05:00</span></div>
+        <div class="streak-badge hidden" id="streakBadge">🔥 連對 x0</div>
+      </div>
+
+      <div class="hud-right">
+        <button id="btnDrawer" class="btn-hud" title="單元抽屜">⚙️ 單元</button>
+        <button id="btnAudio" class="btn-hud" title="音效切換">🔊</button>
+        <button id="btnPause" class="btn-hud" title="課堂暫停">⏸️</button>
+      </div>
+    </header>
+
+    <!-- 老師專屬單元自選抽屜 (1~10 單元勾選) -->
+    <section class="drawer-panel hidden" id="drawerPanel">
+      <div class="drawer-header">
+        <h3>👨‍🏫 課堂單元出題與模式設定</h3>
+        <button id="btnCloseDrawer" class="btn-drawer-close">✖️ 關閉</button>
+      </div>
+      <div class="drawer-row">
+        <label>遊玩模式：
+          <select id="selectPlayMode">
+            <option value="group">👥 小組合作輪流 (防霸占模式)</option>
+            <option value="solo">🧑‍🚀 個人獨立挑戰</option>
+          </select>
+        </label>
+        <label>挑戰時長：
+          <select id="selectGameTime">
+            <option value="5">⚡ 5 分鐘隨堂快閃戰</option>
+            <option value="10">⏱️ 10 分鐘深海探險挑戰</option>
+          </select>
+        </label>
+      </div>
+      <div class="unit-check-card">
+        <div class="check-actions">
+          <span>勾選本次出題單元 (Unit 01 ~ 10)：</span>
+          <div>
+            <button id="btnCheckAll" class="btn-mini">全選</button>
+            <button id="btnClearAll" class="btn-mini">清空</button>
+          </div>
+        </div>
+        <div class="units-grid" id="unitsGrid"></div>
+      </div>
+      <button id="btnApplyDrawer" class="btn-apply-drawer">💾 套用設定並重新起錨</button>
+    </section>
+
+    <!-- 水面甲板題目展示區 -->
+    <section class="deck-question-board" id="deckBoard">
+      <div class="deck-status-bar">
+        <span class="unit-tag" id="unitTag">單元：載入中...</span>
+        <span class="group-turn-tag" id="groupTurnTag">🎣 本回合神釣手：第 1 棒組員</span>
+      </div>
+      <h2 class="question-stem" id="questionStem">深海探測聲納啟動中...</h2>
+      <!-- 靜止觀察倒數提示條 -->
+      <div class="freeze-read-bar hidden" id="freezeReadBar">
+        <div class="freeze-progress" id="freezeProgress"></div>
+        <span class="freeze-text">👀 聲納鎖定中，請先仔細讀題（魚群就位倒數）...</span>
+      </div>
+    </section>
+
+    <!-- 遊戲主舞台：深海與黃金礦工機械爪 (Canvas) -->
+    <main class="ocean-stage" id="oceanStage">
+      <canvas id="fishingCanvas"></canvas>
+      
+      <!-- 機械爪冷卻遮罩 (抓錯懲罰) -->
+      <div class="cooldown-overlay hidden" id="cooldownOverlay">
+        <div class="cooldown-card">
+          <div class="cooldown-spinner">⚙️</div>
+          <h3>機械爪過熱冷卻中</h3>
+          <p>抓錯魚群需重新校準絞盤（剩餘 <span id="cooldownSec">4</span> 秒）</p>
+          <span class="cooldown-tip">💡 仔細思考再出爪，盲目亂射會浪費更多時間！</span>
+        </div>
+      </div>
+
+      <!-- 觸控盲操導引 (點擊全螢幕發射) -->
+      <div class="touch-launch-zone" id="touchLaunchZone">
+        <div class="touch-guide-pill">👇 點擊螢幕任意處 或 按【空白鍵 / ↓】射出機械爪！</div>
+      </div>
+    </main>
+
+    <!-- 底部資訊條 -->
+    <footer class="app-footer">
+      <span>操作提示：看準角度點擊發射，抓中正確生物大魚獲得高分！</span>
+    </footer>
+
+    <!-- ==================== 彈窗面板 ==================== -->
+
+    <!-- 1. 抓錯魚「💡生物小筆記」彈窗 (方案 B：魚逃跑，吸收解析後重試) -->
+    <div class="modal-backdrop hidden" id="noteModal">
+      <div class="modal-card note-card">
+        <div class="note-top-tag">
+          <span class="warn-badge">⚠️ 哎呀！這隻魚掙脫了！</span>
+          <h3>這不是正確答案，先吸收觀念：</h3>
+        </div>
+        <div class="note-content-box">
+          <h4>💡 生物小筆記：</h4>
+          <p id="noteContent">解析內容...</p>
+        </div>
+        <button id="btnCloseNote" class="btn-modal-action">我吸收了，繼續鎖定剩下的魚 🎯</button>
+      </div>
+    </div>
+
+    <!-- 2. 全場課堂暫停彈窗 -->
+    <div class="modal-backdrop hidden" id="pauseModal">
+      <div class="modal-card pause-card">
+        <h2>⏸️ 課堂講解暫停中</h2>
+        <p style="margin: 12px 0; color: #cbd5e1;">全場釣魚暫停，請抬頭看黑板，專注聽老師講解！</p>
+        <button id="btnResumeGame" class="btn-modal-action">繼續出海捕撈 ⛵</button>
+      </div>
+    </div>
+
+    <!-- 3. 結算登錄班級座號 -->
+    <div class="modal-backdrop hidden" id="idModal">
+      <div class="modal-card id-card">
+        <h2>🚢 探險返航結算！</h2>
+        <p style="margin: 8px 0; color: #94a3b8;">時間到！請輸入班級與組別（或個人座號）領取榮譽證書：</p>
+        <div class="input-fields-col">
+          <input type="text" id="classInput" placeholder="班級 (例: 701)" maxlength="6">
+          <input type="text" id="seatInput" placeholder="組別/座號 (例: 第3組 或 15號)" maxlength="10">
+        </div>
+        <button id="btnCreateCert" class="btn-modal-action">產生成績認證卡 📜</button>
+      </div>
+    </div>
+
+    <!-- 4. Google Classroom 繳交專用防偽證書 -->
+    <div class="modal-backdrop hidden" id="certModal">
+      <div class="modal-card cert-card">
+        <div class="cert-dashed-border">
+          <span class="cert-gold-badge">🏆 國家深海生物研究員證書 🏆</span>
+          <h2 class="cert-main-title">BIO-FISHING: GOLD MINER</h2>
+          <div class="cert-stats-grid">
+            <div class="stat-col">
+              <span class="s-label">深海神釣手</span>
+              <span class="s-val" id="certHeroText">701 班 第 3 組</span>
+            </div>
+            <div class="stat-col">
+              <span class="s-label">防偽驗證碼</span>
+              <span class="s-val cert-code" id="certVerifyCode">FISH-8831</span>
+            </div>
+            <div class="stat-col">
+              <span class="s-label">捕獲總積分</span>
+              <span class="s-val" id="certScoreText">1450 分</span>
+            </div>
+            <div class="stat-col">
+              <span class="s-label">最高連對</span>
+              <span class="s-val" id="certStreakText">5 題 Combo</span>
+            </div>
+          </div>
+          <div class="cert-classroom-hint">
+            <p>📸 <b>請按 iPad 截圖鍵，將此證書截圖繳交至 Google Classroom 作業區</b> 📸</p>
+            <span id="certTimeText" style="font-size:0.75rem; color:#64748b; margin-top:4px; display:block;"></span>
+          </div>
+        </div>
+        <div class="cert-btn-row">
+          <button id="btnRestartFishing" class="btn-modal-action btn-restart">再戰一局 🔄</button>
+          <button id="btnExitToLobby" class="btn-secondary">回遊戲大廳</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>
