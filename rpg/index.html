@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>樂透大冒險：生物勇者傳奇 - RPG Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=2.1">
+  <link rel="stylesheet" href="style.css?v=2.2">
 </head>
 <body>
 
@@ -19,7 +19,7 @@
         <div class="mode-tag" id="modeTag">👥 小組競賽 (第 1 棒作答)</div>
       </div>
 
-      <!-- 勇者血條與裝備狀態展示 -->
+      <!-- 勇者血條與裝備狀態展示 (嚴格防換行與雙行問題) -->
       <div class="header-center">
         <div class="hero-status-pill">
           <div class="stat-item">
@@ -41,13 +41,18 @@
             <span class="stat-label">🛡️ 防具:</span>
             <span class="equip-text" id="armorDisplay">👕 布衣 (+0)</span>
           </div>
+          <div class="stat-item hidden" id="accessoryStatItem">
+            <span class="stat-label">🕶️ 飾品:</span>
+            <span class="equip-text" id="accessoryDisplay">無</span>
+          </div>
         </div>
       </div>
 
       <div class="header-right">
+        <button id="btnLeaderboard" class="btn-tool btn-gold" title="查看班級英雄榮譽榜">🏆 英雄榜</button>
         <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
-        <button id="btnRules" class="btn-tool btn-green" title="查看冒險指南">📖 冒險指南</button>
-        <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+        <button id="btnRules" class="btn-tool btn-green" title="查看冒險指南">📖 指南</button>
+        <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結</button>
         <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
         <button id="btnTimer" class="btn-tool" title="計時器開關">⏱️</button>
       </div>
@@ -73,7 +78,7 @@
           <div class="hero-avatar-wrapper">
             <div class="hero-aura aura-wood" id="heroAura"></div>
             <div class="companion-avatar hidden" id="avatarLele" title="守護犬樂樂">🐶</div>
-            <div class="hero-avatar" id="heroAvatar">🗡️🛡️</div>
+            <div class="hero-avatar" id="heroAvatar">🪵🛡️</div>
             <div class="companion-avatar hidden" id="avatarPudding" title="智慧貓布丁">🐱</div>
           </div>
           <div class="hero-name-badge" id="heroNameBadge">生物勇者 (第 1 棒)</div>
@@ -105,7 +110,7 @@
               <div class="hp-bar-bg">
                 <div class="hp-bar-fill enemy-hp-fill" id="enemyHpFill" style="width: 100%;"></div>
               </div>
-              <span class="enemy-hp-text" id="enemyHpText">50 / 50</span>
+              <span class="enemy-hp-text" id="enemyHpText">100 / 100</span>
             </div>
           </div>
         </div>
@@ -115,8 +120,8 @@
       <!-- 2. 🏕️ 勇者營地補給站 (Camp Scene - 預設隱藏) -->
       <div class="camp-scene hidden" id="campScene">
         <div class="camp-header">
-          <h2>🏕️ 勇者營地補給站 ‧ 武器裝備升級</h2>
-          <p>開寶箱獲得的金幣可在這裡購買神器，提升勇者攻擊力與生命上限！</p>
+          <h2>🏕️ 勇者營地補給站 ‧ 神兵升級與造型裝飾</h2>
+          <p>答對題目與通關獲得的金幣可在這裡購買神器與趣味道具！提升勇者傷害、生命與酷眩外觀！</p>
         </div>
 
         <div class="shop-grid">
@@ -124,8 +129,8 @@
           <div class="shop-card">
             <div class="item-icon">⚔️</div>
             <div class="item-details">
-              <h3>精鋼劍 (ATK +15)</h3>
-              <p>鍛造鋼鐵打造的利刃，能對史萊姆與 Boss 造成更高傷害。</p>
+              <h3>精鋼劍 (ATK +35 ➔ 60 傷)</h3>
+              <p>鍛造鋼鐵打造的利刃，答對 1 題秒答爆發 90 傷！<b>答題砍怪數直接砍半！</b></p>
               <div class="item-price">🪙 50 金幣</div>
             </div>
             <button id="btnBuySteelSword" class="btn-buy">購買裝備</button>
@@ -134,8 +139,8 @@
           <div class="shop-card">
             <div class="item-icon">🗡️✨</div>
             <div class="item-details">
-              <h3>勇者聖劍 (ATK +35)</h3>
-              <p>注入聖光神力的絕世寶劍，揮砍時自帶璀璨黃金光芒！</p>
+              <h3>勇者聖劍 (ATK +95 ➔ 120 傷)</h3>
+              <p>注入璀璨聖光的絕世神劍！秒答狂飆 180 毀滅傷害！<b>Boss 只要 2 題秒殺！</b></p>
               <div class="item-price">🪙 120 金幣</div>
             </div>
             <button id="btnBuyHolySword" class="btn-buy">購買裝備</button>
@@ -145,7 +150,7 @@
           <div class="shop-card">
             <div class="item-icon">🛡️</div>
             <div class="item-details">
-              <h3>鎖子甲 (Max HP +30)</h3>
+              <h3>鎖子甲 (Max HP +60)</h3>
               <p>密合金屬環編織的護甲，顯著提高勇者最大生命值！</p>
               <div class="item-price">🪙 40 金幣</div>
             </div>
@@ -155,11 +160,42 @@
           <div class="shop-card">
             <div class="item-icon">🐉</div>
             <div class="item-details">
-              <h3>龍鱗護甲 (Max HP +70)</h3>
-              <p>傳說巨龍鱗片縫製的頂級鎧甲，賦予強大防禦生命！</p>
+              <h3>龍鱗護甲 (Max HP +150 + 每題自動回 15 HP)</h3>
+              <p>傳說巨龍鱗片鎧甲！<b>答對題目自動吸血恢復 15 HP！</b>永不戰敗！</p>
               <div class="item-price">🪙 100 金幣</div>
             </div>
             <button id="btnBuyDragonArmor" class="btn-buy">購買裝備</button>
+          </div>
+
+          <!-- 🕶️ 趣味道具頭飾區 -->
+          <div class="shop-card accessory-card">
+            <div class="item-icon">🕶️</div>
+            <div class="item-details">
+              <h3>酷炫墨鏡 (ATK +5 + 酷炫造型)</h3>
+              <p>戴上極具質感的墨鏡，增添帥氣度並獲得專屬戰鬥台詞！</p>
+              <div class="item-price">🪙 30 金幣</div>
+            </div>
+            <button id="btnBuySunglasses" class="btn-buy btn-accessory">配戴造型</button>
+          </div>
+
+          <div class="shop-card accessory-card">
+            <div class="item-icon">🥸</div>
+            <div class="item-details">
+              <h3>紳士翹鬍 (ATK +5 + 搞笑鬍子)</h3>
+              <p>戴上逗趣紳士翹鬍，化身風趣優雅的生物冒險大名偵探！</p>
+              <div class="item-price">🪙 30 金幣</div>
+            </div>
+            <button id="btnBuyMustache" class="btn-buy btn-accessory">配戴造型</button>
+          </div>
+
+          <div class="shop-card accessory-card">
+            <div class="item-icon">👑</div>
+            <div class="item-details">
+              <h3>耀眼皇冠 (ATK +10 + 璀璨金光)</h3>
+              <p>象徵尊貴榮耀的皇冠，頭頂自帶閃爍金光！</p>
+              <div class="item-price">🪙 60 金幣</div>
+            </div>
+            <button id="btnBuyCrown" class="btn-buy btn-accessory">配戴造型</button>
           </div>
         </div>
 
@@ -207,49 +243,95 @@
     </div>
   </div>
 
-  <!-- 2. 🎉 通關大獲全勝 Modal (含防偽認證碼與心得填寫) -->
+  <!-- 2. 🎉 通關大獲全勝 Modal (含防偽榮耀認證書卡片與排行榜登錄) -->
   <div class="modal-overlay hidden" id="victoryModal">
     <div class="modal-box victory-box">
       <div class="victory-header">
         <div class="trophy-icon">🏆</div>
-        <h2>🎉 冒險大獲全勝！擊敗紅色三眼大魔王！</h2>
-        <p>全班齊心合力完成生物闖關挑戰，成功救出樂樂與布丁！</p>
+        <h2>🎉 冒險大獲全勝！全破終極龍王荒原！</h2>
+        <p>全班齊心完成生物闖關，擊敗哥布林金幣王與三眼魔王，成功救出樂樂與布丁！</p>
       </div>
 
-      <!-- 防偽認證與心得填寫 -->
-      <div class="cert-form-wrapper">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="inputSeatNo">1. 班級座號 / 小組名：</label>
-            <input type="text" id="inputSeatNo" class="styled-input" placeholder="例如: 701-05號 或 第3組">
+      <!-- 美式奇幻風格 📜 防偽榮耀認證書卡片 -->
+      <div class="cert-card">
+        <div class="cert-card-header">
+          <span class="cert-card-title">📜 國中生物冒險 ‧ 課堂榮耀防偽認證書</span>
+          <span class="rank-badge" id="certRankTitle">👑 傳奇生物聖勇者</span>
+        </div>
+
+        <div class="cert-score-display">
+          🏆 本次挑戰總積分：<span id="certHighScore">0</span> 分
+        </div>
+
+        <!-- 學生資料填寫區 -->
+        <div class="cert-form-wrapper">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="inputSeatNo">1. 班級座號 / 小組名：</label>
+              <input type="text" id="inputSeatNo" class="styled-input" placeholder="例如: 701-05號 或 第3組">
+            </div>
+            <div class="form-group">
+              <label for="inputStudentName">2. 學生姓名 / 隊員名：</label>
+              <input type="text" id="inputStudentName" class="styled-input" placeholder="例如: 王大明">
+            </div>
           </div>
+
           <div class="form-group">
-            <label for="inputStudentName">2. 學生姓名 / 隊員名：</label>
-            <input type="text" id="inputStudentName" class="styled-input" placeholder="例如: 王大明">
+            <label for="inputReflection">3. 📝 本堂課學習心得與錯題討論紀錄：</label>
+            <textarea id="inputReflection" class="styled-textarea" rows="2" placeholder="請寫下今天最印象深刻的生物觀念或與同儕討論心得..."></textarea>
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="inputReflection">3. 📝 本堂課學習心得與錯題討論紀錄：</label>
-          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="請寫下今天最印象深刻的生物觀念或與同儕討論心得..."></textarea>
+        <!-- 全套裝備與夥伴勳章牆 -->
+        <div class="badge-wall" id="badgeWall">
+          <span class="badge-item" id="badgeItemWeapon">⚔️ 武器: 🪵 木劍</span>
+          <span class="badge-item" id="badgeItemArmor">🛡️ 防具: 👕 布衣</span>
+          <span class="badge-item" id="badgeItemAccessory">🕶️ 飾品: 無</span>
+          <span class="badge-item" id="badgeItemCompanions">🐾 夥伴: 🐶 樂樂 / 🐱 布丁</span>
         </div>
 
-        <!-- 認證碼 display -->
+        <!-- 認證碼 display 與官方赤印 -->
         <div class="cert-code-box">
-          <span class="cert-label">🛡️ Google Classroom 防偽驗證卡：</span>
-          <div class="cert-code-value" id="certCodeValue">RPG-8821-70105</div>
-          <small class="cert-subtext">包含了完成時間、最終裝備與驗證雜湊碼，請截圖本畫面上傳作業！</small>
+          <div class="cert-code-row">
+            <div>
+              <span class="cert-label">🛡️ Google Classroom 防偽驗證碼：</span>
+              <div class="cert-code-value" id="certCodeValue">RPG-8821-70105</div>
+            </div>
+            <div class="official-stamp">💮 國中生物研發<br>官方核可關印</div>
+          </div>
+          <small class="cert-subtext">📸 請截圖本畫面上傳作業，或參與班級排行榜！</small>
         </div>
       </div>
 
       <div class="modal-actions-row">
-        <button id="btnCopyCert" class="btn-action btn-gold">📋 複製驗證文字</button>
-        <button id="btnRestartGame" class="btn-action btn-secondary">🔄 重開新冒險</button>
+        <button id="btnSaveToLeaderboard" class="btn-action btn-gold">🏆 登錄班級英雄榜</button>
+        <button id="btnNewGamePlus" class="btn-action btn-purple">⚔️ 帶上滿級神裝 ‧ 再度挑戰衝高分！</button>
+        <button id="btnCopyCert" class="btn-action btn-secondary">📋 複製驗證文字</button>
+        <button id="btnRestartGame" class="btn-action btn-danger">🔄 重開新冒險</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. 📖 冒險指南 Modal -->
+  <!-- 3. 🏆 班級英雄榮譽排行榜 Modal -->
+  <div class="modal-overlay hidden" id="leaderboardModal">
+    <div class="modal-box leaderboard-box">
+      <div class="modal-header">
+        <h2>🏆 樂透大冒險：班級英雄榮譽排行榜</h2>
+        <span class="cert-subtext">紀錄全班最高積分紀錄 ‧ 鼓勵同儕良性競爭</span>
+      </div>
+
+      <div class="leaderboard-container" id="leaderboardContainer">
+        <!-- 排行榜表格即時渲染 -->
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="btnClearLeaderboard" class="btn-action btn-danger">🧹 重置/清除排行榜</button>
+        <button id="btnCloseLeaderboard" class="btn-action btn-success">▶️ 返回冒險</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 📖 冒險指南 Modal -->
   <div class="modal-overlay hidden" id="rulesModal">
     <div class="modal-box rules-box">
       <div class="modal-header">
@@ -257,23 +339,23 @@
       </div>
       <div class="rules-content">
         <div class="rule-item green">
-          <b>⚔️ 1. 答題發動攻擊</b>
-          <p>答對生物題目可發動勇者攻擊，擊敗 2 隻史萊姆與紅色三眼魔王。答錯會遭受怪獸反擊扣血！</p>
+          <b>⚔️ 1. 答題獲得金幣與傷害</b>
+          <p>答對生物題目可獲得 <b>+10 金幣</b>（5 秒內秒答加碼 <b>+5 金幣</b>）。答對發動攻擊，答錯會遭受反擊！</p>
         </div>
         <div class="rule-item yellow">
-          <b>🏕️ 2. 營地補給與神兵裝備</b>
-          <p>第 1、2 關通關後進入營地，可用開寶箱獲得的金幣購買<b>精鋼劍 ⚔️、勇者聖劍 🗡️✨ 與龍鱗護甲 🐉</b>，實時改變武器外觀與攻擊力！</p>
+          <b>🏕️ 2. 神兵與趣味道具商店</b>
+          <p>在營地可用金幣購買<b>精鋼劍 ⚔️、勇者聖劍 🗡️✨、龍鱗護甲 🐉 與酷炫墨鏡 🕶️/翹鬍 🥸/皇冠 👑</b>！購買後打怪題數砍半且吸血回血！</p>
         </div>
         <div class="rule-item pink">
-          <b>🐶🐱 3. 拯救夥伴技能</b>
-          <p>解救<b>樂樂 🐶</b>獲護盾自動抵擋 1 次答錯傷害；解救<b>布丁 🐱</b>可發動 50/50 技能直接刪除 2 個錯誤選項！</p>
+          <b>🏆 3. 榮耀防偽證書與帶裝衝榜</b>
+          <p>通關後生成美式卡牌防偽證書與 Hash 驗證碼，截圖上傳 GC。還可點擊<b>【帶上滿級神裝再挑戰】</b>體驗秒殺怪獸衝爆高分！</p>
         </div>
       </div>
       <button id="btnCloseRules" class="btn-action btn-success">開始勇者冒險！ 🚀</button>
     </div>
   </div>
 
-  <!-- 4. 教師一鍵凍結 Modal -->
+  <!-- 5. 教師一鍵凍結 Modal -->
   <div class="modal-overlay hidden" id="teacherFreezeModal">
     <div class="modal-box freeze-box">
       <div class="freeze-icon">⏸️</div>
@@ -283,6 +365,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=2.1"></script>
+  <script src="game.js?v=2.2"></script>
 </body>
 </html>

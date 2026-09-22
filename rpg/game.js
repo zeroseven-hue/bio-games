@@ -1,35 +1,42 @@
 /**
- * 樂透大冒險：生物勇者傳奇 (RPG Bio-Quest) - 遊戲引擎 V1.0
- * 1. 三關制闖關冒險：草原小徑 (解救樂樂🐶) ➔ 近郊荒野 (解救布丁🐱) ➔ 巨龍王座 (紅色三眼魔王 👹)。
- * 2. 裝備商店與視覺連動：木劍 ➔ 精鋼劍 ➔ 勇者聖劍，光暈與攻擊力實時升級！
- * 3. 夥伴技能：樂樂自動護盾抵擋傷害，布丁 50/50 刪除 2 個錯誤選項！
- * 4. 0 HP CPR 緊急救援與 Fisher-Yates 防重複題庫佇列。
- * 5. 結算卡包含班級座號、學習心得與防偽認證碼 (RPG-8821)。
+ * 樂透大冒險：生物勇者傳奇 (RPG Bio-Quest) - 遊戲引擎 V2.2
+ * 1. 四關制闖關冒險：草原小徑 ➔ 近郊荒野 ➔ 巨龍王座 ➔ 終極龍王荒原 (金幣哥布林 👺💰)。
+ * 2. 裝備神級威力與視覺連動：木劍 🪵🛡️ ➔ 精鋼劍 ⚔️🛡️ (題數砍半) ➔ 勇者聖劍 🗡️✨👑 (秒殺 Boss)。
+ * 3. 趣味道具系統：酷炫墨鏡 🕶️、紳士翹鬍 🥸、耀眼皇冠 👑，即時連動 Avatar 與戰報。
+ * 4. 答題賺錢 (+10g/題 + 秒答+5g) 與龍鱗護甲每題自動回血 15 HP。
+ * 5. 美式卡牌風格防偽榮耀認證書與 Hash 加密驗證碼 (RPG-XXXX-XXXX)。
+ * 6. 班級英雄榮譽排行榜 (localStorage) 與帶裝二週目再挑戰衝榜模式 (New Game+)。
  */
 
-// 裝備清單 (中古世紀奇幻勇者造型)
+// 裝備與飾品清單 (圖示與數值嚴格統一)
 const WEAPONS = [
-  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🗡️🛡️" },
-  { id: "steel", name: "⚔️ 精鋼劍", atk: 15, cost: 50, aura: "aura-steel", icon: "⚔️🛡️" },
-  { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 35, cost: 120, aura: "aura-holy", icon: "⚔️✨👑" }
+  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🪵🛡️" },
+  { id: "steel", name: "⚔️ 精鋼劍", atk: 35, cost: 50, aura: "aura-steel", icon: "⚔️🛡️" },
+  { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 95, cost: 120, aura: "aura-holy", icon: "🗡️✨👑" }
 ];
 
 const ARMORS = [
   { id: "cloth", name: "👕 布衣", hpBonus: 0, cost: 0 },
-  { id: "chain", name: "🛡️ 鎖子甲", hpBonus: 30, cost: 40 },
-  { id: "dragon", name: "🐉 龍鱗護甲", hpBonus: 70, cost: 100 }
+  { id: "chain", name: "🛡️ 鎖子甲", hpBonus: 60, cost: 40 },
+  { id: "dragon", name: "🐉 龍鱗護甲", hpBonus: 150, cost: 100 }
 ];
 
-// 關卡敵人資料 (提升血量硬度 & 自訂邪惡表情怪獸)
+const ACCESSORIES = [
+  { id: "sunglasses", name: "🕶️ 酷炫墨鏡", atkBonus: 5, cost: 30, icon: "🕶️" },
+  { id: "mustache", name: "🥸 紳士翹鬍", atkBonus: 5, cost: 30, icon: "🥸" },
+  { id: "crown", name: "👑 耀眼皇冠", atkBonus: 10, cost: 60, icon: "👑" }
+];
+
+// 4 大關卡敵人資料
 const STAGES = [
   {
     stageNum: 1,
-    title: "🌿 第 1 關：草原小徑",
+    title: "🌿 第 1 关：草原小徑",
     enemies: [
       { name: "調皮綠史萊姆 #1", avatar: "🟢👿", hp: 100, maxHp: 100, atk: 15, class: "slime-green" },
       { name: "調皮綠史萊姆 #2", avatar: "🟢👿", hp: 100, maxHp: 100, atk: 15, class: "slime-green" }
     ],
-    chestGold: 30,
+    chestGold: 50,
     rescueCompanion: "lele"
   },
   {
@@ -39,7 +46,7 @@ const STAGES = [
       { name: "劇毒紫史萊姆 #1", avatar: "🟣👿", hp: 160, maxHp: 160, atk: 20, class: "slime-purple" },
       { name: "劇毒紫史萊姆 #2", avatar: "🟣👿", hp: 160, maxHp: 160, atk: 20, class: "slime-purple" }
     ],
-    chestGold: 50,
+    chestGold: 80,
     rescueCompanion: "pudding"
   },
   {
@@ -48,7 +55,16 @@ const STAGES = [
     enemies: [
       { name: "紅色三眼大魔王 👹", avatar: "👹👁️", hp: 320, maxHp: 320, atk: 25, class: "boss-red" }
     ],
-    chestGold: 100,
+    chestGold: 120,
+    rescueCompanion: null
+  },
+  {
+    stageNum: 4,
+    title: "🏰 第 4 關：終極龍王荒原",
+    enemies: [
+      { name: "龐大金幣哥布林 👺💰", avatar: "👺💰", hp: 400, maxHp: 400, atk: 30, class: "boss-goblin" }
+    ],
+    chestGold: 200,
     rescueCompanion: null
   }
 ];
@@ -58,10 +74,11 @@ let currentStageIndex = 0;
 let currentEnemyIndex = 0;
 let heroHp = 100;
 let heroMaxHp = 100;
-let baseAtk = 30;
+let baseAtk = 25;
 let gold = 0;
 let equippedWeaponIndex = 0;
 let equippedArmorIndex = 0;
+let equippedAccessoryIndex = -1;
 
 let hasLele = false;
 let leleShieldActive = false;
@@ -75,6 +92,12 @@ let timerEnabled = true;
 let isTeacherFrozen = false;
 let isTextZoomed = false;
 
+// 統計與二週目分數
+let correctAnswerCount = 0;
+let quickAnswerCount = 0;
+let totalDamageDealt = 0;
+let ngPlusCount = 0;
+
 let allManifestUnits = [];
 let rawQuestionsByUnit = {};
 let questionPoolByUnit = {};
@@ -82,7 +105,6 @@ let currentActiveQuestion = null;
 let countdownTimer = null;
 let audioCtx = null;
 
-// 防作弊與答題速度動態暴擊機制狀態
 let isCurrentQuizAnsweredCorrectly = false;
 let quizStartTime = 0;
 let lastCalculatedDamage = 0;
@@ -94,6 +116,8 @@ const heroHpText = document.getElementById("heroHpText");
 const goldDisplay = document.getElementById("goldDisplay");
 const weaponDisplay = document.getElementById("weaponDisplay");
 const armorDisplay = document.getElementById("armorDisplay");
+const accessoryDisplay = document.getElementById("accessoryDisplay");
+const accessoryStatItem = document.getElementById("accessoryStatItem");
 const stageInfoText = document.getElementById("stageInfoText");
 const selectUnit = document.getElementById("selectUnit");
 
@@ -116,6 +140,9 @@ const btnBuySteelSword = document.getElementById("btnBuySteelSword");
 const btnBuyHolySword = document.getElementById("btnBuyHolySword");
 const btnBuyChainArmor = document.getElementById("btnBuyChainArmor");
 const btnBuyDragonArmor = document.getElementById("btnBuyDragonArmor");
+const btnBuySunglasses = document.getElementById("btnBuySunglasses");
+const btnBuyMustache = document.getElementById("btnBuyMustache");
+const btnBuyCrown = document.getElementById("btnBuyCrown");
 const btnLeaveCamp = document.getElementById("btnLeaveCamp");
 
 const btnZoomText = document.getElementById("btnZoomText");
@@ -123,6 +150,7 @@ const btnRules = document.getElementById("btnRules");
 const btnFreeze = document.getElementById("btnFreeze");
 const btnSound = document.getElementById("btnSound");
 const btnTimer = document.getElementById("btnTimer");
+const btnLeaderboard = document.getElementById("btnLeaderboard");
 
 // Modals
 const quizModal = document.getElementById("quizModal");
@@ -144,8 +172,22 @@ const inputSeatNo = document.getElementById("inputSeatNo");
 const inputStudentName = document.getElementById("inputStudentName");
 const inputReflection = document.getElementById("inputReflection");
 const certCodeValue = document.getElementById("certCodeValue");
+const certRankTitle = document.getElementById("certRankTitle");
+const certHighScore = document.getElementById("certHighScore");
+const badgeItemWeapon = document.getElementById("badgeItemWeapon");
+const badgeItemArmor = document.getElementById("badgeItemArmor");
+const badgeItemAccessory = document.getElementById("badgeItemAccessory");
+const badgeItemCompanions = document.getElementById("badgeItemCompanions");
+
+const btnSaveToLeaderboard = document.getElementById("btnSaveToLeaderboard");
+const btnNewGamePlus = document.getElementById("btnNewGamePlus");
 const btnCopyCert = document.getElementById("btnCopyCert");
 const btnRestartGame = document.getElementById("btnRestartGame");
+
+const leaderboardModal = document.getElementById("leaderboardModal");
+const leaderboardContainer = document.getElementById("leaderboardContainer");
+const btnClearLeaderboard = document.getElementById("btnClearLeaderboard");
+const btnCloseLeaderboard = document.getElementById("btnCloseLeaderboard");
 
 const rulesModal = document.getElementById("rulesModal");
 const btnCloseRules = document.getElementById("btnCloseRules");
@@ -160,7 +202,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   resetGameState();
 });
 
-// URL 參數設定與讀取
 function initUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const modeParam = urlParams.get("mode");
@@ -194,6 +235,12 @@ function initEventListeners() {
   btnUnfreeze.addEventListener("click", toggleTeacherFreeze);
   btnSound.addEventListener("click", toggleSound);
   btnTimer.addEventListener("click", toggleTimer);
+  btnLeaderboard.addEventListener("click", () => {
+    renderLeaderboard();
+    openModal(leaderboardModal);
+  });
+  btnCloseLeaderboard.addEventListener("click", () => closeModal(leaderboardModal));
+  btnClearLeaderboard.addEventListener("click", clearLeaderboard);
 
   btnStartBattle.addEventListener("click", openBattleQuiz);
 
@@ -201,6 +248,11 @@ function initEventListeners() {
   btnBuyHolySword.addEventListener("click", () => buyWeapon(2));
   btnBuyChainArmor.addEventListener("click", () => buyArmor(1));
   btnBuyDragonArmor.addEventListener("click", () => buyArmor(2));
+
+  btnBuySunglasses.addEventListener("click", () => buyAccessory(0));
+  btnBuyMustache.addEventListener("click", () => buyAccessory(1));
+  btnBuyCrown.addEventListener("click", () => buyAccessory(2));
+
   btnLeaveCamp.addEventListener("click", leaveCampToNextStage);
 
   btnUsePuddingSkill.addEventListener("click", usePudding5050);
@@ -219,6 +271,8 @@ function initEventListeners() {
     executeEnemyAttack();
   });
 
+  btnSaveToLeaderboard.addEventListener("click", saveScoreToLeaderboard);
+  btnNewGamePlus.addEventListener("click", startNewGamePlus);
   btnCopyCert.addEventListener("click", copyCertificationData);
   btnRestartGame.addEventListener("click", () => {
     closeModal(victoryModal);
@@ -228,7 +282,7 @@ function initEventListeners() {
   [inputSeatNo, inputStudentName].forEach(el => el.addEventListener("input", updateCertCode));
 }
 
-// 音效系統 (Web Audio 8-bit Synth)
+// 音效系統 (Web Audio Synth)
 function unlockAudioContext() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume();
@@ -266,7 +320,7 @@ function toggleTimer() {
   btnTimer.textContent = timerEnabled ? "⏱️" : "⏳";
 }
 
-// 載入題庫與 manifest.json
+// 載入題庫
 async function loadManifestAndUnits() {
   try {
     const res = await fetch("../questions/manifest.json");
@@ -317,13 +371,19 @@ function getFallbackQuestions() {
   ];
 }
 
-// 遊戲狀態初始化
+// 重置與裝備狀態
 function resetGameState() {
   currentStageIndex = 0;
   currentEnemyIndex = 0;
   gold = 0;
   equippedWeaponIndex = 0;
   equippedArmorIndex = 0;
+  equippedAccessoryIndex = -1;
+  correctAnswerCount = 0;
+  quickAnswerCount = 0;
+  totalDamageDealt = 0;
+  ngPlusCount = 0;
+
   hasLele = false;
   leleShieldActive = false;
   hasPudding = false;
@@ -340,8 +400,18 @@ function updateHeroStats() {
   heroHp = heroMaxHp;
   weaponDisplay.textContent = w.name;
   armorDisplay.textContent = a.name;
+
+  if (equippedAccessoryIndex >= 0) {
+    const acc = ACCESSORIES[equippedAccessoryIndex];
+    accessoryDisplay.textContent = acc.name;
+    accessoryStatItem.classList.remove("hidden");
+    heroAvatar.textContent = `${w.icon}${acc.icon}`;
+  } else {
+    accessoryStatItem.classList.add("hidden");
+    heroAvatar.textContent = w.icon;
+  }
+
   heroAura.className = `hero-aura ${w.aura}`;
-  heroAvatar.textContent = w.icon;
 }
 
 function updateUI() {
@@ -371,13 +441,18 @@ function updateShopButtons() {
   btnBuyHolySword.disabled = (equippedWeaponIndex >= 2 || gold < 120);
   btnBuyChainArmor.disabled = (equippedArmorIndex >= 1 || gold < 40);
   btnBuyDragonArmor.disabled = (equippedArmorIndex >= 2 || gold < 100);
+
+  btnBuySunglasses.disabled = (equippedAccessoryIndex === 0 || gold < 30);
+  btnBuyMustache.disabled = (equippedAccessoryIndex === 1 || gold < 30);
+  btnBuyCrown.disabled = (equippedAccessoryIndex === 2 || gold < 60);
 }
 
 function setupStage() {
+  // 重置全體怪獸血量 (支援二週目 New Game+)
   const stg = STAGES[currentStageIndex];
   const curEnemy = stg.enemies[currentEnemyIndex];
 
-  stageInfoText.textContent = `${stg.title} ‧ 目標：擊敗 ${curEnemy.name}！`;
+  stageInfoText.textContent = `${stg.title} ${ngPlusCount > 0 ? `[New Game+ x${ngPlusCount}]` : ""} ‧ 目標：擊敗 ${curEnemy.name}！`;
   battleBanner.textContent = `遭遇怪獸 【${curEnemy.name}】！準備進入答題戰鬥！`;
 
   renderMonsterAvatar(curEnemy);
@@ -396,6 +471,8 @@ function renderMonsterAvatar(curEnemy) {
     enemyAvatar.innerHTML = `<div class="slime-blob purple-blob"><span class="blob-eyes">(◣_◢)</span></div>`;
   } else if (curEnemy.class === "boss-red") {
     enemyAvatar.innerHTML = `<div class="boss-blob red-blob"><span class="blob-eyes">👁️👁️👁️</span></div>`;
+  } else if (curEnemy.class === "boss-goblin") {
+    enemyAvatar.innerHTML = `<div class="goblin-blob boss-goblin"><span class="blob-eyes">👺💰</span></div>`;
   } else {
     enemyAvatar.textContent = curEnemy.avatar;
   }
@@ -404,7 +481,7 @@ function renderMonsterAvatar(curEnemy) {
 // 答題戰鬥觸發
 function openBattleQuiz() {
   isCurrentQuizAnsweredCorrectly = false;
-  quizStartTime = Date.now(); // ⏱️ 記錄看題開窗時間戳記
+  quizStartTime = Date.now();
 
   const unitFile = selectUnit.value || "unit01_scientific_method.json";
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
@@ -419,12 +496,10 @@ function openBattleQuiz() {
   quizOptions.innerHTML = "";
   quizExplanation.classList.add("hidden");
 
-  // 🔒 嚴格防偷雞鎖定：攻擊按鈕預設隱藏並禁用，答錯按鈕隱藏
   btnAttackBoss.classList.add("hidden");
   btnAttackBoss.setAttribute("disabled", "true");
   btnCloseWrong.classList.add("hidden");
 
-  // 技能顯示狀態
   btnUsePuddingSkill.classList.toggle("hidden", !hasPudding || puddingSkillUsedInBattle);
   leleShieldNotice.classList.toggle("hidden", !(hasLele && leleShieldActive));
 
@@ -491,32 +566,53 @@ function handleQuizSelect(selectedIndex, btnEl) {
     btnEl.classList.add("correct");
     playSlashSound();
 
-    // ⚡ 計算作答費時與動態暴擊傷害倍率
+    correctAnswerCount++;
+    gold += 10; // 🎯 答對每題固定 +10 金幣獎勵！
+
     const timeTaken = Math.max(0.5, (Date.now() - quizStartTime) / 1000);
     let speedMultiplier = 1.0;
     let speedTag = "";
 
     if (timeTaken <= 5.0) {
       speedMultiplier = 1.5;
-      speedTag = `⚡【極速暴擊 1.5倍】觀念極度熟練！在 ${timeTaken.toFixed(1)} 秒內秒答！`;
+      quickAnswerCount++;
+      gold += 5; // ⚡ 秒答加碼 +5 金幣 (單題總共 +15g)！
+      playCoinSound();
+      speedTag = `⚡【極速暴擊 1.5倍 (+15g 金幣)】作答費時 ${timeTaken.toFixed(1)} 秒！`;
     } else if (timeTaken <= 15.0) {
       speedMultiplier = 1.0;
-      speedTag = `⚔️【勇者重擊 1.0倍】標準發動！作答耗時 ${timeTaken.toFixed(1)} 秒。`;
+      speedTag = `⚔️【勇者重擊 1.0倍 (+10g 金幣)】作答費時 ${timeTaken.toFixed(1)} 秒。`;
     } else {
       speedMultiplier = 0.7;
-      speedTag = `🛡️【謹慎試探 0.7倍】深思熟慮作答，耗時 ${timeTaken.toFixed(1)} 秒。`;
+      speedTag = `🛡️【謹慎試探 0.7倍 (+10g 金幣)】作答耗時 ${timeTaken.toFixed(1)} 秒。`;
+    }
+
+    // 🐉 龍鱗護甲每題自動吸血恢復 15 HP
+    if (equippedArmorIndex === 2) {
+      heroHp = Math.min(heroMaxHp, heroHp + 15);
+      speedTag += `<br><span style="color:#22c55e;">🐉【龍鱗護甲吸血】答對自動恢復 15 HP！</span>`;
     }
 
     const weaponBonus = WEAPONS[equippedWeaponIndex].atk;
-    lastCalculatedDamage = Math.round((baseAtk + weaponBonus) * speedMultiplier);
+    const accessoryBonus = equippedAccessoryIndex >= 0 ? ACCESSORIES[equippedAccessoryIndex].atkBonus : 0;
+    lastCalculatedDamage = Math.round((baseAtk + weaponBonus + accessoryBonus) * speedMultiplier);
+    totalDamageDealt += lastCalculatedDamage;
 
-    explanationText.innerHTML = `<b style="color:#eab308; font-size:1.05rem;">${speedTag} 造成 ${lastCalculatedDamage} 點重擊傷害！</b><br><br>${currentActiveQuestion.explanation || "恭喜答對！發動勇者聖光重擊！"}`;
+    let powerFeedback = "";
+    if (equippedWeaponIndex === 1) {
+      powerFeedback = `<br><span style="color:#38bdf8; font-weight:bold;">💥 精鋼斬威力爆發！答題打怪效率直接砍半！</span>`;
+    } else if (equippedWeaponIndex === 2) {
+      powerFeedback = `<br><span style="color:#eab308; font-weight:bold;">✨ 勇者聖光神打擊！直接秒殺怪獸大半血量！</span>`;
+    }
+
+    explanationText.innerHTML = `<b style="color:#eab308; font-size:1.05rem;">${speedTag} 造成 ${lastCalculatedDamage} 點毀滅傷害！${powerFeedback}</b><br><br>${currentActiveQuestion.explanation || "恭喜答對！發動勇者聖光重擊！"}`;
     quizExplanation.classList.remove("hidden");
 
     btnAttackBoss.textContent = `⚔️ 發動重擊 (${lastCalculatedDamage} 點傷害)！繼續戰鬥 💥`;
     btnAttackBoss.classList.remove("hidden");
     btnAttackBoss.removeAttribute("disabled");
     btnCloseWrong.classList.add("hidden");
+    updateUI();
 
   } else {
     isCurrentQuizAnsweredCorrectly = false;
@@ -531,7 +627,6 @@ function handleQuizSelect(selectedIndex, btnEl) {
     btnCloseWrong.classList.remove("hidden");
   }
 
-  // 小組模式棒次自動切換
   if (gameMode === "group") {
     currentTurnMember = (currentTurnMember % 4) + 1;
     updateUI();
@@ -543,7 +638,7 @@ function executeHeroAttack() {
   const stg = STAGES[currentStageIndex];
   const curEnemy = stg.enemies[currentEnemyIndex];
 
-  const damage = lastCalculatedDamage || (baseAtk + WEAPONS[equippedWeaponIndex].atk);
+  const damage = lastCalculatedDamage || 30;
 
   curEnemy.hp = Math.max(0, curEnemy.hp - damage);
   enemyHpFill.style.width = `${(curEnemy.hp / curEnemy.maxHp) * 100}%`;
@@ -553,14 +648,13 @@ function executeHeroAttack() {
   void enemyAvatar.offsetWidth;
   enemyAvatar.classList.add("hit-anim");
 
-  battleBanner.textContent = `⚔️ 勇者造成了 ${damage} 點重擊傷害！`;
+  battleBanner.textContent = `⚔️ 勇者造成了 ${damage} 點爆發傷害！`;
 
   if (curEnemy.hp <= 0) {
     setTimeout(handleEnemyDefeated, 400);
   }
 }
 
-// 執行怪獸反擊
 function executeEnemyAttack() {
   const stg = STAGES[currentStageIndex];
   const curEnemy = stg.enemies[currentEnemyIndex];
@@ -584,7 +678,6 @@ function executeEnemyAttack() {
   }
 }
 
-// 0 HP 夥伴 CPR 緊急救援保底
 function triggerCprRevive() {
   heroHp = 50;
   updateUI();
@@ -592,7 +685,6 @@ function triggerCprRevive() {
   battleBanner.textContent = "🚑 夥伴 CPR 緊急救援！調降難度接續挑戰！";
 }
 
-// 擊敗怪獸處理
 function handleEnemyDefeated() {
   const stg = STAGES[currentStageIndex];
   playFanfare();
@@ -604,7 +696,6 @@ function handleEnemyDefeated() {
     setupStage();
 
   } else {
-    // 關卡完成，獲得寶箱金幣與救援夥伴
     gold += stg.chestGold;
     playCoinSound();
 
@@ -619,7 +710,7 @@ function handleEnemyDefeated() {
 
     updateUI();
 
-    if (currentStageIndex < 2) {
+    if (currentStageIndex < STAGES.length - 1) {
       currentStageIndex++;
       currentEnemyIndex = 0;
       openCampScene();
@@ -629,7 +720,6 @@ function handleEnemyDefeated() {
   }
 }
 
-// 進入勇者營地
 function openCampScene() {
   battleScene.classList.add("hidden");
   campScene.classList.remove("hidden");
@@ -648,7 +738,7 @@ function buyWeapon(idx) {
     updateHeroStats();
     updateUI();
     playCoinSound();
-    alert(`⚔️ 成功購買裝備【${w.name}】！勇者攻擊力大幅提升！`);
+    alert(`⚔️ 成功購買裝備【${w.name}】！勇者攻擊力飆升！答題打怪題數砍半！`);
   }
 }
 
@@ -660,20 +750,57 @@ function buyArmor(idx) {
     updateHeroStats();
     updateUI();
     playCoinSound();
-    alert(`🛡️ 成功購買防具【${a.name}】！勇者最大血量大幅提升！`);
+    alert(`🛡️ 成功購買防具【${a.name}】！最大血量大幅提升，防護力點滿！`);
   }
 }
 
-// 通關與防偽認證碼
+function buyAccessory(idx) {
+  const acc = ACCESSORIES[idx];
+  if (gold >= acc.cost) {
+    gold -= acc.cost;
+    equippedAccessoryIndex = idx;
+    updateHeroStats();
+    updateUI();
+    playCoinSound();
+    alert(`🕶️ 成功佩戴酷炫飾品【${acc.name}】！造型帥氣度飆升，攻擊力 +${acc.atkBonus}！`);
+  }
+}
+
+// 通關與防偽認證碼 & 排行榜計算
 function openVictoryModal() {
   updateCertCode();
   openModal(victoryModal);
 }
 
+function calculateScore() {
+  return (correctAnswerCount * 100) + (quickAnswerCount * 50) + (totalDamageDealt * 2) + (gold * 5);
+}
+
+function getRankTitle(score) {
+  if (score >= 2500) return "👑 傳奇生物聖勇者";
+  if (score >= 1800) return "⚔️ 疾風聖劍客";
+  if (score >= 1000) return "🛡️ 堅定冒險家";
+  return "🌱 初階生物勇者";
+}
+
 function updateCertCode() {
   const seat = inputSeatNo.value.trim() || "70101號";
-  const name = inputStudentName.value.trim() || "勇者同學";
-  const str = `${seat}-${name}-${gold}g-${equippedWeaponIndex}`;
+  const name = inputStudentName.value.trim() || "生物勇者";
+  const score = calculateScore();
+
+  certHighScore.textContent = score.toLocaleString();
+  certRankTitle.textContent = getRankTitle(score);
+
+  const w = WEAPONS[equippedWeaponIndex];
+  const a = ARMORS[equippedArmorIndex];
+  const acc = equippedAccessoryIndex >= 0 ? ACCESSORIES[equippedAccessoryIndex] : null;
+
+  badgeItemWeapon.textContent = `⚔️ 武器: ${w.name}`;
+  badgeItemArmor.textContent = `🛡️ 防具: ${a.name}`;
+  badgeItemAccessory.textContent = `🕶️ 飾品: ${acc ? acc.name : "無"}`;
+  badgeItemCompanions.textContent = `🐾 夥伴: ${hasLele ? "🐶 樂樂" : ""} ${hasPudding ? "🐱 布丁" : ""}` || "無";
+
+  const str = `${seat}-${name}-${score}-${equippedWeaponIndex}-${equippedArmorIndex}`;
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = (hash << 5) - hash + str.charCodeAt(i);
   const code = Math.abs(hash).toString(16).toUpperCase().padStart(4, "0");
@@ -681,18 +808,115 @@ function updateCertCode() {
 }
 
 function copyCertificationData() {
-  const text = `【樂透大冒險：生物勇者傳奇 - 課堂通關戰報】\n` +
+  const score = calculateScore();
+  const title = getRankTitle(score);
+  const text = `【樂透大冒險：生物勇者傳奇 - 課堂榮耀防偽戰報】\n` +
     `👤 學生/小組：${inputSeatNo.value} ${inputStudentName.value}\n` +
+    `🏆 總積分：${score} 分 (${title})\n` +
     `⚔️ 裝備：${WEAPONS[equippedWeaponIndex].name} / ${ARMORS[equippedArmorIndex].name}\n` +
+    `🕶️ 飾品：${equippedAccessoryIndex >= 0 ? ACCESSORIES[equippedAccessoryIndex].name : "無"}\n` +
     `🪙 剩餘金幣：${gold}g\n` +
     `📝 課堂心得：${inputReflection.value}\n` +
     `🛡️ 防偽認證碼：${certCodeValue.textContent}`;
 
   navigator.clipboard.writeText(text).then(() => {
-    alert("✅ 通關文字與防偽認證碼已成功複製！可直接貼上繳交至 Google Classroom！");
+    alert("✅ 榮耀戰報與防偽認證碼已成功複製！可直接貼上繳交至 Google Classroom！");
   }).catch(() => {
     alert("複製失敗，請手動複製以下內容：\n\n" + text);
   });
+}
+
+// 🏆 排行榜 (Leaderboard LocalStorage)
+function getLeaderboardData() {
+  try {
+    const raw = localStorage.getItem("bio_rpg_leaderboard");
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveScoreToLeaderboard() {
+  const seat = inputSeatNo.value.trim() || "70101號";
+  const name = inputStudentName.value.trim() || "生物勇者";
+  const score = calculateScore();
+  const title = getRankTitle(score);
+  const wIcon = WEAPONS[equippedWeaponIndex].icon;
+  const accIcon = equippedAccessoryIndex >= 0 ? ACCESSORIES[equippedAccessoryIndex].icon : "";
+
+  const list = getLeaderboardData();
+  list.push({
+    seat,
+    name,
+    score,
+    title,
+    avatar: `${wIcon}${accIcon}`,
+    date: new Date().toLocaleDateString()
+  });
+
+  list.sort((a, b) => b.score - a.score);
+  const topList = list.slice(0, 10);
+  localStorage.setItem("bio_rpg_leaderboard", JSON.stringify(topList));
+
+  alert(`🏆 成功登錄班級英雄榮譽榜！【${seat} ${name}】以 ${score} 分獲得 ${title} 榮譽！`);
+  renderLeaderboard();
+  openModal(leaderboardModal);
+}
+
+function renderLeaderboard() {
+  const list = getLeaderboardData();
+  if (list.length === 0) {
+    leaderboardContainer.innerHTML = `<p style="padding:20px; color:#64748b;">🏆 目前尚無排行榜紀錄，快成為第一位全破闖關的英雄吧！</p>`;
+    return;
+  }
+
+  let html = `<table class="leaderboard-table">
+    <thead>
+      <tr>
+        <th>排名</th>
+        <th>勇者資訊</th>
+        <th>裝備造型</th>
+        <th>榮譽稱號</th>
+        <th>最高積分</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  list.forEach((item, index) => {
+    const rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
+    const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `第 ${index + 1} 名`;
+    html += `<tr class="${rankClass}">
+      <td>${medal}</td>
+      <td>${item.seat} ${item.name}</td>
+      <td style="font-size:1.3rem;">${item.avatar}</td>
+      <td>${item.title}</td>
+      <td style="font-size:1.1rem; color:#b45309;">${item.score.toLocaleString()} 分</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  leaderboardContainer.innerHTML = html;
+}
+
+function clearLeaderboard() {
+  if (confirm("⚠️ 確定要清除班級英雄排行榜資料嗎？（適合換新班級上課時重置）")) {
+    localStorage.removeItem("bio_rpg_leaderboard");
+    renderLeaderboard();
+  }
+}
+
+// 🔄 帶裝再挑戰 (New Game+ 二週目)
+function startNewGamePlus() {
+  ngPlusCount++;
+  closeModal(victoryModal);
+  currentStageIndex = 0;
+  currentEnemyIndex = 0;
+
+  // 重置怪獸血量
+  STAGES.forEach(s => s.enemies.forEach(e => e.hp = e.maxHp));
+
+  alert(`⚔️ 帶上滿級神裝踏入二週目 (New Game+ x${ngPlusCount})！體驗一刀秒殺怪獸、衝爆最高積分排行榜！`);
+  setupStage();
 }
 
 function toggleTeacherFreeze() {
