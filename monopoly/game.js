@@ -487,63 +487,19 @@ function updateCoordinates() {
   });
 }
 
-// 5. 3D 旋轉擲骰子與跳躍移動
+// 5. 擲骰子與動態彈跳位移 (極速流暢模式)
 function startDraw(isQuick = false) {
   if (isDrawing || isTeacherFrozen) return;
   unlockAudioContext();
   isDrawing = true;
   isNoBuildMoveTurn = false;
 
-  const dice3DModal = document.getElementById("dice3DModal");
-  const diceCube3D = document.getElementById("diceCube3D");
-  const diceRollText = document.getElementById("diceRollText");
-
   const diceVal = Math.floor(Math.random() * 6) + 1;
   const curTeam = teams[currentTurnIndex];
 
-  if (dice3DModal && diceCube3D) {
-    diceRollText.textContent = `🎲 正在為【${curTeam.name}】投擲 3D 狂歡骰子！`;
-    openModal(dice3DModal);
-
-    // 重設 3D 轉速與旋轉狀態
-    diceCube3D.style.transform = "none";
-    diceCube3D.classList.remove("rolling");
-    void diceCube3D.offsetWidth;
-    diceCube3D.classList.add("rolling");
-
-    // 音效連續咚咚聲 (100ms 拍頻)
-    let tickCount = 0;
-    const tickInterval = setInterval(() => {
-      playTickSound();
-      tickCount++;
-      if (tickCount >= 11) clearInterval(tickInterval);
-    }, 100);
-
-    const faceRotations = {
-      1: "rotateX(0deg) rotateY(0deg)",
-      2: "rotateY(180deg)",
-      3: "rotateY(-90deg)",
-      4: "rotateY(90deg)",
-      5: "rotateX(-90deg)",
-      6: "rotateX(90deg)"
-    };
-
-    setTimeout(() => {
-      clearInterval(tickInterval);
-      diceCube3D.classList.remove("rolling");
-      diceCube3D.style.transform = faceRotations[diceVal];
-      playWinSound();
-
-      setTimeout(() => {
-        closeModal(dice3DModal);
-        diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
-        startJumping(diceVal, isQuick);
-      }, 500);
-    }, 1200);
-  } else {
-    diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
-    startJumping(diceVal, isQuick);
-  }
+  playWinSound();
+  diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
+  startJumping(diceVal, isQuick);
 }
 
 function startJumping(steps, isQuick, isNoBuildMove = false) {
