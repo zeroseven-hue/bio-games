@@ -9,7 +9,7 @@
 
 // 裝備清單 (中古世紀奇幻勇者造型)
 const WEAPONS = [
-  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🗡️🥷" },
+  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🗡️🛡️" },
   { id: "steel", name: "⚔️ 精鋼劍", atk: 15, cost: 50, aura: "aura-steel", icon: "⚔️🛡️" },
   { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 35, cost: 120, aura: "aura-holy", icon: "⚔️✨👑" }
 ];
