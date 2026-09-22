@@ -1,24 +1,26 @@
 /**
- * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V3.0 課堂極致悠閒版
- * 1. 遠離頂部天花板尖刺：小人開局下移登場 (y = 200)，腳下預設 340px 超大安全初生平台！
- * 2. 答對獲得 5 秒「悠閒緩速」護罩：踩對正解速度立即降為 50% 超緩速 (持續 5 秒) + 3 秒無敵！
- * 3. 題目作答時 15% 龜速極緩速：接近命運問答時近乎靜止，讓學生有極度充裕時間秒讀題幹！
- * 4. 預設「⚡ 0.6x 課堂悠閒」超慢基礎速，全班學生皆能輕鬆流暢下樓梯。
- * 5. 全面加寬平台 40% (普通階梯 180~220px，二選一平台 350px 佔半螢幕)，絕不手滑！
- * 6. 生命心提升至 7 顆大心 (❤️❤️❤️❤️❤️❤️❤️)，搭配高頻率「💖 補血階梯」隨時補滿生命。
- * 7. 踩錯答錯安全保底網：正下方 100% 強制刷出安全普通階梯接住角色，防止墜樓！
- * 8. iPad 巨型左右盲操實體按鈕 (> 54px)。
+ * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V4.0 國中七年級極致絲滑版
+ * 1. 60fps 絲滑加權引擎 + 「即按即移、放開即停」極速響應操控，徹底消除滑冰感與微卡頓！
+ * 2. 補血階梯 1.5 秒緩衝碎裂：踩中補血階梯（+1 💖）後，階梯維持 1.5 秒堅固實體讓學生安全移開！
+ * 3. 地下 B30 樓通關目標制：到達 B30 樓（約 2.5 分鐘完賽）即頒發通關證書！
+ * 4. 保留所有經典階梯：普通 🟢、左滾動 ◀◀、右滾動 ▶▶、彈簧 🌀、補血 💖 (1.5s延遲)、碎裂 💥 與 2選1命運問答 ❓！
+ * 5. 答對爆發彩虹星光彩帶與黃金無敵光芒動畫，極致提升成就感！
+ * 6. 遠離頂部天花板尖刺：小人登場位置 (y = 200)，腳下預設 340px 超大安全初生平台！
+ * 7. 答對獲得 5 秒「悠閒緩速」護罩：速度降為 50% (持續 5 秒) + 3 秒無敵！
+ * 8. 題目作答時 15% 龜速極緩速，充裕時間秒讀題幹！
+ * 9. 高對比巨型 iPad 雙側盲操按鈕 (> 54px)。
  */
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
+const GOAL_DEPTH = 30; // 地下 B30 樓通關勝利目標
 
 let hearts = 7;
 let maxHearts = 7;
 let depth = 0;
 let maxDepth = 0;
 let gameTimeSeconds = 0;
-let baseSpeed = 0.6; // 預設 0.6x 超悠閒速度
+let baseSpeed = 0.6; // 預設 0.6x 課堂超悠閒速度
 let speedMultiplier = 1.0;
 let slowdownBoostTimer = 0; // 答對獲得的 5 秒緩速護罩
 let isBulletTime = false;
@@ -30,7 +32,7 @@ let gameLoopTimer = null;
 let secondsTimer = null;
 let lastFrameTime = Date.now();
 
-// 玩家角色物理屬性 (開局登場下移至 y = 200，遠離頂部尖刺)
+// 玩家角色物理屬性 (極速響應：即按即移、放開即停)
 const player = {
   x: 386,
   y: 200,
@@ -38,7 +40,7 @@ const player = {
   vy: 0,
   width: 28,
   height: 36,
-  speed: 5.8,
+  speed: 6.2,
   isGrounded: false,
   invincibleTimer: 0,
   avatar: "🧍‍♂️"
@@ -47,10 +49,11 @@ const player = {
 // 輸入狀態
 const keys = { left: false, right: false };
 
-// 階梯與物體 (維繫畫面上固定 6~7 座均勻階梯)
+// 階梯與粒子系統
 let stairs = [];
 let stairIdCounter = 0;
 let stairCountCounter = 0;
+let starParticles = [];
 
 let currentFateQuestion = null;
 let isFateStairActive = false;
@@ -69,6 +72,7 @@ const canvasContainer = document.getElementById("canvasContainer");
 const modeTag = document.getElementById("modeTag");
 const heartsDisplay = document.getElementById("heartsDisplay");
 const depthDisplay = document.getElementById("depthDisplay");
+const goalProgressFill = document.getElementById("goalProgressFill");
 const timerDisplay = document.getElementById("timerDisplay");
 const selectSpeed = document.getElementById("selectSpeed");
 const selectUnit = document.getElementById("selectUnit");
@@ -309,8 +313,8 @@ function resetGame() {
   speedMultiplier = 1.0;
   slowdownBoostTimer = 0;
   stairCountCounter = 0;
+  starParticles = [];
 
-  // 登場位置下移至 y = 200，遠離天花板頂部尖刺
   player.x = CANVAS_WIDTH / 2 - 14;
   player.y = 200;
   player.vx = 0;
@@ -321,7 +325,7 @@ function resetGame() {
   stairs = [];
   isFateStairActive = false;
 
-  // 1. 開局正下方預設一座 340px 巨型安全初生平台
+  // 1. 開局預設一座 340px 巨型安全初生平台
   stairs.push({
     id: stairIdCounter++,
     type: "NORMAL",
@@ -330,10 +334,11 @@ function resetGame() {
     width: 340,
     height: 18,
     isCrumbled: false,
+    isTriggered: false,
     crumbleTimer: 0
   });
 
-  // 2. 初始化其他 5 座垂直均勻分佈的加寬安全階梯 (距離 85px)
+  // 2. 初始化其他 5 座垂直均勻分佈的加寬階梯 (距離 85px)
   for (let i = 1; i < 6; i++) {
     const y = 245 + i * 85;
     const width = 190;
@@ -346,6 +351,7 @@ function resetGame() {
       width,
       height: 18,
       isCrumbled: false,
+      isTriggered: false,
       crumbleTimer: 0
     });
   }
@@ -365,7 +371,6 @@ function resetGame() {
   }, 1000);
 }
 
-// 新增底層新階梯
 function spawnBottomStair(spawnY) {
   stairCountCounter++;
 
@@ -377,9 +382,9 @@ function spawnBottomStair(spawnY) {
 
   const rand = Math.random();
   let type = "NORMAL";
-  let width = 180 + Math.random() * 40; // 大幅加寬平台
+  let width = 180 + Math.random() * 40;
 
-  if (rand < 0.22) type = "HEART"; // 高頻率補血階梯
+  if (rand < 0.22) type = "HEART"; // 💖 補血階梯 (1.5秒延遲碎裂)
   else if (rand < 0.40) type = "CONVEYOR_LEFT";
   else if (rand < 0.58) type = "CONVEYOR_RIGHT";
   else if (rand < 0.75) type = "SPRING";
@@ -394,11 +399,11 @@ function spawnBottomStair(spawnY) {
     width,
     height: 18,
     isCrumbled: false,
+    isTriggered: false,
     crumbleTimer: 0
   });
 }
 
-// 產生「二選一命運問答階梯」(左 🅰️ vs 右 🅱️ 350px 巨型降落台)
 function spawnFateStairPair(y) {
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
@@ -418,7 +423,7 @@ function spawnFateStairPair(y) {
 
   const isLeftCorrect = Math.random() < 0.5;
 
-  const stairWidth = 350; // 加寬至 350px 巨型平台
+  const stairWidth = 350;
   const leftX = 30;
   const rightX = 420;
 
@@ -431,7 +436,8 @@ function spawnFateStairPair(y) {
     height: 25,
     isCorrect: isLeftCorrect,
     text: `🅰️ ${isLeftCorrect ? correctText : wrongText}`,
-    question: currentFateQuestion
+    question: currentFateQuestion,
+    isCrumbled: false
   };
 
   const rightObj = {
@@ -443,14 +449,34 @@ function spawnFateStairPair(y) {
     height: 25,
     isCorrect: !isLeftCorrect,
     text: `🅱️ ${!isLeftCorrect ? correctText : wrongText}`,
-    question: currentFateQuestion
+    question: currentFateQuestion,
+    isCrumbled: false
   };
 
   stairs.push(leftObj, rightObj);
   playFateSlowdown();
 }
 
-// 遊戲主循環
+// 產生答對爆發彩虹星光彩帶特效
+function spawnStarParticles(x, y) {
+  const colors = ["#fbbf24", "#4ade80", "#38bdf8", "#f472b6", "#a855f7"];
+  for (let i = 0; i < 35; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 6;
+    starParticles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2,
+      size: 4 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1.0,
+      life: 0.8 + Math.random() * 0.4
+    });
+  }
+}
+
+// 60fps 絲滑物理主循環
 function gameLoop() {
   if (!isGameRunning) return;
 
@@ -460,6 +486,7 @@ function gameLoop() {
 
   if (!isTeacherFrozen) {
     updatePhysics(dt);
+    updateParticles(dt);
   }
 
   renderCanvas();
@@ -467,25 +494,24 @@ function gameLoop() {
   gameLoopTimer = requestAnimationFrame(gameLoop);
 }
 
-// 物理模擬與極致悠閒緩速
+// 極速響應與絲滑加權物理模擬
 function updatePhysics(dt) {
   if (player.invincibleTimer > 0) {
     player.invincibleTimer -= dt;
   }
 
-  // 答對獲得的 5 秒悠閒緩速倒數
   if (slowdownBoostTimer > 0) {
     slowdownBoostTimer -= dt;
   }
 
-  // 接近命運階梯時發動 15% 龜速極緩速 (近乎靜止)
+  // 接近命運問答階梯時發動 15% 龜速極緩速 (近乎靜止)
   const hasFateStairNear = stairs.some(s => s.type === "FATE_OPTION" && Math.abs(s.y - player.y) < 170);
   if (hasFateStairNear) {
     isBulletTime = true;
-    speedMultiplier = 0.15; // 龜速 15% 極緩速
+    speedMultiplier = 0.15;
   } else if (slowdownBoostTimer > 0) {
     isBulletTime = false;
-    speedMultiplier = 0.5; // 答對發動 50% 悠閒緩速護罩
+    speedMultiplier = 0.5; // 答對發動 5 秒 50% 悠閒緩速護罩
   } else {
     isBulletTime = false;
     speedMultiplier = 1.0;
@@ -493,25 +519,37 @@ function updatePhysics(dt) {
 
   const currentSpeed = baseSpeed * speedMultiplier;
 
-  // 1. 玩家左右移動
-  if (keys.left) player.vx = -player.speed;
-  else if (keys.right) player.vx = player.speed;
-  else player.vx *= 0.8;
+  // 1. 極速響應操控 (即按即移、放開即停，0 滑冰感)
+  if (keys.left) {
+    player.vx = -player.speed;
+  } else if (keys.right) {
+    player.vx = player.speed;
+  } else {
+    player.vx = 0; // 零延遲立即煞停！
+  }
 
   player.x += player.vx;
   player.x = Math.max(10, Math.min(CANVAS_WIDTH - player.width - 10, player.x));
 
   // 2. 重力加速度
-  player.vy += 0.45;
+  player.vy += 0.48;
   player.y += player.vy;
   player.isGrounded = false;
 
-  // 3. 階梯溫和爬升
+  // 3. 階梯上升 (溫和 1.4px/frame)
   const stairRiseSpeed = 1.4 * currentSpeed;
 
   for (let i = stairs.length - 1; i >= 0; i--) {
     const s = stairs[i];
     s.y -= stairRiseSpeed;
+
+    // 補血階梯 1.5 秒延遲碎裂計時
+    if (s.type === "HEART" && s.isTriggered) {
+      s.crumbleTimer += dt;
+      if (s.crumbleTimer >= 1.5) {
+        s.isCrumbled = true;
+      }
+    }
 
     // 腳底碰撞
     const prevY = player.y - player.vy;
@@ -542,7 +580,7 @@ function updatePhysics(dt) {
     spawnBottomStair(lowestStairY + 90);
   }
 
-  // 5. 頂部天花板尖刺碰撞 (安全彈回與無敵防護)
+  // 5. 頂部天花板尖刺碰撞
   if (player.y <= 25) {
     player.y = 40;
     player.vy = 5;
@@ -567,10 +605,16 @@ function updatePhysics(dt) {
     }
   }
 
-  // 7. 深淵層數
+  // 7. 地下 B30 樓通關目標判斷
   depth = Math.max(depth, Math.floor((CANVAS_HEIGHT - player.y) / 10) + Math.floor(gameTimeSeconds * 2.5));
   maxDepth = Math.max(maxDepth, depth);
   updateUI();
+
+  if (maxDepth >= GOAL_DEPTH && isGameRunning) {
+    playFanfare();
+    spawnStarParticles(CANVAS_WIDTH / 2, 200);
+    gameOver();
+  }
 }
 
 function handleStairCollision(s) {
@@ -582,12 +626,15 @@ function handleStairCollision(s) {
     player.vy = -13;
     playJumpSound();
   } else if (s.type === "HEART") {
-    if (hearts < maxHearts) {
-      hearts++;
-      playHeartSound();
-      showConceptToast("💖 踩中回復階梯！補充 1 顆生命心！");
-      s.isCrumbled = true;
-      updateUI();
+    if (!s.isTriggered) {
+      s.isTriggered = true;
+      s.crumbleTimer = 0;
+      if (hearts < maxHearts) {
+        hearts++;
+        playHeartSound();
+        showConceptToast("💖 踩中補血階梯 (+1 💖)！階梯將於 1.5 秒後碎裂，請安全離去！");
+        updateUI();
+      }
     }
   } else if (s.type === "CRUMBLE") {
     s.crumbleTimer = (s.crumbleTimer || 0) + 1;
@@ -596,13 +643,13 @@ function handleStairCollision(s) {
       playHitSound();
     }
   } else if (s.type === "FATE_OPTION") {
-    // 命運問答階梯結算
     if (s.isCorrect) {
       playFanfare();
       player.invincibleTimer = 3.0;
-      slowdownBoostTimer = 5.0; // 發動 5 秒悠閒緩速護罩！
+      slowdownBoostTimer = 5.0; // 答對獲得 5 秒悠閒緩速護罩！
       player.vy = -8;
-      showConceptToast(`✅ 答對了！發動 5 秒悠閒緩速與無敵衝刺！觀念：${s.question.explanation || "答對恭喜！"}`);
+      spawnStarParticles(player.x + 14, player.y);
+      showConceptToast(`✅ 答對了！發動彩虹星光、5 秒悠閒緩速與無敵衝刺！觀念：${s.question.explanation || "恭喜！"}`);
       isFateStairActive = false;
     } else {
       playHitSound();
@@ -611,13 +658,25 @@ function handleStairCollision(s) {
       showConceptToast(`💡 答錯觀念解析：${s.question.explanation || "請仔細查看解析！"}`);
       isFateStairActive = false;
 
-      // 踩錯答錯保底網：正下方 100% 強制刷出一座 200px 超寬安全階梯接住小人
+      // 答錯保底網：正下方 100% 強制刷出一座 200px 安全普通階梯
       createSafetyStair(player.x - 70, player.y + 70, 200);
     }
   }
 }
 
-// 踩錯答錯安全保底網
+function updateParticles(dt) {
+  for (let i = starParticles.length - 1; i >= 0; i--) {
+    const p = starParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.1;
+    p.alpha -= dt / p.life;
+    if (p.alpha <= 0) {
+      starParticles.splice(i, 1);
+    }
+  }
+}
+
 function createSafetyStair(x, y, width) {
   const safeX = Math.max(20, Math.min(CANVAS_WIDTH - width - 20, x));
   stairs.push({
@@ -628,6 +687,7 @@ function createSafetyStair(x, y, width) {
     width,
     height: 18,
     isCrumbled: false,
+    isTriggered: false,
     crumbleTimer: 0
   });
 }
@@ -654,14 +714,14 @@ function showConceptToast(text) {
 function renderCanvas() {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  // 1. 背景深淵網格
+  // 1. 背景網格
   ctx.strokeStyle = "rgba(51, 65, 85, 0.2)";
   ctx.lineWidth = 1;
   for (let x = 0; x < CANVAS_WIDTH; x += 40) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke();
   }
 
-  // 2. 頂部細胞尖刺
+  // 2. 頂部天花板尖刺
   ctx.fillStyle = "#ef4444";
   for (let x = 0; x < CANVAS_WIDTH; x += 20) {
     ctx.beginPath();
@@ -695,10 +755,11 @@ function renderCanvas() {
       ctx.fillStyle = "#000000"; ctx.font = "bold 12px sans-serif";
       ctx.fillText("🌀 彈簧", s.x + s.width / 2 - 20, s.y + 13);
     } else if (s.type === "HEART") {
-      ctx.fillStyle = "#ec4899";
+      // 補血階梯：若已踩中（1.5s倒數中）呈現動態閃爍提醒
+      ctx.fillStyle = s.isTriggered ? "#f472b6" : "#ec4899";
       ctx.fillRect(s.x, s.y, s.width, s.height);
       ctx.fillStyle = "#ffffff"; ctx.font = "bold 12px sans-serif";
-      ctx.fillText("💖 補血", s.x + s.width / 2 - 20, s.y + 13);
+      ctx.fillText(s.isTriggered ? "⏳ 1.5s碎裂" : "💖 補血", s.x + s.width / 2 - 25, s.y + 13);
     } else if (s.type === "CRUMBLE") {
       ctx.fillStyle = "#78350f";
       ctx.fillRect(s.x, s.y, s.width, s.height);
@@ -728,10 +789,23 @@ function renderCanvas() {
     ctx.fillText(`❓ 命運問答：${currentFateQuestion.shortStem || currentFateQuestion.question}`, 45, 62);
   }
 
-  // 5. 繪製玩家角色
+  // 5. 繪製彩虹星光粒子
+  starParticles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // 6. 繪製玩家角色 (答對發動黃金無敵光芒)
   ctx.save();
-  if (player.invincibleTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
-    ctx.globalAlpha = 0.5;
+  if (player.invincibleTimer > 0) {
+    ctx.shadowColor = "#fbbf24";
+    ctx.shadowBlur = 15;
+    if (Math.floor(Date.now() / 100) % 2 === 0) ctx.globalAlpha = 0.6;
   }
   ctx.font = "30px sans-serif";
   ctx.fillText(player.avatar, player.x - 2, player.y + 28);
@@ -740,7 +814,12 @@ function renderCanvas() {
 
 function updateUI() {
   heartsDisplay.textContent = "❤️".repeat(Math.max(0, hearts));
-  depthDisplay.textContent = `B${maxDepth} 樓`;
+  depthDisplay.textContent = `B${maxDepth} / B${GOAL_DEPTH} 樓`;
+
+  if (goalProgressFill) {
+    const pct = Math.min(100, Math.max(0, (maxDepth / GOAL_DEPTH) * 100));
+    goalProgressFill.style.width = `${pct}%`;
+  }
 
   const m = Math.floor(gameTimeSeconds / 60).toString().padStart(2, "0");
   const s = (gameTimeSeconds % 60).toString().padStart(2, "0");
@@ -752,7 +831,7 @@ function gameOver() {
   cancelAnimationFrame(gameLoopTimer);
   clearInterval(secondsTimer);
 
-  victoryTitle.textContent = hearts > 0 ? "🎉 細胞深淵探險大獲全勝！" : "💥 深淵探險結束！創下深淵紀錄！";
+  victoryTitle.textContent = maxDepth >= GOAL_DEPTH ? "🎉 細胞深淵 B30 樓全勝通關！" : "💥 深淵探險結束！創下深淵紀錄！";
   updateCertCode();
   openModal(victoryModal);
 }
