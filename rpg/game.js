@@ -358,6 +358,11 @@ function updateUI() {
   badgePudding.className = `companion-badge ${hasPudding ? "" : "locked"}`;
   badgePudding.textContent = hasPudding ? "🐱 布丁 (50/50 就緒)" : "🐱 布丁 (未救援)";
 
+  const avatarLele = document.getElementById("avatarLele");
+  const avatarPudding = document.getElementById("avatarPudding");
+  if (avatarLele) avatarLele.classList.toggle("hidden", !hasLele);
+  if (avatarPudding) avatarPudding.classList.toggle("hidden", !hasPudding);
+
   updateShopButtons();
 }
 
@@ -375,14 +380,25 @@ function setupStage() {
   stageInfoText.textContent = `${stg.title} ‧ 目標：擊敗 ${curEnemy.name}！`;
   battleBanner.textContent = `遭遇怪獸 【${curEnemy.name}】！準備進入答題戰鬥！`;
 
-  enemyAvatar.textContent = curEnemy.avatar;
-  enemyAvatar.className = `enemy-avatar ${curEnemy.class || ""}`;
+  renderMonsterAvatar(curEnemy);
   enemyName.textContent = curEnemy.name;
   enemyHpText.textContent = `${curEnemy.hp} / ${curEnemy.maxHp}`;
   enemyHpFill.style.width = `${Math.max(0, (curEnemy.hp / curEnemy.maxHp) * 100)}%`;
 
   battleScene.classList.remove("hidden");
   campScene.classList.add("hidden");
+}
+
+function renderMonsterAvatar(curEnemy) {
+  if (curEnemy.class === "slime-green") {
+    enemyAvatar.innerHTML = `<div class="slime-blob green-blob"><span class="blob-eyes">(｀∀´)</span></div>`;
+  } else if (curEnemy.class === "slime-purple") {
+    enemyAvatar.innerHTML = `<div class="slime-blob purple-blob"><span class="blob-eyes">(◣_◢)</span></div>`;
+  } else if (curEnemy.class === "boss-red") {
+    enemyAvatar.innerHTML = `<div class="boss-blob red-blob"><span class="blob-eyes">👁️👁️👁️</span></div>`;
+  } else {
+    enemyAvatar.textContent = curEnemy.avatar;
+  }
 }
 
 // 答題戰鬥觸發
@@ -590,7 +606,6 @@ function handleEnemyDefeated() {
   } else {
     // 關卡完成，獲得寶箱金幣與救援夥伴
     gold += stg.chestGold;
-    updateUI();
     playCoinSound();
 
     if (stg.rescueCompanion === "lele") {
@@ -601,6 +616,8 @@ function handleEnemyDefeated() {
       hasPudding = true;
       alert("🐱 成功解救智慧貓「布丁」加入隊伍！獲得 50/50 刪除錯誤選項技能！");
     }
+
+    updateUI();
 
     if (currentStageIndex < 2) {
       currentStageIndex++;
