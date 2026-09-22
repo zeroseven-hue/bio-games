@@ -1,17 +1,17 @@
-/* Monopoly Zootopia Bio Style CSS (V3.8) */
+/* Monopoly Zootopia Bio Style CSS (V4.0 Zootopia Carnival Theme) */
 
 :root {
   --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --bg-dark: #0f172a;
-  --panel-bg: rgba(255, 255, 255, 0.98);
+  --panel-bg: #ffffff;
   --text-main: #0f172a;
-  --color-green: #16a34a;
+  --color-green: #10b981;
   --color-blue: #0284c7;
-  --color-gold: #f59e0b;
-  --color-red: #dc2626;
-  --color-purple: #9333ea;
+  --color-gold: #fbbf24;
+  --color-red: #ef4444;
+  --color-purple: #7e22ce;
   --radius-lg: 16px;
-  --radius-md: 10px;
+  --radius-md: 12px;
 }
 
 * {
@@ -23,8 +23,8 @@
 }
 
 body {
-  background-color: #0f172a;
-  background-image: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+  background-color: #3b0764;
+  background-image: radial-gradient(circle at center, #581c87 0%, #1e1b4b 100%);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -36,8 +36,8 @@ body {
 
 .portrait-warning {
   display: none;
-  background: #f59e0b;
-  color: #ffffff;
+  background: #fbbf24;
+  color: #0f172a;
   padding: 8px;
   text-align: center;
   font-weight: bold;
@@ -55,23 +55,25 @@ body {
   max-height: 98vh;
   display: flex;
   flex-direction: column;
-  background: var(--panel-bg);
+  background: #ffffff;
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 20px rgba(251, 191, 36, 0.4);
   overflow: hidden;
+  border: 3px solid #fbbf24;
 }
 
-/* Header Navbar */
+/* Header Navbar - Zootopia Purple & Gold */
 .game-header {
-  height: 52px;
-  min-height: 52px;
+  height: 54px;
+  min-height: 54px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1e293b;
+  background: linear-gradient(135deg, #6b21a8 0%, #3b0764 100%);
   color: #ffffff;
   padding: 4px 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-bottom: 2px solid #fbbf24;
 }
 
 .header-left {
@@ -81,18 +83,21 @@ body {
 }
 
 .game-logo {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 900;
   letter-spacing: 0.5px;
+  color: #fbbf24;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .mode-tag {
   background: #0284c7;
   color: #ffffff;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 800;
+  border: 1px solid #38bdf8;
 }
 
 .turn-indicator {
@@ -648,3 +653,51 @@ body {
 .freeze-box { background: #1e1b4b; color: white; text-align: center; }
 .freeze-icon { font-size: 3.5rem; margin-bottom: 10px; }
 .modal-actions-row { display: flex; gap: 10px; }
+
+/* 3D Rolling Dice Animation Overlay */
+.dice-3d-box {
+  background: radial-gradient(circle, #581c87 0%, #1e1b4b 100%);
+  border: 4px solid #fbbf24;
+  text-align: center;
+  color: #ffffff;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+}
+
+.dice-3d-stage {
+  width: 100px;
+  height: 100px;
+  margin: 20px auto;
+  perspective: 600px;
+}
+
+.dice-cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: spin3DDice 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes spin3DDice {
+  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.6); }
+  50% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg) scale(1.3); }
+  100% { transform: rotateX(1080deg) rotateY(720deg) rotateZ(360deg) scale(1); }
+}
+
+.dice-face {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: #ffffff;
+  border: 3px solid #7e22ce;
+  border-radius: 18px;
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #7e22ce;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
+}

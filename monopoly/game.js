@@ -343,11 +343,15 @@ function getFallbackQuestions() {
   ];
 }
 
+let cellOwners = {};
+let isTakeoverMode = false;
+let isNoBuildMoveTurn = false;
+
 // 4. 初始化競賽隊伍與 10x8 棋盤 (共 28 格)
 function initTeamsAndBoard() {
   teams = ALL_TEAMS.slice(0, activeTeamCount).map(t => ({
     ...t,
-    score: 0,
+    score: 300, // 每隊初始給予 300 金幣
     pos: 0,
     buildingsCount: 0
   }));
@@ -355,13 +359,14 @@ function initTeamsAndBoard() {
   currentTurnIndex = 0;
   currentTileIndex = 0;
   usedBuildingNames = new Set();
+  cellOwners = {};
 
   modeTag.textContent = gameMode === "group" ? `👥 小組競賽 (${activeTeamCount} 隊)` : `👤 個人抽籤模式`;
   renderScoreBar();
   generateBoardGrid();
 }
 
-// 計分板雙指標：顯示得分與 🏠 房屋棟數
+// 計分板雙指標：顯示金幣/得分與 🏠 房屋棟數
 function renderScoreBar() {
   teamScoreBar.innerHTML = "";
   teams.forEach((t, idx) => {
@@ -370,7 +375,7 @@ function renderScoreBar() {
     card.style.borderColor = t.color;
     card.innerHTML = `
       <span>${t.icon} ${t.name}</span>
-      <span style="color:#e67e22;"><b>${t.score}</b> 分</span>
+      <span style="color:#e67e22;">💰 <b>${t.score}</b> 金幣</span>
       <span class="b-count">🏠 ${t.buildingsCount} 棟</span>
     `;
     teamScoreBar.appendChild(card);
@@ -402,7 +407,9 @@ function generateBoardGrid() {
     cell.style.gridRow = pos.r;
 
     let type = "question", icon = "🌱", title = `生態領地 ${idx + 1}`;
-    if ([0, 14].includes(idx)) {
+    if (idx === 0) {
+      type = "start"; icon = "🚩"; title = "Zootopia 總站"; cell.classList.add("corner", "chance");
+    } else if (idx === 14) {
       type = "chance"; icon = "✨"; title = "閃亮機會"; cell.classList.add("corner", "chance");
     } else if ([7, 21].includes(idx)) {
       type = "destiny"; icon = "💢"; title = "驚奇命運"; cell.classList.add("corner", "destiny");
@@ -427,7 +434,6 @@ function generateBoardGrid() {
   setTimeout(updateCoordinates, 250);
 }
 
-// 精準防裁切座標計算 (Clamp 避免 Token 超出底部)
 function updateCoordinates() {
   cellCoordinates = [];
   const bRect = board.getBoundingClientRect();
@@ -454,23 +460,47 @@ function updateCoordinates() {
   });
 }
 
-// 5. 擲骰子與跳躍移動
+// 5. 3D 旋轉擲骰子與跳躍移動
 function startDraw(isQuick = false) {
   if (isDrawing || isTeacherFrozen) return;
   unlockAudioContext();
   isDrawing = true;
+  isNoBuildMoveTurn = false;
+
+  const dice3DModal = document.getElementById("dice3DModal");
+  const diceCube = document.getElementById("diceCube");
+  const diceFaceValue = document.getElementById("diceFaceValue");
+  const diceRollText = document.getElementById("diceRollText");
 
   const diceVal = Math.floor(Math.random() * 6) + 1;
-  const stepsToMove = diceVal;
+  const curTeam = teams[currentTurnIndex];
 
-  diceResultBanner.textContent = `🎲 ${teams[currentTurnIndex].name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
-  startJumping(stepsToMove, isQuick);
+  if (dice3DModal && diceCube) {
+    diceRollText.textContent = `🎲 正在為【${curTeam.name}】投擲狂歡骰子！`;
+    diceFaceValue.textContent = "🎲";
+    openModal(dice3DModal);
+    playTone(450, "sine", 0.05, 0, 0.1);
+
+    setTimeout(() => {
+      diceFaceValue.textContent = diceVal;
+      playWinSound();
+      setTimeout(() => {
+        closeModal(dice3DModal);
+        diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
+        startJumping(diceVal, isQuick);
+      }, 500);
+    }, 600);
+  } else {
+    diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
+    startJumping(diceVal, isQuick);
+  }
 }
 
-function startJumping(steps, isQuick) {
+function startJumping(steps, isQuick, isNoBuildMove = false) {
   let speed = isQuick ? 70 : 110;
   const curTeam = teams[currentTurnIndex];
   const tok = document.getElementById(`token-${curTeam.id}`);
+  if (isNoBuildMove) isNoBuildMoveTurn = true;
 
   const stepRun = () => {
     document.getElementById(`box-${curTeam.pos}`).style.display = "none";
@@ -478,6 +508,14 @@ function startJumping(steps, isQuick) {
     document.getElementById(`box-${curTeam.pos}`).style.display = "block";
 
     playTickSound();
+
+    // 🚩 經過或到達 0 號起點站，給予 +200 金幣獎勵！
+    if (curTeam.pos === 0) {
+      curTeam.score += 200;
+      playFanfare();
+      addHistoryLog(curTeam.name, `🚩 經過/到達 Zootopia 總站起點！發放【+200 金幣】獎勵！`);
+      renderScoreBar();
+    }
 
     if (cellCoordinates[curTeam.pos]) {
       const coord = cellCoordinates[curTeam.pos];
@@ -496,7 +534,14 @@ function startJumping(steps, isQuick) {
       if (steps < 6 && !isQuick) speed += 40;
       setTimeout(stepRun, speed);
     } else {
-      setTimeout(handleTileLanding, 450);
+      setTimeout(() => {
+        if (isNoBuildMoveTurn) {
+          alert(`⚡ 機會/命運卡免答題位移！到站平安，本輪僅純粹位移，禁止建立或強佔領地！`);
+          endTurn();
+        } else {
+          handleTileLanding();
+        }
+      }, 450);
     }
   };
   stepRun();
@@ -507,11 +552,11 @@ function handleTileLanding() {
   const curTeam = teams[currentTurnIndex];
   const pos = curTeam.pos;
 
-  if ([0, 14].includes(pos)) {
+  if (pos === 14) {
     playWinSound();
     const cardText = CHANCE_CARDS[Math.floor(Math.random() * CHANCE_CARDS.length)];
     chanceDesc.textContent = cardText;
-    curTeam.score += 10;
+    curTeam.score += 20;
     addHistoryLog(curTeam.name, `✨ 踩中【閃亮機會】：${cardText}`);
     openModal(chanceModal);
 
@@ -523,19 +568,34 @@ function handleTileLanding() {
     openModal(destinyModal);
 
   } else {
-    if (Math.random() < 0.25) {
-      const taskText = NOVELTY_TASKS[Math.floor(Math.random() * NOVELTY_TASKS.length)];
-      noveltyTask.textContent = taskText;
-      addHistoryLog(curTeam.name, `💡 觸發【新奇互動任務】：${taskText}`);
-      openModal(noveltyModal);
+    // 檢查格子是否有業主
+    const owner = cellOwners[pos];
+    if (owner && owner.teamId !== curTeam.id) {
+      // 踩到敵方領地，詢問是否支付 1.5 倍買斷費 (150 金幣) 強行佔領
+      if (curTeam.score >= 150) {
+        const confirmTakeover = confirm(
+          `⚠️ 此處已被【${owner.teamName}】佔領！(領地原價值 100 金幣)\n\n` +
+          `貴隊【${curTeam.name}】目前擁有 ${curTeam.score} 金幣，是否支付 1.5 倍溢價金幣 (150 金幣) 並挑戰生物題目進行強行佔領？`
+        );
+        if (confirmTakeover) {
+          triggerQuizEvent(true);
+        } else {
+          addHistoryLog(curTeam.name, `🏳️ 踩中敵方【${owner.teamName}】領地，選擇放棄強佔。`);
+          endTurn();
+        }
+      } else {
+        alert(`⚠️ 此處為【${owner.teamName}】的領地！貴隊金幣不足 150 金幣，無法發動 1.5 倍強行佔領！`);
+        endTurn();
+      }
     } else {
-      triggerQuizEvent();
+      triggerQuizEvent(false);
     }
   }
 }
 
-// 7. 觸發生物題目問答
-function triggerQuizEvent() {
+// 7. 觸發生物題目問答 (isTakeover: 是否為強行佔領模式)
+function triggerQuizEvent(isTakeover = false) {
+  isTakeoverMode = isTakeover;
   const unitFile = selectUnit.value || "unit01_scientific_method.json";
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
   quizUnitBadge.textContent = unitObj ? `${unitObj.id.toUpperCase()} ‧ ${unitObj.title}` : "國中生物單元";
@@ -550,11 +610,11 @@ function triggerQuizEvent() {
     if (htmlStem.includes(kw)) htmlStem = htmlStem.replaceAll(kw, `<span class="kw-highlight">${kw}</span>`);
   });
 
-  quizStem.innerHTML = htmlStem;
+  quizStem.innerHTML = isTakeoverMode ? `⚔️【強行佔領攻防戰】${htmlStem}` : htmlStem;
   quizOptions.innerHTML = "";
   quizExplanation.classList.add("hidden");
 
-  // 重設按鈕顯示狀態 (防翻車)
+  // 防作弊核心：重設按鈕 100% 預設隱藏，作答前絕不開放
   btnConfirmAnswer.classList.add("hidden");
   btnCloseWrong.classList.add("hidden");
 
@@ -566,9 +626,7 @@ function triggerQuizEvent() {
     quizOptions.appendChild(btn);
   });
 
-  // 確保彈窗套用放大字體狀態
   quizBox.classList.toggle("zoomed-text", isTextZoomed);
-
   startCountdownTimer();
   openModal(quizModal);
 }
@@ -592,7 +650,7 @@ function startCountdownTimer() {
   }, 1000);
 }
 
-// 8. 答題結算 (答錯 100% 鎖死蓋房，絕無法點選建立領地)
+// 8. 答題結算 (嚴格防偷雞鎖定：答錯 100% 強制隱藏蓋房按鈕！)
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(countdownTimer);
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
@@ -603,34 +661,41 @@ function handleQuizSelect(selectedIndex, btnEl) {
     explanationText.textContent = currentActiveQuestion.explanation || "恭喜答對！獲得建置生態領地的資格！";
     quizExplanation.classList.remove("hidden");
 
-    // 答對才顯示「進行建設」按鈕，隱藏關閉按鈕
+    if (isTakeoverMode) {
+      btnConfirmAnswer.textContent = "⚔️ 答對成功！支付 150 金幣強行佔領領地 🏰";
+    } else {
+      btnConfirmAnswer.textContent = "✅ 答對成功！支付 100 金幣前往建立領地 🏰";
+    }
+
+    // 答對解鎖蓋房/強佔按鈕，隱藏關閉按鈕
     btnConfirmAnswer.classList.remove("hidden");
     btnCloseWrong.classList.add("hidden");
 
-    teams[currentTurnIndex].score += 15;
-    addHistoryLog(teams[currentTurnIndex].name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+15分)`);
+    teams[currentTurnIndex].score += 20;
+    addHistoryLog(teams[currentTurnIndex].name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+20金幣)`);
 
   } else {
     btnEl.classList.add("incorrect");
     playWrongSound();
-    explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請詳閱觀念解析再接再厲！";
+    explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請詳閱觀念解析再接再勵！";
     quizExplanation.classList.remove("hidden");
 
-    // 答錯 100% 鎖死蓋房！隱藏蓋房按鈕，只顯示關閉按鈕
+    // 🔒 答錯 100% 鎖死蓋房！強制隱藏綠色蓋房按鈕，學生絕無法偷雞蓋房！
     btnConfirmAnswer.classList.add("hidden");
+    btnCloseWrong.textContent = "❌ 答錯扣分！關閉結束本輪 ➡️";
     btnCloseWrong.classList.remove("hidden");
 
     addHistoryLog(teams[currentTurnIndex].name, `❌ 答錯題目：【${currentActiveQuestion.question.slice(0, 15)}...】`);
   }
 }
 
-// 9. 答對建立生態領地 (帶隊伍頭像與色彩、不重複建築名稱機制)
+// 9. 答對建立或強行佔領生態領地
 function openBuildModal() {
   const curTeam = teams[currentTurnIndex];
   currentPendingBuildCellId = curTeam.pos;
 
   buildTeamIcon.textContent = curTeam.icon;
-  buildModalTitle.textContent = `🎉 ${curTeam.name} 建立專屬生態領地！`;
+  buildModalTitle.textContent = isTakeoverMode ? `⚔️ ${curTeam.name} 強行收購敵方領地！` : `🎉 ${curTeam.name} 建立專屬生態領地！`;
   recommendBuildList.innerHTML = "";
 
   let defaultUnusedName = "";
@@ -662,16 +727,25 @@ function openBuildModal() {
 function confirmBuildHouse() {
   const curTeam = teams[currentTurnIndex];
   const bName = inputBuildName.value.trim() || "生態研究站";
+  const cost = isTakeoverMode ? 150 : 100;
+
+  if (curTeam.score < cost) {
+    alert(`⚠️ 貴隊金幣不足 (${curTeam.score} < ${cost})，無法進行建置！`);
+    return;
+  }
 
   if (usedBuildingNames.has(bName)) {
     alert(`⚠️ 建築名稱『${bName}』已經在動物城被建立過了！\n請發揮創意選擇或輸入一個獨一無二的生態建築名稱！`);
     return;
   }
 
+  curTeam.score -= cost;
   usedBuildingNames.add(bName);
 
-  const buildArea = document.getElementById(`build-${currentPendingBuildCellId}`);
+  const cellId = currentPendingBuildCellId;
+  const buildArea = document.getElementById(`build-${cellId}`);
   if (buildArea) {
+    buildArea.innerHTML = ""; // 強佔時替換舊建物
     const badge = document.createElement("div");
     badge.className = "building-badge";
     badge.innerHTML = `${curTeam.icon} 🏠 ${bName}`;
@@ -679,9 +753,19 @@ function confirmBuildHouse() {
     buildArea.appendChild(badge);
   }
 
+  cellOwners[cellId] = {
+    teamId: curTeam.id,
+    teamName: curTeam.name,
+    teamIcon: curTeam.icon,
+    color: curTeam.color,
+    buildingName: bName,
+    cost
+  };
+
   curTeam.buildingsCount += 1;
-  addHistoryLog(curTeam.name, `🏰 成功建立領地：【${curTeam.icon} ${bName}】`);
+  addHistoryLog(curTeam.name, isTakeoverMode ? `⚔️ 成功強行佔領敵方領地：【${curTeam.icon} ${bName}】(-150金幣)` : `🏰 成功建立領地：【${curTeam.icon} ${bName}】(-100金幣)`);
   closeModal(buildModal);
+  renderScoreBar();
   endTurn();
 }
 
