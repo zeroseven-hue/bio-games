@@ -270,20 +270,33 @@ async function loadManifestAndUnits() {
   }
 }
 
+const NEGATIVE_KEYWORDS = ["錯誤", "非", "不包含", "不屬於", "不合適", "何者不", "無法", "不正確", "不行"];
+
+function filterPositiveQuestions(rawList) {
+  if (!rawList || !Array.isArray(rawList)) return [];
+  const filtered = rawList.filter(q => {
+    if (!q || !q.question || !Array.isArray(q.options) || q.options.length < 2) return false;
+    const isNegative = NEGATIVE_KEYWORDS.some(kw => q.question.includes(kw));
+    return !isNegative;
+  });
+  return filtered.length > 0 ? filtered : rawList;
+}
+
 function getNextQuestionFromPool(unitFile) {
   if (unitFile === "ALL") {
     let combined = [];
     Object.values(rawQuestionsByUnit).forEach(list => combined.push(...list));
-    if (combined.length === 0) combined = getFallbackQuestions();
+    const safeList = filterPositiveQuestions(combined.length > 0 ? combined : getFallbackQuestions());
     if (!questionPoolByUnit["ALL"] || questionPoolByUnit["ALL"].length === 0) {
-      questionPoolByUnit["ALL"] = shuffleArray([...combined]);
+      questionPoolByUnit["ALL"] = shuffleArray([...safeList]);
     }
     return questionPoolByUnit["ALL"].pop();
   }
 
   if (!questionPoolByUnit[unitFile] || questionPoolByUnit[unitFile].length === 0) {
     const rawList = rawQuestionsByUnit[unitFile] || getFallbackQuestions();
-    questionPoolByUnit[unitFile] = shuffleArray([...rawList]);
+    const safeList = filterPositiveQuestions(rawList);
+    questionPoolByUnit[unitFile] = shuffleArray([...safeList]);
   }
   return questionPoolByUnit[unitFile].pop();
 }
@@ -388,11 +401,13 @@ function spawnBottomStair(spawnY) {
   let type = "NORMAL";
   let width = 180 + Math.random() * 40;
 
-  if (rand < 0.22) type = "HEART"; // 💖 補血階梯
-  else if (rand < 0.40) type = "CONVEYOR_LEFT";
-  else if (rand < 0.58) type = "CONVEYOR_RIGHT";
-  else if (rand < 0.75) type = "SPRING";
-  else if (rand < 0.88) type = "CRUMBLE";
+  // 優化後發配比例：NORMAL 60%, HEART 15%, CONVEYOR_LEFT 7.5%, CONVEYOR_RIGHT 7.5%, SPRING 5%, CRUMBLE 5%
+  if (rand < 0.60) type = "NORMAL";
+  else if (rand < 0.75) type = "HEART";
+  else if (rand < 0.825) type = "CONVEYOR_LEFT";
+  else if (rand < 0.90) type = "CONVEYOR_RIGHT";
+  else if (rand < 0.95) type = "SPRING";
+  else type = "CRUMBLE";
 
   const x = Math.random() * (CANVAS_WIDTH - width - 60) + 30;
   stairs.push({
@@ -412,8 +427,8 @@ function spawnFateStairPair(y) {
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
 
-  if (currentFateQuestion.question && currentFateQuestion.question.length > 25) {
-    currentFateQuestion.shortStem = currentFateQuestion.question.substring(0, 24) + "...";
+  if (currentFateQuestion.question && currentFateQuestion.question.length > 32) {
+    currentFateQuestion.shortStem = currentFateQuestion.question.substring(0, 31) + "...";
   } else {
     currentFateQuestion.shortStem = currentFateQuestion.question;
   }
@@ -427,9 +442,10 @@ function spawnFateStairPair(y) {
 
   const isLeftCorrect = Math.random() < 0.5;
 
-  const stairWidth = 350;
-  const leftX = 30;
-  const rightX = 420;
+  const stairWidth = 220;
+  const stairHeight = 36;
+  const leftX = 70;
+  const rightX = 510;
 
   const leftObj = {
     id: stairIdCounter++,
@@ -437,8 +453,10 @@ function spawnFateStairPair(y) {
     x: leftX,
     y,
     width: stairWidth,
-    height: 25,
+    height: stairHeight,
     isCorrect: isLeftCorrect,
+    optionLabel: "🅰️",
+    optionText: isLeftCorrect ? correctText : wrongText,
     text: `🅰️ ${isLeftCorrect ? correctText : wrongText}`,
     question: currentFateQuestion,
     isCrumbled: false,
@@ -451,8 +469,10 @@ function spawnFateStairPair(y) {
     x: rightX,
     y,
     width: stairWidth,
-    height: 25,
+    height: stairHeight,
     isCorrect: !isLeftCorrect,
+    optionLabel: "🅱️",
+    optionText: !isLeftCorrect ? correctText : wrongText,
     text: `🅱️ ${!isLeftCorrect ? correctText : wrongText}`,
     question: currentFateQuestion,
     isCrumbled: false,
@@ -460,7 +480,6 @@ function spawnFateStairPair(y) {
   };
 
   stairs.push(leftObj, rightObj);
-  playFateSlowdown();
 }
 
 function spawnStarParticles(x, y) {
@@ -499,7 +518,7 @@ function gameLoop() {
   gameLoopTimer = requestAnimationFrame(gameLoop);
 }
 
-// 超前提前 380px 發動 12% 龜速與即時醒目出題
+// 命運問答時機：當階梯進入畫面 (y <= 540) 且離小人 <= 240px 時啟動 0.3x 適度減速
 function updatePhysics(dt) {
   if (player.invincibleTimer > 0) {
     player.invincibleTimer -= dt;
@@ -509,14 +528,10 @@ function updatePhysics(dt) {
     slowdownBoostTimer -= dt;
   }
 
-  // 超前距離 380px 發動 12% 龜速極緩速
-  const fateStairNear = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && (s.y - player.y) < 380 && (s.y - player.y) > -50);
+  const fateStairNear = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && s.y <= 540 && (s.y - player.y) < 240 && (s.y - player.y) > -50);
   if (fateStairNear) {
     isBulletTime = true;
-    speedMultiplier = 0.12;
-  } else if (slowdownBoostTimer > 0) {
-    isBulletTime = false;
-    speedMultiplier = 0.5;
+    speedMultiplier = 0.3; // 輕度減速 0.3x
   } else {
     isBulletTime = false;
     speedMultiplier = 1.0;
@@ -653,9 +668,11 @@ function handleStairCollision(s) {
         s.isTriggered = true;
         playFanfare();
         player.invincibleTimer = 3.0;
-        slowdownBoostTimer = 5.0; // 5 秒悠閒緩速護罩
+        slowdownBoostTimer = 0; // 立刻恢復 100% 正常速度
+        isBulletTime = false;
+        speedMultiplier = 1.0;
         spawnStarParticles(player.x + 14, player.y);
-        showConceptToast(`✅ 答對了！發動彩虹星光、5 秒悠閒緩速與無敵護罩！觀念：${s.question.explanation || "恭喜！"}`);
+        showConceptToast(`✅ 答對了！發動無敵護罩並恢復順暢速度！觀念：${s.question.explanation || "恭喜答對！"}`);
         isFateStairActive = false;
       }
     } else {
@@ -778,24 +795,32 @@ function renderCanvas() {
       ctx.lineWidth = 2.5;
       ctx.strokeRect(s.x, s.y, s.width, s.height);
 
+      const txt = `${s.optionLabel || ""} ${s.optionText || s.text || ""}`;
+      const charLen = txt.length;
+      let fontSize = 15;
+      if (charLen > 14) fontSize = 12;
+      else if (charLen > 10) fontSize = 13;
+      if (isTextZoomed) fontSize += 2;
+
       ctx.fillStyle = "#ffffff";
-      ctx.font = isTextZoomed ? "bold 16px sans-serif" : "bold 14px sans-serif";
-      ctx.fillText(s.text, s.x + 12, s.y + 17);
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.fillText(txt, s.x + 8, s.y + 23);
     }
   });
 
-  // 4. 命運題目頂部醒目橫條
-  const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled);
+  // 4. 命運題目頂部醒目橫條 (高度 65px，18px 粗體)
+  const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && s.y <= 550);
   if (fateStairActive && currentFateQuestion) {
     ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
-    ctx.fillRect(30, 30, CANVAS_WIDTH - 60, 52);
+    ctx.fillRect(20, 20, CANVAS_WIDTH - 40, 65);
     ctx.strokeStyle = "#f59e0b";
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(30, 30, CANVAS_WIDTH - 60, 52);
+    ctx.lineWidth = 3;
+    ctx.strokeRect(20, 20, CANVAS_WIDTH - 40, 65);
 
+    const titleFont = isTextZoomed ? "bold 20px sans-serif" : "bold 18px sans-serif";
     ctx.fillStyle = "#fbbf24";
-    ctx.font = isTextZoomed ? "bold 16px sans-serif" : "bold 14px sans-serif";
-    ctx.fillText(`❓ 命運問答：${currentFateQuestion.shortStem || currentFateQuestion.question}`, 45, 62);
+    ctx.font = titleFont;
+    ctx.fillText(`❓ 命運問答：${currentFateQuestion.shortStem || currentFateQuestion.question}`, 35, 58);
   }
 
   // 5. 繪製彩虹星光粒子
