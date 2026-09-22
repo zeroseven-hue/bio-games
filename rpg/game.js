@@ -10,9 +10,9 @@
 
 // 裝備與飾品清單 (圖示與數值嚴格統一)
 const WEAPONS = [
-  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🪵🛡️" },
-  { id: "steel", name: "⚔️ 精鋼劍", atk: 35, cost: 50, aura: "aura-steel", icon: "⚔️🛡️" },
-  { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 95, cost: 120, aura: "aura-holy", icon: "🗡️✨👑" }
+  { id: "wood", name: "🗡️ 練習木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🐼🗡️" },
+  { id: "steel", name: "⚔️ 精鋼劍", atk: 35, cost: 50, aura: "aura-steel", icon: "🐼⚔️" },
+  { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 95, cost: 120, aura: "aura-holy", icon: "🐼🗡️✨" }
 ];
 
 const ARMORS = [
@@ -31,7 +31,7 @@ const ACCESSORIES = [
 const STAGES = [
   {
     stageNum: 1,
-    title: "🌿 第 1 关：草原小徑",
+    title: "🌿 第 1 關：草原小徑",
     enemies: [
       { name: "調皮綠史萊姆 #1", avatar: "🟢👿", hp: 100, maxHp: 100, atk: 15, class: "slime-green" },
       { name: "調皮綠史萊姆 #2", avatar: "🟢👿", hp: 100, maxHp: 100, atk: 15, class: "slime-green" }
@@ -405,7 +405,11 @@ function updateHeroStats() {
     const acc = ACCESSORIES[equippedAccessoryIndex];
     accessoryDisplay.textContent = acc.name;
     accessoryStatItem.classList.remove("hidden");
-    heroAvatar.textContent = `${w.icon}${acc.icon}`;
+    if (acc.icon === "👑") {
+      heroAvatar.textContent = `👑${w.icon}`;
+    } else {
+      heroAvatar.textContent = `🐼${acc.icon}${w.icon.replace("🐼", "")}`;
+    }
   } else {
     accessoryStatItem.classList.add("hidden");
     heroAvatar.textContent = w.icon;
