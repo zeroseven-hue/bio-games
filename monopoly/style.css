@@ -441,7 +441,7 @@ body {
   z-index: 100;
 }
 
-.modal-overlay.hidden { display: none; }
+.hidden { display: none !important; }
 
 .modal-box {
   background: #ffffff;

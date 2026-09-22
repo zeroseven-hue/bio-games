@@ -223,11 +223,33 @@ function initEventListeners() {
   btnSaveSettings.addEventListener("click", saveSettings);
   fileInput.addEventListener("change", handleFileUpload);
 
-  btnCloseChance.addEventListener("click", () => { closeModal(chanceModal); endTurn(); });
-  btnCloseDestiny.addEventListener("click", () => { closeModal(destinyModal); endTurn(); });
+  btnCloseChance.addEventListener("click", () => {
+    closeModal(chanceModal);
+    const txt = chanceDesc.textContent || "";
+    if (txt.includes("向前飛躍 3 格")) {
+      startJumping(3, true, true);
+    } else {
+      endTurn();
+    }
+  });
+
+  btnCloseDestiny.addEventListener("click", () => {
+    closeModal(destinyModal);
+    const txt = destinyDesc.textContent || "";
+    if (txt.includes("退後 2 格")) {
+      startJumping(26, true, true);
+    } else {
+      endTurn();
+    }
+  });
+
   btnCloseNovelty.addEventListener("click", () => { closeModal(noveltyModal); triggerQuizEvent(); });
 
   btnConfirmAnswer.addEventListener("click", () => {
+    if (!isCurrentQuizAnsweredCorrectly) {
+      alert("⚠️ 作答未完成或答錯題目，嚴格禁止建立或強佔領地！");
+      return;
+    }
     closeModal(quizModal);
     openBuildModal();
   });
@@ -346,6 +368,7 @@ function getFallbackQuestions() {
 let cellOwners = {};
 let isTakeoverMode = false;
 let isNoBuildMoveTurn = false;
+let isCurrentQuizAnsweredCorrectly = false;
 
 // 4. 初始化競賽隊伍與 10x8 棋盤 (共 28 格)
 function initTeamsAndBoard() {
@@ -596,6 +619,8 @@ function handleTileLanding() {
 // 7. 觸發生物題目問答 (isTakeover: 是否為強行佔領模式)
 function triggerQuizEvent(isTakeover = false) {
   isTakeoverMode = isTakeover;
+  isCurrentQuizAnsweredCorrectly = false; // 預設 100% 重設為未答對
+
   const unitFile = selectUnit.value || "unit01_scientific_method.json";
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
   quizUnitBadge.textContent = unitObj ? `${unitObj.id.toUpperCase()} ‧ ${unitObj.title}` : "國中生物單元";
@@ -614,8 +639,9 @@ function triggerQuizEvent(isTakeover = false) {
   quizOptions.innerHTML = "";
   quizExplanation.classList.add("hidden");
 
-  // 防作弊核心：重設按鈕 100% 預設隱藏，作答前絕不開放
+  // 防作弊核心：重設按鈕 100% 預設隱藏並禁用，作答前絕不開放
   btnConfirmAnswer.classList.add("hidden");
+  btnConfirmAnswer.setAttribute("disabled", "true");
   btnCloseWrong.classList.add("hidden");
 
   currentActiveQuestion.options.forEach((optText, idx) => {
@@ -650,12 +676,13 @@ function startCountdownTimer() {
   }, 1000);
 }
 
-// 8. 答題結算 (嚴格防偷雞鎖定：答錯 100% 強制隱藏蓋房按鈕！)
+// 8. 答題結算 (嚴格防偷雞鎖定：答錯 100% 強制隱藏並禁用蓋房按鈕！)
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(countdownTimer);
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
 
   if (isCorrect) {
+    isCurrentQuizAnsweredCorrectly = true;
     btnEl.classList.add("correct");
     playFanfare();
     explanationText.textContent = currentActiveQuestion.explanation || "恭喜答對！獲得建置生態領地的資格！";
@@ -669,19 +696,22 @@ function handleQuizSelect(selectedIndex, btnEl) {
 
     // 答對解鎖蓋房/強佔按鈕，隱藏關閉按鈕
     btnConfirmAnswer.classList.remove("hidden");
+    btnConfirmAnswer.removeAttribute("disabled");
     btnCloseWrong.classList.add("hidden");
 
     teams[currentTurnIndex].score += 20;
     addHistoryLog(teams[currentTurnIndex].name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+20金幣)`);
 
   } else {
+    isCurrentQuizAnsweredCorrectly = false;
     btnEl.classList.add("incorrect");
     playWrongSound();
     explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請詳閱觀念解析再接再勵！";
     quizExplanation.classList.remove("hidden");
 
-    // 🔒 答錯 100% 鎖死蓋房！強制隱藏綠色蓋房按鈕，學生絕無法偷雞蓋房！
+    // 🔒 答錯 100% 鎖死蓋房！強制隱藏與禁用綠色蓋房按鈕，學生絕無法偷雞蓋房！
     btnConfirmAnswer.classList.add("hidden");
+    btnConfirmAnswer.setAttribute("disabled", "true");
     btnCloseWrong.textContent = "❌ 答錯扣分！關閉結束本輪 ➡️";
     btnCloseWrong.classList.remove("hidden");
 
