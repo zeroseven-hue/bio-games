@@ -228,7 +228,7 @@ function playTone(freq, type, duration, delay = 0, vol = 0.1) {
 }
 
 function playJumpSound() { playTone(400, "sine", 0.08, 0, 0.1); }
-function playStepSound() { playTone(520, "triangle", 0.05, 0, 0.08); }
+function playStepSound() { playTone(280, "sine", 0.03, 0, 0.04); } // 輕柔木質 Tap 著地下樓梯音效
 function playConveyorSound() { playTone(220, "sine", 0.06, 0, 0.05); }
 function playHeartSound() { playTone(800, "sine", 0.1, 0, 0.12); playTone(1200, "sine", 0.15, 0.08, 0.12); }
 function playHitSound() { playTone(150, "square", 0.15, 0, 0.15); }
@@ -580,6 +580,7 @@ function updatePhysics(dt) {
   // 2. 重力加速度
   player.vy += 0.48;
   player.y += player.vy;
+  const wasGroundedLastFrame = player.isGrounded;
   player.isGrounded = false;
 
   // 3. 階梯上升 (溫和 1.4px/frame)
@@ -606,8 +607,9 @@ function updatePhysics(dt) {
       player.x < s.x + s.width &&
       !s.isCrumbled
     ) {
-      if (!player.isGrounded && s.type !== "SPRING") {
-        playStepSound(); // 踩踏下樓梯經典 Tap 聲音效！
+      // 僅在「從空中首次著陸於階梯」的瞬間觸發一次清爽 Tap 著地音效，絕不上著陸重複洗音！
+      if (!wasGroundedLastFrame && s.type !== "SPRING") {
+        playStepSound();
       }
       player.y = s.y - player.height;
       player.vy = 0;
