@@ -733,6 +733,7 @@ function handleManualMove() {
 }
 
 function movePlayer(player, steps) {
+  const originPos = player.pos; // 💡 記錄本回合擲骰前的原格
   let targetPos = player.pos + steps;
   const tokenEl = document.getElementById(`token-${player.id}`);
   if (tokenEl) tokenEl.classList.add("running");
@@ -761,7 +762,7 @@ function movePlayer(player, steps) {
       return;
     }
 
-    triggerTileQuizEvent(player);
+    triggerTileQuizEvent(player, originPos);
 
   }, 700);
 }
@@ -797,11 +798,11 @@ function getNextQuestion(preferredDiff, player) {
   return questionPool.pop();
 }
 
-// ⭐ 【全場每格問答】 + 藤蔓螢光發光攀爬 + 暴龍咆哮爪痕劃過跌落
-function triggerTileQuizEvent(player) {
+// ⭐ 【全場每格問答】 (方案 A：答錯動態退回本回合擲骰前原格 originPos) + 藤蔓攀爬 + 暴龍爪痕跌落
+function triggerTileQuizEvent(player, originPos) {
   const cellNum = player.pos;
 
-  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對發出綠光並攀爬 (18 ➜ 29)!
+  // 情況 A: 藤蔓起點格 (3, 10, 18, 22) -> 答對攀爬 (18 ➜ 29)，答錯退回原點 originPos!
   if (JUMPS[cellNum] && JUMPS[cellNum] > cellNum) {
     const jumpTarget = JUMPS[cellNum];
     const question = getNextQuestion("中", player) || getNextQuestion("易", player);
@@ -827,6 +828,7 @@ function triggerTileQuizEvent(player) {
 
         player.pos = jumpTarget;
         updateTokenPosition(player);
+        updateLeaderboard();
         updateMessage(`✅ 【${player.name}】 解答正確！順著發光藤蔓攀爬上升至第 ${jumpTarget} 格！`);
         addLog(`  -> 🌿 攀升成功：解答正確，攀爬升至第 ${jumpTarget} 格。`);
 
@@ -841,8 +843,11 @@ function triggerTileQuizEvent(player) {
         }, 1200);
       } else {
         player.consecutiveErrors++;
-        updateMessage(`❌ 【${player.name}】 答錯了，錯失藤蔓攀爬機會，留在原第 ${cellNum} 格。`);
-        addLog(`  -> 🌿 攀升失敗：留在第 ${cellNum} 格。`);
+        player.pos = originPos;
+        updateTokenPosition(player);
+        updateLeaderboard();
+        updateMessage(`❌ 【${player.name}】 答錯挑戰失敗！錯失藤蔓攀爬，退回第 ${originPos} 格原點！`);
+        addLog(`  -> 🌿 攀升失敗：答錯退回第 ${originPos} 格原點。`);
         finishTurn();
       }
     });
@@ -914,6 +919,7 @@ function triggerTileQuizEvent(player) {
 
         player.pos = jumpTarget;
         updateTokenPosition(player);
+        updateLeaderboard();
         updateMessage(`💥 【${player.name}】 答錯驚動暴龍！慘遭爪痕重擊滑落跌退至第 ${jumpTarget} 格！`);
         addLog(`  -> 🦖 暴龍重擊：跌落至第 ${jumpTarget} 格。`);
 
@@ -938,7 +944,7 @@ function triggerTileQuizEvent(player) {
     return;
   }
 
-  // 情況 C: 紅色環境變遷卡格 (5, 9, 12, 16, 23, 27, 30) -> 答對抽環境卡！
+  // 情況 C: 紅色環境變遷卡格 (5, 9, 12, 16, 23, 27, 30) -> 答對抽環境卡，答錯退回原點！
   if (RED_TILES.includes(cellNum)) {
     const question = getNextQuestion("中", player);
     quizTypeTag.textContent = "🌋 自然環境考驗挑戰！";
@@ -953,14 +959,18 @@ function triggerTileQuizEvent(player) {
         triggerEnvironmentCard(player);
       } else {
         player.consecutiveErrors++;
-        updateMessage(`❌ 【${player.name}】 答錯了，錯失環境變遷試煉，平安停留。`);
+        player.pos = originPos;
+        updateTokenPosition(player);
+        updateLeaderboard();
+        updateMessage(`❌ 【${player.name}】 答錯挑戰失敗，錯失環境變遷試煉，退回第 ${originPos} 格原點！`);
+        addLog(`  -> 🌋 試煉失敗：答錯退回第 ${originPos} 格原點。`);
         finishTurn();
       }
     });
     return;
   }
 
-  // 情況 D: 普通安全格 -> 通過普通生物題
+  // 情況 D: 普通安全格 -> 通過普通生物題，答錯退回原點！
   const question = getNextQuestion("易", player) || getNextQuestion("中", player);
   quizTypeTag.textContent = "🔍 叢林生物生存問答";
   quizTypeTag.style.color = "#0288d1";
@@ -974,8 +984,11 @@ function triggerTileQuizEvent(player) {
       addLog(`  -> 🔍 【${player.name}】 答對題目，平安留在第 ${cellNum} 格。`);
     } else {
       player.consecutiveErrors++;
-      updateMessage(`❌ 【${player.name}】 答錯囉！請詳閱觀念解析加強學習！`);
-      addLog(`  -> 🔍 【${player.name}】 答錯題目，留在第 ${cellNum} 格。`);
+      player.pos = originPos;
+      updateTokenPosition(player);
+      updateLeaderboard();
+      updateMessage(`❌ 【${player.name}】 答錯挑戰失敗！退回第 ${originPos} 格原點，下回合再接再勵！`);
+      addLog(`  -> 🔍 【${player.name}】 答錯題目，退回第 ${originPos} 格原點。`);
     }
     finishTurn();
   });
