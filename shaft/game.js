@@ -228,6 +228,8 @@ function playTone(freq, type, duration, delay = 0, vol = 0.1) {
 }
 
 function playJumpSound() { playTone(400, "sine", 0.08, 0, 0.1); }
+function playStepSound() { playTone(520, "triangle", 0.05, 0, 0.08); }
+function playConveyorSound() { playTone(220, "sine", 0.06, 0, 0.05); }
 function playHeartSound() { playTone(800, "sine", 0.1, 0, 0.12); playTone(1200, "sine", 0.15, 0.08, 0.12); }
 function playHitSound() { playTone(150, "square", 0.15, 0, 0.15); }
 function playFateSlowdown() { playTone(300, "sawtooth", 0.25, 0, 0.1); playTone(200, "sawtooth", 0.35, 0.1, 0.1); }
@@ -393,10 +395,6 @@ function resetGame() {
 function spawnBottomStair(spawnY) {
   stairCountCounter++;
 
-  // 若周圍 150px 內有命運問答階梯，暫停生成普通階梯，確保戰場乾淨零遮擋
-  const hasFateNear = stairs.some(s => s.type === "FATE_OPTION" && Math.abs(s.y - spawnY) < 150);
-  if (hasFateNear) return;
-
   if (stairCountCounter % 6 === 0 && !isFateStairActive) {
     spawnFateStairPair(spawnY);
     isFateStairActive = true;
@@ -429,8 +427,8 @@ function spawnBottomStair(spawnY) {
 }
 
 function spawnFateStairPair(y) {
-  // 1. 自動清空命運階梯上下 150px 範圍內的所有雜亂階梯與彈簧，徹底排除死路與遮擋
-  stairs = stairs.filter(s => Math.abs(s.y - y) > 150);
+  // 1. 僅清空命運階梯上方 120px 的雜亂遮擋階梯，絕不清空下方階梯
+  stairs = stairs.filter(s => !(s.y < y && s.y > y - 120));
 
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
@@ -483,6 +481,31 @@ function spawnFateStairPair(y) {
   };
 
   stairs.push(leftObj, rightObj);
+
+  // 3. 關鍵修復：在命運階梯下方自動生成 2 座安全承接普通階梯 (y + 90 與 y + 180)，100% 保障選完答案腳下必有階梯！
+  stairs.push({
+    id: stairIdCounter++,
+    type: "NORMAL",
+    x: 80,
+    y: y + 90,
+    width: 240,
+    height: 18,
+    isCrumbled: false,
+    isTriggered: false,
+    crumbleTimer: 0
+  });
+
+  stairs.push({
+    id: stairIdCounter++,
+    type: "NORMAL",
+    x: 460,
+    y: y + 180,
+    width: 240,
+    height: 18,
+    isCrumbled: false,
+    isTriggered: false,
+    crumbleTimer: 0
+  });
 }
 
 function spawnStarParticles(x, y) {
@@ -583,6 +606,9 @@ function updatePhysics(dt) {
       player.x < s.x + s.width &&
       !s.isCrumbled
     ) {
+      if (!player.isGrounded && s.type !== "SPRING") {
+        playStepSound(); // 踩踏下樓梯經典 Tap 聲音效！
+      }
       player.y = s.y - player.height;
       player.vy = 0;
       player.isGrounded = true;
