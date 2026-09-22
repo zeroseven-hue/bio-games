@@ -1,14 +1,15 @@
 /**
- * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V4.2 平穩站立版
- * 1. 🛑 修正答對連續跳躍 Bug：答對降落於正確平台後，小人【平穩站立】於階梯上隨之爬升，絕不再重複起跳！
- * 2. ⚡ 題目超前展示優化：命運階梯在底層一刷出 (距離 380~450px)，頂部題目橫條即時顯現！
- * 3. 🐢 超長緩速跑道 (380px)：距離命運階梯 380px 時發動 12% 龜速極緩速，充裕時間秒讀題幹！
- * 4. 60fps 絲滑加權引擎 + 「即按即移、放開即停」極速響應操控，徹底消除滑冰感與微卡頓！
- * 5. 補血階梯 1.5 秒緩衝碎裂：踩中補血階梯（+1 💖）後，階梯維持 1.5 秒堅固實體讓學生安全移開！
- * 6. 地下 B30 樓通關目標制：到達 B30 樓（約 2.5 分鐘完賽）即頒發通关證書！
- * 7. 答對爆發彩虹星光彩帶與黃金無敵光芒動畫，極致提升成就感！
- * 8. 遠離頂部天花板尖刺：小人登場位置 (y = 200)，腳下預設 340px 超大安全初生平台！
- * 9. 高對比巨型 iPad 雙側盲操按鈕 (> 54px)。
+ * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V4.3 修正版
+ * 1. 🛑 修正「再次探險」按鈕卡死與開局即通關 Bug：重構層數計算 (totalDistanceDescended / 70)，開局精準由 B0 樓起算！
+ * 2. 🛑 修正答對連續跳躍 Bug：答對降落於正確平台後，小人【平穩站立】於階梯上隨之爬升，絕不再重複起跳！
+ * 3. ⚡ 題目超前展示優化：命運階梯在底層一刷出 (距離 380~450px)，頂部題目橫條即時顯現！
+ * 4. 🐢 超長緩速跑道 (380px)：距離命運階梯 380px 時發動 12% 龜速極緩速，充裕時間秒讀題幹！
+ * 5. 60fps 絲滑加權引擎 + 「即按即移、放開即停」極速響應操控，徹底消除滑冰感與微卡頓！
+ * 6. 補血階梯 1.5 秒緩衝碎裂：踩中補血階梯（+1 💖）後，階梯維持 1.5 秒堅固實體讓學生安全移開！
+ * 7. 地下 B30 樓通關目標制：到達 B30 樓（約 2.5 分鐘完賽）即頒發通關證書！
+ * 8. 答對爆發彩虹星光彩帶與黃金無敵光芒動畫，極致提升成就感！
+ * 9. 遠離頂部天花板尖刺：小人登場位置 (y = 200)，腳下預設 340px 超大安全初生平台！
+ * 10. 高對比巨型 iPad 雙側盲操按鈕 (> 54px)。
  */
 
 const CANVAS_WIDTH = 800;
@@ -19,6 +20,7 @@ let hearts = 7;
 let maxHearts = 7;
 let depth = 0;
 let maxDepth = 0;
+let totalDistanceDescended = 0; // 下降總距離 (計算 B0~B30 樓)
 let gameTimeSeconds = 0;
 let baseSpeed = 0.6; // 預設 0.6x 課堂超悠閒速度
 let speedMultiplier = 1.0;
@@ -307,6 +309,7 @@ function resetGame() {
   maxHearts = 7;
   depth = 0;
   maxDepth = 0;
+  totalDistanceDescended = 0; // 精準重置為 0
   gameTimeSeconds = 0;
   isGameRunning = true;
   isBulletTime = false;
@@ -405,7 +408,6 @@ function spawnBottomStair(spawnY) {
   });
 }
 
-// 產生「二選一命運問答階梯」(左 🅰️ vs 右 🅱️ 350px 巨型降落台)
 function spawnFateStairPair(y) {
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
@@ -507,14 +509,14 @@ function updatePhysics(dt) {
     slowdownBoostTimer -= dt;
   }
 
-  // 超前距離 380px 發動 12% 龜速極緩速 (近乎靜止，充裕時間秒讀)
+  // 超前距離 380px 發動 12% 龜速極緩速
   const fateStairNear = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && (s.y - player.y) < 380 && (s.y - player.y) > -50);
   if (fateStairNear) {
     isBulletTime = true;
     speedMultiplier = 0.12;
   } else if (slowdownBoostTimer > 0) {
     isBulletTime = false;
-    speedMultiplier = 0.5; // 答對發動 5 秒 50% 悠閒緩速護罩
+    speedMultiplier = 0.5;
   } else {
     isBulletTime = false;
     speedMultiplier = 1.0;
@@ -541,6 +543,7 @@ function updatePhysics(dt) {
 
   // 3. 階梯上升 (溫和 1.4px/frame)
   const stairRiseSpeed = 1.4 * currentSpeed;
+  totalDistanceDescended += stairRiseSpeed; // 累加下降距離計算層數
 
   for (let i = stairs.length - 1; i >= 0; i--) {
     const s = stairs[i];
@@ -606,8 +609,8 @@ function updatePhysics(dt) {
     }
   }
 
-  // 7. 地下 B30 樓通關目標判斷
-  depth = Math.max(depth, Math.floor((CANVAS_HEIGHT - player.y) / 10) + Math.floor(gameTimeSeconds * 2.5));
+  // 7. 地下 B30 樓通關目標精準計算 (基於下降總距離)
+  depth = Math.floor(totalDistanceDescended / 70);
   maxDepth = Math.max(maxDepth, depth);
   updateUI();
 
@@ -655,7 +658,6 @@ function handleStairCollision(s) {
         showConceptToast(`✅ 答對了！發動彩虹星光、5 秒悠閒緩速與無敵護罩！觀念：${s.question.explanation || "恭喜！"}`);
         isFateStairActive = false;
       }
-      // 不強制 player.vy = -8，小人平穩站立隨階梯上升！
     } else {
       if (!s.isTriggered) {
         s.isTriggered = true;
@@ -665,7 +667,6 @@ function handleStairCollision(s) {
         showConceptToast(`💡 答錯觀念解析：${s.question.explanation || "請仔細查看解析！"}`);
         isFateStairActive = false;
 
-        // 踩錯保底網：正下方 100% 強制刷出一座 200px 安全普通階梯接住角色
         createSafetyStair(player.x - 70, player.y + 70, 200);
       }
     }
