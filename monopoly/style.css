@@ -655,6 +655,10 @@ body {
 .modal-actions-row { display: flex; gap: 10px; }
 
 /* True 6-Faced 3D Rolling Cube Geometry */
+#dice3DModal {
+  z-index: 250 !important;
+}
+
 .dice-3d-box {
   background: radial-gradient(circle, #581c87 0%, #1e1b4b 100%);
   border: 4px solid #fbbf24;
