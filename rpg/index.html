@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>樂透大冒險：生物勇者傳奇 - RPG Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=2.3">
+  <link rel="stylesheet" href="style.css?v=2.4">
 </head>
 <body>
 
@@ -78,7 +78,31 @@
           <div class="hero-avatar-wrapper">
             <div class="hero-aura aura-wood" id="heroAura"></div>
             <div class="companion-avatar hidden" id="avatarLele" title="守護犬樂樂">🐶</div>
-            <div class="hero-avatar" id="heroAvatar">🐼🗡️</div>
+            
+            <!-- 🐼 超級熊貓勇者 全身組件 (配有藍色超人披風與手持雕刻木劍) -->
+            <div class="hero-fullbody" id="heroFullbody">
+              <div class="hero-cape"></div>
+              <div class="hero-panda-head">🐼</div>
+              <div class="hero-suit-body"><span class="hero-star">⭐</span></div>
+              <div class="hero-accessory-slot" id="heroAccessorySlot"></div>
+              <div class="hero-weapon-slot" id="heroWeaponSlot">
+                <!-- SVG 木劍頂級質感視覺 (預設 Stage 1 雕刻木劍) -->
+                <svg class="weapon-svg wooden-sword-svg" viewBox="0 0 100 100" width="55" height="55">
+                  <path d="M 50 10 L 65 30 L 55 70 L 50 78 L 45 70 L 35 30 Z" fill="url(#woodGrad)" stroke="#451a03" stroke-width="3"/>
+                  <path d="M 30 68 L 70 68 L 65 74 L 35 74 Z" fill="#b45309" stroke="#451a03" stroke-width="2"/>
+                  <rect x="46" y="74" width="8" height="18" rx="3" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+                  <circle cx="50" cy="94" r="5" fill="#d97706" stroke="#451a03" stroke-width="1.5"/>
+                  <defs>
+                    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#f59e0b"/>
+                      <stop offset="50%" stop-color="#d97706"/>
+                      <stop offset="100%" stop-color="#78350f"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
             <div class="companion-avatar hidden" id="avatarPudding" title="智慧貓布丁">🐱</div>
           </div>
           <div class="hero-name-badge" id="heroNameBadge">生物勇者 (第 1 棒)</div>
@@ -365,6 +389,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=2.3"></script>
+  <script src="game.js?v=2.4"></script>
 </body>
 </html>

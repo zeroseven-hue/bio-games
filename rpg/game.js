@@ -401,18 +401,69 @@ function updateHeroStats() {
   weaponDisplay.textContent = w.name;
   armorDisplay.textContent = a.name;
 
+  const heroWeaponSlot = document.getElementById("heroWeaponSlot");
+  const heroAccessorySlot = document.getElementById("heroAccessorySlot");
+
+  if (heroWeaponSlot) {
+    if (equippedWeaponIndex === 0) {
+      // 🪵 雕刻木劍 SVG 質感 (深棕木色與雕刻紋理，完全還原 media_1790089969390.png)
+      heroWeaponSlot.innerHTML = `<svg class="weapon-svg wooden-sword-svg" viewBox="0 0 100 100" width="55" height="55">
+        <path d="M 50 10 L 65 30 L 55 70 L 50 78 L 45 70 L 35 30 Z" fill="url(#woodGrad)" stroke="#451a03" stroke-width="3"/>
+        <path d="M 30 68 L 70 68 L 65 74 L 35 74 Z" fill="#b45309" stroke="#451a03" stroke-width="2"/>
+        <rect x="46" y="74" width="8" height="18" rx="3" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+        <circle cx="50" cy="94" r="5" fill="#d97706" stroke="#451a03" stroke-width="1.5"/>
+        <defs>
+          <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f59e0b"/>
+            <stop offset="50%" stop-color="#d97706"/>
+            <stop offset="100%" stop-color="#78350f"/>
+          </linearGradient>
+        </defs>
+      </svg>`;
+    } else if (equippedWeaponIndex === 1) {
+      // ⚔️ 精鋼利劍 SVG (亮銀鋼鐵金屬質感)
+      heroWeaponSlot.innerHTML = `<svg class="weapon-svg steel-sword-svg" viewBox="0 0 100 100" width="58" height="58">
+        <path d="M 50 5 L 63 25 L 54 68 L 50 76 L 46 68 L 37 25 Z" fill="url(#steelGrad)" stroke="#0f172a" stroke-width="3"/>
+        <line x1="50" y1="12" x2="50" y2="70" stroke="#0284c7" stroke-width="2"/>
+        <path d="M 28 66 Q 50 62 72 66 L 68 72 Q 50 68 32 72 Z" fill="#38bdf8" stroke="#0f172a" stroke-width="2"/>
+        <rect x="46" y="72" width="8" height="18" rx="3" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="50" cy="93" r="6" fill="#38bdf8" stroke="#0f172a" stroke-width="2"/>
+        <defs>
+          <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="40%" stop-color="#e2e8f0"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+        </defs>
+      </svg>`;
+    } else if (equippedWeaponIndex === 2) {
+      // 🗡️✨ 勇者聖劍 SVG (璀璨黃金神劍)
+      heroWeaponSlot.innerHTML = `<svg class="weapon-svg holy-sword-svg" viewBox="0 0 100 100" width="62" height="62">
+        <path d="M 50 2 L 66 22 L 55 65 L 50 75 L 45 65 L 34 22 Z" fill="url(#holyGrad)" stroke="#78350f" stroke-width="3"/>
+        <line x1="50" y1="8" x2="50" y2="68" stroke="#ffffff" stroke-width="2.5"/>
+        <path d="M 24 64 L 76 64 L 70 72 L 30 72 Z" fill="#fbbf24" stroke="#78350f" stroke-width="2"/>
+        <rect x="45" y="72" width="10" height="18" rx="3" fill="#b45309" stroke="#78350f" stroke-width="2"/>
+        <polygon points="50,90 55,95 50,100 45,95" fill="#fef08a" stroke="#78350f" stroke-width="1.5"/>
+        <defs>
+          <linearGradient id="holyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="30%" stop-color="#fef08a"/>
+            <stop offset="70%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+          </linearGradient>
+        </defs>
+      </svg>`;
+    }
+  }
+
   if (equippedAccessoryIndex >= 0) {
     const acc = ACCESSORIES[equippedAccessoryIndex];
     accessoryDisplay.textContent = acc.name;
     accessoryStatItem.classList.remove("hidden");
-    if (acc.icon === "👑") {
-      heroAvatar.textContent = `👑${w.icon}`;
-    } else {
-      heroAvatar.textContent = `🐼${acc.icon}${w.icon.replace("🐼", "")}`;
-    }
+    if (heroAccessorySlot) heroAccessorySlot.textContent = acc.icon;
   } else {
     accessoryStatItem.classList.add("hidden");
-    heroAvatar.textContent = w.icon;
+    if (heroAccessorySlot) heroAccessorySlot.textContent = "";
   }
 
   heroAura.className = `hero-aura ${w.aura}`;
