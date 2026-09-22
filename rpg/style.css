@@ -579,3 +579,35 @@ body {
 /* Zoom Mode */
 .zoomed-text .quiz-stem { font-size: 1.5rem !important; }
 .zoomed-text .btn-option { font-size: 1.3rem !important; min-height: 60px; }
+
+/* Custom Slime & Boss Visual Animations */
+.slime-green {
+  animation: gooeyJiggle 2s infinite ease-in-out;
+  filter: drop-shadow(0 8px 16px rgba(34, 197, 94, 0.45));
+}
+
+.slime-purple {
+  animation: poisonPulse 1.8s infinite ease-in-out;
+  filter: drop-shadow(0 8px 18px rgba(147, 51, 234, 0.55));
+}
+
+.boss-red {
+  animation: bossFlame 1.5s infinite alternate;
+  filter: drop-shadow(0 0 25px rgba(239, 68, 68, 0.8));
+}
+
+@keyframes gooeyJiggle {
+  0%, 100% { transform: scale(1, 1) translateY(0); }
+  30% { transform: scale(1.12, 0.88) translateY(4px); }
+  60% { transform: scale(0.92, 1.08) translateY(-6px); }
+}
+
+@keyframes poisonPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.4)); }
+  50% { transform: scale(1.1) rotate(4deg); filter: drop-shadow(0 0 24px rgba(147, 51, 234, 0.85)); }
+}
+
+@keyframes bossFlame {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6)); }
+  100% { transform: scale(1.15) translateY(-8px) rotate(-3deg); filter: drop-shadow(0 0 35px rgba(239, 68, 68, 1)); }
+}

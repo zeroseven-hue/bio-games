@@ -7,11 +7,11 @@
  * 5. 結算卡包含班級座號、學習心得與防偽認證碼 (RPG-8821)。
  */
 
-// 裝備清單
+// 裝備清單 (中古世紀奇幻勇者造型)
 const WEAPONS = [
-  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🗡️🧑‍🚀" },
-  { id: "steel", name: "⚔️ 精鋼劍", atk: 15, cost: 50, aura: "aura-steel", icon: "⚔️🧑‍🚀" },
-  { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 35, cost: 120, aura: "aura-holy", icon: "🗡️✨🧑‍🚀" }
+  { id: "wood", name: "🪵 木劍", atk: 0, cost: 0, aura: "aura-wood", icon: "🗡️🥷" },
+  { id: "steel", name: "⚔️ 精鋼劍", atk: 15, cost: 50, aura: "aura-steel", icon: "⚔️🛡️" },
+  { id: "holy", name: "🗡️✨ 勇者聖劍", atk: 35, cost: 120, aura: "aura-holy", icon: "⚔️✨👑" }
 ];
 
 const ARMORS = [
@@ -20,14 +20,14 @@ const ARMORS = [
   { id: "dragon", name: "🐉 龍鱗護甲", hpBonus: 70, cost: 100 }
 ];
 
-// 關卡敵人資料
+// 關卡敵人資料 (提升血量硬度 & 自訂邪惡表情怪獸)
 const STAGES = [
   {
     stageNum: 1,
     title: "🌿 第 1 關：草原小徑",
     enemies: [
-      { name: "黏黏史萊姆 #1", avatar: "🟢", hp: 50, maxHp: 50, atk: 15 },
-      { name: "黏黏史萊姆 #2", avatar: "🟢", hp: 50, maxHp: 50, atk: 15 }
+      { name: "調皮綠史萊姆 #1", avatar: "🟢👿", hp: 100, maxHp: 100, atk: 15, class: "slime-green" },
+      { name: "調皮綠史萊姆 #2", avatar: "🟢👿", hp: 100, maxHp: 100, atk: 15, class: "slime-green" }
     ],
     chestGold: 30,
     rescueCompanion: "lele"
@@ -36,8 +36,8 @@ const STAGES = [
     stageNum: 2,
     title: "🌵 第 2 關：近郊荒野",
     enemies: [
-      { name: "色違史萊姆 #1", avatar: "🟣", hp: 80, maxHp: 80, atk: 20 },
-      { name: "色違史萊姆 #2", avatar: "🟣", hp: 80, maxHp: 80, atk: 20 }
+      { name: "劇毒紫史萊姆 #1", avatar: "🟣👿", hp: 160, maxHp: 160, atk: 20, class: "slime-purple" },
+      { name: "劇毒紫史萊姆 #2", avatar: "🟣👿", hp: 160, maxHp: 160, atk: 20, class: "slime-purple" }
     ],
     chestGold: 50,
     rescueCompanion: "pudding"
@@ -46,7 +46,7 @@ const STAGES = [
     stageNum: 3,
     title: "🔥 第 3 關：巨龍王座",
     enemies: [
-      { name: "紅色三眼大魔王 👹", avatar: "👹", hp: 250, maxHp: 250, atk: 25 }
+      { name: "紅色三眼大魔王 👹", avatar: "👹👁️", hp: 320, maxHp: 320, atk: 25, class: "boss-red" }
     ],
     chestGold: 100,
     rescueCompanion: null
@@ -81,6 +81,11 @@ let questionPoolByUnit = {};
 let currentActiveQuestion = null;
 let countdownTimer = null;
 let audioCtx = null;
+
+// 防作弊與答題速度動態暴擊機制狀態
+let isCurrentQuizAnsweredCorrectly = false;
+let quizStartTime = 0;
+let lastCalculatedDamage = 0;
 
 // DOM 元素引用
 const modeTag = document.getElementById("modeTag");
@@ -201,6 +206,10 @@ function initEventListeners() {
   btnUsePuddingSkill.addEventListener("click", usePudding5050);
 
   btnAttackBoss.addEventListener("click", () => {
+    if (!isCurrentQuizAnsweredCorrectly) {
+      alert("⚠️ 作答未完成或答錯題目，嚴格禁止發動勇者攻擊！");
+      return;
+    }
     closeModal(quizModal);
     executeHeroAttack();
   });
@@ -367,6 +376,7 @@ function setupStage() {
   battleBanner.textContent = `遭遇怪獸 【${curEnemy.name}】！準備進入答題戰鬥！`;
 
   enemyAvatar.textContent = curEnemy.avatar;
+  enemyAvatar.className = `enemy-avatar ${curEnemy.class || ""}`;
   enemyName.textContent = curEnemy.name;
   enemyHpText.textContent = `${curEnemy.hp} / ${curEnemy.maxHp}`;
   enemyHpFill.style.width = `${Math.max(0, (curEnemy.hp / curEnemy.maxHp) * 100)}%`;
@@ -377,6 +387,9 @@ function setupStage() {
 
 // 答題戰鬥觸發
 function openBattleQuiz() {
+  isCurrentQuizAnsweredCorrectly = false;
+  quizStartTime = Date.now(); // ⏱️ 記錄看題開窗時間戳記
+
   const unitFile = selectUnit.value || "unit01_scientific_method.json";
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
   quizUnitBadge.textContent = unitObj ? `${unitObj.id.toUpperCase()} ‧ ${unitObj.title}` : "國中生物單元";
@@ -389,7 +402,10 @@ function openBattleQuiz() {
   quizStem.textContent = currentActiveQuestion.question;
   quizOptions.innerHTML = "";
   quizExplanation.classList.add("hidden");
+
+  // 🔒 嚴格防偷雞鎖定：攻擊按鈕預設隱藏並禁用，答錯按鈕隱藏
   btnAttackBoss.classList.add("hidden");
+  btnAttackBoss.setAttribute("disabled", "true");
   btnCloseWrong.classList.add("hidden");
 
   // 技能顯示狀態
@@ -455,19 +471,47 @@ function handleQuizSelect(selectedIndex, btnEl) {
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
 
   if (isCorrect) {
+    isCurrentQuizAnsweredCorrectly = true;
     btnEl.classList.add("correct");
     playSlashSound();
-    explanationText.textContent = currentActiveQuestion.explanation || "恭喜答對！準備發動聖光勇者重擊！";
+
+    // ⚡ 計算作答費時與動態暴擊傷害倍率
+    const timeTaken = Math.max(0.5, (Date.now() - quizStartTime) / 1000);
+    let speedMultiplier = 1.0;
+    let speedTag = "";
+
+    if (timeTaken <= 5.0) {
+      speedMultiplier = 1.5;
+      speedTag = `⚡【極速暴擊 1.5倍】觀念極度熟練！在 ${timeTaken.toFixed(1)} 秒內秒答！`;
+    } else if (timeTaken <= 15.0) {
+      speedMultiplier = 1.0;
+      speedTag = `⚔️【勇者重擊 1.0倍】標準發動！作答耗時 ${timeTaken.toFixed(1)} 秒。`;
+    } else {
+      speedMultiplier = 0.7;
+      speedTag = `🛡️【謹慎試探 0.7倍】深思熟慮作答，耗時 ${timeTaken.toFixed(1)} 秒。`;
+    }
+
+    const weaponBonus = WEAPONS[equippedWeaponIndex].atk;
+    lastCalculatedDamage = Math.round((baseAtk + weaponBonus) * speedMultiplier);
+
+    explanationText.innerHTML = `<b style="color:#eab308; font-size:1.05rem;">${speedTag} 造成 ${lastCalculatedDamage} 點重擊傷害！</b><br><br>${currentActiveQuestion.explanation || "恭喜答對！發動勇者聖光重擊！"}`;
     quizExplanation.classList.remove("hidden");
+
+    btnAttackBoss.textContent = `⚔️ 發動重擊 (${lastCalculatedDamage} 點傷害)！繼續戰鬥 💥`;
     btnAttackBoss.classList.remove("hidden");
+    btnAttackBoss.removeAttribute("disabled");
     btnCloseWrong.classList.add("hidden");
 
   } else {
+    isCurrentQuizAnsweredCorrectly = false;
     btnEl.classList.add("incorrect");
     playHitSound();
-    explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請觀看筆記解析後再接再厲！";
+    explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請觀看筆記解析後再接再勵！";
     quizExplanation.classList.remove("hidden");
+
     btnAttackBoss.classList.add("hidden");
+    btnAttackBoss.setAttribute("disabled", "true");
+    btnCloseWrong.textContent = "💥 受到怪獸反擊！閉關受創 ➡️";
     btnCloseWrong.classList.remove("hidden");
   }
 
@@ -483,8 +527,7 @@ function executeHeroAttack() {
   const stg = STAGES[currentStageIndex];
   const curEnemy = stg.enemies[currentEnemyIndex];
 
-  const weaponBonus = WEAPONS[equippedWeaponIndex].atk;
-  const damage = baseAtk + weaponBonus;
+  const damage = lastCalculatedDamage || (baseAtk + WEAPONS[equippedWeaponIndex].atk);
 
   curEnemy.hp = Math.max(0, curEnemy.hp - damage);
   enemyHpFill.style.width = `${(curEnemy.hp / curEnemy.maxHp) * 100}%`;
