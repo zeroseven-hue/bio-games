@@ -890,7 +890,7 @@ body {
 .hero-panda-head {
   font-size: 3.8rem;
   z-index: 4;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  filter: grayscale(1) contrast(1.15) drop-shadow(0 4px 8px rgba(0,0,0,0.3));
   margin-bottom: -18px;
   line-height: 1;
 }
