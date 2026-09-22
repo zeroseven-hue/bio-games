@@ -376,23 +376,24 @@ body {
 /* Camp Scene (營地補給) */
 .camp-scene {
   flex: 1;
-  padding: 20px;
+  min-height: 0;
+  padding: 12px 20px 16px 20px;
   background: #f8fafc;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  overflow-y: auto;
 }
 
-.camp-header { text-align: center; margin-bottom: 12px; }
-.camp-header h2 { color: #1e293b; font-size: 1.3rem; margin-bottom: 4px; }
-.camp-header p { color: #64748b; font-size: 0.85rem; font-weight: bold; }
+.camp-header { text-align: center; margin-bottom: 8px; }
+.camp-header h2 { color: #1e293b; font-size: 1.2rem; margin-bottom: 2px; }
+.camp-header p { color: #64748b; font-size: 0.8rem; font-weight: bold; }
 
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  max-width: 900px;
-  margin: 0 auto;
+  gap: 8px 12px;
+  max-width: 920px;
+  margin: 0 auto 12px auto;
   width: 100%;
 }
 
@@ -400,28 +401,29 @@ body {
   background: #ffffff;
   border: 2px solid #cbd5e1;
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  gap: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.04);
 }
 
-.item-icon { font-size: 2.2rem; }
+.item-icon { font-size: 1.8rem; }
 .item-details { flex: 1; }
-.item-details h3 { font-size: 0.95rem; color: #0f172a; margin-bottom: 2px; }
-.item-details p { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; }
-.item-price { font-size: 0.82rem; font-weight: 900; color: #d97706; }
+.item-details h3 { font-size: 0.9rem; color: #0f172a; margin-bottom: 1px; }
+.item-details p { font-size: 0.72rem; color: #64748b; margin-bottom: 2px; line-height: 1.2; }
+.item-price { font-size: 0.8rem; font-weight: 900; color: #d97706; }
 
 .btn-buy {
   background: #0284c7;
   color: #ffffff;
   border: none;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 8px;
   font-weight: 800;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-buy:disabled {
@@ -429,7 +431,17 @@ body {
   cursor: not-allowed;
 }
 
-.camp-actions { text-align: center; margin-top: 12px; }
+.camp-actions {
+  position: sticky;
+  bottom: 0;
+  background: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  padding: 8px 0;
+  margin-top: auto;
+  border-top: 1.5px solid #e2e8f0;
+  z-index: 10;
+}
 
 /* Modal Overlay & General Styling */
 .modal-overlay {
