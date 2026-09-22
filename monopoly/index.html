@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>動物方城市生物大富翁 - Zootopia Bio Monopoly</title>
-  <link rel="stylesheet" href="style.css?v=4.1">
+  <link rel="stylesheet" href="style.css?v=4.2">
   <!-- XLSX Library for Roster Import -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -268,19 +268,24 @@
         <button id="btnDiscardSnapshot" class="btn-action btn-danger">❌ 開啟新局</button>
       </div>
     </div>
-  <!-- 11. 3D 骰子旋轉動畫 Modal -->
+  <!-- 11. 正宗 3D 6面體立體骰子旋轉動畫 Modal -->
   <div class="modal-overlay hidden" id="dice3DModal">
     <div class="modal-box dice-3d-box">
-      <h2>🎲 骰子狂歡旋轉中...</h2>
+      <h2 id="diceModalTitle" style="color:#fbbf24; font-size:1.4rem;">🎲 3D 狂歡骰子熱烈旋轉中...</h2>
       <div class="dice-3d-stage">
-        <div class="dice-cube" id="diceCube">
-          <div class="dice-face" id="diceFaceValue">🎲</div>
+        <div class="dice-cube-3d" id="diceCube3D">
+          <div class="cube-face face-front">⚀</div>
+          <div class="cube-face face-back">⚁</div>
+          <div class="cube-face face-right">⚂</div>
+          <div class="cube-face face-left">⚃</div>
+          <div class="cube-face face-top">⚄</div>
+          <div class="cube-face face-bottom">⚅</div>
         </div>
       </div>
-      <p id="diceRollText">正在為隊伍投擲骰子！</p>
+      <p id="diceRollText" style="font-size:1.1rem; font-weight:bold; color:#ffffff;">正在為隊伍投擲骰子！</p>
     </div>
   </div>
 
-  <script src="game.js?v=4.1"></script>
+  <script src="game.js?v=4.2"></script>
 </body>
 </html>

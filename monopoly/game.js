@@ -251,7 +251,11 @@ function initEventListeners() {
       return;
     }
     closeModal(quizModal);
-    openBuildModal();
+    if (isTakeoverMode) {
+      executeTakeoverOptionA();
+    } else {
+      openBuildModal();
+    }
   });
 
   btnCloseWrong.addEventListener("click", () => {
@@ -491,28 +495,51 @@ function startDraw(isQuick = false) {
   isNoBuildMoveTurn = false;
 
   const dice3DModal = document.getElementById("dice3DModal");
-  const diceCube = document.getElementById("diceCube");
-  const diceFaceValue = document.getElementById("diceFaceValue");
+  const diceCube3D = document.getElementById("diceCube3D");
   const diceRollText = document.getElementById("diceRollText");
 
   const diceVal = Math.floor(Math.random() * 6) + 1;
   const curTeam = teams[currentTurnIndex];
 
-  if (dice3DModal && diceCube) {
-    diceRollText.textContent = `🎲 正在為【${curTeam.name}】投擲狂歡骰子！`;
-    diceFaceValue.textContent = "🎲";
+  if (dice3DModal && diceCube3D) {
+    diceRollText.textContent = `🎲 正在為【${curTeam.name}】投擲 3D 狂歡骰子！`;
     openModal(dice3DModal);
-    playTone(450, "sine", 0.05, 0, 0.1);
+
+    // 重設 3D 轉速與旋轉狀態
+    diceCube3D.style.transform = "none";
+    diceCube3D.classList.remove("rolling");
+    void diceCube3D.offsetWidth;
+    diceCube3D.classList.add("rolling");
+
+    // 音效連續咚咚聲 (100ms 拍頻)
+    let tickCount = 0;
+    const tickInterval = setInterval(() => {
+      playTickSound();
+      tickCount++;
+      if (tickCount >= 11) clearInterval(tickInterval);
+    }, 100);
+
+    const faceRotations = {
+      1: "rotateX(0deg) rotateY(0deg)",
+      2: "rotateY(180deg)",
+      3: "rotateY(-90deg)",
+      4: "rotateY(90deg)",
+      5: "rotateX(-90deg)",
+      6: "rotateX(90deg)"
+    };
 
     setTimeout(() => {
-      diceFaceValue.textContent = diceVal;
+      clearInterval(tickInterval);
+      diceCube3D.classList.remove("rolling");
+      diceCube3D.style.transform = faceRotations[diceVal];
       playWinSound();
+
       setTimeout(() => {
         closeModal(dice3DModal);
         diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
         startJumping(diceVal, isQuick);
       }, 500);
-    }, 600);
+    }, 1200);
   } else {
     diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
     startJumping(diceVal, isQuick);
@@ -719,7 +746,52 @@ function handleQuizSelect(selectedIndex, btnEl) {
   }
 }
 
-// 9. 答對建立或強行佔領生態領地
+// 9. 答對建立或強行佔領生態領地 (方案 A：強佔直接沿用原建築名稱與轉移頭像/顏色)
+function executeTakeoverOptionA() {
+  const curTeam = teams[currentTurnIndex];
+  const cellId = curTeam.pos;
+  const owner = cellOwners[cellId];
+
+  if (!owner) {
+    openBuildModal();
+    return;
+  }
+
+  const cost = 150;
+  if (curTeam.score < cost) {
+    alert(`⚠️ 貴隊金幣不足 (${curTeam.score} < ${cost})，無法進行 1.5 倍強行佔領！`);
+    endTurn();
+    return;
+  }
+
+  const bName = owner.buildingName; // 方案 A：直接沿用原被佔領建築名稱
+  curTeam.score -= cost;
+
+  cellOwners[cellId] = {
+    teamId: curTeam.id,
+    teamName: curTeam.name,
+    teamIcon: curTeam.icon,
+    color: curTeam.color,
+    buildingName: bName,
+    cost: 150
+  };
+
+  const buildArea = document.getElementById(`build-${cellId}`);
+  if (buildArea) {
+    buildArea.innerHTML = "";
+    const badge = document.createElement("div");
+    badge.className = "building-badge";
+    badge.innerHTML = `${curTeam.icon} 🏠 ${bName}`;
+    badge.style.backgroundColor = curTeam.color;
+    buildArea.appendChild(badge);
+  }
+
+  curTeam.buildingsCount += 1;
+  addHistoryLog(curTeam.name, `⚔️ 成功強行佔領【${owner.teamName}】的領地：【${curTeam.icon} ${bName}】(沿用原名，-150金幣)`);
+  renderScoreBar();
+  endTurn();
+}
+
 function openBuildModal() {
   const curTeam = teams[currentTurnIndex];
   currentPendingBuildCellId = curTeam.pos;
