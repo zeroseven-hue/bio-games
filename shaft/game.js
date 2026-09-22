@@ -391,6 +391,10 @@ function resetGame() {
 function spawnBottomStair(spawnY) {
   stairCountCounter++;
 
+  // 若周圍 150px 內有命運問答階梯，暫停生成普通階梯，確保戰場乾淨零遮擋
+  const hasFateNear = stairs.some(s => s.type === "FATE_OPTION" && Math.abs(s.y - spawnY) < 150);
+  if (hasFateNear) return;
+
   if (stairCountCounter % 6 === 0 && !isFateStairActive) {
     spawnFateStairPair(spawnY);
     isFateStairActive = true;
@@ -401,7 +405,6 @@ function spawnBottomStair(spawnY) {
   let type = "NORMAL";
   let width = 180 + Math.random() * 40;
 
-  // 優化後發配比例：NORMAL 60%, HEART 15%, CONVEYOR_LEFT 7.5%, CONVEYOR_RIGHT 7.5%, SPRING 5%, CRUMBLE 5%
   if (rand < 0.60) type = "NORMAL";
   else if (rand < 0.75) type = "HEART";
   else if (rand < 0.825) type = "CONVEYOR_LEFT";
@@ -424,6 +427,9 @@ function spawnBottomStair(spawnY) {
 }
 
 function spawnFateStairPair(y) {
+  // 1. 自動清空命運階梯上下 150px 範圍內的所有雜亂階梯與彈簧，徹底排除死路與遮擋
+  stairs = stairs.filter(s => Math.abs(s.y - y) > 150);
+
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
 
@@ -442,10 +448,11 @@ function spawnFateStairPair(y) {
 
   const isLeftCorrect = Math.random() < 0.5;
 
-  const stairWidth = 220;
-  const stairHeight = 36;
-  const leftX = 70;
-  const rightX = 510;
+  // 2. 100% 壁貼壁全寬度無落空設計 (單座寬度 370px, 高度 44px)
+  const stairWidth = 370;
+  const stairHeight = 44;
+  const leftX = 10;   // 左邊貼緊 x = 10 (絕不落空)
+  const rightX = 420; // 右邊貼緊 x = 790 (絕不落空)，中間保留 40px 中央天井
 
   const leftObj = {
     id: stairIdCounter++,
@@ -792,19 +799,27 @@ function renderCanvas() {
       ctx.fillStyle = s.isCorrect ? "#15803d" : "#b91c1c";
       ctx.fillRect(s.x, s.y, s.width, s.height);
       ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3.0;
       ctx.strokeRect(s.x, s.y, s.width, s.height);
 
-      const txt = `${s.optionLabel || ""} ${s.optionText || s.text || ""}`;
-      const charLen = txt.length;
-      let fontSize = 15;
-      if (charLen > 14) fontSize = 12;
-      else if (charLen > 10) fontSize = 13;
-      if (isTextZoomed) fontSize += 2;
-
       ctx.fillStyle = "#ffffff";
-      ctx.font = `bold ${fontSize}px sans-serif`;
-      ctx.fillText(txt, s.x + 8, s.y + 23);
+      const label = s.optionLabel || "";
+      const content = s.optionText || s.text || "";
+      const fullText = `${label} ${content}`;
+
+      if (content.length <= 15) {
+        let fSize = isTextZoomed ? 17 : 15;
+        ctx.font = `bold ${fSize}px sans-serif`;
+        ctx.fillText(fullText, s.x + 12, s.y + 27);
+      } else {
+        // 長選項文字分雙行繪製在 44px 階梯盒內，確保 100% 完整清晰無被遮蓋
+        let fSize = isTextZoomed ? 14 : 13;
+        ctx.font = `bold ${fSize}px sans-serif`;
+        const line1 = content.substring(0, 15);
+        const line2 = content.substring(15);
+        ctx.fillText(`${label} ${line1}`, s.x + 10, s.y + 19);
+        ctx.fillText(`   ${line2}`, s.x + 10, s.y + 36);
+      }
     }
   });
 
