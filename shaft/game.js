@@ -14,12 +14,13 @@
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
-const GOAL_DEPTH = 30; // 地下 B30 樓通關勝利目標
+const TARGET_CORRECT_GOAL = 10; // 答對 10 題全勝通關目標
 
 let hearts = 7;
 let maxHearts = 7;
 let depth = 0;
 let maxDepth = 0;
+let correctAnswersCount = 0; // 累積答對題數
 let totalDistanceDescended = 0; // 下降總距離 (計算 B0~B30 樓)
 let gameTimeSeconds = 0;
 let baseSpeed = 0.6; // 預設 0.6x 課堂超悠閒速度
@@ -322,7 +323,8 @@ function resetGame() {
   maxHearts = 7;
   depth = 0;
   maxDepth = 0;
-  totalDistanceDescended = 0; // 精準重置為 0
+  correctAnswersCount = 0; // 精準重置答對題數為 0
+  totalDistanceDescended = 0;
   gameTimeSeconds = 0;
   isGameRunning = true;
   isBulletTime = false;
@@ -432,12 +434,6 @@ function spawnFateStairPair(y) {
 
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
-
-  if (currentFateQuestion.question && currentFateQuestion.question.length > 32) {
-    currentFateQuestion.shortStem = currentFateQuestion.question.substring(0, 31) + "...";
-  } else {
-    currentFateQuestion.shortStem = currentFateQuestion.question;
-  }
 
   const opts = currentFateQuestion.options || ["選項A", "選項B"];
   const correctIdx = currentFateQuestion.answer;
@@ -631,16 +627,10 @@ function updatePhysics(dt) {
     }
   }
 
-  // 7. 地下 B30 樓通關目標精準計算 (基於下降總距離)
+  // 7. 計算樓層深度
   depth = Math.floor(totalDistanceDescended / 70);
   maxDepth = Math.max(maxDepth, depth);
   updateUI();
-
-  if (maxDepth >= GOAL_DEPTH && isGameRunning) {
-    playFanfare();
-    spawnStarParticles(CANVAS_WIDTH / 2, 200);
-    gameOver();
-  }
 }
 
 function handleStairCollision(s) {
@@ -673,14 +663,22 @@ function handleStairCollision(s) {
     if (s.isCorrect) {
       if (!s.isTriggered) {
         s.isTriggered = true;
+        correctAnswersCount++;
         playFanfare();
         player.invincibleTimer = 3.0;
         slowdownBoostTimer = 0; // 立刻恢復 100% 正常速度
         isBulletTime = false;
         speedMultiplier = 1.0;
         spawnStarParticles(player.x + 14, player.y);
-        showConceptToast(`✅ 答對了！發動無敵護罩並恢復順暢速度！觀念：${s.question.explanation || "恭喜答對！"}`);
+        showConceptToast(`✅ 答對第 ${correctAnswersCount}/${TARGET_CORRECT_GOAL} 題！觀念解析：${s.question.explanation || "恭喜答對！"}`);
         isFateStairActive = false;
+        updateUI();
+
+        if (correctAnswersCount >= TARGET_CORRECT_GOAL && isGameRunning) {
+          playFanfare();
+          spawnStarParticles(CANVAS_WIDTH / 2, 200);
+          gameOver();
+        }
       }
     } else {
       if (!s.isTriggered) {
@@ -823,19 +821,28 @@ function renderCanvas() {
     }
   });
 
-  // 4. 命運題目頂部醒目橫條 (高度 65px，18px 粗體)
+  // 4. 命運題目頂部醒目橫條 (高度 80px，100% 完整雙行繪製，無切斷 ...)
   const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && s.y <= 550);
   if (fateStairActive && currentFateQuestion) {
     ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
-    ctx.fillRect(20, 20, CANVAS_WIDTH - 40, 65);
+    ctx.fillRect(20, 15, CANVAS_WIDTH - 40, 80);
     ctx.strokeStyle = "#f59e0b";
     ctx.lineWidth = 3;
-    ctx.strokeRect(20, 20, CANVAS_WIDTH - 40, 65);
+    ctx.strokeRect(20, 15, CANVAS_WIDTH - 40, 80);
 
-    const titleFont = isTextZoomed ? "bold 20px sans-serif" : "bold 18px sans-serif";
+    const qText = currentFateQuestion.question || "";
+    const titleFont = isTextZoomed ? "bold 19px sans-serif" : "bold 17px sans-serif";
     ctx.fillStyle = "#fbbf24";
     ctx.font = titleFont;
-    ctx.fillText(`❓ 命運問答：${currentFateQuestion.shortStem || currentFateQuestion.question}`, 35, 58);
+
+    if (qText.length <= 22) {
+      ctx.fillText(`❓ 命運問答：${qText}`, 35, 60);
+    } else {
+      const line1 = qText.substring(0, 22);
+      const line2 = qText.substring(22);
+      ctx.fillText(`❓ 命運問答：${line1}`, 35, 48);
+      ctx.fillText(`   ${line2}`, 35, 76);
+    }
   }
 
   // 5. 繪製彩虹星光粒子
@@ -863,10 +870,10 @@ function renderCanvas() {
 
 function updateUI() {
   heartsDisplay.textContent = "❤️".repeat(Math.max(0, hearts));
-  depthDisplay.textContent = `B${maxDepth} / B${GOAL_DEPTH} 樓`;
+  depthDisplay.textContent = `🎯 答對: ${correctAnswersCount} / ${TARGET_CORRECT_GOAL} 題 (B${maxDepth}樓)`;
 
   if (goalProgressFill) {
-    const pct = Math.min(100, Math.max(0, (maxDepth / GOAL_DEPTH) * 100));
+    const pct = Math.min(100, Math.max(0, (correctAnswersCount / TARGET_CORRECT_GOAL) * 100));
     goalProgressFill.style.width = `${pct}%`;
   }
 
@@ -880,7 +887,7 @@ function gameOver() {
   cancelAnimationFrame(gameLoopTimer);
   clearInterval(secondsTimer);
 
-  victoryTitle.textContent = maxDepth >= GOAL_DEPTH ? "🎉 細胞深淵 B30 樓全勝通關！" : "💥 深淵探險結束！創下深淵紀錄！";
+  victoryTitle.textContent = correctAnswersCount >= TARGET_CORRECT_GOAL ? `🎉 恭喜答對 ${TARGET_CORRECT_GOAL} 題全勝通關！` : `💥 探險結束！共答對 ${correctAnswersCount} 題 (到達 B${maxDepth} 樓)`;
   updateCertCode();
   openModal(victoryModal);
 }
