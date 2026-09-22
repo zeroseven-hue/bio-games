@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>樂透大冒險：生物勇者傳奇 - RPG Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=2.5">
+  <link rel="stylesheet" href="style.css?v=2.6">
 </head>
 <body>
 
@@ -35,7 +35,13 @@
           </div>
           <div class="stat-item">
             <span class="stat-label">⚔️ 武器:</span>
-            <span class="equip-text" id="weaponDisplay">🗡️ 練習木劍 (+0)</span>
+            <span class="equip-text" id="weaponDisplay">
+              <svg class="inline-weapon-svg" viewBox="0 0 100 100" width="16" height="16" style="vertical-align:-2px; margin-right:3px;">
+                <path d="M 50 10 L 65 30 L 55 70 L 50 78 L 45 70 L 35 30 Z" fill="#d97706" stroke="#451a03" stroke-width="4"/>
+                <path d="M 30 68 L 70 68 L 65 74 L 35 74 Z" fill="#b45309" stroke="#451a03" stroke-width="3"/>
+                <rect x="46" y="74" width="8" height="18" rx="3" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+              </svg>練習木劍 (+0)
+            </span>
           </div>
           <div class="stat-item">
             <span class="stat-label">🛡️ 防具:</span>
@@ -79,10 +85,29 @@
             <div class="hero-aura aura-wood" id="heroAura"></div>
             <div class="companion-avatar hidden" id="avatarLele" title="守護犬樂樂">🐶</div>
             
-            <!-- 🐼 超級熊貓勇者 全身組件 (配有藍色超人披風與手持雕刻木劍) -->
+            <!-- 🐼 超級熊貓勇者 全身組件 (純黑白 SVG 熊貓與手持雕刻木劍) -->
             <div class="hero-fullbody" id="heroFullbody">
               <div class="hero-cape"></div>
-              <div class="hero-panda-head">🐼</div>
+              <div class="hero-panda-head">
+                <svg class="panda-head-svg" viewBox="0 0 100 90" width="65" height="58">
+                  <!-- 黑耳朵 -->
+                  <circle cx="20" cy="22" r="16" fill="#1e293b"/>
+                  <circle cx="80" cy="22" r="16" fill="#1e293b"/>
+                  <!-- 純白潔淨臉龐 -->
+                  <ellipse cx="50" cy="50" rx="42" ry="36" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+                  <!-- 黑眼圈 -->
+                  <ellipse cx="32" cy="48" rx="12" ry="15" fill="#1e293b" transform="rotate(-15 32 48)"/>
+                  <ellipse cx="68" cy="48" rx="12" ry="15" fill="#1e293b" transform="rotate(15 68 48)"/>
+                  <!-- 亮眼黑瞳 -->
+                  <circle cx="33" cy="46" r="4" fill="#ffffff"/>
+                  <circle cx="67" cy="46" r="4" fill="#ffffff"/>
+                  <circle cx="34" cy="45" r="1.5" fill="#1e293b"/>
+                  <circle cx="66" cy="45" r="1.5" fill="#1e293b"/>
+                  <!-- 黑色鼻子與笑臉 -->
+                  <ellipse cx="50" cy="60" rx="6" ry="4" fill="#1e293b"/>
+                  <path d="M 44 65 Q 50 70 56 65" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
               <div class="hero-suit-body"><span class="hero-star">⭐</span></div>
               <div class="hero-accessory-slot" id="heroAccessorySlot"></div>
               <div class="hero-weapon-slot" id="heroWeaponSlot">
@@ -389,6 +414,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=2.5"></script>
+  <script src="game.js?v=2.6"></script>
 </body>
 </html>

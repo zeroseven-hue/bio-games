@@ -398,8 +398,15 @@ function updateHeroStats() {
   const a = ARMORS[equippedArmorIndex];
   heroMaxHp = 100 + a.hpBonus;
   heroHp = heroMaxHp;
-  weaponDisplay.textContent = w.name;
   armorDisplay.textContent = a.name;
+
+  if (equippedWeaponIndex === 0) {
+    weaponDisplay.innerHTML = `<svg class="inline-weapon-svg" viewBox="0 0 100 100" width="16" height="16" style="vertical-align:-2px; margin-right:3px;"><path d="M 50 10 L 65 30 L 55 70 L 50 78 L 45 70 L 35 30 Z" fill="#d97706" stroke="#451a03" stroke-width="4"/><path d="M 30 68 L 70 68 L 65 74 L 35 74 Z" fill="#b45309" stroke="#451a03" stroke-width="3"/><rect x="46" y="74" width="8" height="18" rx="3" fill="#78350f" stroke="#451a03" stroke-width="3"/></svg>練習木劍 (+0)`;
+  } else if (equippedWeaponIndex === 1) {
+    weaponDisplay.innerHTML = `<svg class="inline-weapon-svg" viewBox="0 0 100 100" width="16" height="16" style="vertical-align:-2px; margin-right:3px;"><path d="M 50 5 L 63 25 L 54 68 L 50 76 L 46 68 L 37 25 Z" fill="#38bdf8" stroke="#0f172a" stroke-width="4"/><path d="M 28 66 Q 50 62 72 66 L 68 72 Q 50 68 32 72 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3"/></svg>精鋼利劍 (+35)`;
+  } else if (equippedWeaponIndex === 2) {
+    weaponDisplay.innerHTML = `<svg class="inline-weapon-svg" viewBox="0 0 100 100" width="16" height="16" style="vertical-align:-2px; margin-right:3px;"><path d="M 50 2 L 66 22 L 55 65 L 50 75 L 45 65 L 34 22 Z" fill="#fbbf24" stroke="#78350f" stroke-width="4"/><path d="M 24 64 L 76 64 L 70 72 L 30 72 Z" fill="#fef08a" stroke="#78350f" stroke-width="3"/></svg>勇者聖劍 (+95)`;
+  }
 
   const heroWeaponSlot = document.getElementById("heroWeaponSlot");
   const heroAccessorySlot = document.getElementById("heroAccessorySlot");
