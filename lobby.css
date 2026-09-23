@@ -59,6 +59,12 @@ body {
 .lobby-header p {
   color: var(--text-muted);
   font-size: 1.05rem;
+  margin-bottom: 14px;
+}
+
+.header-nav {
+  margin-top: 16px;
+  margin-bottom: 4px;
 }
 
 /* 遊戲卡片區域 */
@@ -245,15 +251,17 @@ body {
 }
 
 .btn-timer-link {
+  display: inline-block;
   background: #0284c7;
   color: #ffffff;
-  padding: 8px 18px;
+  padding: 10px 22px;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 800;
   font-size: 0.95rem;
-  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
   transition: all 0.2s ease;
+  margin-top: 4px;
 }
 
 .btn-timer-link:hover {
