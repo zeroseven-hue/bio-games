@@ -3,38 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>生物小精靈塔防：微觀免疫大作戰 - Bio-Pacman Defense Grid</title>
-  <link rel="stylesheet" href="style.css?v=1.0">
+  <title>生物小精靈塔防：微觀免疫大作戰 V2.0 - Bio-Pacman Defense Grid</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
   <!-- 頂部 HUD 看板 -->
   <header id="game-header">
     <div class="header-left">
-      <span class="badge">國中生物課堂</span>
+      <span class="badge" id="stage-badge">關卡 1：微觀細胞防線</span>
       <select id="unit-select"></select>
     </div>
     <div class="header-right">
       <div class="stat-box">⚡ ATP: <span id="atp-val">0</span></div>
       <div class="stat-box">🎯 答對: <span id="correct-count">0</span></div>
       <div class="stat-box">❤️ <span id="lives-val">❤️❤️❤️</span></div>
+      <button id="btn-leaderboard" class="hdr-btn" title="查看課堂排行榜">🏆 排行榜</button>
+      <button id="btn-drawer" class="hdr-btn" title="課堂設定">⚙️ 設定</button>
     </div>
   </header>
+
+  <!-- 老師專屬課堂設定抽屜 -->
+  <section id="drawer-panel" class="drawer-panel hidden">
+    <div class="drawer-header">
+      <h3>👨‍🏫 課堂模式與特教友善設定</h3>
+      <button id="btn-close-drawer" class="btn-drawer-close">✖️ 關閉</button>
+    </div>
+    <div class="drawer-row">
+      <label class="toggle-label">
+        <input type="checkbox" id="check-stress-free">
+        <span class="toggle-custom"></span>
+        <strong>🧩 特教無壓力模式 (無限生命無限復活)</strong>
+      </label>
+      <small class="help-text">取消生命扣光 Game Over 機制，適合資源班及需無壓力思考的學生。</small>
+    </div>
+    <div class="drawer-row">
+      <label>👥 小組棒次輪流提示：
+        <select id="select-turn-mode">
+          <option value="1">單人獨立挑戰</option>
+          <option value="2">2 人組員輪流操作</option>
+          <option value="3" selected>3 人組員輪流作答</option>
+          <option value="4">4 人組員輪流作答</option>
+        </select>
+      </label>
+    </div>
+    <button id="btn-apply-drawer" class="btn-apply-drawer">💾 套用課堂設定</button>
+  </section>
 
   <!-- 主遊戲畫布與操控區 -->
   <main id="game-container">
     <div class="canvas-wrapper">
-      <canvas id="gameCanvas" width="448" height="496"></canvas>
+      <canvas id="gameCanvas" width="672" height="480"></canvas>
       <!-- 3-2-1 解凍倒數遮罩 -->
       <div id="countdown-overlay" class="hidden">
         <span id="countdown-num">3</span>
       </div>
     </div>
 
-    <!-- 胞器與機制圖例說明 -->
+    <!-- 胞器與機制圖例說明 (對齊國中生物正確防禦觀念) -->
     <div id="organelle-legend">
-      <span><strong style="color:#ff5555;">⚡ 粒線體</strong>：呼吸作用（無敵反殺）</span>
-      <span><strong style="color:#22c55e;">🌿 葉綠體</strong>：光合作用（全場緩速+產糖）</span>
-      <span><strong style="color:#06b6d4;">🛡️ 哨站</strong>：消耗 20 ATP 架設抗體發射台</span>
+      <span><strong style="color:#ff5555;">⚡ 粒線體</strong>：呼吸作用釋能 (強效吞噬)</span>
+      <span><strong style="color:#22c55e;">🌿 葉綠體</strong>：光合作用產糖 (全場緩速)</span>
+      <span><strong style="color:#06b6d4;">🛡️ B 淋巴球哨站</strong>：20 ATP 發射特異性抗體</span>
     </div>
 
     <!-- iPad 專用虛擬方向鍵 (D-Pad) + 支援滑動手勢 -->
@@ -42,7 +71,7 @@
       <button class="d-btn up" data-dir="UP">▲</button>
       <div class="d-row">
         <button class="d-btn left" data-dir="LEFT">◀</button>
-        <button class="d-btn center" id="btn-build">架設砲塔</button>
+        <button class="d-btn center" id="btn-build">召喚 B 細胞</button>
         <button class="d-btn right" data-dir="RIGHT">▶</button>
       </div>
       <button class="d-btn down" data-dir="DOWN">▼</button>
@@ -68,8 +97,9 @@
   <!-- Google Classroom 防偽認證結算卡 -->
   <div id="result-modal" class="modal-overlay hidden">
     <div class="modal-card certificate">
-      <h2>🏆 國家微觀免疫研究員認證卡</h2>
-      <p class="cert-subtitle">國中七年級生物 課堂形成性評量認證</p>
+      <span class="cert-gold-badge" id="cert-medal-badge">🥇 國家金牌免疫研究員認證 🥇</span>
+      <h2>🏆 國家微觀免疫研究員評量卡</h2>
+      <p class="cert-subtitle">國中七年級生物 課堂形成性評量通關認證</p>
       
       <div class="cert-info">
         <div class="input-row">
@@ -78,8 +108,9 @@
         </div>
         <div class="stat-summary">
           <div>作戰總分：<strong id="final-score">0</strong></div>
-          <div>答對命中率：<strong id="final-accuracy">0%</strong></div>
+          <div>答對率：<strong id="final-accuracy">0%</strong></div>
           <div>消滅病原體：<strong id="final-kills">0</strong> 隻</div>
+          <div>通關階段：<strong id="final-stage">Stage 1</strong></div>
         </div>
       </div>
 
@@ -93,13 +124,47 @@
         <ul id="wrong-list"></ul>
       </div>
 
+      <div class="cert-classroom-hint">
+        📸 <b>請按 iPad 截圖鍵，將此證書截圖繳交至 Google Classroom 作業區</b> 📸
+      </div>
+
       <div class="cert-actions">
-        <button id="btn-restart" class="glow-btn">再戰一局 🔄</button>
-        <button id="btn-lobby" class="glow-btn btn-secondary">回遊戲大廳 🏠</button>
+        <button id="btn-next-stage" class="glow-btn btn-gold">🚀 前進下一關卡 (Stage 2)</button>
+        <button id="btn-show-board" class="glow-btn btn-orange">🏆 登錄排行榜</button>
+        <button id="btn-restart" class="glow-btn btn-secondary">再戰一局 🔄</button>
+        <button id="btn-lobby" class="glow-btn btn-secondary">回大廳 🏠</button>
       </div>
     </div>
   </div>
 
-  <script src="game.js?v=1.0"></script>
+  <!-- 🏆 課堂高分排行榜 Modal -->
+  <div id="leaderboard-modal" class="modal-overlay hidden">
+    <div class="modal-card leaderboard-card">
+      <h2>🏆 國中生物免疫作戰 英雄排行榜</h2>
+      <p class="cert-subtitle">記錄全班最高得分與抗體防禦神手紀錄</p>
+
+      <div class="leaderboard-table-wrapper">
+        <table class="leaderboard-table" id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>名次</th>
+              <th>神釣手 / 學生姓名</th>
+              <th>總得分</th>
+              <th>命中率</th>
+              <th>通關關卡</th>
+              <th>防偽驗證碼</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="cert-actions" style="margin-top: 14px;">
+        <button id="btn-close-leaderboard" class="glow-btn">關閉排行榜 ✖️</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js?v=2.0"></script>
 </body>
 </html>

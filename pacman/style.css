@@ -1,4 +1,4 @@
-/* Bio-Pacman Defense Grid Style (V1.0) */
+/* Bio-Pacman Defense Grid Style (V2.0 Cyber-Immunology) */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -25,15 +25,15 @@ body {
 /* 頂部 HUD 導覽列 */
 #game-header {
   width: 100%;
-  max-width: 520px;
-  padding: 8px 12px;
+  max-width: 720px;
+  padding: 8px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #111827;
   border-bottom: 2px solid #1f2937;
   z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
 }
 
 .header-left {
@@ -45,9 +45,9 @@ body {
 .badge {
   background: #2563eb;
   color: white;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
 }
 
@@ -61,10 +61,12 @@ body {
   font-weight: bold;
   outline: none;
   cursor: pointer;
+  max-width: 210px;
 }
 
 .header-right {
   display: flex;
+  align-items: center;
   gap: 8px;
   font-size: 13px;
   font-weight: bold;
@@ -78,7 +80,92 @@ body {
   color: #38bdf8;
 }
 
-/* 主遊戲視窗 */
+.hdr-btn {
+  background: #0284c7;
+  color: white;
+  border: 1px solid #38bdf8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hdr-btn:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+/* 老師專屬設定抽屜 */
+.drawer-panel {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 580px;
+  background: #1e293b;
+  border: 2px solid #0284c7;
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 8px;
+}
+
+.drawer-header h3 {
+  color: #38bdf8;
+  font-size: 15px;
+}
+
+.btn-drawer-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.drawer-row {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.help-text {
+  color: #94a3b8;
+  font-size: 12px;
+  display: block;
+  margin-top: 2px;
+}
+
+.btn-apply-drawer {
+  width: 100%;
+  padding: 10px;
+  background: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 主遊戲視窗 (672px x 480px, 適配 21x15 Grid) */
 #game-container {
   flex: 1;
   display: flex;
@@ -86,7 +173,7 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 520px;
+  max-width: 720px;
   position: relative;
   padding: 6px;
 }
@@ -102,10 +189,10 @@ body {
 canvas {
   background: #000;
   border: 3px solid #1e3a8a;
-  box-shadow: 0 0 24px rgba(30, 58, 138, 0.5);
+  box-shadow: 0 0 28px rgba(30, 58, 138, 0.6);
   border-radius: 8px;
-  max-width: 95vw;
-  max-height: 52vh;
+  max-width: 98vw;
+  max-height: 56vh;
   object-fit: contain;
 }
 
@@ -113,7 +200,7 @@ canvas {
 #countdown-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,10 +209,10 @@ canvas {
 }
 
 #countdown-num {
-  font-size: 72px;
+  font-size: 76px;
   font-weight: 900;
   color: #facc15;
-  text-shadow: 0 0 25px rgba(250, 204, 21, 0.9);
+  text-shadow: 0 0 30px rgba(250, 204, 21, 0.9);
   animation: pulse 0.7s infinite;
 }
 
@@ -161,7 +248,7 @@ canvas {
 }
 
 .d-btn {
-  width: 58px;
+  width: 60px;
   height: 46px;
   background: #1f2937;
   color: #60a5fa;
@@ -181,9 +268,9 @@ canvas {
   color: #fff;
   border-color: #10b981;
   box-shadow: 0 3px 0 #065f46;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
-  width: 88px;
+  width: 96px;
 }
 
 .d-btn:active {
@@ -216,7 +303,7 @@ canvas {
   border-radius: 14px;
   padding: 22px;
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
@@ -298,40 +385,46 @@ canvas {
 }
 
 .glow-btn {
-  width: 100%;
   padding: 12px;
   background: #2563eb;
   border: none;
   border-radius: 8px;
   color: white;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   transition: background 0.2s ease;
+  flex: 1;
 }
 
-.glow-btn:hover {
-  background: #1d4ed8;
-}
-
-.glow-btn.btn-secondary {
-  background: #4b5563;
-}
-
-.glow-btn.btn-secondary:hover {
-  background: #374151;
-}
+.glow-btn:hover { background: #1d4ed8; }
+.glow-btn.btn-gold { background: linear-gradient(135deg, #d97706, #b45309); }
+.glow-btn.btn-orange { background: #ea580c; }
+.glow-btn.btn-secondary { background: #4b5563; }
 
 /* 防偽認證結算卡 */
 .certificate {
   text-align: center;
   border-color: #10b981;
+  position: relative;
+}
+
+.cert-gold-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
 .cert-subtitle {
   font-size: 13px;
   color: #9ca3af;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .input-row {
@@ -358,7 +451,7 @@ canvas {
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .security-badge {
@@ -366,24 +459,61 @@ canvas {
   color: #6ee7b7;
   padding: 8px;
   border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 14px;
+  font-size: 13px;
+  margin-bottom: 12px;
   border: 1px solid #059669;
 }
 
 .wrong-box {
   text-align: left;
-  max-height: 130px;
+  max-height: 120px;
   overflow-y: auto;
   background: #18202f;
   padding: 10px;
   border-radius: 6px;
   font-size: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   border: 1px solid #374151;
+}
+
+.cert-classroom-hint {
+  font-size: 12px;
+  color: #38bdf8;
+  margin-bottom: 14px;
 }
 
 .cert-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 排行榜 Modal */
+.leaderboard-card {
+  max-width: 580px;
+}
+
+.leaderboard-table-wrapper {
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 12px;
+  border-radius: 6px;
+  border: 1px solid #374151;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+  padding: 8px 10px;
+  border: 1px solid #374151;
+  text-align: center;
+}
+
+.leaderboard-table th {
+  background: #1f2937;
+  color: #fbbf24;
 }
