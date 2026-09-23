@@ -250,66 +250,67 @@ function playStepSound() {
   } catch (e) {}
 }
 
-// 🗣️ 經典下樓梯人聲「啊～～～！」墜落慘叫聲 (Vocal Formant Synthesis "AH!" Scream)
+// 🗣️ 《小朋友下樓梯》經典原汁原味人聲墜落慘叫聲 (參考: https://www.youtube.com/watch?v=BqeKzTyDLkI)
 function playDeathScreamSound() {
   if (!soundEnabled || isTeacherFrozen) return;
   unlockAudioContext();
 
-  const doPlayVocalScream = () => {
+  const doPlayNSShaftScream = () => {
     try {
       if (!audioCtx) return;
       const now = audioCtx.currentTime;
-      const duration = 0.85;
+      const duration = 0.82;
 
-      // 1. 主聲道 Gain 節點 (大音量 0.85，超清楚經典「啊～～～！」人聲尖叫)
+      // 1. 主 Master Gain (0.9 超震撼高清大音量)
       const mainGain = audioCtx.createGain();
       mainGain.gain.setValueAtTime(0.01, now);
-      mainGain.gain.linearRampToValueAtTime(0.85, now + 0.03); // 極速 Attack
+      mainGain.gain.linearRampToValueAtTime(0.9, now + 0.03); // 強力 Attack 慘叫爆音
       mainGain.gain.setValueAtTime(0.85, now + 0.45);
-      mainGain.gain.linearRampToValueAtTime(0.001, now + duration); // 自然衰減尾音
+      mainGain.gain.linearRampToValueAtTime(0.001, now + duration); // 深淵尾音自然衰減
       mainGain.connect(audioCtx.destination);
 
-      // 2. 聲帶基音 (Glottal Pulse / Pitch F0 Slide: 720Hz -> 140Hz 人聲尖叫極速狂降)
+      // 2. 聲帶基音 (Glottal Pitch Curve: 先 650Hz->820Hz 驚恐飆高，再狂滑落至 220Hz)
       const voiceOsc = audioCtx.createOscillator();
       voiceOsc.type = "sawtooth";
-      voiceOsc.frequency.setValueAtTime(720, now);
-      voiceOsc.frequency.exponentialRampToValueAtTime(140, now + duration);
+      voiceOsc.frequency.setValueAtTime(650, now);
+      voiceOsc.frequency.linearRampToValueAtTime(820, now + 0.05); // 慘叫起標尖叫衝高
+      voiceOsc.frequency.exponentialRampToValueAtTime(220, now + duration); // 墜落深淵俯衝音高
 
-      // 3. 恐懼顫音 (Vocal Terror Tremolo: 10Hz 微幅抖音)
+      // 3. 人聲恐懼抖動 (9.5Hz Vocal Tremolo Vibrato)
       const vibrato = audioCtx.createOscillator();
       const vibratoGain = audioCtx.createGain();
-      vibrato.frequency.setValueAtTime(10, now);
-      vibratoGain.gain.setValueAtTime(28, now);
+      vibrato.frequency.setValueAtTime(9.5, now);
+      vibratoGain.gain.setValueAtTime(32, now);
       vibrato.connect(vibratoGain);
       vibratoGain.connect(voiceOsc.frequency);
       vibrato.start(now);
       vibrato.stop(now + duration);
 
-      // 4. 人聲共鳴腔 Formant 濾波器 (打造人聲「啊～」AH Vowel Timbre)
-      // Formant 1: 750 Hz (口腔/喉腔「啊」主要共鳴)
+      // 4. 《小朋友下樓梯》經典「啊～」人聲共鳴腔 (AH Vocal Formant Filters)
+      // Formant 1: 780 Hz (口腔/喉腔「啊」主要共鳴)
       const f1 = audioCtx.createBiquadFilter();
       f1.type = "bandpass";
-      f1.frequency.setValueAtTime(750, now);
-      f1.Q.setValueAtTime(3.5, now);
+      f1.frequency.setValueAtTime(780, now);
+      f1.Q.setValueAtTime(3.2, now);
 
-      // Formant 2: 1250 Hz (咽腔共鳴)
+      // Formant 2: 1280 Hz (咽腔共鳴)
       const f2 = audioCtx.createBiquadFilter();
       f2.type = "bandpass";
-      f2.frequency.setValueAtTime(1250, now);
-      f2.Q.setValueAtTime(4.5, now);
+      f2.frequency.setValueAtTime(1280, now);
+      f2.Q.setValueAtTime(4.2, now);
 
-      // Formant 3: 2700 Hz (尖叫高頻撕裂質感)
+      // Formant 3: 2650 Hz (尖叫高頻撕裂質感)
       const f3 = audioCtx.createBiquadFilter();
       f3.type = "bandpass";
-      f3.frequency.setValueAtTime(2700, now);
-      f3.Q.setValueAtTime(5.5, now);
+      f3.frequency.setValueAtTime(2650, now);
+      f3.Q.setValueAtTime(5.0, now);
 
       const f2Gain = audioCtx.createGain();
       f2Gain.gain.value = 0.75;
       const f3Gain = audioCtx.createGain();
       f3Gain.gain.value = 0.45;
 
-      // 5. 喉嚨氣音白噪音 (Throat Noise Screech)
+      // 5. 喉嚨爆音/撕裂氣音 (Throat Noise Friction)
       const bufferSize = Math.floor(audioCtx.sampleRate * duration);
       const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
@@ -321,18 +322,18 @@ function playDeathScreamSound() {
 
       const noiseFilter = audioCtx.createBiquadFilter();
       noiseFilter.type = "bandpass";
-      noiseFilter.frequency.setValueAtTime(2100, now);
-      noiseFilter.Q.setValueAtTime(2.2, now);
+      noiseFilter.frequency.setValueAtTime(2200, now);
+      noiseFilter.Q.setValueAtTime(1.8, now);
 
       const noiseGain = audioCtx.createGain();
-      noiseGain.gain.setValueAtTime(0.28, now);
+      noiseGain.gain.setValueAtTime(0.3, now);
       noiseGain.gain.linearRampToValueAtTime(0.01, now + duration);
 
       noiseSource.connect(noiseFilter);
       noiseFilter.connect(noiseGain);
       noiseGain.connect(mainGain);
 
-      // 連接人聲聲帶 -> Formants 共鳴腔 -> 主輸出
+      // 聲道路由：聲帶基音 -> 三共鳴腔 -> 主輸出
       voiceOsc.connect(f1);
       voiceOsc.connect(f2);
       voiceOsc.connect(f3);
@@ -349,14 +350,14 @@ function playDeathScreamSound() {
       voiceOsc.stop(now + duration);
       noiseSource.stop(now + duration);
     } catch (e) {
-      console.warn("慘叫聲播放失敗:", e);
+      console.warn("小朋友下樓梯慘叫聲播放失敗:", e);
     }
   };
 
   if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume().then(doPlayVocalScream).catch(doPlayVocalScream);
+    audioCtx.resume().then(doPlayNSShaftScream).catch(doPlayNSShaftScream);
   } else {
-    doPlayVocalScream();
+    doPlayNSShaftScream();
   }
 }
 
