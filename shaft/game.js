@@ -206,10 +206,53 @@ function handleTouchEnd(e) {
   }
 }
 
-// 音效系統
+// 音效系統 (載入官方原版《小朋友下樓梯》極致 100% WAV 音效素材)
+let fallingAudioBuffer = null;
+let dyingAudioBuffer = null;
+let isAudioBuffersLoading = false;
+
 function unlockAudioContext() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume();
+  if (!fallingAudioBuffer && !isAudioBuffersLoading) {
+    loadAuthenticShaftSounds();
+  }
+}
+
+function decodeB64ToBuffer(b64Data, callback) {
+  try {
+    if (!audioCtx) return;
+    const base64Str = b64Data.includes(",") ? b64Data.split(",")[1] : b64Data;
+    const binaryStr = atob(base64Str);
+    const len = binaryStr.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
+    audioCtx.decodeAudioData(bytes.buffer, (buffer) => {
+      if (callback) callback(buffer);
+    }, (err) => console.warn("Base64 decode Audio error:", err));
+  } catch (e) {
+    console.warn("decodeB64ToBuffer failed:", e);
+  }
+}
+
+function loadAuthenticShaftSounds() {
+  if (!audioCtx) return;
+  isAudioBuffersLoading = true;
+
+  // 優先解碼內嵌 Base64 (零延遲、離線可用)
+  if (typeof FALLING_WAV_BASE64 !== "undefined") {
+    decodeB64ToBuffer(FALLING_WAV_BASE64, (buf) => { fallingAudioBuffer = buf; });
+  }
+  if (typeof DYING_WAV_BASE64 !== "undefined") {
+    decodeB64ToBuffer(DYING_WAV_BASE64, (buf) => { dyingAudioBuffer = buf; });
+  }
+
+  // 備用從 sounds/ 網路載入
+  fetch("sounds/falling.wav")
+    .then(r => r.arrayBuffer())
+    .then(ab => audioCtx.decodeAudioData(ab))
+    .then(buf => { fallingAudioBuffer = buf; })
+    .catch(() => {});
 }
 
 function playTone(freq, type, duration, delay = 0, vol = 0.1) {
@@ -250,114 +293,39 @@ function playStepSound() {
   } catch (e) {}
 }
 
-// 🗣️ 《小朋友下樓梯》經典原汁原味人聲墜落慘叫聲 (參考: https://www.youtube.com/watch?v=BqeKzTyDLkI)
+// 🗣️ 官方原版《小朋友下樓梯》100% 經典原音掉落慘叫聲 (1:1 對照 YouTube: BqeKzTyDLkI)
 function playDeathScreamSound() {
   if (!soundEnabled || isTeacherFrozen) return;
   unlockAudioContext();
 
-  const doPlayNSShaftScream = () => {
+  const doPlayOriginalWav = () => {
     try {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const duration = 0.82;
-
-      // 1. 主 Master Gain (0.9 超震撼高清大音量)
-      const mainGain = audioCtx.createGain();
-      mainGain.gain.setValueAtTime(0.01, now);
-      mainGain.gain.linearRampToValueAtTime(0.9, now + 0.03); // 強力 Attack 慘叫爆音
-      mainGain.gain.setValueAtTime(0.85, now + 0.45);
-      mainGain.gain.linearRampToValueAtTime(0.001, now + duration); // 深淵尾音自然衰減
-      mainGain.connect(audioCtx.destination);
-
-      // 2. 聲帶基音 (Glottal Pitch Curve: 先 650Hz->820Hz 驚恐飆高，再狂滑落至 220Hz)
-      const voiceOsc = audioCtx.createOscillator();
-      voiceOsc.type = "sawtooth";
-      voiceOsc.frequency.setValueAtTime(650, now);
-      voiceOsc.frequency.linearRampToValueAtTime(820, now + 0.05); // 慘叫起標尖叫衝高
-      voiceOsc.frequency.exponentialRampToValueAtTime(220, now + duration); // 墜落深淵俯衝音高
-
-      // 3. 人聲恐懼抖動 (9.5Hz Vocal Tremolo Vibrato)
-      const vibrato = audioCtx.createOscillator();
-      const vibratoGain = audioCtx.createGain();
-      vibrato.frequency.setValueAtTime(9.5, now);
-      vibratoGain.gain.setValueAtTime(32, now);
-      vibrato.connect(vibratoGain);
-      vibratoGain.connect(voiceOsc.frequency);
-      vibrato.start(now);
-      vibrato.stop(now + duration);
-
-      // 4. 《小朋友下樓梯》經典「啊～」人聲共鳴腔 (AH Vocal Formant Filters)
-      // Formant 1: 780 Hz (口腔/喉腔「啊」主要共鳴)
-      const f1 = audioCtx.createBiquadFilter();
-      f1.type = "bandpass";
-      f1.frequency.setValueAtTime(780, now);
-      f1.Q.setValueAtTime(3.2, now);
-
-      // Formant 2: 1280 Hz (咽腔共鳴)
-      const f2 = audioCtx.createBiquadFilter();
-      f2.type = "bandpass";
-      f2.frequency.setValueAtTime(1280, now);
-      f2.Q.setValueAtTime(4.2, now);
-
-      // Formant 3: 2650 Hz (尖叫高頻撕裂質感)
-      const f3 = audioCtx.createBiquadFilter();
-      f3.type = "bandpass";
-      f3.frequency.setValueAtTime(2650, now);
-      f3.Q.setValueAtTime(5.0, now);
-
-      const f2Gain = audioCtx.createGain();
-      f2Gain.gain.value = 0.75;
-      const f3Gain = audioCtx.createGain();
-      f3Gain.gain.value = 0.45;
-
-      // 5. 喉嚨爆音/撕裂氣音 (Throat Noise Friction)
-      const bufferSize = Math.floor(audioCtx.sampleRate * duration);
-      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
+      if (audioCtx && fallingAudioBuffer) {
+        const source = audioCtx.createBufferSource();
+        source.buffer = fallingAudioBuffer;
+        const gain = audioCtx.createGain();
+        gain.gain.value = 1.0; // 100% 官方原音大音量
+        source.connect(gain);
+        gain.connect(audioCtx.destination);
+        source.start(0);
+      } else if (typeof FALLING_WAV_BASE64 !== "undefined") {
+        const audio = new Audio(FALLING_WAV_BASE64);
+        audio.volume = 1.0;
+        audio.play().catch(e => console.warn("Audio element play error:", e));
+      } else {
+        const audio = new Audio("sounds/falling.wav");
+        audio.volume = 1.0;
+        audio.play().catch(e => console.warn(e));
       }
-      const noiseSource = audioCtx.createBufferSource();
-      noiseSource.buffer = noiseBuffer;
-
-      const noiseFilter = audioCtx.createBiquadFilter();
-      noiseFilter.type = "bandpass";
-      noiseFilter.frequency.setValueAtTime(2200, now);
-      noiseFilter.Q.setValueAtTime(1.8, now);
-
-      const noiseGain = audioCtx.createGain();
-      noiseGain.gain.setValueAtTime(0.3, now);
-      noiseGain.gain.linearRampToValueAtTime(0.01, now + duration);
-
-      noiseSource.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(mainGain);
-
-      // 聲道路由：聲帶基音 -> 三共鳴腔 -> 主輸出
-      voiceOsc.connect(f1);
-      voiceOsc.connect(f2);
-      voiceOsc.connect(f3);
-
-      f1.connect(mainGain);
-      f2.connect(f2Gain);
-      f2Gain.connect(mainGain);
-      f3.connect(f3Gain);
-      f3Gain.connect(mainGain);
-
-      voiceOsc.start(now);
-      noiseSource.start(now);
-
-      voiceOsc.stop(now + duration);
-      noiseSource.stop(now + duration);
     } catch (e) {
-      console.warn("小朋友下樓梯慘叫聲播放失敗:", e);
+      console.warn("原版慘叫聲播放失敗:", e);
     }
   };
 
   if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume().then(doPlayNSShaftScream).catch(doPlayNSShaftScream);
+    audioCtx.resume().then(doPlayOriginalWav).catch(doPlayOriginalWav);
   } else {
-    doPlayNSShaftScream();
+    doPlayOriginalWav();
   }
 }
 
