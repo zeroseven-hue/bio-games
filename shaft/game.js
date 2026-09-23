@@ -126,21 +126,6 @@ function initEventListeners() {
   document.addEventListener("touchstart", unlockAudioContext);
   document.addEventListener("pointerdown", unlockAudioContext);
 
-  const btnTestScream = document.getElementById("btnTestScream");
-  if (btnTestScream) {
-    btnTestScream.addEventListener("click", () => {
-      unlockAudioContext();
-      playDeathScreamSound();
-    });
-  }
-  const btnTestScreamRules = document.getElementById("btnTestScreamRules");
-  if (btnTestScreamRules) {
-    btnTestScreamRules.addEventListener("click", () => {
-      unlockAudioContext();
-      playDeathScreamSound();
-    });
-  }
-
   window.addEventListener("keydown", (e) => {
     unlockAudioContext();
     if (e.code === "Space" && !["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) {
@@ -265,65 +250,113 @@ function playStepSound() {
   } catch (e) {}
 }
 
-// 經典 8-bit 掉入深淵/死掉慘叫狂降滑音效 (死鞘鞘慘叫 - 雙音軌 + 32Hz 顫音 LFO + 雙重喚醒保險)
+// 🗣️ 經典下樓梯人聲「啊～～～！」墜落慘叫聲 (Vocal Formant Synthesis "AH!" Scream)
 function playDeathScreamSound() {
   if (!soundEnabled || isTeacherFrozen) return;
   unlockAudioContext();
 
-  const doPlayScream = () => {
+  const doPlayVocalScream = () => {
     try {
       if (!audioCtx) return;
       const now = audioCtx.currentTime;
+      const duration = 0.85;
 
-      // 主 Gain (大音量 0.7)
+      // 1. 主聲道 Gain 節點 (大音量 0.85，超清楚經典「啊～～～！」人聲尖叫)
       const mainGain = audioCtx.createGain();
-      mainGain.gain.setValueAtTime(0.7, now);
-      mainGain.gain.linearRampToValueAtTime(0.01, now + 0.75);
+      mainGain.gain.setValueAtTime(0.01, now);
+      mainGain.gain.linearRampToValueAtTime(0.85, now + 0.03); // 極速 Attack
+      mainGain.gain.setValueAtTime(0.85, now + 0.45);
+      mainGain.gain.linearRampToValueAtTime(0.001, now + duration); // 自然衰減尾音
       mainGain.connect(audioCtx.destination);
 
-      // 音軌 1：鋸齒波高頻急速下滑 (1250Hz -> 100Hz)
-      const osc1 = audioCtx.createOscillator();
-      osc1.type = "sawtooth";
-      osc1.frequency.setValueAtTime(1250, now);
-      osc1.frequency.exponentialRampToValueAtTime(100, now + 0.75);
+      // 2. 聲帶基音 (Glottal Pulse / Pitch F0 Slide: 720Hz -> 140Hz 人聲尖叫極速狂降)
+      const voiceOsc = audioCtx.createOscillator();
+      voiceOsc.type = "sawtooth";
+      voiceOsc.frequency.setValueAtTime(720, now);
+      voiceOsc.frequency.exponentialRampToValueAtTime(140, now + duration);
 
-      // 音軌 2：方波 (1180Hz -> 85Hz) 營造經典 8-bit 懷舊 GamEOver 顫動感
-      const osc2 = audioCtx.createOscillator();
-      osc2.type = "square";
-      osc2.frequency.setValueAtTime(1180, now);
-      osc2.frequency.exponentialRampToValueAtTime(85, now + 0.75);
+      // 3. 恐懼顫音 (Vocal Terror Tremolo: 10Hz 微幅抖音)
+      const vibrato = audioCtx.createOscillator();
+      const vibratoGain = audioCtx.createGain();
+      vibrato.frequency.setValueAtTime(10, now);
+      vibratoGain.gain.setValueAtTime(28, now);
+      vibrato.connect(vibratoGain);
+      vibratoGain.connect(voiceOsc.frequency);
+      vibrato.start(now);
+      vibrato.stop(now + duration);
 
-      // LFO 顫音滑音效果 (32Hz 高速震音，打造慘叫 Panic 音感)
-      const lfo = audioCtx.createOscillator();
-      const lfoGain = audioCtx.createGain();
-      lfo.frequency.setValueAtTime(32, now);
-      lfoGain.gain.setValueAtTime(95, now);
-      lfo.connect(lfoGain);
-      lfoGain.connect(osc1.frequency);
-      lfoGain.connect(osc2.frequency);
+      // 4. 人聲共鳴腔 Formant 濾波器 (打造人聲「啊～」AH Vowel Timbre)
+      // Formant 1: 750 Hz (口腔/喉腔「啊」主要共鳴)
+      const f1 = audioCtx.createBiquadFilter();
+      f1.type = "bandpass";
+      f1.frequency.setValueAtTime(750, now);
+      f1.Q.setValueAtTime(3.5, now);
 
-      const osc2Gain = audioCtx.createGain();
-      osc2Gain.gain.setValueAtTime(0.45, now);
-      osc2.connect(osc2Gain);
-      osc2Gain.connect(mainGain);
-      osc1.connect(mainGain);
+      // Formant 2: 1250 Hz (咽腔共鳴)
+      const f2 = audioCtx.createBiquadFilter();
+      f2.type = "bandpass";
+      f2.frequency.setValueAtTime(1250, now);
+      f2.Q.setValueAtTime(4.5, now);
 
-      lfo.start(now);
-      osc1.start(now);
-      osc2.start(now);
+      // Formant 3: 2700 Hz (尖叫高頻撕裂質感)
+      const f3 = audioCtx.createBiquadFilter();
+      f3.type = "bandpass";
+      f3.frequency.setValueAtTime(2700, now);
+      f3.Q.setValueAtTime(5.5, now);
 
-      lfo.stop(now + 0.75);
-      osc1.stop(now + 0.75);
-      osc2.stop(now + 0.75);
+      const f2Gain = audioCtx.createGain();
+      f2Gain.gain.value = 0.75;
+      const f3Gain = audioCtx.createGain();
+      f3Gain.gain.value = 0.45;
+
+      // 5. 喉嚨氣音白噪音 (Throat Noise Screech)
+      const bufferSize = Math.floor(audioCtx.sampleRate * duration);
+      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      const noiseSource = audioCtx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.setValueAtTime(2100, now);
+      noiseFilter.Q.setValueAtTime(2.2, now);
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.28, now);
+      noiseGain.gain.linearRampToValueAtTime(0.01, now + duration);
+
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(mainGain);
+
+      // 連接人聲聲帶 -> Formants 共鳴腔 -> 主輸出
+      voiceOsc.connect(f1);
+      voiceOsc.connect(f2);
+      voiceOsc.connect(f3);
+
+      f1.connect(mainGain);
+      f2.connect(f2Gain);
+      f2Gain.connect(mainGain);
+      f3.connect(f3Gain);
+      f3Gain.connect(mainGain);
+
+      voiceOsc.start(now);
+      noiseSource.start(now);
+
+      voiceOsc.stop(now + duration);
+      noiseSource.stop(now + duration);
     } catch (e) {
       console.warn("慘叫聲播放失敗:", e);
     }
   };
 
   if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume().then(doPlayScream).catch(doPlayScream);
+    audioCtx.resume().then(doPlayVocalScream).catch(doPlayVocalScream);
   } else {
-    doPlayScream();
+    doPlayVocalScream();
   }
 }
 
