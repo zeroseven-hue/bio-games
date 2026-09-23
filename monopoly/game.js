@@ -251,6 +251,16 @@ function initEventListeners() {
       return;
     }
     closeModal(quizModal);
+    const curTeam = teams[currentTurnIndex];
+    const requiredCost = isTakeoverMode ? 150 : 100;
+
+    if (curTeam.score < requiredCost) {
+      // 💰 金幣不足蓋房/強佔：平順領獎金並結束本輪 (防死鎖)
+      addHistoryLog(curTeam.name, `💰 答對獲得 +50 金幣，因金幣不足 ${requiredCost} 放棄建立領地。`);
+      endTurn();
+      return;
+    }
+
     if (isTakeoverMode) {
       executeTakeoverOptionA();
     } else {
@@ -262,6 +272,15 @@ function initEventListeners() {
     closeModal(quizModal);
     endTurn();
   });
+
+  const btnCancelBuild = document.getElementById("btnCancelBuild");
+  if (btnCancelBuild) {
+    btnCancelBuild.addEventListener("click", () => {
+      closeModal(buildModal);
+      addHistoryLog(teams[currentTurnIndex].name, `🏠 答對獲得 +50 金幣，選擇保留資金暫不建立領地。`);
+      endTurn();
+    });
+  }
 
   btnConfirmBuild.addEventListener("click", confirmBuildHouse);
 
@@ -378,7 +397,7 @@ let isCurrentQuizAnsweredCorrectly = false;
 function initTeamsAndBoard() {
   teams = ALL_TEAMS.slice(0, activeTeamCount).map(t => ({
     ...t,
-    score: 300, // 每隊初始給予 300 金幣
+    score: 600, // 每隊初始給予 600 金幣 (提高開局容錯率與資金)
     pos: 0,
     buildingsCount: 0
   }));
@@ -663,6 +682,7 @@ function startCountdownTimer() {
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(countdownTimer);
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
+  const curTeam = teams[currentTurnIndex];
 
   if (isCorrect) {
     isCurrentQuizAnsweredCorrectly = true;
@@ -671,19 +691,26 @@ function handleQuizSelect(selectedIndex, btnEl) {
     explanationText.textContent = currentActiveQuestion.explanation || "恭喜答對！獲得建置生態領地的資格！";
     quizExplanation.classList.remove("hidden");
 
-    if (isTakeoverMode) {
-      btnConfirmAnswer.textContent = "⚔️ 答對成功！支付 150 金幣強行佔領領地 🏰";
+    curTeam.score += 50; // 答對獲得 +50 金幣！ (大提升學習獎勵動機)
+    addHistoryLog(curTeam.name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+50金幣)`);
+    renderScoreBar();
+
+    const requiredCost = isTakeoverMode ? 150 : 100;
+    if (curTeam.score < requiredCost) {
+      // 💰 金幣不足以蓋房，動態切換按鈕文字為領獎金結束，防範死鎖！
+      btnConfirmAnswer.textContent = `💰 答對領取 +50 金幣！（金幣不足 ${requiredCost} 無法蓋房，結束本輪 ➡️）`;
     } else {
-      btnConfirmAnswer.textContent = "✅ 答對成功！支付 100 金幣前往建立領地 🏰";
+      if (isTakeoverMode) {
+        btnConfirmAnswer.textContent = "⚔️ 答對成功！支付 150 金幣強行佔領領地 🏰";
+      } else {
+        btnConfirmAnswer.textContent = "✅ 答對成功！支付 100 金幣前往建立領地 🏰";
+      }
     }
 
     // 答對解鎖蓋房/強佔按鈕，隱藏關閉按鈕
     btnConfirmAnswer.classList.remove("hidden");
     btnConfirmAnswer.removeAttribute("disabled");
     btnCloseWrong.classList.add("hidden");
-
-    teams[currentTurnIndex].score += 20;
-    addHistoryLog(teams[currentTurnIndex].name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+20金幣)`);
 
   } else {
     isCurrentQuizAnsweredCorrectly = false;
@@ -788,7 +815,9 @@ function confirmBuildHouse() {
   const cost = isTakeoverMode ? 150 : 100;
 
   if (curTeam.score < cost) {
-    alert(`⚠️ 貴隊金幣不足 (${curTeam.score} < ${cost})，無法進行建置！`);
+    alert(`⚠️ 貴隊金幣不足 (${curTeam.score} < ${cost})，無法進行建置！已為貴隊保留答對獎賞。`);
+    closeModal(buildModal);
+    endTurn();
     return;
   }
 
