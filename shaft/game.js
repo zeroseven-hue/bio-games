@@ -23,7 +23,7 @@ let maxDepth = 0;
 let correctAnswersCount = 0; // 累積答對題數
 let totalDistanceDescended = 0; // 下降總距離 (計算 B0~B30 樓)
 let gameTimeSeconds = 0;
-let baseSpeed = 0.6; // 預設 0.6x 課堂超悠閒速度
+let baseSpeed = 0.4; // 預設 0.4x 課堂超悠閒速度 (最適合國中生)
 let speedMultiplier = 1.0;
 let slowdownBoostTimer = 0; // 答對獲得的 5 秒緩速護罩
 let isBulletTime = false;
@@ -122,10 +122,27 @@ function setupCanvasDPI() {
 }
 
 function initEventListeners() {
-  document.addEventListener("click", unlockAudioContext, { once: true });
-  document.addEventListener("touchstart", unlockAudioContext, { once: true });
+  document.addEventListener("click", unlockAudioContext);
+  document.addEventListener("touchstart", unlockAudioContext);
+  document.addEventListener("pointerdown", unlockAudioContext);
+
+  const btnTestScream = document.getElementById("btnTestScream");
+  if (btnTestScream) {
+    btnTestScream.addEventListener("click", () => {
+      unlockAudioContext();
+      playDeathScreamSound();
+    });
+  }
+  const btnTestScreamRules = document.getElementById("btnTestScreamRules");
+  if (btnTestScreamRules) {
+    btnTestScreamRules.addEventListener("click", () => {
+      unlockAudioContext();
+      playDeathScreamSound();
+    });
+  }
 
   window.addEventListener("keydown", (e) => {
+    unlockAudioContext();
     if (e.code === "Space" && !["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) {
       e.preventDefault();
       toggleTeacherFreeze();
@@ -156,7 +173,7 @@ function initEventListeners() {
   canvasContainer.addEventListener("touchend", handleTouchEnd, { passive: false });
 
   selectSpeed.addEventListener("change", (e) => {
-    baseSpeed = parseFloat(e.target.value) || 0.6;
+    baseSpeed = parseFloat(e.target.value) || 0.4;
   });
 
   btnZoomText.addEventListener("click", () => {
@@ -248,31 +265,65 @@ function playStepSound() {
   } catch (e) {}
 }
 
-// 經典 8-bit 掉入深淵/死掉慘叫狂降滑音效 (死鞘鞘慘叫 - 100% 大聲清晰)
+// 經典 8-bit 掉入深淵/死掉慘叫狂降滑音效 (死鞘鞘慘叫 - 雙音軌 + 32Hz 顫音 LFO + 雙重喚醒保險)
 function playDeathScreamSound() {
   if (!soundEnabled || isTeacherFrozen) return;
   unlockAudioContext();
+
+  const doPlayScream = () => {
+    try {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      // 主 Gain (大音量 0.7)
+      const mainGain = audioCtx.createGain();
+      mainGain.gain.setValueAtTime(0.7, now);
+      mainGain.gain.linearRampToValueAtTime(0.01, now + 0.75);
+      mainGain.connect(audioCtx.destination);
+
+      // 音軌 1：鋸齒波高頻急速下滑 (1250Hz -> 100Hz)
+      const osc1 = audioCtx.createOscillator();
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(1250, now);
+      osc1.frequency.exponentialRampToValueAtTime(100, now + 0.75);
+
+      // 音軌 2：方波 (1180Hz -> 85Hz) 營造經典 8-bit 懷舊 GamEOver 顫動感
+      const osc2 = audioCtx.createOscillator();
+      osc2.type = "square";
+      osc2.frequency.setValueAtTime(1180, now);
+      osc2.frequency.exponentialRampToValueAtTime(85, now + 0.75);
+
+      // LFO 顫音滑音效果 (32Hz 高速震音，打造慘叫 Panic 音感)
+      const lfo = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfo.frequency.setValueAtTime(32, now);
+      lfoGain.gain.setValueAtTime(95, now);
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc1.frequency);
+      lfoGain.connect(osc2.frequency);
+
+      const osc2Gain = audioCtx.createGain();
+      osc2Gain.gain.setValueAtTime(0.45, now);
+      osc2.connect(osc2Gain);
+      osc2Gain.connect(mainGain);
+      osc1.connect(mainGain);
+
+      lfo.start(now);
+      osc1.start(now);
+      osc2.start(now);
+
+      lfo.stop(now + 0.75);
+      osc1.stop(now + 0.75);
+      osc2.stop(now + 0.75);
+    } catch (e) {
+      console.warn("慘叫聲播放失敗:", e);
+    }
+  };
+
   if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-  try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sawtooth";
-    
-    const now = audioCtx.currentTime;
-    osc.frequency.setValueAtTime(950, now);
-    osc.frequency.exponentialRampToValueAtTime(120, now + 0.65);
-    
-    gain.gain.setValueAtTime(0.35, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.65);
-    
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-    osc.stop(now + 0.65);
-  } catch (e) {
-    console.warn("慘叫聲播放失敗:", e);
+    audioCtx.resume().then(doPlayScream).catch(doPlayScream);
+  } else {
+    doPlayScream();
   }
 }
 

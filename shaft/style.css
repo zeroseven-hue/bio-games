@@ -115,6 +115,7 @@ body {
 .btn-tool.active-zoom { background: #0284c7; border-color: #38bdf8; }
 .btn-green { background: #16a34a; }
 .btn-purple { background: #9333ea; }
+.btn-red { background: #dc2626; }
 
 /* B30 通關進度條 */
 .goal-progress-bar-wrap {
