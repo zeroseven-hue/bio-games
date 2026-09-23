@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>生物小精靈塔防：微觀免疫大作戰 - Bio-Pacman Defense Grid</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+  <!-- 頂部 HUD 看板 -->
+  <header id="game-header">
+    <div class="header-left">
+      <span class="badge">國中生物課堂</span>
+      <select id="unit-select"></select>
+    </div>
+    <div class="header-right">
+      <div class="stat-box">⚡ ATP: <span id="atp-val">0</span></div>
+      <div class="stat-box">🎯 答對: <span id="correct-count">0</span></div>
+      <div class="stat-box">❤️ <span id="lives-val">❤️❤️❤️</span></div>
+    </div>
+  </header>
+
+  <!-- 主遊戲畫布與操控區 -->
+  <main id="game-container">
+    <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="448" height="496"></canvas>
+      <!-- 3-2-1 解凍倒數遮罩 -->
+      <div id="countdown-overlay" class="hidden">
+        <span id="countdown-num">3</span>
+      </div>
+    </div>
+
+    <!-- 胞器與機制圖例說明 -->
+    <div id="organelle-legend">
+      <span><strong style="color:#ff5555;">⚡ 粒線體</strong>：呼吸作用（無敵反殺）</span>
+      <span><strong style="color:#22c55e;">🌿 葉綠體</strong>：光合作用（全場緩速+產糖）</span>
+      <span><strong style="color:#06b6d4;">🛡️ 哨站</strong>：消耗 20 ATP 架設抗體發射台</span>
+    </div>
+
+    <!-- iPad 專用虛擬方向鍵 (D-Pad) + 支援滑動手勢 -->
+    <div id="virtual-dpad">
+      <button class="d-btn up" data-dir="UP">▲</button>
+      <div class="d-row">
+        <button class="d-btn left" data-dir="LEFT">◀</button>
+        <button class="d-btn center" id="btn-build">架設砲塔</button>
+        <button class="d-btn right" data-dir="RIGHT">▶</button>
+      </div>
+      <button class="d-btn down" data-dir="DOWN">▼</button>
+    </div>
+  </main>
+
+  <!-- 生物問答與時間凍結 Modal -->
+  <div id="quiz-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="quiz-header">
+        <span id="quiz-type-tag" class="tag">⚡ 粒線體事件</span>
+        <span class="freeze-tag">⏸️ 全場時間凍結 ‧ 請從容作答</span>
+      </div>
+      <h3 id="quiz-question">讀取生物題目中...</h3>
+      <div id="quiz-options" class="options-grid"></div>
+      <div id="quiz-feedback" class="feedback-box hidden">
+        <p id="feedback-text"></p>
+        <button id="feedback-close-btn" class="glow-btn">確認觀念，重返防線 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Classroom 防偽認證結算卡 -->
+  <div id="result-modal" class="modal-overlay hidden">
+    <div class="modal-card certificate">
+      <h2>🏆 國家微觀免疫研究員認證卡</h2>
+      <p class="cert-subtitle">國中七年級生物 課堂形成性評量認證</p>
+      
+      <div class="cert-info">
+        <div class="input-row">
+          <label>班級 / 組別 / 座號姓名：</label>
+          <input type="text" id="student-id" placeholder="例: 701班 第3組 林小君" value="">
+        </div>
+        <div class="stat-summary">
+          <div>作戰總分：<strong id="final-score">0</strong></div>
+          <div>答對命中率：<strong id="final-accuracy">0%</strong></div>
+          <div>消滅病原體：<strong id="final-kills">0</strong> 隻</div>
+        </div>
+      </div>
+
+      <div class="security-badge">
+        <span>Google Classroom 防偽校驗碼：</span>
+        <strong id="security-code">PAC-8812</strong>
+      </div>
+
+      <div id="wrong-summary" class="wrong-box hidden">
+        <h4>💡 本局待訂正觀念清單：</h4>
+        <ul id="wrong-list"></ul>
+      </div>
+
+      <div class="cert-actions">
+        <button id="btn-restart" class="glow-btn">再戰一局 🔄</button>
+        <button id="btn-lobby" class="glow-btn btn-secondary">回遊戲大廳 🏠</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>

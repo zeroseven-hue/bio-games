@@ -232,6 +232,18 @@ body {
   background: linear-gradient(135deg, #b45309, #92400e);
 }
 
+.card-badge.bg-indigo {
+  background: linear-gradient(135deg, #4338ca, #3730a3);
+}
+
+.btn-play.btn-indigo {
+  background: linear-gradient(135deg, #4338ca, #3730a3);
+}
+
+.btn-play.btn-indigo:hover {
+  background: linear-gradient(135deg, #3730a3, #312e81);
+}
+
 .btn-timer-link {
   background: #0284c7;
   color: #ffffff;
