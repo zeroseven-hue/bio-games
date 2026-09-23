@@ -228,7 +228,45 @@ function playTone(freq, type, duration, delay = 0, vol = 0.1) {
 }
 
 function playJumpSound() { playTone(400, "sine", 0.08, 0, 0.1); }
-function playStepSound() { playTone(280, "sine", 0.03, 0, 0.04); } // 輕柔木質 Tap 著地下樓梯音效
+
+// 100% 清晰清爽 8-bit 著地下樓梯 Tap 音效
+function playStepSound() {
+  if (!soundEnabled || isTeacherFrozen) return;
+  unlockAudioContext();
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(380, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.06);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.06);
+  } catch (e) {}
+}
+
+// 經典 8-bit 掉入深淵/死掉慘叫狂降滑音效 (死鞘鞘慘叫)
+function playDeathScreamSound() {
+  if (!soundEnabled || isTeacherFrozen) return;
+  unlockAudioContext();
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.65);
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.65);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.65);
+  } catch (e) {}
+}
+
 function playConveyorSound() { playTone(220, "sine", 0.06, 0, 0.05); }
 function playHeartSound() { playTone(800, "sine", 0.1, 0, 0.12); playTone(1200, "sine", 0.15, 0.08, 0.12); }
 function playHitSound() { playTone(150, "square", 0.15, 0, 0.15); }
@@ -641,12 +679,12 @@ function updatePhysics(dt) {
 
   // 6. 底部深淵熱氣流救援保底
   if (player.y >= CANVAS_HEIGHT - 20) {
+    playDeathScreamSound();
     if (hearts > 1) {
       hearts--;
       player.y = 120;
       player.vy = -12;
       showConceptToast("🌪️ 觸發深淵熱氣流保底救援！扣 1 💖 彈回頂部！");
-      playJumpSound();
       updateUI();
     } else {
       hearts = 0;
@@ -757,6 +795,7 @@ function takeDamage() {
   playHitSound();
   updateUI();
   if (hearts <= 0) {
+    playDeathScreamSound();
     gameOver();
   }
 }
