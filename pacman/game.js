@@ -370,7 +370,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('btn-build').addEventListener('click', tryBuildTower);
   document.getElementById('btn-restart').addEventListener('click', () => { location.reload(); });
-  document.getElementById('btn-lobby').addEventListener('click', () => { window.location.href = '../index.html'; });
   document.getElementById('btn-next-stage').addEventListener('click', advanceNextStage);
   document.getElementById('btn-leaderboard').addEventListener('click', openLeaderboard);
   document.getElementById('btn-show-board').addEventListener('click', saveAndShowLeaderboard);
