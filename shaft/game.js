@@ -248,23 +248,32 @@ function playStepSound() {
   } catch (e) {}
 }
 
-// 經典 8-bit 掉入深淵/死掉慘叫狂降滑音效 (死鞘鞘慘叫)
+// 經典 8-bit 掉入深淵/死掉慘叫狂降滑音效 (死鞘鞘慘叫 - 100% 大聲清晰)
 function playDeathScreamSound() {
   if (!soundEnabled || isTeacherFrozen) return;
   unlockAudioContext();
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.65);
-    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.65);
+    
+    const now = audioCtx.currentTime;
+    osc.frequency.setValueAtTime(950, now);
+    osc.frequency.exponentialRampToValueAtTime(120, now + 0.65);
+    
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.65);
+    
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.65);
-  } catch (e) {}
+    osc.start(now);
+    osc.stop(now + 0.65);
+  } catch (e) {
+    console.warn("慘叫聲播放失敗:", e);
+  }
 }
 
 function playConveyorSound() { playTone(220, "sine", 0.06, 0, 0.05); }
@@ -276,6 +285,46 @@ function playFanfare() { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => play
 function toggleSound() {
   soundEnabled = !soundEnabled;
   btnSound.textContent = soundEnabled ? "🔊" : "🔇";
+}
+
+// 智能中文避頭標點與詞組斷行演算法 (防止孤立標點與切字)
+function splitSmartQuestionText(text, maxChars = 22) {
+  if (!text || text.length <= maxChars) return [text || "", ""];
+
+  const noHeadPunctuation = [",", "，", "。", "！", "？", "、", "；", "：", "」", "』", "）", "]", "}", ">"];
+  let splitIdx = maxChars;
+
+  while (splitIdx > 10 && (noHeadPunctuation.includes(text[splitIdx]) || noHeadPunctuation.includes(text[splitIdx - 1]))) {
+    splitIdx--;
+  }
+
+  let l1 = text.substring(0, splitIdx).trim();
+  let l2 = text.substring(splitIdx).trim();
+
+  if (l2.length > 0 && noHeadPunctuation.includes(l2[0])) {
+    l1 += l2[0];
+    l2 = l2.substring(1).trim();
+  }
+
+  return [l1, l2];
+}
+
+function splitSmartOptionText(content, maxChars = 14) {
+  if (!content || content.length <= 15) return [content || "", ""];
+
+  const compoundWords = ["冷藏", "保存", "進行", "結果", "作用", "細胞", "養分", "環境", "避光", "密封", "低溫", "處理", "活性", "酵素"];
+  let splitIdx = maxChars;
+
+  compoundWords.forEach(w => {
+    const pos = content.indexOf(w);
+    if (pos > 0 && splitIdx > pos && splitIdx < pos + w.length) {
+      splitIdx = pos;
+    }
+  });
+
+  let l1 = content.substring(0, splitIdx).trim();
+  let l2 = content.substring(splitIdx).trim();
+  return [l1, l2];
 }
 
 // 載入題庫
@@ -877,18 +926,17 @@ function renderCanvas() {
         ctx.font = `bold ${fSize}px sans-serif`;
         ctx.fillText(fullText, s.x + 12, s.y + 27);
       } else {
-        // 長選項文字分雙行繪製在 44px 階梯盒內，確保 100% 完整清晰無被遮蓋
+        // 智能避詞切字：避免將「冷藏保存」切成「冷」與「藏保存」
         let fSize = isTextZoomed ? 14 : 13;
         ctx.font = `bold ${fSize}px sans-serif`;
-        const line1 = content.substring(0, 15);
-        const line2 = content.substring(15);
-        ctx.fillText(`${label} ${line1}`, s.x + 10, s.y + 19);
-        ctx.fillText(`   ${line2}`, s.x + 10, s.y + 36);
+        const [optL1, optL2] = splitSmartOptionText(content, 14);
+        ctx.fillText(`${label} ${optL1}`, s.x + 10, s.y + 19);
+        ctx.fillText(`   ${optL2}`, s.x + 10, s.y + 36);
       }
     }
   });
 
-  // 4. 命運題目頂部醒目橫條 (高度 80px，100% 完整雙行繪製，無切斷 ...)
+  // 4. 命運題目頂部醒目橫條 (高度 80px，智能避頭標點演算法，徹底杜絕逗號孤立在開頭)
   const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && s.y <= 550);
   if (fateStairActive && currentFateQuestion) {
     ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
@@ -905,10 +953,9 @@ function renderCanvas() {
     if (qText.length <= 22) {
       ctx.fillText(`❓ 命運問答：${qText}`, 35, 60);
     } else {
-      const line1 = qText.substring(0, 22);
-      const line2 = qText.substring(22);
-      ctx.fillText(`❓ 命運問答：${line1}`, 35, 48);
-      ctx.fillText(`   ${line2}`, 35, 76);
+      const [qL1, qL2] = splitSmartQuestionText(qText, 22);
+      ctx.fillText(`❓ 命運問答：${qL1}`, 35, 48);
+      ctx.fillText(`   ${qL2}`, 35, 76);
     }
   }
 
