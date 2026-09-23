@@ -650,6 +650,21 @@ body {
 .history-table th, .history-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
 .history-table th { background: #f1f5f9; }
 
-.freeze-box { background: #1e1b4b; color: white; text-align: center; }
-.freeze-icon { font-size: 3.5rem; margin-bottom: 10px; }
-.modal-actions-row { display: flex; gap: 10px; }
+.modal-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+.modal-actions-row .btn-action {
+  flex: 1;
+  margin-top: 0;
+  width: auto;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
