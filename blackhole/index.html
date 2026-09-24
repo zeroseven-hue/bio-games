@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>生物星際大逃亡：逃離黑洞 (Bio-Blackhole Escape)</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+
+  <!-- 🌟 背景星空星系 -->
+  <div class="stars-bg"></div>
+
+  <!-- 頂部雙軌跑道儀表板 -->
+  <header id="gameHeader">
+    <div class="status-row">
+      <span class="badge badge-info" id="lblUnit">載入中...</span>
+      <span id="lblShipName">🚀 方舟號曲速躍遷中</span>
+      <span class="badge badge-warning" id="lblOxygen">維生氧氣：100%</span>
+    </div>
+    
+    <div class="track-container">
+      <div class="track-label-row">
+        <span>⚫ 黑洞引力逼近進度</span>
+        <span id="lblDistance">🚀 躍遷距離: 0% / 黑洞威脅: 0%</span>
+      </div>
+      <div class="track">
+        <!-- 飛船躍遷進度亮條 -->
+        <div class="progress-bar" id="progressBar"></div>
+        <!-- 黑洞逼近暗紅條 -->
+        <div class="blackhole-bar" id="blackholeBar"></div>
+        <!-- 圖示定位 -->
+        <div class="ship-icon" id="shipIcon">🛸</div>
+        <div class="blackhole-icon" id="blackholeIcon">⚫</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主答題操作區 -->
+  <main id="gameMain">
+    <div class="question-box" id="qText">正在連結中央生物數據庫...</div>
+    <div class="options-grid">
+      <button class="btn-opt opt-0" id="btn0"><span class="opt-prefix">▲</span> <span class="opt-text">選項 1</span></button>
+      <button class="btn-opt opt-1" id="btn1"><span class="opt-prefix">◆</span> <span class="opt-text">選項 2</span></button>
+      <button class="btn-opt opt-2" id="btn2"><span class="opt-prefix">●</span> <span class="opt-text">選項 3</span></button>
+      <button class="btn-opt opt-3" id="btn3"><span class="opt-prefix">■</span> <span class="opt-text">選項 4</span></button>
+    </div>
+  </main>
+
+  <!-- 答錯冷卻鎖定彈窗（5秒引擎過載鎖定 + 觀念修復） -->
+  <div class="overlay-cooldown" id="cooldownModal">
+    <h2 class="alert-title">⚠️ 引擎過載！維生冷卻修復中</h2>
+    <div class="cooldown-timer" id="cdTimer">5</div>
+    <div class="concept-box">
+      <div class="concept-title">【黑盒子觀念修復日誌】</div>
+      <div id="cdExplanation">觀念解析說明內容...</div>
+    </div>
+  </div>
+
+  <!-- 結算畫面與黑盒子學習檢討日誌 -->
+  <div class="screen-end" id="endScreen">
+    <div class="end-card">
+      <h1 id="endTitle" class="end-title-success">🎉 躍遷成功！成功逃離黑洞引力圈</h1>
+      <p id="endSubtitle">小組逃亡任務完成！以下為本次星際答題黑盒子紀錄：</p>
+      
+      <div class="table-container">
+        <table class="review-table">
+          <thead>
+            <tr>
+              <th style="width: 45%;">題目</th>
+              <th style="width: 55%;">觀念解析與正確答案</th>
+            </tr>
+          </thead>
+          <tbody id="reviewBody"></tbody>
+        </table>
+      </div>
+
+      <button id="btnRestart" class="btn-restart">
+        🔄 重啟緊急推進器！再次隨機航行
+      </button>
+    </div>
+  </div>
+
+  <!-- 核心邏輯腳本 -->
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>
