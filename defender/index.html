@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>生物小蜜蜂：星際防衛隊 V2.0 (Bio Defender)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- 頂部 HUD 資訊列 -->
+    <header>
+      <div class="hud-item">❤️ <span id="lives-val">3</span></div>
+      <div class="hud-item">🏆 <span id="score-val">0</span></div>
+      <div class="hud-item">🔥 <span id="combo-val">0</span> 連擊</div>
+      <div class="hud-item">
+        <button class="btn-sound" id="sound-btn" onclick="toggleSound()">🔊 音效</button>
+      </div>
+    </header>
+
+    <!-- 📚 單元切換列 (動態載入中央題庫) -->
+    <div class="unit-bar">
+      <span class="unit-title" id="unit-display-name">📚 載入題庫單元...</span>
+      <select id="unit-select" class="styled-select" onchange="onUnitChange(this.value)">
+        <option value="">載入單元中...</option>
+      </select>
+    </div>
+
+    <!-- 上方生物題目閱讀板 -->
+    <div id="question-panel">
+      <div class="time-bar-bg">
+        <div class="time-bar-fill" id="time-fill"></div>
+      </div>
+      <div id="q-text">戰機通訊系統連線中...</div>
+      <div class="options-grid">
+        <div class="opt-card A" id="opt-A">A. --</div>
+        <div class="opt-card B" id="opt-B">B. --</div>
+        <div class="opt-card C" id="opt-C">C. --</div>
+        <div class="opt-card D" id="opt-D">D. --</div>
+      </div>
+    </div>
+
+    <!-- 戰鬥主畫布 -->
+    <div id="canvas-wrap">
+      <canvas id="gameCanvas"></canvas>
+      <div id="hint-banner"></div>
+    </div>
+
+    <!-- 教室大黑板大觸屏專用：拍打發射按鈕 -->
+    <div id="bigscreen-pad" style="display: none;">
+      <button class="touch-btn btn-A" onclick="directShoot('A')">[A] 鎖定發射</button>
+      <button class="touch-btn btn-B" onclick="directShoot('B')">[B] 鎖定發射</button>
+      <button class="touch-btn btn-C" onclick="directShoot('C')">[C] 鎖定發射</button>
+      <button class="touch-btn btn-D" onclick="directShoot('D')">[D] 鎖定發射</button>
+    </div>
+
+    <!-- 彈窗 1：開局身分登錄與單元模式選擇 (防偽機制) -->
+    <div class="modal-overlay" id="start-modal">
+      <div class="modal-card">
+        <h2 style="color: var(--accent-blue); margin-bottom: 8px;">🚀 生物星際防衛隊 V2.0</h2>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
+          請輸入真實身分，完成將生成 Google Classroom 驗證碼證書卡。
+        </p>
+        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+          <input type="text" id="user-class" placeholder="班級(如701)" style="width: 30%;" required />
+          <input type="number" id="user-seat" placeholder="座號" style="width: 25%;" required />
+          <input type="text" id="user-name" placeholder="姓名" style="flex: 1;" required />
+        </div>
+
+        <div style="text-align: left; margin-bottom: 12px;">
+          <label style="font-size: 12px; color: #94a3b8;">選擇生物挑戰單元：</label>
+          <select id="modal-unit-select" class="styled-select">
+            <option value="">載入單元清單中...</option>
+          </select>
+        </div>
+
+        <div style="text-align: left; margin-bottom: 12px;">
+          <label style="font-size: 12px; color: #94a3b8;">操作模式：</label>
+          <select id="mode-select">
+            <option value="standard">學生載具（觸控拖曳 / 鍵盤 A/B/C/D 鍵與空白鍵）</option>
+            <option value="bigscreen">教室大黑板觸控螢幕（下方直覺大按鈕）</option>
+          </select>
+        </div>
+        <button class="primary-btn" onclick="startMission()">啟動戰機出擊！</button>
+      </div>
+    </div>
+
+    <!-- 彈窗 2：結算防偽證書卡 -->
+    <div class="modal-overlay" id="end-modal" style="display: none;">
+      <div class="modal-card">
+        <h2 style="color: var(--accent-yellow);">🎖️ 任務結算報告</h2>
+        <div style="font-size: 15px; font-weight: bold; margin: 6px 0; color: #38bdf8;" id="end-rank">評級：達爾文特派員</div>
+
+        <!-- 防偽卡片 (供學生截圖/複製) -->
+        <div class="cert-card" id="cert-card">
+          <div class="watermark" id="cert-watermark">701 15號 王小明</div>
+          <div>👤 防衛隊員：<strong id="cert-user" style="color: var(--accent-blue);">--</strong></div>
+          <div>🏆 最終戰分：<strong id="cert-score" style="color: var(--accent-green); font-size: 16px;">0</strong></div>
+          <div>🎯 答對題數：<span id="cert-stats" style="color: #f8fafc;">0 / 10</span></div>
+          <div>📅 完成時間：<span id="cert-time" style="color: #94a3b8;">--</span></div>
+          <div>🔒 防偽序號：<code id="cert-hash" style="color: var(--accent-yellow); font-family: monospace;">--</code></div>
+        </div>
+
+        <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 10px;">📋 一鍵複製防偽成績與驗證碼</button>
+
+        <div style="margin-top: 12px; font-size: 12px; color: #94a3b8; text-align: left;">錯題回顧清單：</div>
+        <div class="review-box" id="review-list"></div>
+
+        <button class="primary-btn" onclick="location.reload()" style="margin-top: 10px;">重新挑戰</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入外部 JavaScript 邏輯檔案 -->
+  <script src="game.js"></script>
+</body>
+</html>
