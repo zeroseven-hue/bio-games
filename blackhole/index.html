@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>生物星際大逃亡：逃離黑洞 (Bio-Blackhole Escape)</title>
-  <link rel="stylesheet" href="style.css?v=2.0">
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body id="gameBody">
 
@@ -19,7 +19,11 @@
     <div class="status-row">
       <span class="badge badge-info" id="lblUnit">載入中...</span>
       <span id="lblShipName">🚀 方舟號曲速逃擊中</span>
-      <span class="badge badge-warning" id="lblOxygen">維生氧氣：100%</span>
+      <div class="header-tools">
+        <button id="btnSound" class="btn-tool" title="音效開關">🔊 音效</button>
+        <button id="btnMusic" class="btn-tool" title="背景音樂開關">🎵 音樂</button>
+        <span class="badge badge-warning" id="lblOxygen">維生氧氣：100%</span>
+      </div>
     </div>
 
     <!-- 📚 題庫單元選擇 Bar -->
@@ -74,12 +78,42 @@
     </div>
   </div>
 
-  <!-- 結算畫面與黑盒子學習檢討日誌 -->
+  <!-- 結算畫面與黑盒子學習檢討日誌 + 官方防偽認證碼 -->
   <div class="screen-end" id="endScreen">
     <div class="end-card">
       <h1 id="endTitle" class="end-title-success">🎉 躍遷成功！成功逃離黑洞引力圈</h1>
       <p id="endSubtitle">小組逃亡任務完成！以下為本次星際答題黑盒子紀錄：</p>
       
+      <!-- 📜 官方防偽認證與課堂心得表單 -->
+      <div class="cert-form-wrapper">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="inputSeatNo">👤 班級與座號 (例: 70105號)</label>
+            <input type="text" id="inputSeatNo" class="styled-input" placeholder="70105號">
+          </div>
+          <div class="form-group">
+            <label for="inputStudentName">✍️ 探險家姓名</label>
+            <input type="text" id="inputStudentName" class="styled-input" placeholder="探險家同學">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputReflection">📝 課堂生物學習心得與檢討 (可直接複製繳交至 Google Classroom)</label>
+          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="今天黑洞逃亡中，我複習了酵素專一性與細胞膜運輸作用..."></textarea>
+        </div>
+
+        <div class="cert-code-box">
+          <div>Google Classroom 官方防偽認證碼：</div>
+          <div class="cert-code-value" id="certCodeValue">BLACKHOLE-0000-70105</div>
+          <div class="cert-subtext">包含防偽雜湊標記，請截圖上傳或點擊下方按鈕複製內文</div>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="btnCopyCert" class="btn-action btn-gold">📋 複製通關心得與防偽認證碼</button>
+        <button id="btnRestart" class="btn-action btn-success">🔄 重啟緊急推進器！再次航行</button>
+      </div>
+
       <div class="table-container">
         <table class="review-table">
           <thead>
@@ -91,14 +125,10 @@
           <tbody id="reviewBody"></tbody>
         </table>
       </div>
-
-      <button id="btnRestart" class="btn-restart">
-        🔄 重啟緊急推進器！再次隨機航行
-      </button>
     </div>
   </div>
 
   <!-- 核心邏輯腳本 -->
-  <script src="game.js?v=2.0"></script>
+  <script src="game.js?v=3.0"></script>
 </body>
 </html>

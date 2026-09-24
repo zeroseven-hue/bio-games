@@ -1,12 +1,12 @@
 /**
- * 🧬 《生物星際大逃亡：逃離黑洞》核心邏輯控制器 V2.0
- * 包含：動態黑洞漩渦 Canvas 渲染、聲效引擎、單元題庫動態抓取與全單元切換機制
+ * 🧬 《生物星際大逃亡：逃離黑洞》核心邏輯控制器 V3.0
+ * 包含：動態黑洞心跳加速度音效、Synthwave BGM、防偽認證碼與全單元題庫選擇
  */
 
 const FALLBACK_QUESTION_BANK = [
   { id: 1, question: "關於酵素（催化劑）特性的敘述，下列何者正確？", options: ["酵素主要成分是蛋白質，具有專一性", "酵素高溫煮沸後冷卻，活性即可恢復", "酵素在反應過程中會被大量消耗", "強酸強鹼環境下所有酵素活性最高"], answer: 0, explanation: "💡 觀念解析：酵素的主成分是蛋白質，專一性高。高溫或強酸強鹼會使蛋白質變性破壞活性，冷卻後無法恢復！" },
   { id: 2, question: "將新鮮豬肝切片放入雙氧水中會產生大量氣泡，氣泡成分為何？", options: ["二氧化碳", "氧氣", "氮氣", "氫氣"], answer: 1, explanation: "💡 觀念解析：豬肝含有過氧化氫酵素，能催化雙氧水分解產生「氧氣」與水！" },
-  { id: 3, question: "植物進行光合作用時，水分子被光能分解會釋放何種物質？", options: ["二氧化碳", "葡萄糖", "氧氣", "澱粉"], answer: 2, explanation: "💡 觀念解析：光合作用第一階段（光反應），葉綠素吸收光能將水分解，釋放出「氧氣」。" },
+  { id: 3, question: "植物進行光合作用時，水分子被光能分解會釋放何種物質？", options: ["二氧化碳", "葡萄糖", "氧氣", "澱粉"], answer: 2, explanation: "💡 觀念解析：光合作用第一階段（光反應），葉綠素吸收光能將水分解，釋露出「氧氣」。" },
   { id: 4, question: "探究植物葉片光合作用實驗中，用酒精加熱處理葉片的目的為何？", options: ["軟化葉片細胞壁", "溶解葉綠素以便觀察顏色變化", "測試葉片是否含有葡萄糖", "增加葉片吸收碘液的能力"], answer: 1, explanation: "💡 觀念解析：葉綠素溶於酒精，隔水加熱可去除葉綠素，避免影響後續碘液顯色觀察。" },
   { id: 5, question: "人體唾液澱粉酵素在下列哪一種溫度環境下，催化活性最高？", options: ["0°C (冰塊中)", "37°C (體溫環境)", "70°C (溫水中)", "100°C (沸水中)"], answer: 1, explanation: "💡 觀念解析：人體內酵素最適溫度約在體溫 37°C 左右。0°C 活性暫時抑制，100°C 永久變性失效。" },
   { id: 6, question: "有關細胞膜性質與功能的敘述，下列何者正確？", options: ["可控制物質進出細胞，具有選擇透性", "主要成分為纖維素，能支撐細胞形狀", "所有物質皆可自由通過細胞膜", "植物細胞只有細胞壁而沒有細胞膜"], answer: 0, explanation: "💡 觀念解析：細胞膜主要由脂質與蛋白質組成具選擇透性；細胞壁成分為纖維素。" },
@@ -23,8 +23,6 @@ const TOTAL_QUESTIONS_PER_ROUND = 12;
 // 單元題庫管理變數
 let allManifestUnits = [];
 let rawQuestionsByUnit = {};
-let questionPoolByUnit = {};
-
 let roundQuestions = [];
 let currentIndex = 0;
 let wrongLogs = [];
@@ -35,7 +33,12 @@ let oxygen = 100;
 let shipProgress = 0;      // 0% ~ 100%
 let blackholeProgress = 0; // 0% ~ 100%
 let blackholeTimer = null;
+
+// 音效與音樂控制
 let soundEnabled = true;
+let musicEnabled = true;
+let heartbeatLoopTimer = null;
+let bgmTimer = null;
 
 // Web Audio API 聲效
 let audioCtx = null;
@@ -109,11 +112,60 @@ function playVictorySound() {
   });
 }
 
+// 💓 動態加速度心跳/滴答聲音效系統 (根據黑洞距離自動調速)
+function updateDynamicHeartbeatSound() {
+  if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
+  if (!soundEnabled || isLocked || currentIndex >= roundQuestions.length) return;
+
+  const gap = shipProgress - blackholeProgress;
+  let intervalMs = 1000;
+  let pitch = 85;
+
+  if (gap <= 15) {
+    intervalMs = 280; // 極速狂跳 答!答!答!答! (BPM ~210)
+    pitch = 160;
+  } else if (gap <= 35) {
+    intervalMs = 550; // 加速心跳 (BPM ~110)
+    pitch = 120;
+  } else {
+    intervalMs = 1000; // 悠緩平穩 (BPM 60)
+    pitch = 85;
+  }
+
+  // 播放心跳重音
+  playTone(pitch, "triangle", 0.08, 0, 0.12);
+
+  heartbeatLoopTimer = setTimeout(updateDynamicHeartbeatSound, intervalMs);
+}
+
+// 🎵 Synthwave 背景音樂 (BGM) 電晶體風格
+function playBGMStep() {
+  if (!musicEnabled || currentIndex >= roundQuestions.length) return;
+  const notes = [130, 164, 196, 220, 196, 164];
+  const step = Math.floor(Date.now() / 400) % notes.length;
+  playTone(notes[step], "sine", 0.15, 0, 0.05);
+  bgmTimer = setTimeout(playBGMStep, 400);
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById("btnSound");
+  if (btn) btn.innerText = soundEnabled ? "🔊 音效" : "🔇 音效關";
+  if (soundEnabled) updateDynamicHeartbeatSound();
+}
+
+function toggleMusic() {
+  musicEnabled = !musicEnabled;
+  const btn = document.getElementById("btnMusic");
+  if (btn) btn.innerText = musicEnabled ? "🎵 音樂" : "🔇 音樂關";
+  if (musicEnabled) playBGMStep();
+}
+
 function triggerScreenShake() {
   const body = document.getElementById("gameBody");
   if (body) {
     body.classList.remove("shake");
-    void body.offsetWidth; // 強制重繪
+    void body.offsetWidth;
     body.classList.add("shake");
     setTimeout(() => body.classList.remove("shake"), 450);
   }
@@ -129,7 +181,7 @@ function shuffleArray(arr) {
   return pool;
 }
 
-// 📚 載入清單 (Manifest) 並支援多單元切換與預設抓取
+// 📚 載入清單 (Manifest) 並支援多單元切換
 async function loadManifestAndUnits() {
   const selectUnit = document.getElementById("selectUnit");
   const unitInfoText = document.getElementById("unitInfoText");
@@ -157,13 +209,11 @@ async function loadManifestAndUnits() {
   if (manifest && manifest.units) {
     allManifestUnits = manifest.units;
 
-    // 1. 全單元綜合大亂鬥
     const allOpt = document.createElement("option");
     allOpt.value = "ALL";
     allOpt.textContent = "🌱 全單元綜合大亂鬥 (1~10單元混合)";
     if (selectUnit) selectUnit.appendChild(allOpt);
 
-    // 2. 各獨立單元
     allManifestUnits.forEach(u => {
       const opt = document.createElement("option");
       opt.value = u.file;
@@ -171,7 +221,6 @@ async function loadManifestAndUnits() {
       if (selectUnit) selectUnit.appendChild(opt);
     });
 
-    // 預載各單元題庫 JSON
     for (const u of allManifestUnits) {
       const paths = [`../questions/${u.file}`, `questions/${u.file}`, u.file];
       for (const p of paths) {
@@ -186,7 +235,6 @@ async function loadManifestAndUnits() {
       }
     }
   } else {
-    // 降級預設單元
     const opt = document.createElement("option");
     opt.value = "unit10_enzymes.json";
     opt.textContent = "國中生物：酵素、細胞與能量作用評量";
@@ -194,7 +242,6 @@ async function loadManifestAndUnits() {
     rawQuestionsByUnit["unit10_enzymes.json"] = FALLBACK_QUESTION_BANK;
   }
 
-  // 檢查 URL 網址參數 (例如 ?unit=unit10_enzymes.json 或 ?file=...)
   const urlParams = new URLSearchParams(window.location.search);
   const targetUnit = urlParams.get("unit") || urlParams.get("file") || "ALL";
   if (selectUnit) {
@@ -210,7 +257,6 @@ async function loadManifestAndUnits() {
   initGame();
 }
 
-// 抓取指定單元的題目池
 function getQuestionsForSelectedUnit() {
   const selectUnit = document.getElementById("selectUnit");
   const selectedValue = selectUnit ? selectUnit.value : "ALL";
@@ -234,6 +280,8 @@ function getQuestionsForSelectedUnit() {
 // 初始化遊戲狀態
 function initGame() {
   if (blackholeTimer) clearInterval(blackholeTimer);
+  if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
+  if (bgmTimer) clearTimeout(bgmTimer);
   
   roundQuestions = getQuestionsForSelectedUnit();
   currentIndex = 0;
@@ -251,6 +299,8 @@ function initGame() {
   updateUI();
   renderQuestion();
   startBlackholeTensionTimer();
+  updateDynamicHeartbeatSound();
+  if (musicEnabled) playBGMStep();
 }
 
 // 動態黑洞逼近計時器（每 3 秒逼近 1.2%）
@@ -290,7 +340,6 @@ function handleSelect(selectedIndex) {
 
   const q = roundQuestions[currentIndex];
   if (selectedIndex === q.answer) {
-    // 答對：推進飛船 +8.33%
     playBoostSound();
     currentIndex++;
     shipProgress = Math.min(100, Math.round((currentIndex / TOTAL_QUESTIONS_PER_ROUND) * 100));
@@ -302,7 +351,6 @@ function handleSelect(selectedIndex) {
       setTimeout(renderQuestion, 250);
     }
   } else {
-    // 答錯：震撼螢幕、扣氧氣 15%、飛船後退 5%、黑洞逼近 3%、觸發過載冷卻
     triggerScreenShake();
     playAlarmSound();
     oxygen = Math.max(0, oxygen - 15);
@@ -327,8 +375,6 @@ function handleSelect(selectedIndex) {
 
 // 檢查被黑洞吞噬或氧氣歸零 Failure 狀態
 function checkFailState() {
-  const gap = shipProgress - blackholeProgress;
-  // 氧氣歸零 或 黑洞已超越飛船 (黑洞進度 >= 飛船進度 + 5)
   if (oxygen <= 0 || (currentIndex > 0 && blackholeProgress >= shipProgress + 5)) {
     finishGame(false);
     return true;
@@ -371,7 +417,6 @@ function updateUI() {
   document.getElementById("lblOxygen").innerText = `維生氧氣：${oxygen}%`;
   document.getElementById("lblDistance").innerText = `🚀 躍遷進度: ${shipProgress}% / ⚫ 黑洞逼近: ${blackholeProgress}%`;
 
-  // 黑洞距離小於 20% 時啟動全屏紅色警報閃爍
   const criticalAlert = document.getElementById("criticalAlert");
   const warningBanner = document.getElementById("warningBanner");
   const gap = shipProgress - blackholeProgress;
@@ -383,11 +428,58 @@ function updateUI() {
     if (criticalAlert) criticalAlert.classList.remove("danger-flash");
     if (warningBanner) warningBanner.classList.add("hidden");
   }
+
+  updateCertCode();
+}
+
+// 🛡️ 官方防偽認證碼與證書產生器
+function updateCertCode() {
+  const seatInput = document.getElementById("inputSeatNo");
+  const nameInput = document.getElementById("inputStudentName");
+  const certCodeValue = document.getElementById("certCodeValue");
+
+  if (!certCodeValue) return;
+
+  const seat = (seatInput && seatInput.value.trim()) || "70105號";
+  const name = (nameInput && nameInput.value.trim()) || "黑洞逃亡領航員";
+  const str = `${seat}-${name}-${shipProgress}-${blackholeProgress}-${oxygen}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash << 5) - hash + str.charCodeAt(i);
+  const code = Math.abs(hash).toString(16).toUpperCase().padStart(4, "0");
+  certCodeValue.textContent = `BLACKHOLE-${code}-${seat}`;
+}
+
+function copyCertificationData() {
+  const seatInput = document.getElementById("inputSeatNo");
+  const nameInput = document.getElementById("inputStudentName");
+  const reflectionInput = document.getElementById("inputReflection");
+  const certCodeValue = document.getElementById("certCodeValue");
+
+  const seat = (seatInput && seatInput.value.trim()) || "70105號";
+  const name = (nameInput && nameInput.value.trim()) || "黑洞逃亡領航員";
+  const reflection = (reflectionInput && reflectionInput.value.trim()) || "今天黑洞逃亡中複習了酵素專一性與細胞膜運輸作用。";
+  const certCode = (certCodeValue && certCodeValue.textContent) || "BLACKHOLE-0000-70105";
+
+  const text = `【生物星際大逃亡：逃離黑洞 - 課堂通關證書】\n` +
+    `👤 領航員：${seat} ${name}\n` +
+    `🚀 躍遷進度：${shipProgress}%\n` +
+    `⚫ 黑洞威脅：${blackholeProgress}%\n` +
+    `💖 維生氧氣：${oxygen}%\n` +
+    `📝 課堂心得與檢討：${reflection}\n` +
+    `🛡️ Google Classroom 官方防偽認證碼：${certCode}`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert("✅ 防偽認證證書與心得文字已成功複製！可直接上傳繳交至 Google Classroom！");
+  }).catch(() => {
+    alert("複製失敗，請手動複製以下內容：\n\n" + text);
+  });
 }
 
 // 結算畫面 (Success vs Failure)
 function finishGame(isSuccess) {
   if (blackholeTimer) clearInterval(blackholeTimer);
+  if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
+  if (bgmTimer) clearTimeout(bgmTimer);
   isLocked = true;
 
   const criticalAlert = document.getElementById("criticalAlert");
@@ -425,6 +517,8 @@ function finishGame(isSuccess) {
       reviewBody.appendChild(tr);
     });
   }
+
+  updateCertCode();
 }
 
 // 🌌 Canvas 太空星空與黑洞漩渦動態渲染
@@ -440,7 +534,6 @@ function initSpaceCanvas() {
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
 
-  // 初始化星光
   stars = [];
   for (let i = 0; i < 120; i++) {
     stars.push({
@@ -451,7 +544,6 @@ function initSpaceCanvas() {
     });
   }
 
-  // 初始化黑洞吸力粒子
   blackholeParticles = [];
   for (let i = 0; i < 40; i++) {
     blackholeParticles.push({
@@ -465,7 +557,6 @@ function initSpaceCanvas() {
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. 繪製急速星流
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     stars.forEach(s => {
       s.x -= s.speed * 2;
@@ -475,7 +566,6 @@ function initSpaceCanvas() {
       ctx.fill();
     });
 
-    // 2. 繪製左側黑洞吸力漩渦
     const bhX = (blackholeProgress / 100) * (canvas.width * 0.4) - 40;
     const bhY = canvas.height / 2;
 
@@ -489,7 +579,6 @@ function initSpaceCanvas() {
     ctx.arc(bhX, bhY, 140, 0, Math.PI * 2);
     ctx.fill();
 
-    // 黑洞吸力粒子
     ctx.fillStyle = "#ff4757";
     blackholeParticles.forEach(p => {
       p.angle += p.speed;
@@ -516,6 +605,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const btnRestart = document.getElementById("btnRestart");
   if (btnRestart) btnRestart.addEventListener("click", initGame);
+
+  const btnSound = document.getElementById("btnSound");
+  if (btnSound) btnSound.addEventListener("click", toggleSound);
+
+  const btnMusic = document.getElementById("btnMusic");
+  if (btnMusic) btnMusic.addEventListener("click", toggleMusic);
+
+  const btnCopyCert = document.getElementById("btnCopyCert");
+  if (btnCopyCert) btnCopyCert.addEventListener("click", copyCertificationData);
+
+  const seatInput = document.getElementById("inputSeatNo");
+  const nameInput = document.getElementById("inputStudentName");
+  if (seatInput) seatInput.addEventListener("input", updateCertCode);
+  if (nameInput) nameInput.addEventListener("input", updateCertCode);
 
   loadManifestAndUnits();
 });
