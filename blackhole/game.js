@@ -52,8 +52,17 @@ let animFrameId = null;
 
 function unlockAudioContext() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") audioCtx.resume();
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume().catch(e => {});
+  }
 }
+
+// 綁定全域點擊/按鍵事件，確保瀏覽器在任何使用者互動時即刻解鎖 AudioContext
+['click', 'touchstart', 'pointerdown', 'keydown'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    unlockAudioContext();
+  }, { passive: true });
+});
 
 function playTone(freq, type, duration, delay = 0, vol = 0.15) {
   if (!soundEnabled) return;
@@ -73,18 +82,18 @@ function playTone(freq, type, duration, delay = 0, vol = 0.15) {
 }
 
 function playBoostSound() {
-  playTone(400, "triangle", 0.08, 0, 0.15);
-  playTone(600, "sine", 0.12, 0.06, 0.2);
-  playTone(880, "sine", 0.18, 0.14, 0.25);
+  playTone(400, "triangle", 0.08, 0, 0.18);
+  playTone(600, "sine", 0.12, 0.06, 0.22);
+  playTone(880, "sine", 0.18, 0.14, 0.28);
 }
 
 function playAlarmSound() {
-  playTone(220, "sawtooth", 0.25, 0, 0.3);
-  playTone(160, "sawtooth", 0.35, 0.2, 0.35);
+  playTone(220, "sawtooth", 0.25, 0, 0.35);
+  playTone(160, "sawtooth", 0.35, 0.2, 0.4);
 }
 
 function playTickSound() {
-  playTone(1000, "sine", 0.05, 0, 0.12);
+  playTone(1000, "sine", 0.05, 0, 0.15);
 }
 
 function playGameOverSound() {
@@ -108,57 +117,126 @@ function playGameOverSound() {
 
 function playVictorySound() {
   [523, 659, 784, 1046].forEach((freq, idx) => {
-    playTone(freq, "square", 0.12, idx * 0.08, 0.15);
+    playTone(freq, "square", 0.12, idx * 0.08, 0.2);
   });
+}
+
+// 💓 雙擊心跳聲 ("Lub-Dub" 咚-咚) 專用諧波合成器，確保低音與中高音在任何喇叭上都清晰巨大
+function playHeartbeatDoublePulse(baseFreq = 160, isPanic = false) {
+  if (!soundEnabled) return;
+  unlockAudioContext();
+  try {
+    const now = audioCtx.currentTime;
+    
+    // 第一重音 Lub (咚)
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(baseFreq, now);
+    osc1.frequency.exponentialRampToValueAtTime(60, now + 0.1);
+    gain1.gain.setValueAtTime(0.4, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.1);
+
+    // 加上中頻 Click 聲讓手持裝置/小喇叭也能清脆聽到「答！」
+    const oscClick1 = audioCtx.createOscillator();
+    const gainClick1 = audioCtx.createGain();
+    oscClick1.type = "triangle";
+    oscClick1.frequency.setValueAtTime(800, now);
+    oscClick1.frequency.exponentialRampToValueAtTime(200, now + 0.03);
+    gainClick1.gain.setValueAtTime(0.18, now);
+    gainClick1.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+    oscClick1.connect(gainClick1);
+    gainClick1.connect(audioCtx.destination);
+    oscClick1.start(now);
+    oscClick1.stop(now + 0.03);
+
+    // 第二重音 Dub (咚) - 80ms 後
+    const delay2 = 0.08;
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(baseFreq * 1.25, now + delay2);
+    osc2.frequency.exponentialRampToValueAtTime(70, now + delay2 + 0.09);
+    gain2.gain.setValueAtTime(0.32, now + delay2);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + delay2 + 0.09);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(now + delay2);
+    osc2.stop(now + delay2 + 0.09);
+
+    // 若處於極度危險 (gap <= 15%)，加疊 880Hz 蜂鳴警報聲
+    if (isPanic) {
+      playTone(880, "sawtooth", 0.06, 0.02, 0.2);
+    }
+  } catch (e) {}
 }
 
 // 💓 動態加速度心跳/滴答聲音效系統 (根據黑洞距離自動調速)
 function updateDynamicHeartbeatSound() {
   if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
-  if (!soundEnabled || isLocked || currentIndex >= roundQuestions.length) return;
+  if (!soundEnabled || currentIndex >= roundQuestions.length) return;
 
   const gap = shipProgress - blackholeProgress;
   let intervalMs = 1000;
-  let pitch = 85;
+  let basePitch = 140;
 
   if (gap <= 15) {
-    intervalMs = 280; // 極速狂跳 答!答!答!答! (BPM ~210)
-    pitch = 160;
+    intervalMs = 260; // 極速狂跳 答!答!答!答! (BPM ~230)
+    basePitch = 220;
   } else if (gap <= 35) {
-    intervalMs = 550; // 加速心跳 (BPM ~110)
-    pitch = 120;
+    intervalMs = 520; // 加速心跳 (BPM ~115)
+    basePitch = 180;
   } else {
-    intervalMs = 1000; // 悠緩平穩 (BPM 60)
-    pitch = 85;
+    intervalMs = 1000; // 悠緩平穩 (BPM ~60)
+    basePitch = 140;
   }
 
-  // 播放心跳重音
-  playTone(pitch, "triangle", 0.08, 0, 0.12);
+  // 只要音效開啟，就算在 answer 鎖定過渡期間也播放心跳，且【絕對不要】因為 isLocked 就終止計時器迴圈！
+  if (!isLocked) {
+    playHeartbeatDoublePulse(basePitch, gap <= 15);
+  }
 
   heartbeatLoopTimer = setTimeout(updateDynamicHeartbeatSound, intervalMs);
 }
 
 // 🎵 Synthwave 背景音樂 (BGM) 電晶體風格
 function playBGMStep() {
+  if (bgmTimer) clearTimeout(bgmTimer);
   if (!musicEnabled || currentIndex >= roundQuestions.length) return;
-  const notes = [130, 164, 196, 220, 196, 164];
+  const notes = [130, 164, 196, 261, 220, 196];
   const step = Math.floor(Date.now() / 400) % notes.length;
-  playTone(notes[step], "sine", 0.15, 0, 0.05);
+  if (!isLocked) {
+    playTone(notes[step], "sine", 0.18, 0, 0.08);
+  }
   bgmTimer = setTimeout(playBGMStep, 400);
 }
 
 function toggleSound() {
+  unlockAudioContext();
   soundEnabled = !soundEnabled;
   const btn = document.getElementById("btnSound");
-  if (btn) btn.innerText = soundEnabled ? "🔊 音效" : "🔇 音效關";
-  if (soundEnabled) updateDynamicHeartbeatSound();
+  if (btn) btn.innerText = soundEnabled ? "🔊 音效 (開啟)" : "🔇 音效關";
+  if (soundEnabled) {
+    updateDynamicHeartbeatSound();
+  } else {
+    if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
+  }
 }
 
 function toggleMusic() {
+  unlockAudioContext();
   musicEnabled = !musicEnabled;
   const btn = document.getElementById("btnMusic");
-  if (btn) btn.innerText = musicEnabled ? "🎵 音樂" : "🔇 音樂關";
-  if (musicEnabled) playBGMStep();
+  if (btn) btn.innerText = musicEnabled ? "🎵 音樂 (開啟)" : "🔇 音樂關";
+  if (musicEnabled) {
+    playBGMStep();
+  } else {
+    if (bgmTimer) clearTimeout(bgmTimer);
+  }
 }
 
 function triggerScreenShake() {
@@ -335,6 +413,7 @@ function renderQuestion() {
 
 // 作答判定
 function handleSelect(selectedIndex) {
+  unlockAudioContext();
   if (isLocked) return;
   isLocked = true;
 
