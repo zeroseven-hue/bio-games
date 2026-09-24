@@ -1,7 +1,7 @@
 :root {
-  --bg-space: #070913;
-  --card-bg: rgba(20, 26, 48, 0.95);
-  --border-color: #3b4c80;
+  --bg-space: #05070e;
+  --card-bg: rgba(16, 22, 42, 0.95);
+  --border-color: #314275;
   --red: #e21b3c;
   --blue: #1368ce;
   --yellow: #d89e00;
@@ -29,29 +29,58 @@ body {
   position: relative;
 }
 
-/* 🌟 動態星空背景與黑洞漩渦 */
-.stars-bg {
+/* 🌌 動態太空 Canvas 背景 (星空速流與黑洞引力漩渦) */
+#spaceCanvas {
   position: absolute;
   inset: 0;
-  background: 
-    radial-gradient(circle at 10% 20%, rgba(255, 65, 108, 0.08), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(0, 198, 255, 0.08), transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(138, 35, 135, 0.12), transparent 60%);
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
   z-index: 0;
+  pointer-events: none;
+}
+
+/* ⚠️ 緊急警報全螢幕邊框閃爍 */
+.critical-alert-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border: 4px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.critical-alert-overlay.danger-flash {
+  animation: redFlashBorder 0.8s infinite alternate;
+}
+
+@keyframes redFlashBorder {
+  0% { border-color: rgba(255, 71, 87, 0.2); box-shadow: inset 0 0 20px rgba(255, 71, 87, 0.2); }
+  100% { border-color: rgba(255, 71, 87, 0.9); box-shadow: inset 0 0 60px rgba(255, 71, 87, 0.7); }
+}
+
+/* 震動效果 (Screen Shake) */
+.shake {
+  animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes screenShake {
+  10%, 90% { transform: translate3d(-3px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
 }
 
 /* 頂部跑道與雙軌儀表板 */
 header {
   position: relative;
   z-index: 10;
-  padding: 12px 20px;
-  background: rgba(13, 17, 33, 0.95);
-  border-bottom: 2px solid #2e3a63;
+  padding: 10px 18px;
+  background: rgba(10, 14, 28, 0.96);
+  border-bottom: 2px solid #28345c;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  gap: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
 }
 
 .status-row {
@@ -59,52 +88,91 @@ header {
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .badge {
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 8px;
-  background: #2a355a;
-  font-size: 0.9rem;
-  border: 1px solid #48598e;
+  background: #222d4f;
+  font-size: 0.88rem;
+  border: 1px solid #3d4f85;
 }
 
 .badge-warning {
-  background: #631b26;
+  background: #5c1823;
   border-color: #ff4757;
   color: #ffda79;
 }
 
 .badge-info {
-  background: #0f4c81;
+  background: #0d4272;
   border-color: #38bdf8;
   color: #e0f2fe;
+}
+
+/* 📚 題庫單元選擇 Bar */
+.unit-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #141b36;
+  border-radius: 8px;
+  padding: 6px 12px;
+  border: 1px solid #2e3c6a;
+  font-size: 0.9rem;
+}
+
+.unit-info {
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+.unit-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.styled-unit-select {
+  background: #0a0e1e;
+  color: #ffda79;
+  border: 1px solid #475890;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.88rem;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+
+.styled-unit-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
 /* 雙軌進度條 (飛船推進 vs 黑洞吞噬距離) */
 .track-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 4px;
 }
 
 .track-label-row {
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: #cbd5e1;
   font-weight: 600;
 }
 
 .track {
   position: relative;
   height: 28px;
-  background: #11172a;
+  background: #0d1222;
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid #3d4c7a;
+  border: 1px solid #364673;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
 }
 
@@ -113,8 +181,8 @@ header {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #ff416c, #8a2387, #00c6ff);
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px rgba(0, 198, 255, 0.8);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(0, 198, 255, 0.9);
 }
 
 /* 黑洞逼近暗紅條 */
@@ -124,8 +192,8 @@ header {
   left: 0;
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, rgba(0,0,0,0.9), rgba(226, 27, 60, 0.85));
-  transition: width 0.4s ease;
+  background: linear-gradient(90deg, rgba(0,0,0,0.95), rgba(226, 27, 60, 0.9));
+  transition: width 0.3s ease;
   z-index: 2;
   border-right: 2px solid #ff4757;
 }
@@ -136,9 +204,9 @@ header {
   left: 0%;
   transform: translate(-50%, -50%);
   font-size: 22px;
-  transition: left 0.4s ease;
+  transition: left 0.3s ease;
   z-index: 5;
-  filter: drop-shadow(0 0 8px #00c6ff);
+  filter: drop-shadow(0 0 10px #00c6ff);
 }
 
 .blackhole-icon {
@@ -147,9 +215,31 @@ header {
   left: 0%;
   transform: translate(-50%, -50%);
   font-size: 22px;
-  transition: left 0.4s ease;
+  transition: left 0.3s ease;
   z-index: 6;
-  filter: drop-shadow(0 0 10px #ff4757);
+  filter: drop-shadow(0 0 12px #ff4757);
+}
+
+/* 警告橫幅 Banner */
+.warning-banner {
+  background: #5c1823;
+  border: 1px solid #ff4757;
+  color: #ffda79;
+  text-align: center;
+  padding: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 6px;
+  animation: pulseBanner 1s infinite alternate;
+}
+
+@keyframes pulseBanner {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; transform: scale(1.01); }
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* 主操作區 */
@@ -159,7 +249,7 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 14px;
   max-width: 920px;
   margin: 0 auto;
   width: 100%;
@@ -167,21 +257,21 @@ main {
 
 .question-box {
   flex: 0 0 auto;
-  min-height: 130px;
+  min-height: 125px;
   background: var(--card-bg);
   border: 2px solid var(--border-color);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 24px;
-  font-size: 1.3rem;
+  padding: 18px 24px;
+  font-size: 1.25rem;
   text-align: center;
   font-weight: 600;
   line-height: 1.5;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  margin-bottom: 16px;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  margin-bottom: 14px;
+  backdrop-filter: blur(10px);
 }
 
 /* Kahoot 風格四色按鈕 */
@@ -189,25 +279,25 @@ main {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-gap: 14px;
-  margin-bottom: 8px;
+  grid-gap: 12px;
+  margin-bottom: 6px;
 }
 
 .btn-opt {
   border: none;
   border-radius: 14px;
   color: white;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  padding: 16px 22px;
+  padding: 16px 20px;
   cursor: pointer;
   box-shadow: 0 6px 0 rgba(0,0,0,0.4);
-  transition: transform 0.1s, filter 0.2s, background-color 0.2s;
-  min-height: 85px;
+  transition: transform 0.1s, filter 0.2s;
+  min-height: 82px;
   line-height: 1.4;
   touch-action: manipulation;
   text-align: left;
@@ -224,8 +314,8 @@ main {
 }
 
 .opt-prefix {
-  font-size: 1.4rem;
-  flex: 0 0 30px;
+  font-size: 1.35rem;
+  flex: 0 0 28px;
   text-align: center;
 }
 
@@ -244,7 +334,7 @@ main {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(7, 9, 19, 0.96);
+  background: rgba(5, 7, 14, 0.96);
   z-index: 100;
   flex-direction: column;
   align-items: center;
@@ -268,15 +358,15 @@ main {
   margin: 0;
   font-size: 1.8rem;
   letter-spacing: 1px;
-  text-shadow: 0 0 12px rgba(255, 71, 87, 0.6);
+  text-shadow: 0 0 12px rgba(255, 71, 87, 0.7);
 }
 
 .cooldown-timer {
   font-size: 4.2rem;
   font-weight: 900;
   color: #ff4757;
-  margin: 10px 0;
-  text-shadow: 0 0 20px rgba(255, 71, 87, 0.8);
+  margin: 8px 0;
+  text-shadow: 0 0 20px rgba(255, 71, 87, 0.9);
 }
 
 .concept-box {
@@ -286,8 +376,8 @@ main {
   border: 2px solid #ff4757;
   border-radius: 14px;
   padding: 20px 26px;
-  margin-top: 12px;
-  font-size: 1.15rem;
+  margin-top: 10px;
+  font-size: 1.12rem;
   line-height: 1.6;
   text-align: left;
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
@@ -297,10 +387,10 @@ main {
   font-weight: bold;
   margin-bottom: 8px;
   color: #ffda79;
-  font-size: 1.2rem;
+  font-size: 1.18rem;
 }
 
-/* 結算頁面與失算畫面 */
+/* 結算頁面 */
 .screen-end {
   display: none;
   position: fixed;
@@ -346,7 +436,7 @@ main {
 .review-table th, .review-table td {
   border: 1px solid var(--border-color);
   padding: 14px 16px;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
 }
 
 .review-table th {
@@ -357,7 +447,7 @@ main {
 .btn-restart {
   margin-top: 24px;
   padding: 14px 36px;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   border-radius: 12px;
   border: none;
   background: linear-gradient(135deg, #1368ce, #00c6ff);
