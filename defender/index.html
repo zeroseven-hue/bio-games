@@ -59,18 +59,21 @@
     <div class="modal-overlay" id="start-modal">
       <div class="modal-card">
         <h2 style="color: var(--accent-blue); margin-bottom: 8px;">🚀 生物星際防衛隊 V2.0</h2>
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
-          請輸入真實身分，完成將生成 Google Classroom 驗證碼證書卡。
+        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 10px;">
+          請輸入真實身分（座號需為 2 碼如 <code style="color:var(--accent-yellow);">05</code>，姓名請填寫真實姓名，不可使用暱稱或藝名）。
         </p>
-        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
-          <input type="text" id="user-class" placeholder="班級(如701)" style="width: 30%;" required />
-          <input type="number" id="user-seat" placeholder="座號" style="width: 25%;" required />
-          <input type="text" id="user-name" placeholder="姓名" style="flex: 1;" required />
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <input type="text" id="user-class" placeholder="班級 (如701)" style="width: 28%;" required />
+          <input type="text" id="user-seat" placeholder="座號 (2碼如05)" maxlength="2" style="width: 34%;" required />
+          <input type="text" id="user-name" placeholder="真實姓名 (勿填暱稱/藝名)" style="flex: 1;" required />
+        </div>
+        <div style="font-size: 11px; color: #fbbf24; text-align: left; margin-bottom: 12px; line-height: 1.4;">
+          ⚠️ 提醒：防偽證書將登錄此真實身分與驗證碼，供教師核對成績！
         </div>
 
         <div style="text-align: left; margin-bottom: 12px;">
-          <label style="font-size: 12px; color: #94a3b8;">選擇生物挑戰單元：</label>
-          <select id="modal-unit-select" class="styled-select">
+          <label style="font-size: 12px; color: #94a3b8;">選擇生物挑戰單元 (中央動態題庫)：</label>
+          <select id="modal-unit-select" class="styled-select" onchange="onUnitChange(this.value)">
             <option value="">載入單元清單中...</option>
           </select>
         </div>

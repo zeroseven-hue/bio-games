@@ -32,7 +32,7 @@ const DEFAULT_QUESTION_BANK = [
     q: "植物進行光合作用時，『光反應』分解水分子後，釋放出的氣體是？",
     options: { A: "二氧化碳", B: "氧氣", C: "氮氣", D: "水蒸氣" },
     ans: "B",
-    hint: "光反應藉由光能將水裂解，釋放出氧氣。"
+    hint: "光反應藉由光能將水裂解，釋露出氧氣。"
   },
   {
     q: "使用碘液檢驗煮熟的米飯時，若含有澱粉，顏色會轉變成？",
@@ -92,7 +92,8 @@ function toggleSound() {
 }
 
 function playTone(freq, type, duration, startVol = 0.12) {
-  if (!isSoundOn || !audioCtx) return;
+  if (!isSoundOn) return;
+  initAudio();
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -134,7 +135,7 @@ const ctx = canvas.getContext("2d");
 let cw = 400, ch = 500;
 
 let manifestData = null;
-let currentUnitId = "ch01";
+let currentUnitId = "all";
 let loadedBankMap = {}; // 暫存已載入的單元題庫
 
 let gameQuestions = [];
@@ -157,32 +158,54 @@ let stars = [];
 let keys = {};
 let gameTick = 0;
 
-/* 讀取 URL 參數與載入 Manifest */
+/* 洗牌演算法 (用於隨機抽題) */
+function shuffleArray(arr) {
+  let pool = [...arr];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+
+/* 讀取 URL 參數與動態載入 GitHub 題庫 Manifest */
 async function initManifestAndUnits() {
   const urlParams = new URLSearchParams(window.location.search);
-  const paramUnit = urlParams.get("unit");
+  const paramUnit = urlParams.get("unit") || urlParams.get("file");
 
-  try {
-    const resp = await fetch("../manifest.json");
-    if (resp.ok) {
-      manifestData = await resp.json();
-      populateUnitSelects(manifestData.units);
-      if (paramUnit && (manifestData.units.some(u => u.id === paramUnit) || paramUnit === 'all')) {
-        currentUnitId = paramUnit;
-      } else {
-        currentUnitId = manifestData.default_unit || "ch01";
+  const manifestPaths = [
+    "../questions/manifest.json",
+    "questions/manifest.json",
+    "../manifest.json",
+    "manifest.json"
+  ];
+
+  for (const p of manifestPaths) {
+    try {
+      const resp = await fetch(p);
+      if (resp.ok) {
+        manifestData = await resp.json();
+        break;
       }
+    } catch (e) {}
+  }
+
+  if (manifestData && manifestData.units) {
+    populateUnitSelects(manifestData.units);
+    if (paramUnit) {
+      currentUnitId = paramUnit;
     } else {
-      throw new Error("Manifest HTTP error");
+      currentUnitId = manifestData.units[0].file || manifestData.units[0].id;
     }
-  } catch (e) {
-    console.warn("無法讀取 manifest.json，使用預設 10 單元清單", e);
+  } else {
+    console.warn("無法讀取 manifest.json，使用預設 10 單元清單");
     const fallbackUnits = Array.from({ length: 10 }, (_, i) => ({
-      id: `ch${String(i + 1).padStart(2, '0')}`,
-      title: `第 ${i + 1} 單元：生物主題測驗`
+      id: `unit${String(i + 1).padStart(2, '0')}`,
+      title: `單元 ${String(i + 1).padStart(2, '0')}：生物主題測驗`,
+      file: `unit${String(i + 1).padStart(2, '0')}_enzymes.json`
     }));
     populateUnitSelects(fallbackUnits);
-    currentUnitId = paramUnit || "ch01";
+    currentUnitId = paramUnit || "all";
   }
 
   // 設定選單預設值
@@ -202,13 +225,13 @@ function populateUnitSelects(units) {
     // 全部綜合題庫選項
     const optAll = document.createElement("option");
     optAll.value = "all";
-    optAll.textContent = "🌟 ALL 全單元綜合題庫";
+    optAll.textContent = "🌟 ALL 全單元綜合題庫 (隨機抽題)";
     sel.appendChild(optAll);
 
     units.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = u.id;
-      opt.textContent = `${u.id.toUpperCase()} - ${u.title}`;
+      opt.value = u.file || u.id;
+      opt.textContent = u.title;
       sel.appendChild(opt);
     });
   });
@@ -227,56 +250,90 @@ function updateUnitDisplayTitle() {
   const disp = document.getElementById("unit-display-name");
   if (!disp) return;
   if (currentUnitId === "all") {
-    disp.textContent = "📚 全單元綜合大考驗";
+    disp.textContent = "📚 全單元綜合大考驗 (隨機抽題)";
     return;
   }
   if (manifestData && manifestData.units) {
-    const u = manifestData.units.find(item => item.id === currentUnitId);
+    const u = manifestData.units.find(item => item.file === currentUnitId || item.id === currentUnitId);
     if (u) {
       disp.textContent = `📚 ${u.title}`;
       return;
     }
   }
-  disp.textContent = `📚 單元 ${currentUnitId.toUpperCase()}`;
+  disp.textContent = `📚 生物單元測驗`;
 }
 
-/* 根據 currentUnitId 取得題庫 */
+/* 根據 currentUnitId 從 GitHub 題庫動態抓取並隨機抽題 */
 async function fetchQuestionsForCurrentUnit() {
   if (currentUnitId === "all") {
     let allPool = [];
     if (manifestData && manifestData.units) {
       for (const u of manifestData.units) {
-        const pool = await loadSingleUnitFile(u.id);
+        const pool = await loadSingleUnitFile(u.file || u.id);
         allPool = allPool.concat(pool);
       }
     }
-    return allPool.length > 0 ? allPool : DEFAULT_QUESTION_BANK;
+    return allPool.length > 0 ? shuffleArray(allPool) : DEFAULT_QUESTION_BANK;
   } else {
     const pool = await loadSingleUnitFile(currentUnitId);
-    return pool.length > 0 ? pool : DEFAULT_QUESTION_BANK;
+    return pool.length > 0 ? shuffleArray(pool) : DEFAULT_QUESTION_BANK;
   }
 }
 
-async function loadSingleUnitFile(unitId) {
-  if (loadedBankMap[unitId]) return loadedBankMap[unitId];
-  try {
-    const resp = await fetch(`../questions_${unitId}.json`);
-    if (resp.ok) {
-      const data = await resp.json();
-      const qList = data.questions || data;
-      // 轉換欄位格式
-      const formatted = qList.map(item => ({
-        q: item.question || item.q,
-        options: item.options,
-        ans: item.answer || item.ans,
-        hint: item.explanation || item.hint || "請仔細審題觀念！"
-      }));
-      loadedBankMap[unitId] = formatted;
-      return formatted;
-    }
-  } catch (e) {
-    console.warn(`無法載入 questions_${unitId}.json:`, e);
+async function loadSingleUnitFile(fileOrId) {
+  if (loadedBankMap[fileOrId]) return loadedBankMap[fileOrId];
+
+  const possiblePaths = [
+    `../questions/${fileOrId}`,
+    `questions/${fileOrId}`,
+    `../questions/unit${fileOrId.replace('ch','').replace('unit','')}_enzymes.json`,
+    `../${fileOrId}`,
+    fileOrId
+  ];
+
+  for (const path of possiblePaths) {
+    try {
+      const resp = await fetch(path);
+      if (resp.ok) {
+        const data = await resp.json();
+        const rawList = data.questions || (Array.isArray(data) ? data : []);
+        
+        // 轉譯題庫格式，相容 options 陣列/物件與 answer 數字/字母格式
+        const formatted = rawList.map(item => {
+          let opts = {};
+          if (Array.isArray(item.options)) {
+            opts = {
+              A: item.options[0] || "--",
+              B: item.options[1] || "--",
+              C: item.options[2] || "--",
+              D: item.options[3] || "--"
+            };
+          } else {
+            opts = item.options || { A: "--", B: "--", C: "--", D: "--" };
+          }
+
+          let ansKey = "A";
+          if (typeof item.answer === "number" || typeof item.ans === "number") {
+            const idx = typeof item.answer === "number" ? item.answer : item.ans;
+            ansKey = ["A", "B", "C", "D"][idx] || "A";
+          } else if (typeof item.answer === "string" || typeof item.ans === "string") {
+            ansKey = (item.answer || item.ans).toUpperCase();
+          }
+
+          return {
+            q: item.question || item.q,
+            options: opts,
+            ans: ansKey,
+            hint: item.explanation || item.hint || "請仔細審題觀念！"
+          };
+        });
+
+        loadedBankMap[fileOrId] = formatted;
+        return formatted;
+      }
+    } catch (e) {}
   }
+
   return [];
 }
 
@@ -306,21 +363,42 @@ function initStars() {
 }
 
 /* ========================================================
-   4. 啟動與載入題目關卡
+   4. 啟動與載入題目關卡 (包含座號2碼與真實姓名嚴格驗證)
    ======================================================== */
 async function startMission() {
   const cEl = document.getElementById("user-class");
   const sEl = document.getElementById("user-seat");
   const nEl = document.getElementById("user-name");
 
-  const c = cEl ? cEl.value.trim() : "";
-  const s = sEl ? sEl.value.trim() : "";
-  const n = nEl ? nEl.value.trim() : "";
+  let c = cEl ? cEl.value.trim() : "";
+  let s = sEl ? sEl.value.trim() : "";
+  let n = nEl ? nEl.value.trim() : "";
 
   if (!c || !s || !n) {
-    alert("請務必完整輸入班級、座號與姓名！");
+    alert("⚠️ 請務必完整填寫班級、座號與真實姓名！");
     return;
   }
+
+  // 自動格式化單碼座號 (如 5 -> 05)
+  if (s.length === 1 && !isNaN(s)) {
+    s = "0" + s;
+    if (sEl) sEl.value = s;
+  }
+
+  // 驗證座號：必須為 2 碼數字
+  if (!/^\d{2}$/.test(s)) {
+    alert("⚠️ 座號請填寫 2 位數號碼（例如：05、12、35）！");
+    if (sEl) sEl.focus();
+    return;
+  }
+
+  // 驗證真實姓名：不可使用單字、藝名或暱稱
+  if (n.length < 2) {
+    alert("⚠️ 請填寫真實全姓名（不可使用暱稱、單字或藝名），以利教師核對成績！");
+    if (nEl) nEl.focus();
+    return;
+  }
+
   playerProfile = { cls: c, seat: s, name: n };
   initAudio();
 
@@ -331,7 +409,7 @@ async function startMission() {
     document.getElementById("bigscreen-pad").style.display = "none";
   }
 
-  // 取得題庫資料
+  // 取得題庫資料並隨機抽取 10 題
   const pool = await fetchQuestionsForCurrentUnit();
   gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 10);
 
