@@ -1,6 +1,6 @@
 /**
  * 🧬 《生物星際大逃亡：逃離黑洞》核心邏輯控制器 V3.0
- * 包含：動態黑洞心跳加速度音效、Synthwave BGM、防偽認證碼與全單元題庫選擇
+ * 包含：動態黑洞心跳加速度音效 (開局慢 60 BPM -> 逼近 115 BPM -> 臨界 230 BPM)、Synthwave BGM、防偽認證碼與全單元題庫選擇
  */
 
 const FALLBACK_QUESTION_BANK = [
@@ -121,8 +121,8 @@ function playVictorySound() {
   });
 }
 
-// 💓 雙擊心跳聲 ("Lub-Dub" 咚-咚) 專用諧波合成器，確保低音與中高音在任何喇叭上都清晰巨大
-function playHeartbeatDoublePulse(baseFreq = 160, isPanic = false) {
+// 💓 雙擊心跳聲 ("Lub-Dub" 咚-咚) 專用諧波合成器
+function playHeartbeatDoublePulse(baseFreq = 140, isPanic = false) {
   if (!soundEnabled) return;
   unlockAudioContext();
   try {
@@ -133,49 +133,49 @@ function playHeartbeatDoublePulse(baseFreq = 160, isPanic = false) {
     const gain1 = audioCtx.createGain();
     osc1.type = "sine";
     osc1.frequency.setValueAtTime(baseFreq, now);
-    osc1.frequency.exponentialRampToValueAtTime(60, now + 0.1);
+    osc1.frequency.exponentialRampToValueAtTime(60, now + 0.12);
     gain1.gain.setValueAtTime(0.4, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
     osc1.connect(gain1);
     gain1.connect(audioCtx.destination);
     osc1.start(now);
-    osc1.stop(now + 0.1);
+    osc1.stop(now + 0.12);
 
-    // 加上中頻 Click 聲讓手持裝置/小喇叭也能清脆聽到「答！」
+    // 加上中頻 Click 聲讓喇叭清脆聽到「答！」
     const oscClick1 = audioCtx.createOscillator();
     const gainClick1 = audioCtx.createGain();
     oscClick1.type = "triangle";
-    oscClick1.frequency.setValueAtTime(800, now);
+    oscClick1.frequency.setValueAtTime(750, now);
     oscClick1.frequency.exponentialRampToValueAtTime(200, now + 0.03);
-    gainClick1.gain.setValueAtTime(0.18, now);
+    gainClick1.gain.setValueAtTime(0.16, now);
     gainClick1.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
     oscClick1.connect(gainClick1);
     gainClick1.connect(audioCtx.destination);
     oscClick1.start(now);
     oscClick1.stop(now + 0.03);
 
-    // 第二重音 Dub (咚) - 80ms 後
-    const delay2 = 0.08;
+    // 第二重音 Dub (咚) - 90ms 後
+    const delay2 = 0.09;
     const osc2 = audioCtx.createOscillator();
     const gain2 = audioCtx.createGain();
     osc2.type = "sine";
-    osc2.frequency.setValueAtTime(baseFreq * 1.25, now + delay2);
-    osc2.frequency.exponentialRampToValueAtTime(70, now + delay2 + 0.09);
+    osc2.frequency.setValueAtTime(baseFreq * 1.2, now + delay2);
+    osc2.frequency.exponentialRampToValueAtTime(70, now + delay2 + 0.1);
     gain2.gain.setValueAtTime(0.32, now + delay2);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + delay2 + 0.09);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + delay2 + 0.1);
     osc2.connect(gain2);
     gain2.connect(audioCtx.destination);
     osc2.start(now + delay2);
-    osc2.stop(now + delay2 + 0.09);
+    osc2.stop(now + delay2 + 0.1);
 
-    // 若處於極度危險 (gap <= 15%)，加疊 880Hz 蜂鳴警報聲
+    // 若處於極度危險 (gap <= 5%)，加疊 880Hz 蜂鳴警報聲
     if (isPanic) {
-      playTone(880, "sawtooth", 0.06, 0.02, 0.2);
+      playTone(880, "sawtooth", 0.06, 0.02, 0.22);
     }
   } catch (e) {}
 }
 
-// 💓 動態加速度心跳/滴答聲音效系統 (根據黑洞距離自動調速)
+// 💓 動態三階段加速度心跳/滴答聲音效系統 (開局慢 60 BPM -> 逼近 115 BPM -> 臨界 230 BPM)
 function updateDynamicHeartbeatSound() {
   if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
   if (!soundEnabled || currentIndex >= roundQuestions.length) return;
@@ -183,36 +183,52 @@ function updateDynamicHeartbeatSound() {
   const gap = shipProgress - blackholeProgress;
   let intervalMs = 1000;
   let basePitch = 140;
+  let isPanic = false;
+  let stageText = "🟢 悠緩平穩 (60 BPM)";
 
-  if (gap <= 15) {
-    intervalMs = 260; // 極速狂跳 答!答!答!答! (BPM ~230)
+  // 三階段精確計算：開局 (currentIndex===0) 必定為第一階段 slow beat
+  if (currentIndex > 0 && (gap <= 5 || blackholeProgress >= shipProgress || oxygen <= 25)) {
+    // 🔴 階段 3：黑洞極度逼近或低氧 (極速狂跳 230 BPM)
+    intervalMs = 260;
     basePitch = 220;
-  } else if (gap <= 35) {
-    intervalMs = 520; // 加速心跳 (BPM ~115)
+    isPanic = true;
+    stageText = "🔴 臨界狂跳 (230 BPM)";
+  } else if (currentIndex > 0 && (gap <= 20 || oxygen <= 45)) {
+    // 🟡 階段 2：黑洞中度接近 (加速心跳 115 BPM)
+    intervalMs = 520;
     basePitch = 180;
+    isPanic = false;
+    stageText = "🟡 黑洞接近 (115 BPM)";
   } else {
-    intervalMs = 1000; // 悠緩平穩 (BPM ~60)
+    // 🟢 階段 1：開局與安全距離 (悠緩沉穩心跳 60 BPM, 間隔 1000ms 咚......咚......咚)
+    intervalMs = 1000;
     basePitch = 140;
+    isPanic = false;
+    stageText = "🟢 悠緩平穩 (60 BPM)";
   }
 
-  // 只要音效開啟，就算在 answer 鎖定過渡期間也播放心跳，且【絕對不要】因為 isLocked 就終止計時器迴圈！
+  // 更新 HUD 上的心跳狀態提示
+  const heartbeatStatus = document.getElementById("heartbeatStatus");
+  if (heartbeatStatus) heartbeatStatus.innerText = stageText;
+
+  // 只要音效開啟，播放雙重打擊聲
   if (!isLocked) {
-    playHeartbeatDoublePulse(basePitch, gap <= 15);
+    playHeartbeatDoublePulse(basePitch, isPanic);
   }
 
   heartbeatLoopTimer = setTimeout(updateDynamicHeartbeatSound, intervalMs);
 }
 
-// 🎵 Synthwave 背景音樂 (BGM) 電晶體風格
+// 🎵 Synthwave 背景音樂 (BGM) 悠緩電晶體風格 (600ms / step)
 function playBGMStep() {
   if (bgmTimer) clearTimeout(bgmTimer);
   if (!musicEnabled || currentIndex >= roundQuestions.length) return;
   const notes = [130, 164, 196, 261, 220, 196];
-  const step = Math.floor(Date.now() / 400) % notes.length;
+  const step = Math.floor(Date.now() / 600) % notes.length;
   if (!isLocked) {
-    playTone(notes[step], "sine", 0.18, 0, 0.08);
+    playTone(notes[step], "sine", 0.22, 0, 0.06);
   }
-  bgmTimer = setTimeout(playBGMStep, 400);
+  bgmTimer = setTimeout(playBGMStep, 600);
 }
 
 function toggleSound() {
