@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>屁屁星人敲敲樂：生物大作戰 V1.0</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+
+  <!-- 開始畫面：學生登入、單元與題數選擇 -->
+  <div class="start-overlay" id="startScreen">
+    <div class="start-card">
+      <div class="shinchan shaking start-preview">
+        <div class="head"></div>
+        <div class="shirt"></div>
+        <div class="shorts"><div class="butt-crack"></div></div>
+        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+      </div>
+      <h1 class="game-title">🍑 屁屁星人敲敲樂</h1>
+      <p class="game-subtitle">看準題目，敲擊正確答案的小新！鍵盤支援 A / B / C / D</p>
+
+      <!-- 學生身分登入區 -->
+      <div class="profile-box">
+        <div class="profile-title">👤 學生身分登記 (防偽成績單必填)</div>
+        <div class="profile-inputs">
+          <div class="input-field">
+            <label for="inputClass">班級：</label>
+            <input type="text" id="inputClass" placeholder="例：701" maxlength="6" value="701">
+          </div>
+          <div class="input-field">
+            <label for="inputSeat">座號 (2碼)：</label>
+            <input type="text" id="inputSeat" placeholder="例：05" maxlength="2" value="01">
+          </div>
+          <div class="input-field">
+            <label for="inputName">真實姓名：</label>
+            <input type="text" id="inputName" placeholder="請填寫真實姓名" maxlength="10">
+          </div>
+        </div>
+        <div class="profile-tip" id="profileErrorTip">⚠️ 請填寫完整班級、2位數字座號與真實姓名！</div>
+      </div>
+
+      <!-- 動態單元選擇 -->
+      <div class="config-group" id="unitSelectorGroup">
+        <label class="config-label" for="unitSelect">📚 選擇複習單元：</label>
+        <select id="unitSelect" class="styled-select">
+          <option value="all">🌐 ALL (1~10單元 綜合隨機出題)</option>
+        </select>
+      </div>
+
+      <!-- 題數選擇 -->
+      <div class="config-group" id="countSelectorGroup">
+        <label class="config-label">🔢 選擇本次複習題數：</label>
+        <div class="count-options">
+          <button type="button" class="btn-count active" data-count="10" onclick="setQuestionCount(10)">10 題</button>
+          <button type="button" class="btn-count" data-count="15" onclick="setQuestionCount(15)">15 題</button>
+          <button type="button" class="btn-count" data-count="20" onclick="setQuestionCount(20)">20 題</button>
+          <button type="button" class="btn-count" data-count="all" onclick="setQuestionCount('all')">全刷</button>
+        </div>
+      </div>
+
+      <div class="teacher-preset-tip" id="teacherPresetTip" style="display: none;">
+        ✨ 老師已指派本次挑戰題數與題庫
+      </div>
+
+      <div class="start-btn-wrap">
+        <button type="button" class="btn-start" onclick="startGame()">開始挑戰 🔨</button>
+        <a href="../index.html" class="btn-home-start">🏠 返回大廳</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 遊戲頂部狀態列 -->
+  <header>
+    <div class="header-left">
+      <a href="../index.html" class="btn-back-lobby">🏠 大廳</a>
+      <div class="status-badge" id="unitBadge">單元：載入中</div>
+    </div>
+    <div class="header-center">
+      <div class="status-badge" id="progressBadge">題號：0 / 0</div>
+      <div class="status-badge">
+        <span>生命：</span>
+        <span class="hearts" id="heartDisplay">❤️❤️❤️</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-badge" id="scoreBadge">得分：0</div>
+    </div>
+  </header>
+
+  <!-- 題目看板 -->
+  <div class="question-board">
+    <div class="question-title" id="questionText">準備中...</div>
+  </div>
+
+  <!-- 主舞台：四個洞口與選項 -->
+  <main class="field">
+    <div class="hole-card">
+      <div class="hole-hotkey">A</div>
+      <div class="hole" onclick="handleSelect(0)">
+        <div class="shinchan shaking" id="shin-0">
+          <div class="head"></div>
+          <div class="shirt"></div>
+          <div class="shorts"><div class="butt-crack"></div></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+      </div>
+      <button type="button" class="option-btn" id="opt-0" onclick="handleSelect(0)">
+        <span class="tag-letter">A</span><span class="opt-text">選項 A</span>
+      </button>
+    </div>
+
+    <div class="hole-card">
+      <div class="hole-hotkey">B</div>
+      <div class="hole" onclick="handleSelect(1)">
+        <div class="shinchan shaking" id="shin-1">
+          <div class="head"></div>
+          <div class="shirt"></div>
+          <div class="shorts"><div class="butt-crack"></div></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+      </div>
+      <button type="button" class="option-btn" id="opt-1" onclick="handleSelect(1)">
+        <span class="tag-letter">B</span><span class="opt-text">選項 B</span>
+      </button>
+    </div>
+
+    <div class="hole-card">
+      <div class="hole-hotkey">C</div>
+      <div class="hole" onclick="handleSelect(2)">
+        <div class="shinchan shaking" id="shin-2">
+          <div class="head"></div>
+          <div class="shirt"></div>
+          <div class="shorts"><div class="butt-crack"></div></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+      </div>
+      <button type="button" class="option-btn" id="opt-2" onclick="handleSelect(2)">
+        <span class="tag-letter">C</span><span class="opt-text">選項 C</span>
+      </button>
+    </div>
+
+    <div class="hole-card">
+      <div class="hole-hotkey">D</div>
+      <div class="hole" onclick="handleSelect(3)">
+        <div class="shinchan shaking" id="shin-3">
+          <div class="head"></div>
+          <div class="shirt"></div>
+          <div class="shorts"><div class="butt-crack"></div></div>
+          <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+        </div>
+      </div>
+      <button type="button" class="option-btn" id="opt-3" onclick="handleSelect(3)">
+        <span class="tag-letter">D</span><span class="opt-text">選項 D</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- 訂正彈窗 -->
+  <div class="modal" id="feedbackModal">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">作答反饋</div>
+      <div class="modal-explain" id="modalExplain">詳細解析...</div>
+      <button type="button" class="btn-next" id="modalActionBtn" onclick="nextQuestion()">繼續前進 ➜</button>
+    </div>
+  </div>
+
+  <!-- 防偽成績單結算彈窗 -->
+  <div class="modal" id="certModal">
+    <div class="modal-box cert-box">
+      <div class="cert-header">
+        <div class="cert-stamp">VERIFIED</div>
+        <h2>📜 屁屁星人敲敲樂 ‧ 防偽成績單</h2>
+        <div class="cert-id" id="certIdDisplay">驗證碼：BUTT-000000</div>
+      </div>
+      <div class="cert-body">
+        <div class="cert-row">
+          <span>👤 學生資料：</span>
+          <strong id="certStudentInfo">701 班 01 號 王小明</strong>
+        </div>
+        <div class="cert-row">
+          <span>📚 挑戰單元：</span>
+          <strong id="certUnitInfo">單元 01：科學態度與科學方法</strong>
+        </div>
+        <div class="cert-row">
+          <span>🎯 最終得分：</span>
+          <strong id="certScoreDisplay" class="highlight-score">100 分</strong>
+        </div>
+        <div class="cert-row">
+          <span>❤️ 剩餘生命：</span>
+          <strong id="certLivesDisplay">❤️❤️❤️ (3/3)</strong>
+        </div>
+        <div class="cert-row">
+          <span>⏱️ 作答費時：</span>
+          <strong id="certTimeDisplay">45 秒</strong>
+        </div>
+        <div class="cert-row">
+          <span>📅 簽發時間：</span>
+          <strong id="certTimestampDisplay">2026-09-28 12:00</strong>
+        </div>
+      </div>
+
+      <div class="cert-actions">
+        <button type="button" class="btn-copy-cert" id="btnCopyCert" onclick="copyCertToClipboard()">📋 複製成績單驗證碼 (Google Classroom 繳交)</button>
+        <div class="cert-btn-group">
+          <button type="button" class="btn-restart" onclick="resetToStart()">再戰一局 🔄</button>
+          <a href="../index.html" class="btn-home">🏠 返回遊戲大廳</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>
