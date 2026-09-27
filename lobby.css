@@ -269,6 +269,10 @@ body {
   transform: translateY(-2px);
 }
 
+.btn-standalone-link:hover {
+  background: #047857 !important;
+}
+
 /* 教師派發面板 */
 .dispatch-section {
   margin-bottom: 40px;
