@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🧋 珍珠奶茶大對決 | 喝光奶茶擂台版</title>
+    <style>
+        :root {
+            --grass-green: #7ec850;
+            --dirt-brown: #8d5b4c;
+            --hole-dark: #3a2219;
+            --p1-color: #ff4757;
+            --p2-color: #1e90ff;
+            --tea-color: #d2b48c;
+            --text-dark: #2f3542;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--grass-green);
+            background-image: 
+                radial-gradient(#95d568 15%, transparent 16%),
+                radial-gradient(#6eb840 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            color: var(--text-dark);
+        }
+
+        .game-container {
+            background: #fffbe6;
+            border-radius: 35px;
+            padding: 20px;
+            box-shadow: 0 15px 0px #5c9339, 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 1050px;
+            width: 100%;
+            border: 8px solid #ffffff;
+            position: relative;
+            transition: max-width 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.3rem;
+            color: #ff4757;
+            margin-bottom: 5px;
+            text-shadow: 3px 3px 0px #ffeaa7, 5px 5px 0px #2f3542;
+        }
+
+        /* 控制面板 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            font-size: 1rem;
+            font-weight: 900;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+        }
+
+        .btn-start { background: #ff4757; color: white; }
+        .btn-rank { background: #ffa502; color: white; }
+        .btn-music { background: #70a1ff; color: white; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .select-style {
+            border-radius: 20px;
+            padding: 6px 12px;
+            border: 3px solid #ffa502;
+            font-size: 0.95rem;
+            outline: none;
+            background: white;
+            font-weight: bold;
+        }
+
+        /* 倒數計時與警告 */
+        .timer-box {
+            background: #ffeaa7;
+            border-radius: 20px;
+            padding: 6px 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 3px dashed #fdcb6e;
+            font-weight: bold;
+        }
+        .timer-value { font-size: 1.8rem; color: #d63031; font-weight: 900; }
+        
+        .warning-text {
+            color: #d63031;
+            font-weight: 900;
+            font-size: 1.1rem;
+            display: none;
+            animation: blink 0.6s infinite alternate;
+        }
+        @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; transform: scale(1.05); } }
+
+        /* 雙陣地區域 */
+        .boards-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .player-section {
+            flex: 1;
+            min-width: 300px;
+            max-width: 460px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 📱 響應式優化: 在平版或手機端自適應防破版 */
+        @media (max-width: 720px) {
+            .game-container { padding: 12px; border-radius: 20px; }
+            h1 { font-size: 1.7rem; }
+            .player-section { min-width: 100%; }
+            .timer-value { font-size: 1.4rem; }
+        }
+
+        .player-header {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+            border: 3px solid #ddd;
+        }
+
+        .p1-border { border-color: var(--p1-color); }
+        .p2-border { border-color: var(--p2-color); }
+        .p1-score { color: var(--p1-color); font-size: 1.8rem; font-weight: 900; }
+        .p2-score { color: var(--p2-color); font-size: 1.8rem; font-weight: 900; }
+
+        /* 🥤 動態奶茶水位杯裝設計 */
+        .boba-cup-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            padding: 8px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            border: 2px solid #eee;
+        }
+
+        .cup-icon { font-size: 1.8rem; }
+        .cup-progress-bg {
+            flex: 1;
+            height: 22px;
+            background: #f1f2f6;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #ced6e0;
+            position: relative;
+        }
+
+        .cup-liquid {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #c8d6e5, #c89666);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        /* 遊戲網格與泥土洞穴 */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            background: linear-gradient(135deg, #a8e6cf 0%, #dbedc6 100%);
+            padding: 16px;
+            border-radius: 30px;
+            position: relative;
+            width: 100%;
+            border: 6px solid #81c784;
+            box-shadow: inset 0 8px 0 rgba(0,0,0,0.1);
+        }
+
+        .hole {
+            position: relative;
+            aspect-ratio: 1/1;
+            background: radial-gradient(circle, #2b1810 60%, #543325 100%);
+            border-radius: 50%;
+            overflow: hidden;
+            border: 6px solid #6d4c41;
+            box-shadow: inset 0 10px 15px rgba(0,0,0,0.6), 0 4px 0 #4e342e;
+        }
+
+        .key-hint {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.65);
+            color: #ffeaa7;
+            padding: 2px 7px;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        /* 角色 SVG 容器 */
+        .character {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 85%;
+            height: 85%;
+            transform: translate(-50%, 115%);
+            transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .hole.up-boba .boba-char { transform: translate(-50%, 8%); }
+        .hole.up-coriander .coriander-char { transform: translate(-50%, 8%); }
+
+        /* 特效字幕 */
+        .hit-text {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 900;
+            font-size: 1.5rem;
+            animation: popUp 0.5s ease-out forwards;
+            z-index: 100;
+            text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff;
+        }
+        .text-p1 { color: var(--p1-color); }
+        .text-p2 { color: var(--p2-color); }
+        .text-bad { color: #27ae60; font-size: 1.6rem; }
+
+        @keyframes popUp {
+            0% { transform: scale(0.5) translateY(0); opacity: 1; }
+            50% { transform: scale(1.3) translateY(-20px); }
+            100% { transform: scale(1) translateY(-40px); opacity: 0; }
+        }
+
+        /* 彈窗遮罩 */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            z-index: 50;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 5px solid #ffa502;
+            text-align: center;
+        }
+
+        .rank-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+        .rank-table th, .rank-table td { padding: 8px; border-bottom: 2px dashed #eee; }
+        .rank-table th { background: #ffeaa7; color: #d63031; }
+
+        .secret-btn {
+            background: #eee;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            color: #888;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Classroom 結算截圖證書卡 */
+        .cert-card {
+            background: #f8fafc;
+            border: 2px dashed #3b82f6;
+            border-radius: 16px;
+            padding: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .cert-code {
+            display: inline-block;
+            background: #eff6ff;
+            border: 1.5px solid #2563eb;
+            color: #1d4ed8;
+            padding: 4px 12px;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="main-container">
+        <h1>🧋 珍珠奶茶大對決</h1>
+        
+        <div class="controls">
+            <select id="game-mode" class="select-style">
+                <option value="1p">🧑 單人刷榜測驗</option>
+                <option value="2p" selected>⚔️ 雙人擂台 PK 賽</option>
+            </select>
+            <select id="difficulty" class="select-style">
+                <option value="easy">簡單 (輕鬆吸)</option>
+                <option value="medium" selected>普通 (順暢速)</option>
+                <option value="hard">極速 (巔峰對決)</option>
+            </select>
+            <button id="start-btn" class="btn btn-start">準備 PK 開始！</button>
+            <button id="rank-btn" class="btn btn-rank">🏆 排行榜</button>
+            <button id="music-btn" class="btn btn-music">🎵 音效: 關</button>
+        </div>
+
+        <div class="timer-box">
+            ⏱️ 剩餘時間：<span id="time" class="timer-value">30</span> 秒
+            <div id="warning-text" class="warning-text">⚠️ 奶茶快被吸光啦！快衝刺！</div>
+        </div>
+
+        <div class="boards-container">
+            <!-- 1P 陣地 -->
+            <div class="player-section" id="section-p1">
+                <div class="player-header p1-border">
+                    <span style="font-weight:900; color:var(--p1-color);" id="p1-title">🔴 1P 玩家</span>
+                    <div>得分: <span id="score1" class="p1-score">0</span></div>
+                </div>
+                <!-- 奶茶水位條 -->
+                <div class="boba-cup-container">
+                    <span class="cup-icon">🥤</span>
+                    <div class="cup-progress-bg">
+                        <div class="cup-liquid" id="liquid-p1"></div>
+                    </div>
+                </div>
+                <div class="game-grid" id="grid-p1"></div>
+            </div>
+
+            <!-- 2P 陣地 -->
+            <div class="player-section" id="section-p2">
+                <div class="player-header p2-border">
+                    <span style="font-weight:900; color:var(--p2-color);">🔵 2P 挑戰者</span>
+                    <div>得分: <span id="score2" class="p2-score">0</span></div>
+                </div>
+                <!-- 奶茶水位條 -->
+                <div class="boba-cup-container">
+                    <span class="cup-icon">🥤</span>
+                    <div class="cup-progress-bg">
+                        <div class="cup-liquid" id="liquid-p2"></div>
+                    </div>
+                </div>
+                <div class="game-grid" id="grid-p2"></div>
+            </div>
+        </div>
+
+        <!-- 彈窗遮罩 -->
+        <div id="modal-overlay" class="modal-overlay">
+            <div class="modal-card" id="modal-card"></div>
+        </div>
+    </div>
+
+    <script>
+        const p1Keys = ['q','w','e','a','s','d','z','x','c'];
+        const p2Keys = ['u','i','o','j','k','l','b','n','m'];
+
+        // 精細 SVG 定義
+        const bobaSVG = `
+            <svg viewBox="0 0 100 100" class="character boba-char">
+                <defs>
+                    <radialGradient id="bobaGrad" cx="35%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="#6d4c41"/>
+                        <stop offset="50%" stop-color="#2d1500"/>
+                        <stop offset="100%" stop-color="#000000"/>
+                    </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="url(#bobaGrad)" stroke="#ffbe76" stroke-width="2"/>
+                <ellipse cx="32" cy="28" rx="8" ry="5" fill="#ffffff" opacity="0.8" transform="rotate(-20 32 28)"/>
+                <circle cx="35" cy="48" r="6" fill="#ffffff"/><circle cx="36" cy="48" r="3" fill="#000000"/>
+                <circle cx="65" cy="48" r="6" fill="#ffffff"/><circle cx="64" cy="48" r="3" fill="#000000"/>
+                <ellipse cx="22" cy="58" rx="6" ry="3" fill="#ff7979" opacity="0.8"/>
+                <ellipse cx="78" cy="58" rx="6" ry="3" fill="#ff7979" opacity="0.8"/>
+                <path d="M 42 62 Q 50 72 58 62" stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            </svg>`;
+
+        const corianderSVG = `
+            <svg viewBox="0 0 100 100" class="character coriander-char">
+                <path d="M 50 90 L 50 60 Q 20 40 15 15 Q 35 20 45 40 Q 50 10 50 5 Q 55 10 60 40 Q 70 20 90 15 Q 85 40 55 60 Z" fill="#2ecc71" stroke="#27ae60" stroke-width="3"/>
+                <path d="M 15 15 Q 25 5 35 20 M 90 15 Q 80 5 70 20 M 50 5 Q 35 0 45 30" fill="none" stroke="#27ae60" stroke-width="2"/>
+                <circle cx="38" cy="42" r="4" fill="#000000"/>
+                <circle cx="62" cy="42" r="4" fill="#000000"/>
+                <path d="M 32 35 L 44 39" stroke="#000000" stroke-width="2.5"/>
+                <path d="M 68 35 L 56 39" stroke="#000000" stroke-width="2.5"/>
+                <path d="M 42 55 Q 50 48 58 55" stroke="#000000" stroke-width="3" fill="none"/>
+                <path d="M 48 54 Q 52 64 56 54" fill="#ff7979"/>
+            </svg>`;
+
+        function createHoles(gridId, keys) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            for(let i=0; i<9; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'hole';
+                hole.setAttribute('data-index', i);
+                hole.innerHTML = `<div class="key-hint">${keys[i].toUpperCase()}</div>${bobaSVG}${corianderSVG}`;
+                grid.appendChild(hole);
+            }
+        }
+        createHoles('grid-p1', p1Keys);
+        createHoles('grid-p2', p2Keys);
+
+        // DOM 宣告
+        const gameModeSelect = document.getElementById('game-mode');
+        const difficultySelect = document.getElementById('difficulty');
+        const sectionP2 = document.getElementById('section-p2');
+        const container = document.getElementById('main-container');
+        const startBtn = document.getElementById('start-btn');
+        const rankBtn = document.getElementById('rank-btn');
+        const musicBtn = document.getElementById('music-btn');
+        const timeDisplay = document.getElementById('time');
+        const warningText = document.getElementById('warning-text');
+        const score1Display = document.getElementById('score1');
+        const score2Display = document.getElementById('score2');
+        const liquidP1 = document.getElementById('liquid-p1');
+        const liquidP2 = document.getElementById('liquid-p2');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalCard = document.getElementById('modal-card');
+
+        // 狀態變數
+        let is2PMode = true;
+        let gameActive = false;
+        let score1 = 0, score2 = 0;
+        let timeLeft = 30;
+        let soundActive = false;
+        let timerInterval = null;
+        let peepTimeoutP1 = null, peepTimeoutP2 = null;
+        let lastHoleP1 = null, lastHoleP2 = null;
+        let lastTouchTime = 0; // 防手勢/滑鼠雙重觸發
+
+        let popTimeP1 = 0, popTimeP2 = 0;
+        let reactionTimesP1 = [], reactionTimesP2 = [];
+
+        // 音效
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        function playSound(type) {
+            if (!soundActive || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if(type === 'hit') {
+                osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if(type === 'trap') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(90, audioCtx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+            }
+        }
+
+        // 模式切換
+        gameModeSelect.addEventListener('change', (e) => {
+            is2PMode = e.target.value === '2p';
+            sectionP2.style.display = is2PMode ? 'flex' : 'none';
+            container.style.maxWidth = is2PMode ? '1050px' : '580px';
+            document.getElementById('p1-title').textContent = is2PMode ? '🔴 1P 玩家' : '🎯 目前分數';
+            document.querySelectorAll('.key-hint').forEach(k => k.style.display = is2PMode ? 'block' : 'none');
+        });
+        gameModeSelect.dispatchEvent(new Event('change'));
+
+        function randomTime(min, max) { return Math.round(Math.random() * (max - min) + min); }
+        function randomHole(holes, player) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (player === 1 && hole === lastHoleP1) return randomHole(holes, 1);
+            if (player === 2 && hole === lastHoleP2) return randomHole(holes, 2);
+            if (player === 1) lastHoleP1 = hole; else lastHoleP2 = hole;
+            return hole;
+        }
+
+        function peep(player) {
+            if(!gameActive) return;
+            const diff = difficultySelect.value;
+            const speed = diff === 'easy' ? randomTime(1100, 1500) : (diff === 'hard' ? randomTime(600, 900) : randomTime(800, 1200));
+            const holes = document.querySelectorAll(`#grid-p${player} .hole`);
+            const hole = randomHole(holes, player);
+            const isTrap = Math.random() < 0.25;
+            const activeClass = isTrap ? 'up-coriander' : 'up-boba';
+
+            hole.classList.add(activeClass);
+            if(player === 1) popTimeP1 = Date.now(); else popTimeP2 = Date.now();
+
+            const timeout = setTimeout(() => {
+                hole.classList.remove('up-boba', 'up-coriander');
+                if(gameActive) peep(player);
+            }, speed);
+
+            if(player === 1) peepTimeoutP1 = timeout; else peepTimeoutP2 = timeout;
+        }
+
+        function updateCupLiquid() {
+            const targetScore = 20;
+            const remainP1 = Math.max(0, 100 - (score1 / targetScore) * 100);
+            const remainP2 = Math.max(0, 100 - (score2 / targetScore) * 100);
+            liquidP1.style.width = `${remainP1}%`;
+            liquidP2.style.width = `${remainP2}%`;
+        }
+
+        function processHit(player, holeIndex, clientX, clientY) {
+            if(!gameActive) return;
+            const holes = document.querySelectorAll(`#grid-p${player} .hole`);
+            const hole = holes[holeIndex];
+            const isBoba = hole.classList.contains('up-boba');
+            const isTrap = hole.classList.contains('up-coriander');
+
+            if(!isBoba && !isTrap) return;
+
+            const hitTime = Date.now();
+            const reaction = hitTime - (player === 1 ? popTimeP1 : popTimeP2);
+
+            if(player === 1) clearTimeout(peepTimeoutP1); else clearTimeout(peepTimeoutP2);
+
+            if(isBoba) {
+                if(player === 1) { score1++; score1Display.textContent = score1; reactionTimesP1.push(reaction); }
+                else { score2++; score2Display.textContent = score2; reactionTimesP2.push(reaction); }
+                playSound('hit');
+                createHitText(clientX, clientY, `+1 🧋`, player === 1 ? 'text-p1' : 'text-p2');
+            } else if(isTrap) {
+                if(player === 1) { score1 = Math.max(0, score1 - 2); score1Display.textContent = score1; }
+                else { score2 = Math.max(0, score2 - 2); score2Display.textContent = score2; }
+                playSound('trap');
+                createHitText(clientX, clientY, `-2 🌿`, 'text-bad');
+            }
+
+            updateCupLiquid();
+            hole.classList.remove('up-boba', 'up-coriander');
+            setTimeout(() => { if(gameActive) peep(player); }, 250);
+        }
+
+        function createHitText(x, y, text, className) {
+            const el = document.createElement('div');
+            el.className = `hit-text ${className}`;
+            el.textContent = text;
+            el.style.left = `${x - 20}px`; el.style.top = `${y - 30}px`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 500);
+        }
+
+        // 🔧 觸控與滑鼠防雙重發射優化
+        function bindEvents(gridId, player) {
+            const grid = document.getElementById(gridId);
+            grid.addEventListener('touchstart', (e) => {
+                if(!gameActive) return;
+                lastTouchTime = Date.now();
+                const hole = e.target.closest('.hole');
+                if(!hole) return;
+                e.preventDefault();
+                const idx = parseInt(hole.getAttribute('data-index'));
+                const touch = e.touches[0];
+                processHit(player, idx, touch.clientX, touch.clientY);
+            }, {passive: false});
+
+            grid.addEventListener('mousedown', (e) => {
+                if(!gameActive || (Date.now() - lastTouchTime < 500)) return;
+                const hole = e.target.closest('.hole');
+                if(!hole) return;
+                const idx = parseInt(hole.getAttribute('data-index'));
+                processHit(player, idx, e.clientX, e.clientY);
+            });
+        }
+        bindEvents('grid-p1', 1);
+        bindEvents('grid-p2', 2);
+
+        window.addEventListener('keydown', (e) => {
+            if(!gameActive || e.repeat) return;
+            const key = e.key.toLowerCase();
+            const p1Idx = p1Keys.indexOf(key);
+            if(p1Idx !== -1) {
+                const hole = document.querySelectorAll('#grid-p1 .hole')[p1Idx];
+                const rect = hole.getBoundingClientRect();
+                processHit(1, p1Idx, rect.left + rect.width/2, rect.top + rect.height/2);
+            }
+            if(is2PMode) {
+                const p2Idx = p2Keys.indexOf(key);
+                if(p2Idx !== -1) {
+                    const hole = document.querySelectorAll('#grid-p2 .hole')[p2Idx];
+                    const rect = hole.getBoundingClientRect();
+                    processHit(2, p2Idx, rect.left + rect.width/2, rect.top + rect.height/2);
+                }
+            }
+        });
+
+        // 🔧 鬼影珍珠 Timeout 徹底防禦與清理
+        function startGame() {
+            initAudio();
+            gameActive = false;
+            clearInterval(timerInterval);
+            if (peepTimeoutP1) clearTimeout(peepTimeoutP1);
+            if (peepTimeoutP2) clearTimeout(peepTimeoutP2);
+            document.querySelectorAll('.hole').forEach(h => h.classList.remove('up-boba', 'up-coriander'));
+
+            score1 = 0; score2 = 0;
+            reactionTimesP1 = []; reactionTimesP2 = [];
+            score1Display.textContent = 0; score2Display.textContent = 0;
+            updateCupLiquid();
+            
+            timeLeft = 30; timeDisplay.textContent = timeLeft;
+            warningText.style.display = 'none';
+            gameActive = true;
+            startBtn.disabled = true;
+
+            peep(1);
+            if(is2PMode) peep(2);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timeDisplay.textContent = timeLeft;
+
+                if(timeLeft <= 5 && timeLeft > 0) {
+                    warningText.style.display = 'block';
+                }
+
+                if(timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            if (peepTimeoutP1) clearTimeout(peepTimeoutP1);
+            if (peepTimeoutP2) clearTimeout(peepTimeoutP2);
+            warningText.style.display = 'none';
+            document.querySelectorAll('.hole').forEach(h => h.classList.remove('up-boba', 'up-coriander'));
+            startBtn.disabled = false;
+
+            const avgP1 = reactionTimesP1.length ? Math.round(reactionTimesP1.reduce((a,b)=>a+b,0)/reactionTimesP1.length) : 0;
+            const avgP2 = reactionTimesP2.length ? Math.round(reactionTimesP2.reduce((a,b)=>a+b,0)/reactionTimesP2.length) : 0;
+
+            showResultModal(avgP1, avgP2);
+        }
+
+        function generateVerifyCode(score, avgMs) {
+            let salt = "BOBA701";
+            let raw = `${score}-${avgMs}-${salt}`;
+            let hash = 0;
+            for (let i = 0; i < raw.length; i++) {
+                hash = ((hash << 5) - hash) + raw.charCodeAt(i); hash |= 0;
+            }
+            return "NEURO-" + Math.abs(hash).toString(16).toUpperCase().padStart(6, '0');
+        }
+
+        function showResultModal(avgP1, avgP2) {
+            let title = '', body = '';
+            const verifyCode = generateVerifyCode(score1, avgP1);
+
+            if(is2PMode) {
+                let winner = score1 > score2 ? '🎉 1P 獲勝！吸珍珠快手！' : (score2 > score1 ? '🎉 2P 獲勝！吸珍珠快手！' : '🤝 平手！奶茶平分！');
+                title = `⚔️ 擂台 PK 結果`;
+                body = `
+                    <h2 style="color:#d63031; margin-bottom:10px;">${winner}</h2>
+                    <p style="font-size:1.1rem; margin:5px 0;"><strong>🔴 1P 得分：</strong>${score1} 分 (平均反應: ${avgP1} ms)</p>
+                    <p style="font-size:1.1rem; margin:5px 0;"><strong>🔵 2P 得分：</strong>${score2} 分 (平均反應: ${avgP2} ms)</p>
+                `;
+            } else {
+                title = `🎯 測驗挑戰結束`;
+                body = `
+                    <p style="font-size:1.2rem; margin:8px 0;"><strong>你的最終得分：</strong><span style="color:#d63031; font-weight:900;">${score1} 分</span></p>
+                    <p style="font-size:1.1rem; margin:8px 0;"><strong>⚡ 平均反應速率：</strong><span style="color:#0984e3; font-weight:900;">${avgP1} ms</span></p>
+                    <button class="btn btn-rank" onclick="saveScorePrompt(${score1}, ${avgP1})" style="margin-top:10px;">💾 登錄至課堂排行榜</button>
+                `;
+            }
+
+            modalCard.innerHTML = `
+                <h2>${title}</h2>
+                <div style="margin:15px 0;">${body}</div>
+                <div class="cert-card">
+                    <div style="font-size:12px; color:#64748b;">Classroom 防偽驗證代碼：</div>
+                    <div class="cert-code">${verifyCode}</div>
+                    <div style="color:#ef4444; font-size:12px; font-weight:bold; margin-top:6px;">📸 請截圖上傳 Google Classroom 繳交作業</div>
+                </div>
+                <hr style="margin:15px 0; border:0; border-top:2px dashed #ccc;">
+                <button class="secret-btn" onclick="toggleSecretInfo()">🔍 老師教學專用解析</button>
+                <div id="secret-info" style="display:none; text-align:left; background:#f1f2f6; padding:10px; border-radius:10px; margin-top:10px; font-size:0.85rem;">
+                    <strong>🧠 神經傳導觀念引導：</strong><br>
+                    1. 意識動作路徑：眼睛(受器) ➔ 視神經 ➔ 大腦判斷 ➔ 脊髓 ➔ 手部肌肉(動器)。<br>
+                    2. 重複 PK 練習能強化神經突觸聯結，使平均反應毫秒數縮短（學習效果）！
+                </div>
+                <br>
+                <button class="btn btn-start" onclick="closeModal()" style="margin-top:15px;">關閉並準備下一局</button>
+            `;
+            modalOverlay.style.display = 'flex';
+        }
+
+        function getRankings() { return JSON.parse(localStorage.getItem('boba_rankings') || '[]'); }
+        function saveScorePrompt(score, avgMs) {
+            const name = prompt('請輸入你的班級座號/暱稱：', '101-01');
+            if(name) {
+                const ranks = getRankings();
+                ranks.push({name, score, avgMs, date: new Date().toLocaleTimeString()});
+                ranks.sort((a,b) => b.score - a.score || a.avgMs - b.avgMs);
+                localStorage.setItem('boba_rankings', JSON.stringify(ranks.slice(0, 5)));
+                showRankingsModal();
+            }
+        }
+        function showRankingsModal() {
+            const ranks = getRankings();
+            let rows = ranks.map((r, i) => `<tr><td>${i+1}</td><td>${r.name}</td><td>${r.score} 分</td><td>${r.avgMs} ms</td></tr>`).join('');
+            if(!rows) rows = '<tr><td colspan="4">目前還沒有紀錄喔！快來挑戰！</td></tr>';
+
+            modalCard.innerHTML = `
+                <h2>🏆 課堂王者排行榜 (Top 5)</h2>
+                <table class="rank-table">
+                    <thead><tr><th>名次</th><th>暱稱</th><th>分數</th><th>反應速度</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <button class="btn btn-start" onclick="closeModal()">返回遊戲</button>
+                <button style="background:none; border:none; color:#aaa; font-size:0.7rem; display:block; margin:10px auto 0 auto; cursor:pointer;" onclick="localStorage.removeItem('boba_rankings'); showRankingsModal();">清空排行榜(換班級)</button>
+            `;
+            modalOverlay.style.display = 'flex';
+        }
+
+        function toggleSecretInfo() {
+            const el = document.getElementById('secret-info');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+        function closeModal() { modalOverlay.style.display = 'none'; }
+
+        startBtn.addEventListener('click', startGame);
+        rankBtn.addEventListener('click', showRankingsModal);
+        musicBtn.addEventListener('click', () => {
+            initAudio();
+            soundActive = !soundActive;
+            musicBtn.textContent = soundActive ? '🎵 音效: 開' : '🎵 音效: 關';
+        });
+    </script>
+</body>
+</html>

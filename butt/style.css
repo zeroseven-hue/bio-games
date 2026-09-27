@@ -94,16 +94,11 @@ body {
 }
 
 .profile-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 10px;
-}
-
-@media (max-width: 480px) {
-  .profile-inputs {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
+  width: 100%;
 }
 
 .input-field {
@@ -112,14 +107,31 @@ body {
   gap: 4px;
 }
 
+.input-field.compact-class {
+  width: 75px;
+  flex-shrink: 0;
+}
+
+.input-field.compact-seat {
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.input-field.flex-name {
+  flex: 1;
+  min-width: 140px;
+}
+
 .input-field label {
   font-size: 0.8rem;
   font-weight: bold;
   color: #334155;
+  white-space: nowrap;
 }
 
 .input-field input {
-  padding: 8px 10px;
+  width: 100%;
+  padding: 8px 8px;
   border: 2px solid #CBD5E1;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -127,6 +139,7 @@ body {
   outline: none;
   background: white;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .input-field input:focus {
