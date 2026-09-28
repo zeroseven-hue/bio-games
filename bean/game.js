@@ -95,7 +95,7 @@ function speak(text, pitch = 1.2, rate = 1.12) {
   } catch (e) {}
 }
 
-// --- 備用題庫 ---
+// --- 備用題庫 (20題完整保底) ---
 const fallbackBank = [
   {
     question: "國中生物課進行『植物行光合作用產生澱粉』實驗時，下列何者最常選用作為實驗葉片？",
@@ -114,6 +114,108 @@ const fallbackBank = [
     options: ["實驗中保持不變的因素", "實驗中操作改變的因素", "實驗測量產生的結果", "完全不作處理的組別"],
     answer: 0,
     explanation: "控制變因是指實驗過程中所有必須維持相同的變因。"
+  },
+  {
+    question: "使用複式顯微鏡觀察洋蔥表皮細胞時，若將玻片向左上方移動，則視野中的影像會向何方移動？",
+    options: ["右下方", "左上方", "右上方", "左下方"],
+    answer: 0,
+    explanation: "複式顯微鏡成的影像是上下顛倒、左右相反的倒立實像，玻片向左上移，影像向右下移。"
+  },
+  {
+    question: "生物體內的酵素（生物催化劑）主要化學成分為何？",
+    options: ["蛋白質", "葡萄糖", "脂質", "核酸"],
+    answer: 0,
+    explanation: "酵素主要由蛋白質構成，其活性易受溫度與 pH 值影響。"
+  },
+  {
+    question: "下列何者為『擴散作用』的主要特徵？",
+    options: ["分子由高濃度往低濃度自然移動", "必須消耗細胞能量 ATP", "僅能透過酵素輔助進行", "只能在活細胞中發生"],
+    answer: 0,
+    explanation: "擴散作用是分子由高濃度區域向低濃度區域擴散的物理現象，不需消耗細胞能量。"
+  },
+  {
+    question: "人類心臟四個腔室中，哪一個腔室的心肌最發達厚實，能將血液泵送至全身？",
+    options: ["左心室", "右心室", "左心房", "右心房"],
+    answer: 0,
+    explanation: "左心室負責推動體循環將血液送往全身器官，因此心肌最為發達厚實。"
+  },
+  {
+    question: "人體的『體循環』路徑，起點與終點分別為何？",
+    options: ["左心室起點，右心房終點", "右心室起點，左心房終點", "左心房起點，右心室終點", "右心房起點，左心室終點"],
+    answer: 0,
+    explanation: "體循環由左心室出發經大動脈至全身微血管，最後匯集至大靜脈回到右心房。"
+  },
+  {
+    question: "當飯後血糖濃度升高時，人體主要分泌哪一種激素以促進血糖轉化為肝糖儲存？",
+    options: ["胰島素", "腎上腺素", "甲狀腺素", "生長激素"],
+    answer: 0,
+    explanation: "胰島素由胰島 β 細胞分泌，能促進細胞吸收葡萄糖並合成肝糖以降低血糖。"
+  },
+  {
+    question: "綠色植物光合作用的『光反應』階段，主要會產生哪一種氣體？",
+    options: ["氧氣", "二氧化碳", "氮氣", "水蒸氣"],
+    answer: 0,
+    explanation: "光反應在葉綠體葉綠餅進行，水分子吸收光能被分解釋放出氧氣。"
+  },
+  {
+    question: "人體消化器官中，胃液呈強酸性主要含有何種化學成分？",
+    options: ["鹽酸", "硫酸", "醋酸", "硝酸"],
+    answer: 0,
+    explanation: "胃腺分泌胃酸（鹽酸），可提供強酸環境活化胃蛋白酵素並殺滅食物中的細菌。"
+  },
+  {
+    question: "生物體的構造層級中，『心臟、血管與血液』共同組成的層級為何？",
+    options: ["器官系統", "器官", "組織", "個體"],
+    answer: 0,
+    explanation: "多個功能相關的器官共同運作構成「器官系統」（循環系統）。"
+  },
+  {
+    question: "植物體內運輸水分與無機鹽的主要構造為何？",
+    options: ["木質部", "韌皮部", "形成層", "表皮細胞"],
+    answer: 0,
+    explanation: "木質部主要由假導管與導管組成，負責由下往上單向運輸水分與溶於水的無機鹽。"
+  },
+  {
+    question: "高大樹木能將根部吸收的水分拉升至幾十公尺高的樹頂，最主要的動力來源為何？",
+    options: ["葉片的蒸散作用", "根壓作用", "毛細現象", "光合作用消耗"],
+    answer: 0,
+    explanation: "葉片氣孔蒸散水分產生的拉力（蒸散拉力）是植物體內水分向上運輸的最主要動力。"
+  },
+  {
+    question: "植物葉片上的『氣孔』主要由哪一種細胞控制其開啟與關閉？",
+    options: ["保衛細胞", "葉肉細胞", "表皮細胞", "角質層"],
+    answer: 0,
+    explanation: "保衛細胞成對存在，吸水膨脹時氣孔張開，失水萎縮時氣孔關閉。"
+  },
+  {
+    question: "人體神經系統與內分泌系統相比，下列何者為『神經系統』的作用特點？",
+    options: ["反應迅速且作用範圍局限", "反應緩慢但作用持久", "透過血液運輸化學物質", "影響全身廣泛細胞"],
+    answer: 0,
+    explanation: "神經系統透過電訊號與神經傳導物質傳遞，特點是反應極為迅速且控制精準局限。"
+  },
+  {
+    question: "植物莖部的向光性生長，主要是因為莖部背光側的哪一種物質濃度較高？",
+    options: ["生長素", "吉貝素", "乙烯", "脫落酸"],
+    answer: 0,
+    explanation: "單側光照射下，生長素會向背光側移動，刺激背光側細胞快速伸長，使莖彎向光源。"
+  },
+  {
+    question: "人體消化道中，消化與吸收養分最主要、最主要的器官為何？",
+    options: ["小腸", "大腸", "胃", "口腔"],
+    answer: 0,
+    explanation: "小腸長且內壁有密集的絨毛，是食物完成消化與吸收大多數養分的最主要器官。"
+  },
+  {
+    question: "人體唾液中的澱粉酵素，在下列哪一種 pH 值環境下的催化活性最高？",
+    options: ["pH 7（接近中性）", "pH 2（強酸性）", "pH 12（強鹼性）", "pH 4（弱酸性）"],
+    answer: 0,
+    explanation: "唾液澱粉酵素的最適 pH 值約為 6.8~7.0 接近中性，在胃部強酸環境下會失去活性。"
+  },
+  {
+    question: "科學探究歷程中，『假說』經過多次實驗廣泛驗證皆成立後，可上升為什麼？",
+    options: ["學說或定律", "觀察紀錄", "控制變因", "實驗結果"],
+    answer: 0,
+    explanation: "假說若能禁得起廣泛反複實驗驗證且具普遍預測力，最終可發展為學說。"
   }
 ];
 
@@ -342,6 +444,16 @@ async function fetchQuestionsForUnit(unitId) {
   let loaded = [];
   const basePathCandidates = ['../questions/', 'questions/'];
 
+  if (manifestUnits.length === 0) {
+    await loadManifestAndUnits();
+  }
+
+  const parseQuestions = (data) => {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.questions)) return data.questions;
+    return [];
+  };
+
   if (unitId === 'all') {
     if (manifestUnits.length > 0) {
       for (const unit of manifestUnits) {
@@ -350,7 +462,8 @@ async function fetchQuestionsForUnit(unitId) {
             const res = await fetch(basePath + unit.file);
             if (res.ok) {
               const data = await res.json();
-              loaded.push(...data);
+              const qList = parseQuestions(data);
+              loaded.push(...qList);
               break;
             }
           } catch (e) {}
@@ -364,14 +477,17 @@ async function fetchQuestionsForUnit(unitId) {
       try {
         const res = await fetch(basePath + fileName);
         if (res.ok) {
-          loaded = await res.json();
+          const data = await res.json();
+          const qList = parseQuestions(data);
+          loaded.push(...qList);
           break;
         }
       } catch (e) {}
     }
   }
 
-  return loaded.length > 0 ? loaded.filter(validQuestion) : fallbackBank;
+  const validList = loaded.filter(validQuestion);
+  return validList.length > 0 ? validList : fallbackBank;
 }
 
 function correctIndex(q) {
