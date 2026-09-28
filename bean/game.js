@@ -559,6 +559,7 @@ function renderQuestion() {
   clearTimers();
   clearSpawn();
   currentQuestionSpawns = 0;
+  targetSpawnedInCurrentQuestion = false;
 
   if (idx >= pool.length) {
     endGame();
@@ -610,7 +611,9 @@ function scheduleSpawn(delay) {
   spawnTimer = setTimeout(spawnCharacter, delay ?? (cfg.spawnMin + Math.random() * (cfg.spawnMax - cfg.spawnMin)));
 }
 
-// 生產淘氣豆 (修正：確保開局前兩次必定出現正確答案豆)
+let targetSpawnedInCurrentQuestion = false;
+
+// 生產淘氣豆 (修正：全隨機非預測登場，兼顧不卡拖延與樂趣性)
 function spawnCharacter() {
   if (locked || stunned) return;
   clearSpawn();
@@ -622,20 +625,33 @@ function spawnCharacter() {
   let type = 'target';
   let hole = correct;
 
-  if (currentQuestionSpawns <= 2) {
-    type = 'target';
-    hole = correct;
+  const r = Math.random();
+
+  // 若前兩次探頭都還沒出現正確答案，第 3 次之後提高至 85% 機率登場，防止學生久等；
+  // 平常情況下，第 1、2 次探頭動態隨機：目標豆 (46%)、巡邏員 😠 (22%)、奶嘴豆 😭 (22%)、金豆 ✨ (10%)
+  if (!targetSpawnedInCurrentQuestion && currentQuestionSpawns >= 3) {
+    if (r < 0.85) {
+      type = 'target';
+      hole = correct;
+      targetSpawnedInCurrentQuestion = true;
+    } else {
+      type = Math.random() < 0.5 ? 'baby' : 'guard';
+      hole = Math.floor(Math.random() * 4);
+    }
   } else {
-    const r = Math.random();
-    if (r < 0.12) {
+    if (r < 0.10) {
       type = 'gold';
       hole = Math.floor(Math.random() * 4);
-    } else if (r < 0.38) {
-      type = Math.random() < 0.5 ? 'baby' : 'guard';
+    } else if (r < 0.32) {
+      type = 'baby';
+      hole = Math.floor(Math.random() * 4);
+    } else if (r < 0.54) {
+      type = 'guard';
       hole = Math.floor(Math.random() * 4);
     } else {
       type = 'target';
       hole = correct;
+      targetSpawnedInCurrentQuestion = true;
     }
   }
 
