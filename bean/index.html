@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>淘氣豆：生物敲敲研究所 V1.0</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+  <!-- 大錘子懸浮游標 (電腦桌機專用) -->
+  <div id="hammerCursor" class="hammer-cursor" aria-hidden="true">
+    <span class="hammer-head"></span>
+    <span class="hammer-handle"></span>
+  </div>
+
+  <!-- 開始畫面：學生登入、單元與題數選擇 -->
+  <section class="overlay" id="startScreen">
+    <div class="dialog-box start-card">
+      <div class="mascot-preview" aria-hidden="true">
+        <div class="mischief mascot">
+          <span class="tuft"></span>
+          <span class="eye e1"></span>
+          <span class="eye e2"></span>
+          <span class="mouth"></span>
+          <span class="body"></span>
+        </div>
+      </div>
+      <p class="eyebrow">BIOLOGY QUICK WHACK GAME</p>
+      <h1 class="game-title">🫘 淘氣豆：生物敲敲研究所</h1>
+      <p class="dialog-sub">看準題目，敲擊正確答案洞口探頭的淘氣豆！鍵盤支援 A / B / C / D</p>
+
+      <!-- 學生身分登記區 -->
+      <div class="profile-box">
+        <div class="profile-title">👤 學生身分登記 (防偽成績單必填)</div>
+        <div class="profile-inputs">
+          <div class="input-field compact-class">
+            <label for="inputClass">班級：</label>
+            <input type="text" id="inputClass" placeholder="701" maxlength="6" value="701">
+          </div>
+          <div class="input-field compact-seat">
+            <label for="inputSeat">座號：</label>
+            <input type="text" id="inputSeat" placeholder="01" maxlength="2" value="01">
+          </div>
+          <div class="input-field flex-name">
+            <label for="inputName">真實姓名：</label>
+            <input type="text" id="inputName" placeholder="請填寫真實姓名" maxlength="10">
+          </div>
+        </div>
+        <div class="profile-tip" id="profileErrorTip">⚠️ 請填寫完整班級、2位數字座號與真實姓名！</div>
+      </div>
+
+      <!-- 動態單元選擇 -->
+      <div class="config-group" id="unitSelectorGroup">
+        <label class="config-label" for="unitSelect">📚 選擇複習單元：</label>
+        <select id="unitSelect" class="styled-select">
+          <option value="all">🌐 ALL (1~10單元 綜合隨機出題)</option>
+        </select>
+      </div>
+
+      <!-- 規則說明卡片 -->
+      <div class="rules-card">
+        <span>🎯 敲中正確洞的淘氣豆 <b>+10分</b>，二連擊以上累積 <b>Combo</b> 升級大錘！</span>
+        <span>❌ 答錯 <b>扣分</b> 且連擊中斷｜🍼 誤敲奶嘴豆 <b>-1</b>｜💢 誤敲巡邏員 <b>短暫暈眩 1.2 秒</b></span>
+        <span>✨ 稀有金豆現身 <b>BONUS +3分</b></span>
+      </div>
+
+      <!-- 題數選擇 -->
+      <div class="count-selector-wrap" id="countWrap">
+        <span class="count-label">🔢 選擇本次複習題數：</span>
+        <div class="count-btns">
+          <button type="button" class="btn-pill active" data-count="10" onclick="setQuestionCount(10)">10 題</button>
+          <button type="button" class="btn-pill" data-count="15" onclick="setQuestionCount(15)">15 題</button>
+          <button type="button" class="btn-pill" data-count="20" onclick="setQuestionCount(20)">20 題</button>
+          <button type="button" class="btn-pill" data-count="all" onclick="setQuestionCount('all')">全刷</button>
+        </div>
+      </div>
+
+      <div class="preset-tag" id="presetTag" hidden></div>
+
+      <div class="start-actions">
+        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">開始挑戰 🔨</button>
+        <a href="../index.html" class="btn-ghost">🏠 返回大廳</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 頂部 HUD 狀態列 -->
+  <header class="hud">
+    <a href="../index.html" class="btn-back-lobby">🏠 大廳</a>
+    <div class="info-badge" id="badgeUnit">單元：載入中</div>
+    <div class="info-badge" id="badgeProgress">題號 0 / 0</div>
+    <div class="info-badge combo-badge">🔥 <span id="badgeCombo">Combo 0</span></div>
+    <div class="info-badge" id="badgeScore">得分 0</div>
+  </header>
+
+  <!-- 主舞台 -->
+  <main class="game-shell">
+    <section class="question-card">
+      <div class="question-top">
+        <span class="question-kicker">BIOLOGY QUESTION</span>
+        <span id="timeHint" class="time-hint">先看懂題目再出手</span>
+      </div>
+      <div id="questionText" class="question-text">題庫載入中…</div>
+      <div class="soft-timer" aria-label="本題時間"><div id="timeFill"></div></div>
+    </section>
+
+    <!-- 四個選項卡片 -->
+    <section class="answers" id="answers" aria-label="選項"></section>
+
+    <!-- 四個地洞舞台 -->
+    <section class="arena-wrap">
+      <div class="arena-title">
+        <span>等待正確答案洞口的淘氣豆出現</span>
+        <span id="hammerLevel">🔨 Lv.1 小木槌</span>
+      </div>
+      <div class="field-stage" id="fieldStage"></div>
+      <div id="statusToast" class="status-toast" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <!-- 暈眩警示覆蓋層 -->
+  <div class="stun-overlay" id="stunOverlay" hidden>
+    <div class="stun-card">
+      <div class="stun-stars">⭐💫⭐</div>
+      <strong>被巡邏員抓包了！</strong>
+      <span>警報暈眩 1.2 秒</span>
+    </div>
+  </div>
+
+  <!-- 觀念訂正彈窗 -->
+  <section class="overlay" id="feedbackModal" hidden>
+    <div class="dialog-box result-card">
+      <h2 id="modalTitle">作答結果</h2>
+      <div id="modalBody" class="explain-body"></div>
+      <button type="button" class="btn-action" id="modalBtn">繼續前進 ➜</button>
+    </div>
+  </section>
+
+  <!-- 防偽成績單結算彈窗 -->
+  <div class="modal" id="certModal">
+    <div class="modal-box cert-box">
+      <div class="cert-header">
+        <div class="cert-stamp">VERIFIED</div>
+        <h2>📜 淘氣豆敲敲研究所 ‧ 防偽成績單</h2>
+        <div class="cert-id" id="certIdDisplay">驗證碼：BEAN-000000</div>
+      </div>
+      <div class="cert-body">
+        <div class="cert-row">
+          <span>👤 學生資料：</span>
+          <strong id="certStudentInfo">701 班 01 號 王小明</strong>
+        </div>
+        <div class="cert-row">
+          <span>📚 挑戰單元：</span>
+          <strong id="certUnitInfo">單元 01：科學態度與科學方法</strong>
+        </div>
+        <div class="cert-row">
+          <span>🎯 最終得分：</span>
+          <strong id="certScoreDisplay" class="highlight-score">100 分</strong>
+        </div>
+        <div class="cert-row">
+          <span>🔥 最高 Combo：</span>
+          <strong id="certComboDisplay">Combo 10</strong>
+        </div>
+        <div class="cert-row">
+          <span>🔨 最終錘子：</span>
+          <strong id="certHammerDisplay">Lv.5 終極槌</strong>
+        </div>
+        <div class="cert-row">
+          <span>⏱️ 作答費時：</span>
+          <strong id="certTimeDisplay">45 秒</strong>
+        </div>
+        <div class="cert-row">
+          <span>📅 簽發時間：</span>
+          <strong id="certTimestampDisplay">2026-09-28 21:00</strong>
+        </div>
+      </div>
+
+      <div class="cert-actions">
+        <button type="button" class="btn-copy-cert" id="btnCopyCert" onclick="copyCertToClipboard()">📋 複製成績單驗證碼 (Google Classroom 繳交)</button>
+        <div class="cert-btn-group">
+          <button type="button" class="btn-restart" onclick="resetToStart()">再戰一局 🔄</button>
+          <a href="../index.html" class="btn-home">🏠 返回遊戲大廳</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js?v=1.0"></script>
+</body>
+</html>
