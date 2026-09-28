@@ -552,10 +552,13 @@ async function startGame() {
   renderQuestion();
 }
 
+let currentQuestionSpawns = 0;
+
 // 渲染當前題目
 function renderQuestion() {
   clearTimers();
   clearSpawn();
+  currentQuestionSpawns = 0;
 
   if (idx >= pool.length) {
     endGame();
@@ -607,28 +610,41 @@ function scheduleSpawn(delay) {
   spawnTimer = setTimeout(spawnCharacter, delay ?? (cfg.spawnMin + Math.random() * (cfg.spawnMax - cfg.spawnMin)));
 }
 
+// 生產淘氣豆 (修正：確保開局前兩次必定出現正確答案豆)
 function spawnCharacter() {
   if (locked || stunned) return;
   clearSpawn();
 
   const q = pool[idx];
   const correct = correctIndex(q);
-  let type = 'target';
-  let hole = Math.floor(Math.random() * 4);
-  const r = Math.random();
+  currentQuestionSpawns++;
 
-  if (r < cfg.goldChance) {
-    type = 'gold';
-  } else if (r < cfg.goldChance + cfg.obstacleChance) {
-    type = Math.random() < .5 ? 'baby' : 'guard';
-  } else if (Math.random() < .55) {
-    hole = correct; // 提高正確洞出現機率
+  let type = 'target';
+  let hole = correct;
+
+  if (currentQuestionSpawns <= 2) {
+    type = 'target';
+    hole = correct;
+  } else {
+    const r = Math.random();
+    if (r < 0.12) {
+      type = 'gold';
+      hole = Math.floor(Math.random() * 4);
+    } else if (r < 0.38) {
+      type = Math.random() < 0.5 ? 'baby' : 'guard';
+      hole = Math.floor(Math.random() * 4);
+    } else {
+      type = 'target';
+      hole = correct;
+    }
   }
 
   currentSpawn = { hole, type };
   const slot = $('slot-' + hole);
-  slot.innerHTML = characterHTML(type);
-  slot.classList.add('up');
+  if (slot) {
+    slot.innerHTML = characterHTML(type);
+    slot.classList.add('up');
+  }
 
   hideTimer = setTimeout(() => {
     clearSpawn();
@@ -636,9 +652,55 @@ function spawnCharacter() {
   }, cfg.visibleMs);
 }
 
+// 產生不同表情與角色的 HTML
 function characterHTML(type) {
-  const cls = type === 'baby' ? 'baby' : type === 'guard' ? 'guard' : type === 'gold' ? 'gold' : 'mischief';
-  return `<div class="mascot ${cls} ${type === 'target' ? 'wiggle' : ''}"><span class="tuft"></span><span class="eye e1"></span><span class="eye e2"></span><span class="mouth"></span><span class="body"></span></div>`;
+  if (type === 'guard') {
+    // 巡邏員：斜眼生氣表情 + 憤怒標誌
+    return `<div class="mascot guard wiggle">
+      <span class="tuft"></span>
+      <span class="eyebrow-angry e1-brow"></span>
+      <span class="eyebrow-angry e2-brow"></span>
+      <span class="eye eye-angry e1"></span>
+      <span class="eye eye-angry e2"></span>
+      <span class="mouth mouth-frown"></span>
+      <span class="body"></span>
+    </div>`;
+  }
+  if (type === 'baby') {
+    // 奶嘴豆：哭哭眼 + 水滴眼淚 + 奶嘴
+    return `<div class="mascot baby wiggle">
+      <span class="tuft"></span>
+      <span class="eye eye-crying e1"></span>
+      <span class="eye eye-crying e2"></span>
+      <span class="tear t1">💧</span>
+      <span class="tear t2">💧</span>
+      <span class="mouth mouth-cry"></span>
+      <span class="body"></span>
+    </div>`;
+  }
+  if (type === 'gold') {
+    // 金豆：星星眼 + 大笑
+    return `<div class="mascot gold wiggle">
+      <span class="tuft"></span>
+      <span class="eye-star e1">✨</span>
+      <span class="eye-star e2">✨</span>
+      <span class="mouth mouth-joy"></span>
+      <span class="body"></span>
+    </div>`;
+  }
+  // 正確目標淘氣豆：開心微笑 ☺️
+  return `<div class="mascot target wiggle">
+    <span class="tuft"></span>
+    <span class="eye e1"></span>
+    <span class="eye e2"></span>
+    <span class="mouth mouth-smile"></span>
+    <span class="body"></span>
+  </div>`;
+}
+
+function toggleInstructionsModal(show) {
+  const modal = $('instructionsModal');
+  if (modal) modal.hidden = !show;
 }
 
 function clearSpawn() {

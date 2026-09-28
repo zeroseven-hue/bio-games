@@ -86,11 +86,16 @@
 
   <!-- 頂部 HUD 狀態列 -->
   <header class="hud">
-    <a href="../index.html" class="btn-back-lobby">🏠 大廳</a>
-    <div class="info-badge" id="badgeUnit">單元：載入中</div>
-    <div class="info-badge" id="badgeProgress">題號 0 / 0</div>
-    <div class="info-badge combo-badge">🔥 <span id="badgeCombo">Combo 0</span></div>
-    <div class="info-badge" id="badgeScore">得分 0</div>
+    <div class="hud-left">
+      <a href="../index.html" class="btn-back-lobby">🏠 大廳</a>
+      <button type="button" class="btn-back-lobby btn-rule-help" onclick="toggleInstructionsModal(true)">📖 遊戲說明</button>
+    </div>
+    <div class="hud-right">
+      <div class="info-badge" id="badgeUnit">單元：載入中</div>
+      <div class="info-badge" id="badgeProgress">題號 0 / 0</div>
+      <div class="info-badge combo-badge">🔥 <span id="badgeCombo">Combo 0</span></div>
+      <div class="info-badge" id="badgeScore">得分 0</div>
+    </div>
   </header>
 
   <!-- 主舞台 -->
@@ -133,6 +138,22 @@
       <h2 id="modalTitle">作答結果</h2>
       <div id="modalBody" class="explain-body"></div>
       <button type="button" class="btn-action" id="modalBtn">繼續前進 ➜</button>
+    </div>
+  </section>
+
+  <!-- 遊戲詳細說明彈窗 -->
+  <section class="overlay" id="instructionsModal" hidden>
+    <div class="dialog-box rule-modal-card">
+      <h2 style="color:#0369A1; margin-bottom:12px;">📖 淘氣豆：遊戲玩法與規則說明</h2>
+      <div class="explain-body rule-explain-list" style="text-align:left; font-size:0.9rem; line-height:1.6; display:grid; gap:8px;">
+        <p>🎯 <strong>如何作答</strong>：看清上方題目後，當對應選項（A、B、C、D）的「微笑淘氣豆」探頭時，點擊地洞或按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 敲擊作答！</p>
+        <p>🔨 <strong>連擊升級</strong>：連續擊中正確答案可累積 Combo 倍率，每連擊 2 次升級錘子（最高 Lv.5 終極槌），得分與打擊爽快感倍增！</p>
+        <p>🍼 <strong>奶嘴豆 (哭哭臉 😭)</strong>：誤敲戴奶嘴眼眶帶淚的奶嘴豆，會發出哭聲並扣 1 分。</p>
+        <p>💢 <strong>巡邏員 (生氣臉 😠)</strong>：千萬別敲擊斜眼斜眉帶有怒氣標誌 💢 的巡邏員豆，否則會引發警報並暈眩 1.2 秒！</p>
+        <p>✨ <strong>閃耀金豆 (開心星眼 🤩)</strong>：稀有黃金豆現身，命中可獲得額外 BONUS +3 分獎勵！</p>
+        <p>📜 <strong>防偽成績單</strong>：挑戰完成後頒發 `BEAN-XXXXXX` 防偽成績單，可一鍵複製文字貼至 Google Classroom 繳交作業！</p>
+      </div>
+      <button type="button" class="btn-action" style="margin-top:10px; background:#0284C7;" onclick="toggleInstructionsModal(false)">我看懂了 ➜</button>
     </div>
   </section>
 

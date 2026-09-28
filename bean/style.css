@@ -44,6 +44,24 @@ body {
   flex-wrap: wrap;
 }
 
+.hud-left, .hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-rule-help {
+  background: #E0F2FE !important;
+  color: #0369A1 !important;
+  border: 2px solid #38BDF8 !important;
+  cursor: pointer;
+}
+
+.btn-rule-help:hover {
+  background: #BAE6FD !important;
+}
+
 .btn-back-lobby {
   background: rgba(255, 255, 255, 0.92);
   color: #334155;
@@ -312,6 +330,75 @@ body {
   height: 8px;
   border-bottom: 3px solid #3d3935;
   border-radius: 50%;
+}
+
+/* 巡邏員生氣斜眉與生氣嘴巴 */
+.eyebrow-angry {
+  position: absolute;
+  z-index: 5;
+  top: 25px;
+  width: 14px;
+  height: 4px;
+  background: #3d3935;
+  border-radius: 2px;
+}
+.e1-brow { left: 26px; transform: rotate(20deg); }
+.e2-brow { right: 26px; transform: rotate(-20deg); }
+
+.mouth-frown {
+  border-bottom: none !important;
+  border-top: 3px solid #3d3935 !important;
+  border-radius: 50% 50% 0 0 !important;
+  top: 53px !important;
+}
+
+/* 奶嘴豆哭哭眼眶與水滴 */
+.tear {
+  position: absolute;
+  z-index: 5;
+  font-size: 12px;
+  top: 40px;
+  animation: dropTear 0.8s infinite alternate;
+}
+.t1 { left: 24px; }
+.t2 { right: 24px; }
+
+@keyframes dropTear {
+  from { transform: translateY(0); opacity: 0.7; }
+  to { transform: translateY(4px); opacity: 1; }
+}
+
+.mouth-cry {
+  width: 12px !important;
+  height: 12px !important;
+  background: #3d3935;
+  border-radius: 50% !important;
+  top: 48px !important;
+  left: 40px !important;
+}
+
+/* 金豆星眼 */
+.eye-star {
+  position: absolute;
+  z-index: 5;
+  font-size: 14px;
+  top: 26px;
+}
+.eye-star.e1 { left: 26px; }
+.eye-star.e2 { right: 26px; }
+
+.mouth-joy {
+  width: 16px !important;
+  height: 10px !important;
+  background: #d97706;
+  border: 2px solid #3d3935;
+  border-radius: 0 0 10px 10px !important;
+  top: 48px !important;
+  left: 38px !important;
+}
+
+.mouth-smile {
+  border-bottom: 3px solid #3d3935 !important;
 }
 
 .baby .body { background: #a8e6cf; }
