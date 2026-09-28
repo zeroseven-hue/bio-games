@@ -1,0 +1,41 @@
+[
+  {
+    "id": "jungle_escape",
+    "title": "侏羅紀叢林逃生記",
+    "category": "shared",
+    "badgeText": "熱門推薦",
+    "badgeColor": "#27ae60",
+    "icon": "🦖",
+    "description": "探險隊在叢林中避開暴龍爪痕、攀爬藤蔓升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。",
+    "tags": ["👥 小組輪流", "🖥️ 投影主持", "📋 錯題戰報 TXT"],
+    "btnText": "🚀 直接進入遊戲",
+    "btnColor": "#27ae60",
+    "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+  },
+  {
+    "id": "zootopia_monopoly",
+    "title": "動物方城市生物大富翁",
+    "category": "shared",
+    "badgeText": "熱烈迴響",
+    "badgeColor": "#d35400",
+    "icon": "🐰",
+    "description": "茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！",
+    "tags": ["🎲 隨機抽籤", "🏠 答題蓋房", "✨ 閃亮機會"],
+    "btnText": "🎲 直接進入遊戲",
+    "btnColor": "#d35400",
+    "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+  },
+  {
+    "id": "mario_stage",
+    "title": "超級馬力歐生物闖關",
+    "category": "shared",
+    "badgeText": "熱門登場",
+    "badgeColor": "#c0392b",
+    "icon": "🍄",
+    "description": "冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼截圖繳交！",
+    "tags": ["🏃 4大關卡闖關", "🪙 金幣積累", "📜 GC 截圖繳交"],
+    "btnText": "🍄 直接進入遊戲",
+    "btnColor": "#c0392b",
+    "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+  }
+]

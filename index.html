@@ -1,284 +1,512 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>國中生物網頁遊戲平台 - bio-games</title>
-  <link rel="stylesheet" href="lobby.css">
-  <!-- QRCode.js CDN for QR Code Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>國中生物共用題庫遊戲大廳 bio-games</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --accent-blue: #0284c7;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px 15px 40px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1120px;
+        }
+
+        /* 平台頂部標題與說明 */
+        .hero {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 10px 0;
+        }
+
+        .hero-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #166534;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 0 0 10px 0;
+        }
+
+        .badge-code {
+            background: #dcfce7;
+            color: #15803d;
+            font-family: monospace;
+            font-size: 18px;
+            padding: 2px 10px;
+            border-radius: 8px;
+            border: 1px solid #86efac;
+        }
+
+        .hero-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 780px;
+            margin: 0 auto 18px auto;
+            line-height: 1.6;
+        }
+
+        /* 頂端功能按鈕 */
+        .top-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .switch-btn {
+            background: #059669;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        .switch-btn:hover {
+            background: #047857;
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+        }
+
+        /* 大廳區塊 */
+        .hall-header {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .hall-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        /* 卡片網格 Layout */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 22px;
+            width: 100%;
+        }
+
+        /* 卡片主體 */
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+            line-height: 1;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0 0 10px 0;
+            line-height: 1.3;
+        }
+
+        .card-desc {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .tag-pill {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .play-btn {
+            width: 100%;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+
+        .play-btn:hover {
+            opacity: 0.92;
+            transform: scale(1.01);
+        }
+
+        /* 計時器彈窗 Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .timer-display {
+            font-size: 54px;
+            font-weight: 900;
+            font-family: monospace;
+            color: var(--text-dark);
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+
+        .timer-presets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 4px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .preset-btn:hover { background: #e2e8f0; }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .t-btn {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .t-btn-start { background: var(--primary); color: white; }
+        .t-btn-pause { background: #f59e0b; color: white; }
+        .t-btn-reset { background: #94a3b8; color: white; }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
-  <div class="lobby-container">
-    <header class="lobby-header">
-      <div class="logo-area">
-        <h1>🌱 國中生物課堂網頁遊戲平台 <code>bio-games</code></h1>
-        <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式與 Google Classroom 作業繳交</p>
-      </div>
-      <div class="header-nav">
-        <a href="https://zeroseven-hue.github.io/bio-standalone-games/" class="btn-timer-link btn-standalone-link" style="background: #059669; margin-right: 8px;">👉 切換至【獨立單元遊戲大廳】</a>
-        <a href="timer/index.html" class="btn-timer-link">⏱️ 課堂專注計時器</a>
-      </div>
-    </header>
 
-    <main class="lobby-main">
-      <!-- 遊戲卡片區域 -->
-      <section class="games-section">
-        <h2>🎮 課堂遊戲大廳 (生物主題遊戲 ‧ 專注計時)</h2>
-        <div class="game-cards-grid">
+    <div class="container">
+        <!-- 平台 Header -->
+        <header class="hero">
+            <h1 class="hero-title">
+                <span>🌱 國中生物共用題庫遊戲大廳</span>
+                <span class="badge-code">bio-games</span>
+            </h1>
+            <div class="hero-subtitle">
+                跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式與 Google Classroom 作業繳交
+            </div>
+            <div class="top-actions">
+                <button class="action-btn" onclick="openTimerModal()">⏱️ 課堂專注計時器</button>
+                <a class="action-btn switch-btn" href="https://zeroseven-hue.github.io/bio-standalone-games/">👉 切換至【獨立單元遊戲大廳】</a>
+            </div>
+        </header>
 
-          <!-- 遊戲 1: 侏羅紀逃生記 -->
-          <div class="game-card card-jurassic">
-            <div class="card-badge">熱門推薦</div>
-            <div class="card-icon">🦖</div>
-            <h3>侏羅紀叢林逃生記</h3>
-            <p class="card-desc">探險隊在叢林中避開暴龍爪痕、攀爬攀藤升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。</p>
-            <div class="card-tags">
-              <span>👥 小組輪流</span>
-              <span>🖥️ 投影主持</span>
-              <span>📄 錯題戰報 TXT</span>
-            </div>
-            <div class="card-actions">
-              <a href="jurassic/index.html?v=3.4" class="btn-play">🚀 直接進入遊戲</a>
-            </div>
-          </div>
+        <!-- 遊戲大廳區塊 -->
+        <section class="hall-header">
+            <h2 class="hall-title">🎮 共用題庫遊戲大廳 (通識課堂·全課本題庫)</h2>
+        </section>
 
-          <!-- 遊戲 2: 動物方城市大富翁 -->
-          <div class="game-card card-monopoly">
-            <div class="card-badge bg-orange">熱烈迴響</div>
-            <div class="card-icon">🐰</div>
-            <h3>動物方城市生物大富翁</h3>
-            <p class="card-desc">茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！</p>
-            <div class="card-tags">
-              <span>🎲 隨機抽籤</span>
-              <span>🏠 答題蓋房</span>
-              <span>✨ 閃亮機會</span>
-            </div>
-            <div class="card-actions">
-              <a href="monopoly/index.html?v=4.6" class="btn-play btn-orange">🎲 直接進入遊戲</a>
-            </div>
-          </div>
+        <!-- 卡片網格 Container -->
+        <main class="cards-grid" id="cards-container"></main>
 
-          <!-- 遊戲 3: 超級馬力歐生物闖關 -->
-          <div class="game-card card-mario">
-            <div class="card-badge bg-red">熱門登場</div>
-            <div class="card-icon">🍄</div>
-            <h3>超級馬力歐生物闖關</h3>
-            <p class="card-desc">冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼供截圖繳交！</p>
-            <div class="card-tags">
-              <span>🏃 4大關卡闖關</span>
-              <span>🪙 金幣積累</span>
-              <span>📜 GC 截圖繳交</span>
-            </div>
-            <div class="card-actions">
-              <a href="mario/index.html" class="btn-play btn-red">🍄 直接進入遊戲</a>
-            </div>
-          </div>
+        <footer>
+            © 2026 國中生物共用題庫遊戲大廳 bio-games · 專為國中 7-8 年級生物教學打造
+        </footer>
+    </div>
 
-          <!-- 遊戲 4: 樂透大冒險 RPG -->
-          <div class="game-card card-rpg">
-            <div class="card-badge bg-purple">重磅推薦</div>
-            <div class="card-icon">🗡️</div>
-            <h3>樂透大冒險：生物勇者傳奇</h3>
-            <p class="card-desc">勇者擊敗史萊姆與三眼大魔王 Boss！營地購買神兵利器，解救夥伴樂樂🐶與布丁🐱，含 Google Classroom 防偽認證碼與心得填寫！</p>
-            <div class="card-tags">
-              <span>🗡️ RPG三關冒險</span>
-              <span>🏕️ 裝備升級商店</span>
-              <span>🐶🐱 夥伴護盾技能</span>
+    <!-- 課堂計時器 Modal -->
+    <div class="modal" id="timer-modal">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--text-dark);">⏱️ 課堂專注計時器</h3>
+            <div class="timer-display" id="timer-text">03:00</div>
+            
+            <div class="timer-presets">
+                <button class="preset-btn" onclick="setTimerSeconds(60)">1 分鐘</button>
+                <button class="preset-btn" onclick="setTimerSeconds(180)">3 分鐘</button>
+                <button class="preset-btn" onclick="setTimerSeconds(300)">5 分鐘</button>
+                <button class="preset-btn" onclick="setTimerSeconds(600)">10 分鐘</button>
             </div>
-            <div class="card-actions">
-              <a href="rpg/index.html?v=2.7" class="btn-play btn-purple">🗡️ 直接進入冒險</a>
-            </div>
-          </div>
 
-          <!-- 遊戲 5: 植物大戰殭屍 細胞防衛戰 -->
-          <div class="game-card card-pvz">
-            <div class="card-badge bg-green">最新強檔</div>
-            <div class="card-icon">🌱</div>
-            <h3>植物大戰殭屍：細胞防衛戰</h3>
-            <p class="card-desc">答對題目賺陽光部署胞器植物！巨型觸控按鈕免拖曳、讀題10%龜速緩速防焦慮，12分鐘波次防衛與美式卡通防偽證書！</p>
-            <div class="card-tags">
-              <span>🌱 5路細胞防線</span>
-              <span>🐢 讀題10%龜速緩速</span>
-              <span>📜 PVZ-7712防偽證書</span>
+            <div class="timer-controls">
+                <button class="t-btn t-btn-start" id="t-toggle-btn" onclick="toggleTimer()">🚀 開始</button>
+                <button class="t-btn t-btn-reset" onclick="resetTimer()">🔄 重置</button>
+                <button class="t-btn" style="background:#e2e8f0; color:#475569;" onclick="closeTimerModal()">關閉</button>
             </div>
-            <div class="card-actions">
-              <a href="pvz/index.html" class="btn-play btn-green">🌱 直接進入防衛</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 6: 生物大釣手 黃金深海大捕撈 -->
-          <div class="game-card card-fishing">
-            <div class="card-badge bg-gold">最新登場</div>
-            <div class="card-icon">🎣</div>
-            <h3>生物大釣手：黃金深海大捕撈</h3>
-            <p class="card-desc">經典黃金礦工擺盪吊爪！結合磁吸助瞄、2.5秒靜止讀題聲納與抓錯魚逃跑機制，全關卡解鎖 Google Classroom 防偽研究員證書！</p>
-            <div class="card-tags">
-              <span>🎣 擺盪機械爪</span>
-              <span>🧲 磁吸助瞄</span>
-              <span>📜 FISH-8831防偽證書</span>
-            </div>
-            <div class="card-actions">
-              <a href="fishing/index.html?v=1.0" class="btn-play btn-gold">🎣 直接進入捕撈</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 7: 生物大墜落 下樓梯 -->
-          <div class="game-card card-shaft">
-            <div class="card-badge bg-cyan">最新第七款</div>
-            <div class="card-icon">🧬</div>
-            <h3>生物大墜落：細胞深淵下樓梯</h3>
-            <p class="card-desc">經典下樓梯跑酷！28% 子彈時間二選一命運階梯、iPad 雙側觸控盲操、深淵熱氣流救援與 Google Classroom 防偽通關證書！</p>
-            <div class="card-tags">
-              <span>🪜 28%子彈時間</span>
-              <span>🌪️ 深淵熱氣流救援</span>
-              <span>📜 SHAFT-9912防偽證書</span>
-            </div>
-            <div class="card-actions">
-              <a href="shaft/index.html?v=5.7" class="btn-play btn-cyan">🧬 直接進入下樓梯</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 8: 生物小精靈塔防 微觀免疫大作戰 -->
-          <div class="game-card card-pacman">
-            <div class="card-badge bg-indigo">重磅 V2.0</div>
-            <div class="card-icon">👾</div>
-            <h3>生物小精靈塔防：微觀免疫大作戰</h3>
-            <p class="card-desc">21x15 超大雙倍迷宮！三大漸進關卡、動態偽足巨噬細胞、冠狀刺突病毒、B細胞特異抗體砲塔、PAC-8812 防偽證書與課堂英雄榜！</p>
-            <div class="card-tags">
-              <span>🗺️ 21x15 三大關卡</span>
-              <span>📜 PAC-8812防偽證書</span>
-              <span>🏆 課堂英雄排行榜</span>
-            </div>
-            <div class="card-actions">
-              <a href="pacman/index.html?v=2.0" class="btn-play btn-indigo">👾 直接進入塔防 V2.0</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 9: 生物星際大逃亡 逃離黑洞 -->
-          <div class="game-card card-blackhole">
-            <div class="card-badge bg-cyan">最新 V1.0</div>
-            <div class="card-icon">🚀</div>
-            <h3>生物星際大逃亡：逃離黑洞</h3>
-            <p class="card-desc">黑洞動態引力追擊！Kahoot 4 色符號答題、5秒過載冷卻防盲猜、雙軌躍遷進度與黑盒子觀念修復日誌！</p>
-            <div class="card-tags">
-              <span>🌌 黑洞動態追逐</span>
-              <span>⚡ 5秒過載防盲猜</span>
-              <span>📜 黑盒子觀念檢討</span>
-            </div>
-            <div class="card-actions">
-              <a href="blackhole/index.html?v=1.0" class="btn-play btn-purple">🚀 直接進入逃離黑洞</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 10: 生物小蜜蜂 星際防衛隊 -->
-          <div class="game-card card-defender">
-            <div class="card-badge bg-green">最新 V2.0</div>
-            <div class="card-icon">🐝</div>
-            <h3>生物小蜜蜂：星際防衛隊</h3>
-            <p class="card-desc">經典 Space Invaders 街機戰鬥！A/B/C/D 直覺鎖定雷射發射、無限子彈連擊、錯題說明自動暫停與一鍵複製 Google Classroom 防偽證書！</p>
-            <div class="card-tags">
-              <span>🐝 經典小蜜蜂街機</span>
-              <span>🎯 A/B/C/D鎖定雷射</span>
-              <span>📋 複製防偽成績單</span>
-            </div>
-            <div class="card-actions">
-              <a href="defender/index.html?v=2.0" class="btn-play btn-green">🐝 直接進入小蜜蜂 V2.0</a>
-            </div>
-          </div>
-
         </div>
-      </section>
+    </div>
 
-      <!-- 👨‍🏫 教師派發與 QR Code 產生器面板 -->
-      <section class="dispatch-section">
-        <div class="dispatch-card">
-          <h2>👨‍🏫 教師一鍵課堂派發與 QR Code 產生器</h2>
-          <p class="dispatch-subtitle">設定好單元與模式後，生成二維碼供學生使用 iPad / 手機掃碼直接進入對應挑戰！</p>
+    <script>
+        const fallbackGames = [
+            {
+                "id": "jungle_escape",
+                "title": "侏羅紀叢林逃生記",
+                "category": "shared",
+                "badgeText": "熱門推薦",
+                "badgeColor": "#27ae60",
+                "icon": "🦖",
+                "description": "探險隊在叢林中避開暴龍爪痕、攀爬藤蔓升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。",
+                "tags": ["👥 小組輪流", "🖥️ 投影主持", "📋 錯題戰報 TXT"],
+                "btnText": "🚀 直接進入遊戲",
+                "btnColor": "#27ae60",
+                "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+            },
+            {
+                "id": "zootopia_monopoly",
+                "title": "動物方城市生物大富翁",
+                "category": "shared",
+                "badgeText": "熱烈迴響",
+                "badgeColor": "#d35400",
+                "icon": "🐰",
+                "description": "茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！",
+                "tags": ["🎲 隨機抽籤", "🏠 答題蓋房", "✨ 閃亮機會"],
+                "btnText": "🎲 直接進入遊戲",
+                "btnColor": "#d35400",
+                "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+            },
+            {
+                "id": "mario_stage",
+                "title": "超級馬力歐生物闖關",
+                "category": "shared",
+                "badgeText": "熱門登場",
+                "badgeColor": "#c0392b",
+                "icon": "🍄",
+                "description": "冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼截圖繳交！",
+                "tags": ["🏃 4大關卡闖關", "🪙 金幣積累", "📜 GC 截圖繳交"],
+                "btnText": "🍄 直接進入遊戲",
+                "btnColor": "#c0392b",
+                "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+            }
+        ];
 
-          <div class="dispatch-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="selectGame">1. 選擇遊戲或工具：</label>
-                <select id="selectGame" class="styled-select">
-                  <option value="defender/index.html">🐝 生物小蜜蜂：星際防衛隊 (Bio Defender)</option>
-                  <option value="blackhole/index.html">🚀 生物星際大逃亡：逃離黑洞 (Bio-Blackhole Escape)</option>
-                  <option value="pacman/index.html">👾 生物小精靈塔防：微觀免疫大作戰 (Bio-Pacman)</option>
-                  <option value="fishing/index.html">🎣 生物大釣手：黃金深海大捕撈 (Bio-Fishing)</option>
-                  <option value="shaft/index.html">🧬 生物大墜落：細胞深淵下樓梯 (Bio-Shaft)</option>
-                  <option value="pvz/index.html">🌱 植物大戰殭屍：細胞防衛戰 (PVZ)</option>
-                  <option value="rpg/index.html">🗡️ 樂透大冒險：生物勇者傳奇 (RPG)</option>
-                  <option value="jurassic/index.html">🦖 侏羅紀叢林逃生記</option>
-                  <option value="monopoly/index.html">🐰 動物方城市大富翁</option>
-                  <option value="mario/index.html">🍄 超級馬力歐生物闖關</option>
-                  <option value="timer/index.html">⏱️ 課堂專注計時器 (Timer)</option>
-                </select>
-              </div>
+        let allGamesData = [];
 
-              <div class="form-group">
-                <label for="selectUnit">2. 選擇生物題庫單元：</label>
-                <select id="selectUnit" class="styled-select">
-                  <option value="">載入單元清單中...</option>
-                </select>
-              </div>
-            </div>
+        async function loadGames() {
+            try {
+                let res = await fetch('games.json');
+                if (res.ok) {
+                    allGamesData = await res.json();
+                } else {
+                    throw new Error("HTTP load error");
+                }
+            } catch (e) {
+                console.log("使用內嵌備用遊戲清單");
+                allGamesData = fallbackGames;
+            }
+            renderGames();
+        }
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="selectMode">3. 遊玩模式：</label>
-                <select id="selectMode" class="styled-select">
-                  <option value="group-tablet">👥 各組平板輪流競賽</option>
-                  <option value="projector">🖥️ 全班大螢幕投影主持</option>
-                  <option value="solo">🧑‍🚀 個人單機自主挑戰</option>
-                </select>
-              </div>
+        function renderGames() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
 
-              <div class="form-group checkbox-group">
-                <label class="toggle-label">
-                  <input type="checkbox" id="checkTimerOff">
-                  <span class="toggle-custom"></span>
-                  <strong>🧩 特教友善模式 (`timer=off`)</strong>
-                </label>
-                <small class="help-text">取消答題時間限制，適合資源班及需無壓力思考的學生。</small>
-              </div>
-            </div>
+            allGamesData.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
 
-            <div class="dispatch-buttons">
-              <button id="btnGenerateQR" class="btn-dispatch">📱 生成派發 QR Code 與網址</button>
-              <button id="btnCopyUrl" class="btn-dispatch btn-secondary">🔗 複製派發網址</button>
-            </div>
+                const tagsHtml = game.tags.map(t => `<span class="tag-pill">${t}</span>`).join('');
 
-            <!-- QR Code 與網址顯示區 -->
-            <div id="qrResultArea" class="qr-result-area hidden">
-              <div class="qr-code-box">
-                <div id="qrcode"></div>
-                <p class="qr-hint">請學生開啟相機或掃描器對準二維碼即可開始</p>
-              </div>
-              <div class="url-box">
-                <label>派發網址：</label>
-                <input type="text" id="generatedUrlInput" readonly>
-                <a id="btnDirectLaunch" href="#" target="_blank" class="btn-launch-link">🚀 以此設定開啟遊戲</a>
-              </div>
-            </div>
+                card.innerHTML = `
+                    <div class="card-badge" style="background-color: ${game.badgeColor}">${game.badgeText}</div>
+                    <div class="card-icon">${game.icon}</div>
+                    <h3 class="card-title">${game.title}</h3>
+                    <div class="card-desc">${game.description}</div>
+                    <div class="card-tags">${tagsHtml}</div>
+                    <a class="play-btn" href="${game.url}" style="background-color: ${game.btnColor}">${game.btnText}</a>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-          </div>
-        </div>
-      </section>
+        /* --- 課堂計時器邏輯 --- */
+        let timerSeconds = 180;
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let audioCtx = null;
 
-      <!-- 題庫索引列表與簡介 -->
-      <section class="manifest-overview-section">
-        <h2>📚 國中七年級生物中央共用題庫索引</h2>
-        <div class="unit-badges-grid" id="unitBadgesGrid">
-          <!-- 由 JS 動態繪製 -->
-        </div>
-      </section>
-    </main>
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const s = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-text').innerText = `${m}:${s}`;
+        }
 
-    <footer class="lobby-footer">
-      <p>bio-games 國中生物網頁遊戲平台 &copy; 2026 | 專為 GitHub Pages 部署設計 | 相容 Windows, iPad & 觸控大螢幕</p>
-    </footer>
-  </div>
+        function setTimerSeconds(sec) {
+            pauseTimer();
+            timerSeconds = sec;
+            updateTimerDisplay();
+        }
 
-  <script src="lobby.js"></script>
+        function toggleTimer() {
+            if (isTimerRunning) pauseTimer();
+            else startTimer();
+        }
+
+        function startTimer() {
+            isTimerRunning = true;
+            document.getElementById('t-toggle-btn').innerText = "⏸️ 暫停";
+            document.getElementById('t-toggle-btn').className = "t-btn t-btn-pause";
+
+            timerInterval = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    pauseTimer();
+                    playAlarmTone();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('t-toggle-btn').innerText = "🚀 開始";
+            document.getElementById('t-toggle-btn').className = "t-btn t-btn-start";
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = 180;
+            updateTimerDisplay();
+        }
+
+        function playAlarmTone() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                let osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 1.0);
+            } catch(e){}
+        }
+
+        function openTimerModal() { document.getElementById('timer-modal').style.display = 'flex'; }
+        function closeTimerModal() { document.getElementById('timer-modal').style.display = 'none'; }
+
+        loadGames();
+    </script>
 </body>
 </html>
