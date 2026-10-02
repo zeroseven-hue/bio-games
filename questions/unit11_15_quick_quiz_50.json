@@ -1,0 +1,716 @@
+{
+  "unitId": "units11_15_quick_quiz_50",
+  "unitTitle": "Unit 11～15 快問快答（50題）",
+  "quizId": "units11_15_quick_quiz_50",
+  "quizTitle": "國中生物 Unit 11～15 快問快答",
+  "description": "每單元 10 題，共 50 題；包含是非題與二選一題。",
+  "questionCount": 50,
+  "selection": {
+    "units": 5,
+    "questionsPerUnit": 10,
+    "trueFalseCount": 30,
+    "twoChoiceCount": 20
+  },
+  "questions": [
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "光合作用的主要器官是植物的葉片。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "綠色植物的葉片富含葉肉細胞與葉綠體，是進行光合作用合成葡萄糖的主要器官。",
+      "id": 1
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 2,
+      "type": "two_choice",
+      "question": "光合作用中負責吸收太陽能的色素與胞器是？",
+      "options": [
+        "葉綠素（葉綠體）",
+        "呼吸酵素（粒線體）"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "葉綠體內的葉綠素能吸收太陽光能，驅動光合作用製造有機物。",
+      "id": 2
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "實驗中滴加「碘液」主要是用來檢測哪一種養分的存在？",
+      "options": [
+        "澱粉",
+        "葡萄糖"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "黃褐色的碘液遇到澱粉會轉變為藍黑色；本氏液加熱則用來檢測葡萄糖等還原糖。",
+      "id": 3
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 4,
+      "type": "true_false",
+      "question": "光合作用實驗中，將葉片放入酒精中隔水加熱，目的是溶解出葉綠素以利觀察顏色變化。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "酒精能溶解葉綠素使葉片脫色變白，避免綠色干擾後續碘液呈色的觀察。",
+      "id": 4
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "當保衛細胞吸水膨脹時，氣孔通常會產生何種變化？",
+      "options": [
+        "張開",
+        "閉合"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "保衛細胞吸水膨脹時細胞彎曲，使中央的氣孔張開以利氣體交換與蒸散作用。",
+      "id": 5
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "綠色植物行光合作用釋放出的氧氣主要來自於「水」的分解。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "中",
+      "explanation": "光合作用光反應階段中，水分子吸收光能被分解產生氧氣並釋放到大氣中。",
+      "id": 6
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 7,
+      "type": "two_choice",
+      "question": "多數雙子葉植物葉片表皮上的成對保衛細胞通常呈現何種形狀？",
+      "options": [
+        "腎形",
+        "啞鈴形"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "雙子葉植物保衛細胞多呈腎形（半月形）；禾本科單子葉植物常呈啞鈴形。",
+      "id": 7
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "洋蔥鱗葉表皮細胞含有大量的葉綠體，能在陽光下旺盛行光合作用。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "洋蔥鱗葉部位生長於地下，其表皮細胞不含葉綠體，無法行光合作用。",
+      "id": 8
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 9,
+      "type": "true_false",
+      "question": "植物葉片的葉肉細胞含有大量葉綠體，是進行光合作用的主要部位。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "葉肉組織位於上下表皮之間，細胞富含葉綠體，為光合作用最旺盛的場所。",
+      "id": 9
+    },
+    {
+      "unitId": "unit11",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "在葉片上下表皮塗抹凡士林封閉氣孔後，會阻礙二氧化碳進入而降低光合作用速率。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "氣孔是氣體進出的通道，封閉氣孔會使光合作用原料二氧化碳無法補充，降低反應速率。",
+      "id": 10
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "人體消化系統中的食道與大腸皆不具有分泌消化酵素的功能。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "食道與大腸不分泌消化酵素，食道僅負責運輸食物，大腸主要吸收水分與形成排遺。",
+      "id": 11
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 2,
+      "type": "two_choice",
+      "question": "胃液中的強酸性鹽酸環境，最適宜下列哪一種消化酵素發揮活性？",
+      "options": [
+        "胃蛋白酶",
+        "唾液澱粉酶"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "胃蛋白酶在強酸（pH 1.5~2.0）環境下活性最高；唾液澱粉酶在酸性環境中會失去活性。",
+      "id": 12
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "人體消化道中分解食物與吸收養分、水分的最主要部位是？",
+      "options": [
+        "小腸",
+        "大腸"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "小腸長度最長且內壁有絨毛，是消化化學反應與養分、水分吸收最主要的器官。",
+      "id": 13
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 4,
+      "type": "true_false",
+      "question": "膽汁是由膽囊製造並分泌的消化液。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "中",
+      "explanation": "膽汁是由「肝臟」製造，暫時儲存於「膽囊」，再經由膽管注入小腸。",
+      "id": 14
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 5,
+      "type": "true_false",
+      "question": "膽汁不含任何消化酵素，但能將大顆粒脂質乳化為小顆粒以協助消化。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "膽汁中的膽鹽能乳化脂質增加表面積，利於胰液中的脂酶進行化學分解。",
+      "id": 15
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "胰液含有能同時消化醣類、蛋白質與脂質等多種消化酵素。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "胰腺分泌的胰液是功能最全的消化液，含有澱粉酶、蛋白酶與脂酶。",
+      "id": 16
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 7,
+      "type": "two_choice",
+      "question": "小腸內壁表面具有許多微小的絨毛構造，其生理上的主要優勢為？",
+      "options": [
+        "大幅增加吸收養分的表面積",
+        "阻擋細菌侵入血液"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "小腸內壁的環狀皺褶與無數絨毛構造，極大地擴大了接觸與吸收養分的表面積。",
+      "id": 17
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "人體雖然無法消化吸收纖維素，但適量攝取纖維素能促進腸道蠕動預防便秘。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "膳食纖維能增加糞便體積並刺激腸道肌肉蠕動，維持消化道健康。",
+      "id": 18
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 9,
+      "type": "two_choice",
+      "question": "當唾液澱粉酶隨食物吞入強酸性的胃中時，其消化能力會產生何種變化？",
+      "options": [
+        "失去活性停止消化",
+        "活性增強加速分解"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "唾液澱粉酶適合中性環境，胃酸會使其變性並失去分解澱粉的功能。",
+      "id": 19
+    },
+    {
+      "unitId": "unit12",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "胃壁能分泌黏液覆蓋胃黏膜，保護胃壁不被強酸性胃液及胃蛋白酶自我消化。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "胃黏膜表面的黏液屏障能阻隔鹽酸與蛋白酶直接接觸並侵蝕胃壁組織。",
+      "id": 20
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "植物的木質部主要負責將根部吸收的水分與無機鹽，由下往上單向運輸至莖與葉。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "木質部死細胞構成死管構造，專門單向向上運輸水分及溶於水中的礦物質。",
+      "id": 21
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 2,
+      "type": "true_false",
+      "question": "韌皮部負責運輸光合作用產生的蔗糖等有機養分，其輸送方向可依植物需要進行雙向運輸。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "韌皮部可將葉片製造的糖類向上輸送到頂芽或向下輸送到根部儲存。",
+      "id": 22
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "樹木遭遇環狀剝皮移除樹皮後，最終導致樹木死亡的主要原因為何？",
+      "options": [
+        "韌皮部被破壞，根部缺乏養分而餓死",
+        "木質部被破壞，葉子缺乏水分而乾枯"
+      ],
+      "answer": 0,
+      "difficulty": "中",
+      "explanation": "樹皮包含韌皮部，環狀剝皮中斷了養分向下運輸到根部的路徑，根部餓死後無法吸水導致整株死亡。",
+      "id": 23
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 4,
+      "type": "true_false",
+      "question": "木本植物莖部的「年輪」，主要是因為形成層在四季不同氣候下產生的木質部細胞大小與壁厚不同所致。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "春夏生長的木質部細胞大而壁薄（早材，顏色淺）；秋冬生長細胞小而壁厚（晚材，顏色深），形成交替紋路。",
+      "id": 24
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "促使高大樹木將水分自根部一路拉升至幾十公尺高樹梢的最主要動力是？",
+      "options": [
+        "葉片的蒸散作用",
+        "根部的呼吸作用"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "葉片氣孔蒸散水分產生強大的拉力（蒸散拉力），是高大植物水分上升的最主要動力。",
+      "id": 25
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 6,
+      "type": "two_choice",
+      "question": "雙子葉植物（如向日葵）莖部的維管束在橫切面上呈現何種排列方式？",
+      "options": [
+        "環狀排列",
+        "散生排列"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "雙子葉植物莖維管束呈環狀排列且具形成層；單子葉植物（如玉米）維管束為散生排列。",
+      "id": 26
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 7,
+      "type": "true_false",
+      "question": "維管束形成層細胞向內分裂產生新生韌皮部，向外分裂產生新生木質部。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "中",
+      "explanation": "形成層向「內」分裂產生新的木質部，向「外」分裂產生新的韌皮部。",
+      "id": 27
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "根毛是根部表皮細胞向外突出形成的構造，能大幅增加吸收水分與無機鹽的表面積。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "根毛由單一表皮細胞延伸而成，增加與土壤接觸面積，有利於水及無機鹽吸收。",
+      "id": 28
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 9,
+      "type": "two_choice",
+      "question": "移植樹木時常常剪去部分枝葉，主要目的為？",
+      "options": [
+        "減少水分蒸散以提高存活率",
+        "增加光合作用吸收陽光"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "剪去枝葉可減少葉片蒸散面積，防止移植初期受損根部吸水不足導致樹木乾枯。",
+      "id": 29
+    },
+    {
+      "unitId": "unit13",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "向日葵莖浸泡紅墨水後，切開橫切面可觀察到位於維管束內側的木質部被染成紅色。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "紅墨水隨水分由木質部向上運輸，雙子葉植物木質部位於維管束內側，故被染紅。",
+      "id": 30
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "哺乳動物成熟的紅血球呈雙凹圓盤狀，且細胞內不具有細胞核。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "成熟紅血球無細胞核，雙凹圓盤狀可增加表面積並利於擠壓通過微血管。",
+      "id": 31
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 2,
+      "type": "two_choice",
+      "question": "負責人體免疫防禦、能進行變形運動穿出微血管吞噬病原體的血球是？",
+      "options": [
+        "白血球",
+        "紅血球"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "白血球具有細胞核，能伸出偽足進行變形運動並執行吞噬作用。",
+      "id": 32
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "血液中主要協助血液凝固、防止血管破裂時失血過多的成分是？",
+      "options": [
+        "血小板",
+        "血漿"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "血小板是細胞碎片，當血管受損時能釋放凝血因子協助血液凝固。",
+      "id": 33
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 4,
+      "type": "true_false",
+      "question": "人體體循環中，左心室收縮將鮮紅色的充氧血壓入主動脈送往全身組織。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "左心室壁最厚，收縮力最強，負責將充氧血打入大動脈進行體循環。",
+      "id": 34
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 5,
+      "type": "true_false",
+      "question": "肺靜脈中流動的血液屬於暗紅色的缺氧血。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "中",
+      "explanation": "肺靜脈將經過肺部氣體交換後富含氧氣的「充氧血（鮮紅色）」送回左心房。",
+      "id": 35
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "正常情況下，對同一個人而言，心跳與動脈產生的脈搏次數是一致的。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "每次心室收縮壓出血液推動動脈壁血管搏動，故心搏與脈搏頻率相同。",
+      "id": 36
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 7,
+      "type": "true_false",
+      "question": "微血管管壁極薄，僅由單層細胞組成，且血流速度最慢，有利於血液與組織進行物質交換。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "微血管的薄壁與緩慢血流是人體進行養分、廢氣與氣體交換的專屬部位。",
+      "id": 37
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "靜脈管壁比動脈更厚且彈性更好，因此心臟壓出的血液在靜脈中血壓最高。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "中",
+      "explanation": "動脈管壁最厚、彈性最佳且血壓最高；靜脈管壁較薄且血壓較低，部分靜脈具有瓣膜。",
+      "id": 38
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 9,
+      "type": "two_choice",
+      "question": "當血液流經微血管時，部分血漿滲出微血管進入組織細胞間隙稱為？",
+      "options": [
+        "組織液",
+        "淋巴液"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "血漿滲出微血管至細胞間隙稱為組織液；組織液進入淋巴管後則稱為淋巴液。",
+      "id": 39
+    },
+    {
+      "unitId": "unit14",
+      "sourceQuestionId": 10,
+      "type": "two_choice",
+      "question": "淋巴管內的淋巴液經過過濾後，最終會注入心血管系統的何種血管中？",
+      "options": [
+        "靜脈",
+        "動脈"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "淋巴管最終匯集於大靜脈（如鎖骨下靜脈），使淋巴重新回到血液循環中。",
+      "id": 40
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "完整無損的皮膚與黏膜屬於人體阻擋病原體侵入的第一道物理防線。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "體表的皮膚與消化道、呼吸道黏膜是防範病原體入侵的最外層物理屏障。",
+      "id": 41
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 2,
+      "type": "two_choice",
+      "question": "傷口感染時產生的局部發炎反應（紅、熱、腫、痛），屬於人體防禦作用的第幾道防線？",
+      "options": [
+        "第二道防線（非專一性）",
+        "第三道防線（專一性）"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "發炎反應與吞噬作用屬於非專一性的第二道防線。",
+      "id": 42
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 3,
+      "type": "true_false",
+      "question": "胃液中的強酸性鹽酸能殺死隨食物吞下的大多數細菌，屬於第一道化學防線。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "胃酸、淚液及唾液中的溶菌酶屬於體表及分泌物形成的非專一性化學防線。",
+      "id": 43
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 4,
+      "type": "true_false",
+      "question": "由淋巴球（B細胞、T細胞）主導的第三道防線，能精準辨識特定抗原，屬於專一性免疫。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "第三道防線能辨識特定病原體的抗原，產生專一性抗體與細胞免疫，並建立記憶。",
+      "id": 44
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 5,
+      "type": "true_false",
+      "question": "被毒蛇咬傷時緊急注射的「抗蛇毒血清」含有現成抗體，屬於人工主動免疫。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "中",
+      "explanation": "直接注射現成抗體屬於「被動免疫」；注射疫苗刺激自身產生抗體才屬於「主動免疫」。",
+      "id": 45
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "施打疫苗是利用減毒或滅活的病原體碎片作為抗原，刺激人體產生專一性抗體與記憶細胞。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "疫苗提供抗原刺激免疫系統建立記憶，當未來真正病毒侵入時能快速清除。",
+      "id": 46
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 7,
+      "type": "true_false",
+      "question": "白血球進行吞噬作用時具有高度專一性，每一種吞噬細胞只能吞噬特定一種細菌。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "吞噬作用屬於非專一性防禦，對入侵的各種異物與病原體均進行包圍吞噬。",
+      "id": 47
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "器官移植手術後的排斥反應，是因為受者的免疫系統辨識出移植器官表面的異體抗原。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "受者淋巴球會將移植器官辨識為外來異物抗原並進行專一性攻擊，故需免疫抑制。",
+      "id": 48
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 9,
+      "type": "two_choice",
+      "question": "眼淚與唾液中含有何種化學成分，能分解某些細菌的細胞壁以達到防禦效果？",
+      "options": [
+        "溶菌酶",
+        "強鹽酸"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "淚液與唾液富含溶菌酶，能破壞細菌細胞壁；鹽酸則存在於胃液中。",
+      "id": 49
+    },
+    {
+      "unitId": "unit15",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "小明患過水痘後獲得長期免疫力，是因為體內保留了針對水痘病毒的專一性記憶細胞。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "感染後形成的記憶淋巴球能在體內長期留存，二次接觸時能極快速產生大量抗體。",
+      "id": 50
+    }
+  ]
+}

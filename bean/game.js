@@ -292,7 +292,7 @@ function saveProfile(className, seat, name) {
 // 動態載入題庫 Manifest
 async function loadManifestAndUnits() {
   const select = $('unitSelect');
-  select.innerHTML = '<option value="all">🌐 ALL (1~10單元 綜合隨機出題)</option>';
+  select.innerHTML = '<option value="all">🌐 ALL (1~15單元 綜合隨機出題)</option>';
 
   const manifestPaths = ['../questions/manifest.json', 'questions/manifest.json'];
   let manifestData = null;

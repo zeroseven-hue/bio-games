@@ -10,7 +10,13 @@
     { "id": "unit08", "title": "單元 08：尺度與微觀測量", "file": "unit08_scale_measurement.json" },
     { "id": "unit09", "title": "單元 09：養分、能量與食物檢驗", "file": "unit09_nutrients_energy.json" },
     { "id": "unit10", "title": "單元 10：酵素與酵素作用", "file": "unit10_enzymes.json" },
+    { "id": "unit11", "title": "單元 11：植物如何獲得養分", "file": "unit11_plant_nutrition.json" },
+    { "id": "unit12", "title": "單元 12：動物如何獲得養分", "file": "unit12_animal_nutrition.json" },
+    { "id": "unit13", "title": "單元 13：植物體內的運輸", "file": "unit13_plant_transport.json" },
+    { "id": "unit14", "title": "單元 14：人體的循環與運輸", "file": "unit14_human_circulation.json" },
+    { "id": "unit15", "title": "單元 15：人體的防禦作用", "file": "unit15_human_defense.json" },
     { "id": "quick45", "title": "⚡ 01. 科學方法 (45題快速作答版)", "file": "01_科學方法_45題快速作答版.json" },
-    { "id": "quick50", "title": "🔥 Unit 1～10 快問快答 (50題)", "file": "unit01_10_quick_quiz_50.json" }
+    { "id": "quick50_1_10", "title": "🔥 Unit 1～10 快問快答 (50題)", "file": "unit01_10_quick_quiz_50.json" },
+    { "id": "quick50_11_15", "title": "🔥 Unit 11～15 快問快答 (50題)", "file": "unit11_15_quick_quiz_50.json" }
   ]
 }
