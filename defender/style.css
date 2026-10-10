@@ -104,6 +104,7 @@ header {
   flex-direction: column;
   gap: 6px;
   z-index: 5;
+  max-height: 48vh;
 }
 .time-bar-bg {
   width: 100%;
@@ -119,11 +120,13 @@ header {
   transition: width 0.1s linear;
 }
 #q-text {
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: clamp(12px, 1.8vw, 15px);
+  line-height: 1.45;
   font-weight: 600;
-  min-height: 38px;
+  max-height: 85px;
+  overflow-y: auto;
   color: #ffffff;
+  padding-right: 4px;
 }
 .options-grid {
   display: grid;

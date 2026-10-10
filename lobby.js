@@ -137,9 +137,34 @@ function renderPublisherCards(publishers, container) {
 function initDispatchEvents() {
   const btnGenerateQR = document.getElementById("btnGenerateQR");
   const btnCopyUrl = document.getElementById("btnCopyUrl");
+  const selectQCount = document.getElementById("selectQCount");
+  const inputCustomQCount = document.getElementById("inputCustomQCount");
 
-  btnGenerateQR.addEventListener("click", generateDispatchUrlAndQR);
-  btnCopyUrl.addEventListener("click", copyDispatchUrl);
+  if (selectQCount && inputCustomQCount) {
+    selectQCount.addEventListener("change", () => {
+      if (selectQCount.value === "custom") {
+        inputCustomQCount.style.display = "inline-block";
+        inputCustomQCount.focus();
+      } else {
+        inputCustomQCount.style.display = "none";
+      }
+    });
+  }
+
+  if (btnGenerateQR) btnGenerateQR.addEventListener("click", generateDispatchUrlAndQR);
+  if (btnCopyUrl) btnCopyUrl.addEventListener("click", copyDispatchUrl);
+}
+
+function getSelectedQCount() {
+  const selectQCount = document.getElementById("selectQCount");
+  const inputCustom = document.getElementById("inputCustomQCount");
+  if (!selectQCount) return "10";
+
+  if (selectQCount.value === "custom") {
+    const val = parseInt(inputCustom ? inputCustom.value : "10", 10);
+    return (isNaN(val) || val <= 0) ? "10" : val.toString();
+  }
+  return selectQCount.value;
 }
 
 function buildDispatchUrl() {
@@ -147,12 +172,14 @@ function buildDispatchUrl() {
   const selectUnit = document.getElementById("selectUnit").value;
   const selectMode = document.getElementById("selectMode").value;
   const checkTimerOff = document.getElementById("checkTimerOff").checked;
+  const qcount = getSelectedQCount();
 
   const baseUrl = new URL(selectGame, window.location.href);
 
   if (selectUnit) baseUrl.searchParams.set("unit", selectUnit);
   if (selectMode) baseUrl.searchParams.set("mode", selectMode);
   if (checkTimerOff) baseUrl.searchParams.set("timer", "off");
+  if (qcount) baseUrl.searchParams.set("qcount", qcount);
 
   return baseUrl.toString();
 }

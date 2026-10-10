@@ -409,9 +409,11 @@ async function startMission() {
     document.getElementById("bigscreen-pad").style.display = "none";
   }
 
-  // 取得題庫資料並隨機抽取 10 題
+  // 取得題庫資料並隨機抽取題目 (依 URL ?qcount=N 或預設 10 題)
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetQCount = parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10;
   const pool = await fetchQuestionsForCurrentUnit();
-  gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 10);
+  gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, targetQCount);
 
   // 關閉開始選單
   document.getElementById("start-modal").style.display = "none";
@@ -440,6 +442,31 @@ function loadQuestion(idx) {
   }
 
   const q = gameQuestions[idx];
+  if (!q.shuffled) {
+    const origCorrectText = q.options[q.ans];
+    const rawList = [
+      { text: q.options.A },
+      { text: q.options.B },
+      { text: q.options.C },
+      { text: q.options.D }
+    ];
+    for (let i = rawList.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rawList[i], rawList[j]] = [rawList[j], rawList[i]];
+    }
+    q.options = {
+      A: rawList[0].text,
+      B: rawList[1].text,
+      C: rawList[2].text,
+      D: rawList[3].text
+    };
+    if (q.options.A === origCorrectText) q.ans = "A";
+    else if (q.options.B === origCorrectText) q.ans = "B";
+    else if (q.options.C === origCorrectText) q.ans = "C";
+    else if (q.options.D === origCorrectText) q.ans = "D";
+    q.shuffled = true;
+  }
+
   document.getElementById("q-text").textContent = `Q${idx + 1}. ${q.q}`;
   document.getElementById("opt-A").textContent = `A. ${q.options.A}`;
   document.getElementById("opt-B").textContent = `B. ${q.options.B}`;
@@ -887,6 +914,10 @@ function endMission() {
       (l.correct ? `✅ 正確` : `❌ 你的選擇: [${l.myAns || l.reason}]（正解: [${l.ans}]）`);
     listEl.appendChild(div);
   });
+
+  setTimeout(() => {
+    triggerSubmitModal();
+  }, 1000);
 }
 
 /* 一鍵複製防偽文字報告 */
@@ -930,6 +961,66 @@ function fallbackCopy(text) {
     alert("複製失敗，請直接螢幕截圖上傳。");
   }
   document.body.removeChild(textArea);
+}
+
+/* 🚀 直接一鍵發送成績至老師 GAS 試算表 */
+async function directSubmitToGAS() {
+  const btn = document.getElementById("btnDirectSubmitGAS");
+  if (!btn) return;
+
+  btn.disabled = true;
+  btn.innerText = "⏳ 正在傳送成績中...";
+
+  const gasUrl = "https://script.google.com/macros/s/AKfycbzDHUfJKbGtgfYM5a1PHpQzbW2JGZL3zFTh582r95vcOKupGRfZVa0ToHbbfX1MirzbbQ/exec";
+
+  const payload = {
+    gameTitle: "生物小蜜蜂：星際防衛隊 V2.0",
+    class: playerProfile.cls || "701",
+    seatOrGroup: `${playerProfile.seat || "01"}號`,
+    nameOrMembers: playerProfile.name || "學生",
+    score: score,
+    duration: "已完成挑戰",
+    mode: "individual",
+    timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })
+  };
+
+  try {
+    await fetch(gasUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    btn.innerText = "✅ 成績已成功傳送至老師試算表！";
+    btn.style.background = "linear-gradient(135deg, #16a34a, #15803d)";
+    alert(`🎉 傳送成功！\n\n【${payload.class}班 ${payload.seatOrGroup} ${payload.nameOrMembers}】\n得分：${score} 分，已自動登記至老師的 Google 試算表！`);
+  } catch (err) {
+    console.error("Submit error:", err);
+    btn.disabled = false;
+    btn.innerText = "❌ 傳送失敗，請點擊重試";
+    alert("網路傳送稍慢，請再按一次重試，或使用下方備用按鈕複製文字檔。");
+  }
+}
+
+function triggerSubmitModal() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
+
+  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
+    showScoreSubmitModal({
+      gameTitle: '生物小蜜蜂：星際防衛隊 V2.0',
+      score: score,
+      duration: '已完成挑戰',
+      initialClass: playerProfile.cls || '701',
+      initialSeat: playerProfile.seat || '01',
+      initialName: playerProfile.name || '',
+      onBonusChallenge: () => {
+        // 🔥 挑戰加碼 10 題：關閉視窗並重新載入 10 題！
+        initGame();
+      }
+    });
+  }
 }
 
 // 頁面載入初始化
