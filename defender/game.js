@@ -934,9 +934,46 @@ function fallbackCopy(text) {
     alert("複製失敗，請直接螢幕截圖上傳。");
   }
   document.body.removeChild(textArea);
-  setTimeout(() => {
-    triggerSubmitModal();
-  }, 1200);
+}
+
+/* 🚀 直接一鍵發送成績至老師 GAS 試算表 */
+async function directSubmitToGAS() {
+  const btn = document.getElementById("btnDirectSubmitGAS");
+  if (!btn) return;
+
+  btn.disabled = true;
+  btn.innerText = "⏳ 正在傳送成績中...";
+
+  const gasUrl = "https://script.google.com/macros/s/AKfycbzDHUfJKbGtgfYM5a1PHpQzbW2JGZL3zFTh582r95vcOKupGRfZVa0ToHbbfX1MirzbbQ/exec";
+
+  const payload = {
+    gameTitle: "生物小蜜蜂：星際防衛隊 V2.0",
+    class: playerProfile.cls || "701",
+    seatOrGroup: `${playerProfile.seat || "01"}號`,
+    nameOrMembers: playerProfile.name || "學生",
+    score: score,
+    duration: "已完成挑戰",
+    mode: "individual",
+    timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })
+  };
+
+  try {
+    await fetch(gasUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    btn.innerText = "✅ 成績已成功傳送至老師試算表！";
+    btn.style.background = "linear-gradient(135deg, #16a34a, #15803d)";
+    alert(`🎉 傳送成功！\n\n【${payload.class}班 ${payload.seatOrGroup} ${payload.nameOrMembers}】\n得分：${score} 分，已自動登記至老師的 Google 試算表！`);
+  } catch (err) {
+    console.error("Submit error:", err);
+    btn.disabled = false;
+    btn.innerText = "❌ 傳送失敗，請點擊重試";
+    alert("網路傳送稍慢，請再按一次重試，或使用下方備用按鈕複製文字檔。");
+  }
 }
 
 function triggerSubmitModal() {
@@ -944,10 +981,11 @@ function triggerSubmitModal() {
     showScoreSubmitModal({
       gameTitle: '生物小蜜蜂：星際防衛隊 V2.0',
       score: score,
-      duration: '已完成挑戰'
+      duration: '已完成挑戰',
+      initialClass: playerProfile.cls || '701',
+      initialSeat: playerProfile.seat || '01',
+      initialName: playerProfile.name || ''
     });
-  } else {
-    alert('成績上傳模組載入中，請稍後再試！');
   }
 }
 

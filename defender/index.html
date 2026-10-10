@@ -62,13 +62,28 @@
         <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 10px;">
           請輸入真實身分（座號需為 2 碼如 <code style="color:var(--accent-yellow);">05</code>，姓名請填寫真實姓名，不可使用暱稱或藝名）。
         </p>
-        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-          <input type="text" id="user-class" placeholder="班級 (如701)" style="width: 28%;" required />
-          <input type="text" id="user-seat" placeholder="座號 (2碼如05)" maxlength="2" style="width: 34%;" required />
-          <input type="text" id="user-name" placeholder="真實姓名 (勿填暱稱/藝名)" style="flex: 1;" required />
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+          <select id="user-class" class="styled-select" style="flex: 1; min-width: 100px;">
+            <option value="701">701 班</option><option value="702">702 班</option>
+            <option value="703">703 班</option><option value="704">704 班</option>
+            <option value="705">705 班</option><option value="706">706 班</option>
+            <option value="707">707 班</option><option value="708">708 班</option>
+            <option value="709">709 班</option><option value="710">710 班</option>
+          </select>
+
+          <select id="user-seat" class="styled-select" style="flex: 1; min-width: 90px;">
+            <option value="01">01 號</option><option value="02">02 號</option><option value="03">03 號</option><option value="04">04 號</option><option value="05">05 號</option>
+            <option value="06">06 號</option><option value="07">07 號</option><option value="08">08 號</option><option value="09">09 號</option><option value="10">10 號</option>
+            <option value="11">11 號</option><option value="12">12 號</option><option value="13">13 號</option><option value="14">14 號</option><option value="15">15 號</option>
+            <option value="16">16 號</option><option value="17">17 號</option><option value="18">18 號</option><option value="19">19 號</option><option value="20">20 號</option>
+            <option value="21">21 號</option><option value="22">22 號</option><option value="23">23 號</option><option value="24">24 號</option><option value="25">25 號</option>
+            <option value="26">26 號</option><option value="27">27 號</option><option value="28">28 號</option><option value="29">29 號</option><option value="30">30 號</option>
+          </select>
+
+          <input type="text" id="user-name" placeholder="真實姓名 (勿填暱稱)" style="flex: 1.5; min-width: 130px;" required />
         </div>
         <div style="font-size: 11px; color: #fbbf24; text-align: left; margin-bottom: 12px; line-height: 1.4;">
-          ⚠️ 提醒：防偽證書將登錄此真實身分與驗證碼，供教師核對成績！
+          ⚠️ 提醒：成績將自動登錄至老師雲端試算表！
         </div>
 
         <div style="text-align: left; margin-bottom: 12px;">
@@ -95,7 +110,7 @@
         <h2 style="color: var(--accent-yellow);">🎖️ 任務結算報告</h2>
         <div style="font-size: 15px; font-weight: bold; margin: 6px 0; color: #38bdf8;" id="end-rank">評級：達爾文特派員</div>
 
-        <!-- 防偽卡片 (供學生截圖/複製) -->
+        <!-- 防偽卡片 (供學生核對) -->
         <div class="cert-card" id="cert-card">
           <div class="watermark" id="cert-watermark">701 15號 王小明</div>
           <div>👤 防衛隊員：<strong id="cert-user" style="color: var(--accent-blue);">--</strong></div>
@@ -105,8 +120,11 @@
           <div>🔒 防偽序號：<code id="cert-hash" style="color: var(--accent-yellow); font-family: monospace;">--</code></div>
         </div>
 
-        <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 10px;">📋 一鍵複製防偽成績與驗證碼</button>
-        <button class="primary-btn" id="btnSubmitScoreModal" onclick="triggerSubmitModal()" style="margin-top: 10px; background: linear-gradient(135deg, #0284c7, #0369a1);">🚀 登錄成績至老師試算表</button>
+        <!-- 主按鈕：一鍵傳送至試算表 (大按鈕) -->
+        <button class="primary-btn" id="btnDirectSubmitGAS" onclick="directSubmitToGAS()" style="margin-top: 14px; font-size: 1.15rem; padding: 14px; background: linear-gradient(135deg, #0284c7, #0369a1); box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">🚀 一鍵送出成績至老師試算表</button>
+
+        <!-- 備用按鈕：複製文字 (小黃鈕) -->
+        <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 8px; font-size: 0.88rem; opacity: 0.85; padding: 8px;">📋 複製成績文字檔 (Classroom 備用)</button>
 
         <div style="margin-top: 12px; font-size: 12px; color: #94a3b8; text-align: left;">錯題回顧清單：</div>
         <div class="review-box" id="review-list"></div>
