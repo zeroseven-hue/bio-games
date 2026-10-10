@@ -887,6 +887,10 @@ function endMission() {
       (l.correct ? `✅ 正確` : `❌ 你的選擇: [${l.myAns || l.reason}]（正解: [${l.ans}]）`);
     listEl.appendChild(div);
   });
+
+  setTimeout(() => {
+    triggerSubmitModal();
+  }, 1000);
 }
 
 /* 一鍵複製防偽文字報告 */
@@ -930,6 +934,21 @@ function fallbackCopy(text) {
     alert("複製失敗，請直接螢幕截圖上傳。");
   }
   document.body.removeChild(textArea);
+  setTimeout(() => {
+    triggerSubmitModal();
+  }, 1200);
+}
+
+function triggerSubmitModal() {
+  if (typeof showScoreSubmitModal === 'function') {
+    showScoreSubmitModal({
+      gameTitle: '生物小蜜蜂：星際防衛隊 V2.0',
+      score: score,
+      duration: '已完成挑戰'
+    });
+  } else {
+    alert('成績上傳模組載入中，請稍後再試！');
+  }
 }
 
 // 頁面載入初始化
