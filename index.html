@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>國中生物網頁遊戲平台 - bio-games</title>
-  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="lobby.css?v=2.0">
   <!-- QRCode.js CDN for QR Code Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -22,9 +22,9 @@
     </header>
 
     <main class="lobby-main">
-      <!-- 遊戲卡片區域 (共用題庫 11 大遊戲) -->
+      <!-- 遊戲卡片區域 -->
       <section class="games-section">
-        <h2>🎮 課堂遊戲大廳 (共用題庫 11 大主題遊戲 ‧ 專注計時)</h2>
+        <h2>🎮 課堂遊戲大廳 (共用題庫主題遊戲 ‧ 專注計時)</h2>
         <div class="game-cards-grid">
 
           <!-- 遊戲 1: 侏羅紀逃生記 -->
@@ -187,19 +187,19 @@
             </div>
           </div>
 
-          <!-- 遊戲 11: 屁屁星人敲敲樂 小心打屁屁 -->
-          <div class="game-card card-butt">
-            <div class="card-badge bg-orange">最新 🍑</div>
-            <div class="card-icon">🍑</div>
-            <h3>屁屁星人敲敲樂：生物大作戰</h3>
-            <p class="card-desc">看準題目，敲擊正確答案的小新！鍵盤支援 A / B / C / D，挑戰全對獲得防偽證書與課堂英雄榜！</p>
+          <!-- 遊戲 11: 淘氣豆 生物敲敲研究所 -->
+          <div class="game-card card-bean">
+            <div class="card-badge bg-green">最新第十一款</div>
+            <div class="card-icon">🫘</div>
+            <h3>淘氣豆：生物敲敲研究所</h3>
+            <p class="card-desc">看準生物題目敲擊對應答案洞口的淘氣豆！Combo 連擊大錘升級、錯題觀念解析與 BEAN 防偽驗證碼證書！</p>
             <div class="card-tags">
-              <span>🍑 小心打屁屁敲敲樂</span>
-              <span>🔨 A/B/C/D 快捷鍵</span>
-              <span>📜 GC 防偽成績單</span>
+              <span>🫘 原創淘氣豆</span>
+              <span>🔨 Combo 錘子升級</span>
+              <span>📜 BEAN 防偽證書</span>
             </div>
             <div class="card-actions">
-              <a href="butt/index.html?v=1.0" class="btn-play btn-orange">🍑 直接進入敲敲樂</a>
+              <a href="bean/index.html?v=1.0" class="btn-play btn-green">🫘 直接進入敲敲研究所</a>
             </div>
           </div>
 
@@ -217,6 +217,7 @@
               <div class="form-group">
                 <label for="selectGame">1. 選擇遊戲或工具：</label>
                 <select id="selectGame" class="styled-select">
+                  <option value="bean/index.html">🫘 淘氣豆：生物敲敲研究所 (Bio-Bean)</option>
                   <option value="defender/index.html">🐝 生物小蜜蜂：星際防衛隊 (Bio Defender)</option>
                   <option value="blackhole/index.html">🚀 生物星際大逃亡：逃離黑洞 (Bio-Blackhole Escape)</option>
                   <option value="pacman/index.html">👾 生物小精靈塔防：微觀免疫大作戰 (Bio-Pacman)</option>
@@ -227,7 +228,6 @@
                   <option value="jurassic/index.html">🦖 侏羅紀叢林逃生記</option>
                   <option value="monopoly/index.html">🐰 動物方城市大富翁</option>
                   <option value="mario/index.html">🍄 超級馬力歐生物闖關</option>
-                  <option value="butt/index.html">🍑 屁屁星人敲敲樂 (小心打屁屁)</option>
                   <option value="timer/index.html">⏱️ 課堂專注計時器 (Timer)</option>
                 </select>
               </div>
@@ -284,9 +284,9 @@
 
       <!-- 題庫索引列表與簡介 -->
       <section class="manifest-overview-section">
-        <h2>📚 國中七年級生物中央共用題庫索引</h2>
-        <div class="unit-badges-grid" id="unitBadgesGrid">
-          <!-- 由 JS 動態繪製 -->
+        <h2>📚 國中七年級生物共用題庫索引</h2>
+        <div id="publisherSectionsContainer" class="publisher-sections-container">
+          <!-- 由 JS 動態繪製版本、上下學期與展開/收回卡片 -->
         </div>
       </section>
     </main>
@@ -296,6 +296,6 @@
     </footer>
   </div>
 
-  <script src="lobby.js"></script>
+  <script src="lobby.js?v=2.0"></script>
 </body>
 </html>

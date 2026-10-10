@@ -249,10 +249,12 @@ async function prepareQuestionPool() {
   let loaded = [];
   try {
     for (const u of selectedUnits) {
-      const res = await fetch(`../questions/${u}.json`);
+      const fetchPath = u.endsWith('.json') ? `../questions/${u}` : `../questions/${u}.json`;
+      const res = await fetch(fetchPath);
       if (res.ok) {
         const d = await res.json();
-        if (d.questions && Array.isArray(d.questions)) loaded.push(...d.questions);
+        const list = d.questions || (Array.isArray(d) ? d : []);
+        loaded.push(...list);
       }
     }
   } catch (err) {

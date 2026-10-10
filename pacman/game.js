@@ -259,7 +259,14 @@ async function loadManifestAndUnits() {
       unitSelect.appendChild(opt);
     });
 
-    if (allUnits.length > 0) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUnit = urlParams.get("unit");
+    const found = allUnits.find(u => u.file === targetUnit);
+
+    if (found) {
+      unitSelect.value = found.file;
+      await loadUnitQuestions(found.file);
+    } else if (allUnits.length > 0) {
       unitSelect.value = allUnits[0].file;
       await loadUnitQuestions(allUnits[0].file);
     } else {
