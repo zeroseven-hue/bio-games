@@ -368,7 +368,10 @@ function getQuestionsForSelectedUnit() {
     if (unitInfoText && selectedOpt) unitInfoText.innerText = `🌱 當前關卡：${selectedOpt.textContent}`;
   }
 
-  return shuffleArray(sourcePool).slice(0, TOTAL_QUESTIONS_PER_ROUND);
+  const urlParams = new URLSearchParams(window.location.search);
+  const qcountParam = parseInt(urlParams.get("qcount") || urlParams.get("count"));
+  const targetCount = (qcountParam && qcountParam > 0) ? qcountParam : TOTAL_QUESTIONS_PER_ROUND;
+  return shuffleArray(sourcePool).slice(0, targetCount);
 }
 
 // 初始化遊戲狀態

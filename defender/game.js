@@ -409,9 +409,11 @@ async function startMission() {
     document.getElementById("bigscreen-pad").style.display = "none";
   }
 
-  // 取得題庫資料並隨機抽取 10 題
+  // 取得題庫資料並隨機抽取題目 (依 URL ?qcount=N 或預設 10 題)
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetQCount = parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10;
   const pool = await fetchQuestionsForCurrentUnit();
-  gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, 10);
+  gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, targetQCount);
 
   // 關閉開始選單
   document.getElementById("start-modal").style.display = "none";

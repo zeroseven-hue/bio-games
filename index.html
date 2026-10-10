@@ -252,7 +252,24 @@
                 </select>
               </div>
 
-              <div class="form-group checkbox-group">
+              <div class="form-group">
+                <label for="selectQCount">4. 本次出題題數：</label>
+                <div style="display: flex; gap: 8px;">
+                  <select id="selectQCount" class="styled-select" style="flex: 1;">
+                    <option value="5">5 題 (快速隨堂複習)</option>
+                    <option value="10" selected>10 題 (標準課堂評量)</option>
+                    <option value="15">15 題 (進階課堂挑戰)</option>
+                    <option value="20">20 題 (完整綜合測驗)</option>
+                    <option value="25">25 題 (大考滿分挑戰)</option>
+                    <option value="custom">✏️ 自訂題數...</option>
+                  </select>
+                  <input type="number" id="inputCustomQCount" class="styled-input" value="10" min="1" max="100" style="width: 100px; display: none;" placeholder="題數">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group checkbox-group" style="margin-top: 4px;">
                 <label class="toggle-label">
                   <input type="checkbox" id="checkTimerOff">
                   <span class="toggle-custom"></span>

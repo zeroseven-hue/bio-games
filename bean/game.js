@@ -322,7 +322,7 @@ async function loadManifestAndUnits() {
 function checkUrlParams() {
   const p = new URLSearchParams(location.search);
   const paramUnit = p.get('unit');
-  const paramCount = p.get('count');
+  const paramCount = p.get('count') || p.get('qcount');
   const paramClass = p.get('class');
   const paramSeat = p.get('seat');
   const paramName = p.get('name');

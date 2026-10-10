@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 課堂學習進度</title>
+  <style>
+    :root {
+      --bg-main: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+      --card-bg: rgba(30, 41, 59, 0.9);
+      --border-color: rgba(56, 189, 248, 0.25);
+      --primary-blue: #38bdf8;
+      --accent-gold: #f59e0b;
+      --accent-green: #22c55e;
+      --accent-purple: #a855f7;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-inner-bg: rgba(15, 23, 42, 0.7);
+      --care-card-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.15));
+      --seat-submitted-bg: rgba(34, 197, 94, 0.15);
+      --seat-submitted-border: #22c55e;
+      --seat-submitted-text: #ffffff;
+      --seat-pending-bg: rgba(255, 255, 255, 0.04);
+      --seat-pending-border: rgba(255, 255, 255, 0.12);
+      --seat-absent-bg: rgba(245, 158, 11, 0.15);
+      --seat-absent-border: #f59e0b;
+      --seat-absent-text: #fbbf24;
+      --select-bg: #0f172a;
+      --shadow-style: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ☀️ 明亮主題風格 */
+    body.theme-light {
+      --bg-main: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --primary-blue: #0284c7;
+      --accent-gold: #d97706;
+      --accent-green: #16a34a;
+      --accent-purple: #9333ea;
+      --text-light: #0f172a;
+      --text-muted: #475569;
+      --card-inner-bg: #f8fafc;
+      --care-card-bg: linear-gradient(135deg, #f3e8ff 0%, #e0f2fe 100%);
+      --seat-submitted-bg: #dcfce7;
+      --seat-submitted-border: #16a34a;
+      --seat-submitted-text: #14532d;
+      --seat-pending-bg: #f1f5f9;
+      --seat-pending-border: #cbd5e1;
+      --seat-absent-bg: #fef3c7;
+      --seat-absent-border: #d97706;
+      --seat-absent-text: #92400e;
+      --select-bg: #ffffff;
+      --shadow-style: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-light);
+      min-height: 100vh;
+      padding: 20px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .container { max-width: 1240px; margin: 0 auto; }
+
+    /* 頂部列 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-style);
+    }
+
+    .header-title h1 {
+      font-size: 1.6rem;
+      color: var(--primary-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .styled-select, .styled-input {
+      background: var(--select-bg);
+      color: var(--primary-blue);
+      border: 2px solid var(--primary-blue);
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .styled-input {
+      width: 70px;
+      text-align: center;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-action:hover { transform: translateY(-2px); }
+
+    .btn-theme-toggle {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1.5px solid var(--border-color);
+      color: var(--text-light);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-score {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* 繳交進度卡片 */
+    .progress-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-style);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .progress-title { font-size: 1.15rem; font-weight: 800; }
+    .progress-stats { font-size: 1.15rem; font-weight: 900; }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 18px;
+      background: var(--card-inner-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      margin-bottom: 14px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      transition: width 0.5s ease;
+    }
+
+    /* 請假快速控制列 */
+    .absent-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-inner-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .absent-bar input {
+      flex: 1;
+      background: var(--select-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-light);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    /* 雙欄主面板 */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .panel-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow-style);
+    }
+
+    .panel-box h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: var(--primary-blue);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 正向獎勵 Top 5 榜 */
+    .top5-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .top5-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-inner-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px 18px;
+    }
+
+    .top5-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.1rem;
+    }
+
+    .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+    .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+    .rank-3 { background: linear-gradient(135deg, #b45309, #78350f); color: #fff; }
+    .rank-other { background: rgba(56, 189, 248, 0.2); color: var(--primary-blue); }
+
+    .top5-info { flex: 1; margin: 0 16px; }
+    .top5-info .name { font-weight: 800; font-size: 1.05rem; }
+    .top5-info .meta { font-size: 0.8rem; color: var(--text-muted); }
+    .top5-score { font-size: 1.25rem; font-weight: 900; color: var(--accent-green); }
+
+    /* 座號矩陣點名圖 */
+    .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+    }
+
+    .seat-card {
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .seat-card.submitted {
+      background: var(--seat-submitted-bg);
+      border: 1.5px solid var(--seat-submitted-border);
+      color: var(--seat-submitted-text);
+    }
+
+    .seat-card.pending {
+      background: var(--seat-pending-bg);
+      border: 1.5px dashed var(--seat-pending-border);
+      color: var(--text-muted);
+    }
+
+    .seat-card.absent {
+      background: var(--seat-absent-bg);
+      border: 1.5px solid var(--seat-absent-border);
+      color: var(--seat-absent-text);
+    }
+
+    .seat-num { font-size: 1.05rem; font-weight: 900; }
+    .seat-card.submitted .seat-num { color: var(--accent-green); }
+    .seat-card.pending .seat-num { color: var(--text-muted); }
+    .seat-card.absent .seat-num { color: var(--accent-gold); }
+
+    .seat-status-text { font-size: 0.8rem; font-weight: 700; margin-top: 4px; }
+
+    .private-score { font-size: 0.75rem; color: var(--accent-gold); margin-top: 2px; display: none; }
+    .show-scores .private-score { display: block; }
+  </style>
+</head>
+<body class="theme-dark">
+  <div class="container">
+    <!-- 頂部列 -->
+    <header class="header">
+      <div class="header-title">
+        <h1>🏆 課堂學習進度</h1>
+        <p>自訂各班人數 ‧ 請假標記 ‧ 學習點名儀表板</p>
+      </div>
+      <div class="header-controls">
+        <select class="styled-select" id="classFilter" onchange="onClassChange()">
+          <option value="701">701 班</option><option value="702">702 班</option>
+          <option value="703">703 班</option><option value="704">704 班</option>
+          <option value="705">705 班</option><option value="706">706 班</option>
+          <option value="707">707 班</option><option value="708">708 班</option>
+          <option value="709">709 班</option><option value="710">710 班</option>
+        </select>
+
+        <div style="display:flex; align-items:center; gap:6px; font-weight:800; font-size:0.9rem;">
+          <span>應到人數：</span>
+          <input type="number" class="styled-input" id="totalSeatsInput" value="30" min="1" max="50" onchange="saveClassConfig()" />
+          <span>人</span>
+        </div>
+
+        <button class="btn-theme-toggle" id="btnThemeToggle" onclick="toggleTheme()">☀️ 明亮色彩模式</button>
+        <button class="btn-toggle-score" id="btnToggleScore" onclick="toggleScoreVisibility()">👁️ 導師分數切換</button>
+        <button class="btn-action" onclick="loadData()">🔄 刷新資料</button>
+      </div>
+    </header>
+
+    <!-- 繳交進度卡片 -->
+    <div class="progress-card">
+      <div class="progress-header">
+        <div class="progress-title" id="progressClassTitle">701 班 課堂挑戰參與率</div>
+        <div class="progress-stats">
+          已完成：<span style="color:var(--accent-green)" id="submittedCount">0</span> / 
+          實到應交：<span style="color:var(--primary-blue)" id="actualRequiredCount">30</span> 人 
+          (<span style="color:var(--accent-gold)" id="progressPercent">0%</span>)
+        </div>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBarFill"></div></div>
+
+      <!-- 請假輸入框列 -->
+      <div class="absent-bar">
+        <span>🏖️ 本班今日請假座號：</span>
+        <input type="text" id="absentSeatsInput" placeholder="請輸入請假座號 (例如：05, 12)，或直接點擊下方座號卡" onchange="saveClassConfig(); renderDashboard();" />
+        <span style="font-size:0.8rem; color:var(--text-muted);">(將自動扣除應交人數)</span>
+      </div>
+    </div>
+
+    <!-- 雙欄主面板 -->
+    <div class="main-grid">
+      <!-- 左側：正向表揚 Top 5 榮譽榜 -->
+      <div class="panel-box">
+        <h2>🎉 學習榮譽英雄榜 (Top 5)</h2>
+        <div class="top5-list" id="top5List"><div style="text-align:center; color:var(--text-muted); padding:30px;">載入榮譽榜中...</div></div>
+      </div>
+
+      <!-- 右側：座號點名矩陣 -->
+      <div class="panel-box" id="matrixPanel">
+        <h2>
+          <span>🔢 全班完成狀態圖 (點擊座號可標記請假)</span>
+          <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">點擊可切換請假狀態</span>
+        </h2>
+        <div class="seat-grid" id="seatMatrixGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let rawRecords = [];
+    let isScoreVisible = false;
+    let currentTheme = localStorage.getItem('gas_dashboard_theme') || 'dark';
+
+    function initTheme() {
+      if (currentTheme === 'light') {
+        document.body.classList.remove('theme-dark');
+        document.body.classList.add('theme-light');
+        document.getElementById('btnThemeToggle').textContent = '🌙 深色夜間模式';
+      } else {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('theme-dark');
+        document.getElementById('btnThemeToggle').textContent = '☀️ 明亮色彩模式';
+      }
+    }
+
+    function toggleTheme() {
+      currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+      localStorage.setItem('gas_dashboard_theme', currentTheme);
+      initTheme();
+    }
+
+    function onClassChange() {
+      loadClassConfig();
+      renderDashboard();
+    }
+
+    function loadClassConfig() {
+      const cls = document.getElementById('classFilter').value;
+      const savedTotal = localStorage.getItem(`gas_cfg_${cls}_total`) || '30';
+      const savedAbsent = localStorage.getItem(`gas_cfg_${cls}_absent`) || '';
+      document.getElementById('totalSeatsInput').value = savedTotal;
+      document.getElementById('absentSeatsInput').value = savedAbsent;
+    }
+
+    function saveClassConfig() {
+      const cls = document.getElementById('classFilter').value;
+      const total = document.getElementById('totalSeatsInput').value;
+      const absent = document.getElementById('absentSeatsInput').value;
+      localStorage.setItem(`gas_cfg_${cls}_total`, total);
+      localStorage.setItem(`gas_cfg_${cls}_absent`, absent);
+    }
+
+    function toggleAbsentSeat(seatNumStr) {
+      const absentInput = document.getElementById('absentSeatsInput');
+      let currentList = absentInput.value.split(/[,，\s]+/).filter(Boolean).map(s => String(s).padStart(2, '0'));
+
+      if (currentList.includes(seatNumStr)) {
+        currentList = currentList.filter(s => s !== seatNumStr);
+      } else {
+        currentList.push(seatNumStr);
+      }
+
+      absentInput.value = currentList.sort().join(', ');
+      saveClassConfig();
+      renderDashboard();
+    }
+
+    function loadData() {
+      google.script.run
+        .withSuccessHandler(data => {
+          rawRecords = data.records || [];
+          renderDashboard();
+        })
+        .withFailureHandler(err => console.error(err))
+        .getScoresData();
+    }
+
+    function toggleScoreVisibility() {
+      isScoreVisible = !isScoreVisible;
+      const btn = document.getElementById('btnToggleScore');
+      const panel = document.getElementById('matrixPanel');
+
+      if (isScoreVisible) {
+        btn.textContent = '🔒 隱藏個人分數 (公開模式)';
+        btn.style.background = 'rgba(239, 68, 68, 0.2)';
+        panel.classList.add('show-scores');
+      } else {
+        btn.textContent = '👁️ 導師分數切換 (私下查看)';
+        btn.style.background = 'rgba(255, 255, 255, 0.1)';
+        panel.classList.remove('show-scores');
+      }
+    }
+
+    function renderDashboard() {
+      const selectedClass = document.getElementById('classFilter').value;
+      document.getElementById('progressClassTitle').textContent = `${selectedClass} 班 課堂挑戰參與率`;
+
+      const classRecords = rawRecords.filter(r => String(r.className) === String(selectedClass));
+
+      // 1. 渲染 Top 5 榮譽榜
+      const sortedRecords = [...classRecords].sort((a, b) => b.score - a.score);
+      const top5 = sortedRecords.slice(0, 5);
+      const top5List = document.getElementById('top5List');
+
+      if (top5.length === 0) {
+        top5List.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:30px;">尚無紀錄</div>';
+      } else {
+        const medalEmojis = ['🥇', '🥈', '🥉', '✨', '🌟'];
+        top5List.innerHTML = top5.map((r, idx) => {
+          let badgeClass = 'rank-other';
+          if (idx === 0) badgeClass = 'rank-1';
+          else if (idx === 1) badgeClass = 'rank-2';
+          else if (idx === 2) badgeClass = 'rank-3';
+
+          return `
+            <div class="top5-item">
+              <div class="top5-badge ${badgeClass}">${medalEmojis[idx]}</div>
+              <div class="top5-info">
+                <div class="name">${r.nameOrMembers} <span style="font-size:0.8rem; color:var(--primary-blue); margin-left:4px;">${r.seatOrGroup}</span></div>
+                <div class="meta">${r.gameTitle}</div>
+              </div>
+              <div class="top5-score">${r.score} 分</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. 解析請假名單與座號點名矩陣
+      const absentInputVal = document.getElementById('absentSeatsInput').value;
+      const absentSet = new Set(absentInputVal.split(/[,，\s]+/).filter(Boolean).map(s => String(s).padStart(2, '0')));
+
+      const submittedMap = {};
+      classRecords.forEach(r => {
+        const seatMatch = String(r.seatOrGroup).match(/\d+/);
+        if (seatMatch) {
+          const seatNum = String(seatMatch[0]).padStart(2, '0');
+          if (!submittedMap[seatNum]) {
+            submittedMap[seatNum] = r;
+          }
+        }
+      });
+
+      const totalSeats = parseInt(document.getElementById('totalSeatsInput').value) || 30;
+      let submittedCount = 0;
+      let absentCount = 0;
+      const gridContainer = document.getElementById('seatMatrixGrid');
+      gridContainer.innerHTML = '';
+
+      for (let i = 1; i <= totalSeats; i++) {
+        const seatStr = String(i).padStart(2, '0');
+        const isAbsent = absentSet.has(seatStr);
+        const record = submittedMap[seatStr];
+        const isSubmitted = !!record;
+
+        if (isAbsent) {
+          absentCount++;
+          gridContainer.innerHTML += `
+            <div class="seat-card absent" onclick="toggleAbsentSeat('${seatStr}')" title="點擊可取消請假標記">
+              <div class="seat-num">${seatStr} 號</div>
+              <div class="seat-status-text">請假 🏖️</div>
+              <div class="private-score">--</div>
+            </div>
+          `;
+        } else if (isSubmitted) {
+          submittedCount++;
+          gridContainer.innerHTML += `
+            <div class="seat-card submitted" onclick="toggleAbsentSeat('${seatStr}')">
+              <div class="seat-num">${seatStr} 號</div>
+              <div class="seat-status-text">✅ 已完成</div>
+              <div class="private-score">${record.score} 分</div>
+            </div>
+          `;
+        } else {
+          gridContainer.innerHTML += `
+            <div class="seat-card pending" onclick="toggleAbsentSeat('${seatStr}')" title="點擊可標記為請假">
+              <div class="seat-num">${seatStr} 號</div>
+              <div class="seat-status-text">加油中 💪</div>
+              <div class="private-score">--</div>
+            </div>
+          `;
+        }
+      }
+
+      // 計算扣除請假後的實到應交人數
+      const actualRequired = Math.max(1, totalSeats - absentCount);
+      const percent = Math.min(100, Math.round((submittedCount / actualRequired) * 100));
+
+      document.getElementById('submittedCount').textContent = submittedCount;
+      document.getElementById('actualRequiredCount').textContent = actualRequired;
+      document.getElementById('progressPercent').textContent = (percent >= 100 && submittedCount >= actualRequired) ? '100% 🎉 應交全數完成！' : `${percent}%`;
+      document.getElementById('progressBarFill').style.width = `${percent}%`;
+    }
+
+    initTheme();
+    loadClassConfig();
+    loadData();
+    setInterval(loadData, 8000);
+  </script>
+</body>
+</html>
