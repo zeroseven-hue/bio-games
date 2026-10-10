@@ -6,15 +6,15 @@
 // 1~10 單元離線保底題庫 (備援防止校園網路斷線)
 const FISHING_FALLBACK_QUESTIONS = [
   { id: 1, unit: "unit01", question: "在設計科學實驗時，實驗組與對照組之間最多能有幾個「操縱變因」？", options: ["只能有 1 個", "可以有 2 個", "可以有 3 個", "沒有限制數量"], answer: 0, explanation: "對照實驗中，為了確認因果關係，操縱變因只能有 1 個。" },
-  { id: 2, unit: "unit02", question: "使用複式顯微鏡觀察洋蔥表皮細胞，若影像偏向右下方，玻片標本應往哪移？", options: ["往右下方移動", "往左上方移動", "往左下方移動", "往正上方移動"], answer: 0, explanation: "複式顯微鏡成倒立放大像，物體偏哪裡就往哪裡移。" },
-  { id: 3, unit: "unit03", question: "下列何者「不屬於」生物體所表現出的生命現象？", options: ["鐘乳石沉積長大", "綠豆萌芽生長", "含羞草葉片閉合", "酵母菌出芽生殖"], answer: 0, explanation: "鐘乳石是無生物礦物累積，不具細胞代謝生長，不屬於生命現象。" },
-  { id: 4, unit: "unit04", question: "虎克最早利用自製顯微鏡在軟木塞切片中所觀察到的蜂窩狀小格子是？", options: ["死去的細胞壁", "活的細胞核", "大型液胞", "葉綠體顆粒"], answer: 0, explanation: "軟木塞為植物死細胞，虎克觀察到的是殘留的植物細胞壁。" },
+  { id: 2, unit: "unit02", question: "使用複式顯微鏡觀察洋蔥表皮細胞，若影像偏向右下方，玻片標本應往哪移？", options: ["往左上方移動", "往右下方移動", "往左下方移動", "往正上方移動"], answer: 1, explanation: "複式顯微鏡成倒立放大像，物體偏哪裡就往哪裡移。" },
+  { id: 3, unit: "unit03", question: "下列何者「不屬於」生物體所表現出的生命現象？", options: ["綠豆萌芽生長", "含羞草葉片閉合", "鐘乳石沉積長大", "酵母菌出芽生殖"], answer: 2, explanation: "鐘乳石是無生物礦物累積，不具細胞代謝生長，不屬於生命現象。" },
+  { id: 4, unit: "unit04", question: "虎克最早利用自製顯微鏡在軟木塞切片中所觀察到的蜂窩狀小格子是？", options: ["活的細胞核", "大型液胞", "葉綠體顆粒", "死去的細胞壁"], answer: 3, explanation: "軟木塞為植物死細胞，虎克觀察到的是殘留的植物細胞壁。" },
   { id: 5, unit: "unit05", question: "植物細胞能夠維持固定且對稱的外形，主要依賴下列哪一構造？", options: ["堅硬的細胞壁", "具選擇性的細胞膜", "粒線體發電機", "大型葉綠體"], answer: 0, explanation: "細胞壁主要由纖維素構成，具保護並支持植物細胞形狀的功能。" },
-  { id: 6, unit: "unit06", question: "將人類紅血球置入高濃度的濃食鹽水中，紅血球細胞將會發生什麼變化？", options: ["失水萎縮", "吸水膨脹破裂", "形狀維持不變", "外層細胞壁加厚"], answer: 0, explanation: "高濃度溶液使水分子滲透出細胞，動物細胞無細胞壁保護會失水萎縮。" },
-  { id: 7, unit: "unit07", question: "人體的「心臟」由肌肉組織、神經組織等聯合構成，在生物層次上屬於？", options: ["器官層級", "細胞層級", "組織層級", "器官系統層級"], answer: 0, explanation: "由多種不同組織共同構成具有特定功能的構造稱為器官。" },
-  { id: 8, unit: "unit08", question: "在微觀尺度大小比較中，下列何者的長度或體積最小？", options: ["水分子結構", "紅血球細胞", "口腔皮膜細胞", "草履蟲單細胞"], answer: 0, explanation: "水分子是奈米級 (nm) 的分子，遠小於微米級 (μm) 的細胞構造。" },
+  { id: 6, unit: "unit06", question: "將人類紅血球置入高濃度的濃食鹽水中，紅血球細胞將會發生什麼變化？", options: ["吸水膨脹破裂", "失水萎縮", "形狀維持不變", "外層細胞壁加厚"], answer: 1, explanation: "高濃度溶液使水分子滲透出細胞，動物細胞無細胞壁保護會失水萎縮。" },
+  { id: 7, unit: "unit07", question: "人體的「心臟」由肌肉組織、神經組織等聯合構成，在生物層次上屬於？", options: ["細胞層級", "組織層級", "器官層級", "器官系統層級"], answer: 2, explanation: "由多種不同組織共同構成具有特定功能的構造稱為器官。" },
+  { id: 8, unit: "unit08", question: "在微觀尺度大小比較中，下列何者的長度或體積最小？", options: ["紅血球細胞", "口腔皮膜細胞", "草履蟲單細胞", "水分子結構"], answer: 3, explanation: "水分子是奈米級 (nm) 的分子，遠小於微米級 (μm) 的細胞構造。" },
   { id: 9, unit: "unit09", question: "1 公克的脂質在生物體內完全氧化燃燒，約可釋出多少千卡的熱量？", options: ["9 千卡熱量", "4 千卡熱量", "0 千卡熱量", "100 千卡熱量"], answer: 0, explanation: "醣類與蛋白質每公克產生 4 千卡，脂質每公克產生 9 千卡。" },
-  { id: 10, unit: "unit10", question: "人體消化系統中的酵素發揮最大催化活性的最適溫度大約是？", options: ["攝氏 37 度左右", "攝氏 80 度高溫", "攝氏 0 度低溫", "攝氏 100 度沸騰"], answer: 0, explanation: "人體酵素大多屬於蛋白質，在體溫約 37°C 時活性最高，高溫會變性失活。" }
+  { id: 10, unit: "unit10", question: "人體消化系統中的酵素發揮最大催化活性的最適溫度大約是？", options: ["攝氏 80 度高溫", "攝氏 37 度左右", "攝氏 0 度低溫", "攝氏 100 度沸騰"], answer: 1, explanation: "人體酵素大多屬於蛋白質，在體溫約 37°C 時活性最高，高溫會變性失活。" }
 ];
 
 // 物理與遊戲常數
@@ -37,6 +37,8 @@ let streak = 0;
 let maxStreak = 0;
 let isPaused = false;
 let isOver = false;
+let answeredCount = 0;
+let targetQCount = 10;
 
 // 防盲猜冷卻狀態與出題靜止讀題
 let isCoolingDown = false;
@@ -315,19 +317,34 @@ function triggerFreezeReadingPhase() {
 
 function spawnOceanFishesForCurrentQuestion() {
   oceanFishes = [];
-  const options = currentQuestion.options;
+  const rawOptions = currentQuestion.options || [];
+
+  let correctText = "";
+  if (typeof currentQuestion.answer === "number") {
+    correctText = rawOptions[currentQuestion.answer] || rawOptions[0];
+  } else if (typeof currentQuestion.answer === "string") {
+    const ansKey = currentQuestion.answer.toUpperCase();
+    const idx = ["A", "B", "C", "D"].indexOf(ansKey);
+    correctText = (idx >= 0 && rawOptions[idx]) ? rawOptions[idx] : (currentQuestion.options[ansKey] || rawOptions[0]);
+  }
+
+  let optionItems = rawOptions.map(opt => ({
+    text: opt,
+    isCorrect: (opt === correctText)
+  }));
+
+  optionItems = shuffleArray(optionItems);
   const layers = [100, 180, 260, 340]; // 4 個深度水層
 
-  options.forEach((optText, idx) => {
-    const isRight = (idx === currentQuestion.answer);
+  optionItems.forEach((item, idx) => {
     const yPos = layers[idx] + (Math.random() * 20 - 10);
     const dir = (idx % 2 === 0) ? 1 : -1;
     const startX = (dir === 1) ? -40 - (idx * 60) : viewW + 40 + (idx * 60);
 
     oceanFishes.push({
       id: idx,
-      text: optText,
-      isCorrect: isRight,
+      text: item.text,
+      isCorrect: item.isCorrect,
       x: startX,
       y: yPos,
       radius: 34,
@@ -421,11 +438,19 @@ function handleFishPulledAboard(fish) {
     playCatchFishSound();
     score += 100 + streak * 25;
     streak++;
+    answeredCount++;
     if (streak > maxStreak) maxStreak = streak;
 
     streakBadge.classList.remove("hidden");
     streakBadge.textContent = `🔥 連對 x${streak}`;
     scoreDisplay.textContent = score;
+
+    if (answeredCount >= targetQCount) {
+      setTimeout(() => {
+        endFishingSession();
+      }, 500);
+      return;
+    }
 
     // 短暫慶祝後自動換下一題
     setTimeout(() => {
@@ -438,7 +463,6 @@ function handleFishPulledAboard(fish) {
     streak = 0;
     streakBadge.classList.add("hidden");
 
-    // 彈出小筆記解析，海裡只剩下 3 隻（或更少）魚供學生重試！
     noteContent.textContent = `您剛才抓到的是「${fish.text}」。\n${currentQuestion.explanation || "觀念不符，請重新思考並抓出正確的答案！"}`;
     noteModal.classList.remove("hidden");
   }
@@ -600,6 +624,9 @@ function gameMainLoop() {
 // ==========================================================================
 
 function startNewFishingSession() {
+  const urlParams = new URLSearchParams(window.location.search);
+  targetQCount = parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10;
+  answeredCount = 0;
   score = 0;
   streak = 0;
   maxStreak = 0;
@@ -641,7 +668,39 @@ function togglePause() {
 
 function endFishingSession() {
   isOver = true;
-  idModal.classList.remove("hidden");
+  clearInterval(timerInterval);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
+
+  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
+    const elapsedSec = Math.max(0, (gameMinutes * 60) - remainingSeconds);
+    const elapsedM = Math.floor(elapsedSec / 60);
+    const elapsedS = elapsedSec % 60;
+    const durationStr = `${elapsedM} 分 ${elapsedS} 秒`;
+
+    showScoreSubmitModal({
+      gameTitle: '生物大釣手：黃金深海大捕撈',
+      score: score,
+      scoreDisplay: `${score} 分 (共答對 ${answeredCount} 題)`,
+      duration: durationStr,
+      onBonusChallenge: () => {
+        // 🔥 挑戰加碼 10 題：關閉視窗，再抓 10 題！
+        answeredCount = 0;
+        isOver = false;
+        prepareQuestionPool().then(() => {
+          presentNextQuestion();
+          startTimer();
+        });
+      },
+      onSuccess: (payload) => {
+        idModal.classList.remove("hidden");
+      }
+    });
+  } else {
+    // 老師自由測試模式，直接打開憑證視窗
+    idModal.classList.remove("hidden");
+  }
 }
 
 function handleGenerateCert() {

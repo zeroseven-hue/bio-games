@@ -418,6 +418,19 @@ function renderQuestion() {
     return;
   }
   const q = roundQuestions[currentIndex];
+  if (!q.shuffled) {
+    const origCorrectText = (q.options && q.answer !== undefined) ? q.options[q.answer] : (q.options ? q.options[0] : '');
+    const rawOptions = [...(q.options || [])];
+    for (let i = rawOptions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rawOptions[i], rawOptions[j]] = [rawOptions[j], rawOptions[i]];
+    }
+    q.options = rawOptions;
+    q.answer = rawOptions.indexOf(origCorrectText);
+    if (q.answer === -1) q.answer = 0;
+    q.shuffled = true;
+  }
+
   document.getElementById("qText").innerText = `${currentIndex + 1}. ${q.question}`;
   
   for (let i = 0; i < 4; i++) {
@@ -617,6 +630,31 @@ function finishGame(isSuccess) {
   }
 
   updateCertCode();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
+
+  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
+    const finalScore = isSuccess ? (100 + currentIndex * 10) : (currentIndex * 10);
+    const seatInput = document.getElementById("inputSeatNo");
+    const nameInput = document.getElementById("inputStudentName");
+    const seatVal = (seatInput && seatInput.value.trim()) || "01";
+    const nameVal = (nameInput && nameInput.value.trim()) || "";
+
+    showScoreSubmitModal({
+      gameTitle: '生物星際大逃亡：逃離黑洞',
+      score: finalScore,
+      scoreDisplay: `${finalScore} 分 (完成 ${currentIndex} 題)`,
+      duration: '黑洞躍遷挑戰',
+      initialClass: '701',
+      initialSeat: seatVal,
+      initialName: nameVal,
+      onBonusChallenge: () => {
+        // 🔥 挑戰加碼 10 題：再重新玩一次！
+        initGame();
+      }
+    });
+  }
 }
 
 // 🌌 Canvas 太空星空與黑洞漩渦動態渲染

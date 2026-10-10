@@ -442,6 +442,31 @@ function loadQuestion(idx) {
   }
 
   const q = gameQuestions[idx];
+  if (!q.shuffled) {
+    const origCorrectText = q.options[q.ans];
+    const rawList = [
+      { text: q.options.A },
+      { text: q.options.B },
+      { text: q.options.C },
+      { text: q.options.D }
+    ];
+    for (let i = rawList.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rawList[i], rawList[j]] = [rawList[j], rawList[i]];
+    }
+    q.options = {
+      A: rawList[0].text,
+      B: rawList[1].text,
+      C: rawList[2].text,
+      D: rawList[3].text
+    };
+    if (q.options.A === origCorrectText) q.ans = "A";
+    else if (q.options.B === origCorrectText) q.ans = "B";
+    else if (q.options.C === origCorrectText) q.ans = "C";
+    else if (q.options.D === origCorrectText) q.ans = "D";
+    q.shuffled = true;
+  }
+
   document.getElementById("q-text").textContent = `Q${idx + 1}. ${q.q}`;
   document.getElementById("opt-A").textContent = `A. ${q.options.A}`;
   document.getElementById("opt-B").textContent = `B. ${q.options.B}`;
@@ -979,14 +1004,21 @@ async function directSubmitToGAS() {
 }
 
 function triggerSubmitModal() {
-  if (typeof showScoreSubmitModal === 'function') {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
+
+  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
     showScoreSubmitModal({
       gameTitle: '生物小蜜蜂：星際防衛隊 V2.0',
       score: score,
       duration: '已完成挑戰',
       initialClass: playerProfile.cls || '701',
       initialSeat: playerProfile.seat || '01',
-      initialName: playerProfile.name || ''
+      initialName: playerProfile.name || '',
+      onBonusChallenge: () => {
+        // 🔥 挑戰加碼 10 題：關閉視窗並重新載入 10 題！
+        initGame();
+      }
     });
   }
 }

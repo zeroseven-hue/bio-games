@@ -571,6 +571,19 @@ function renderQuestion() {
   attempts = 0;
 
   const q = pool[idx];
+  if (!q.shuffled) {
+    const origCorrectText = (q.options && q.answer !== undefined) ? q.options[q.answer] : (q.options ? q.options[0] : '');
+    const rawOptions = [...(q.options || [])];
+    for (let i = rawOptions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rawOptions[i], rawOptions[j]] = [rawOptions[j], rawOptions[i]];
+    }
+    q.options = rawOptions;
+    q.answer = rawOptions.indexOf(origCorrectText);
+    if (q.answer === -1) q.answer = 0;
+    q.shuffled = true;
+  }
+
   $('badgeProgress').textContent = `題號 ${idx + 1} / ${pool.length}`;
   $('badgeScore').textContent = `得分 ${score}`;
   updateCombo();
@@ -910,7 +923,30 @@ function endGame() {
   $('certTimeDisplay').textContent = `${totalTimeSec} 秒`;
   $('certTimestampDisplay').textContent = dateStr;
 
-  $('certModal').style.display = 'flex';
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
+
+  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
+    showScoreSubmitModal({
+      gameTitle: '淘氣豆：生物敲敲研究所',
+      score: score,
+      scoreDisplay: `${score} 分 (共答對 ${pool.length} 題)`,
+      duration: `${totalTimeSec} 秒`,
+      initialClass: studentProfile.className || '701',
+      initialSeat: studentProfile.seat || '01',
+      initialName: studentProfile.name || '',
+      onBonusChallenge: () => {
+        // 🔥 挑戰加碼 10 題：再重新抓 10 題繼續挑戰！
+        $('certModal').style.display = 'none';
+        startGame();
+      },
+      onSuccess: () => {
+        $('certModal').style.display = 'flex';
+      }
+    });
+  } else {
+    $('certModal').style.display = 'flex';
+  }
 }
 
 function copyCertToClipboard() {

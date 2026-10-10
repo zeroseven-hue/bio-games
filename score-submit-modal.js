@@ -257,7 +257,9 @@
             </div>
           </div>
 
-          <button type="button" class="ss-submit-btn" id="ssSubmitBtn">🚀 送出成績至老師試算表</button>
+          <button type="button" class="ss-submit-btn" id="ssSubmitBtn" style="background: linear-gradient(135deg, #16a34a, #15803d);">🚀 送出成績至老師試算表</button>
+          <button type="button" class="ss-submit-btn" id="ssCopyBtn" style="background: linear-gradient(135deg, #475569, #334155); font-size: 0.9rem; margin-top: 6px;">📋 複製成績文字檔 (Classroom 備用)</button>
+          ${options.onBonusChallenge ? `<button type="button" class="ss-submit-btn" id="ssBonusFormBtn" style="background: linear-gradient(135deg, #d97706, #b45309); font-size: 0.9rem; margin-top: 6px;">🔥 不登錄，直接挑戰加碼 10 題</button>` : ''}
           <button type="button" class="ss-close-btn" id="ssCloseBtn">跳過，暫不登錄</button>
         </form>
 
@@ -274,6 +276,8 @@
     const indivFields = overlay.querySelector('#ssIndivFields');
     const groupFields = overlay.querySelector('#ssGroupFields');
     const submitBtn = overlay.querySelector('#ssSubmitBtn');
+    const copyBtn = overlay.querySelector('#ssCopyBtn');
+    const bonusFormBtn = overlay.querySelector('#ssBonusFormBtn');
     const closeBtn = overlay.querySelector('#ssCloseBtn');
 
     tabIndiv.addEventListener('click', () => {
@@ -295,6 +299,44 @@
     closeBtn.addEventListener('click', () => {
       overlay.remove();
       if (options.onClose) options.onClose();
+    });
+
+    if (bonusFormBtn) {
+      bonusFormBtn.addEventListener('click', () => {
+        overlay.remove();
+        if (options.onBonusChallenge) options.onBonusChallenge();
+      });
+    }
+
+    // 複製 Classroom 防偽文字檔按鈕
+    copyBtn.addEventListener('click', () => {
+      let infoText = '';
+      if (currentMode === 'individual') {
+        const cls = overlay.querySelector('#ssClassSelect').value;
+        const seat = overlay.querySelector('#ssSeatSelect').value;
+        const name = overlay.querySelector('#ssNameInput').value.trim() || '學生';
+        infoText = `【${cls}班 ${seat}號 ${name}】`;
+      } else {
+        const cls = overlay.querySelector('#ssGroupClassSelect').value;
+        const grp = overlay.querySelector('#ssGroupNumSelect').value;
+        const members = overlay.querySelector('#ssGroupMembersInput').value.trim() || '組員';
+        infoText = `【${cls}班 ${grp} (組員: ${members})】`;
+      }
+
+      const timestamp = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+      const hashStr = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const textToCopy = `🏆 [${options.gameTitle || '課堂生物遊戲'}] 防偽成績單\n` +
+        `👤 學生資料：${infoText}\n` +
+        `💯 挑戰得分：${options.scoreDisplay || options.score + ' 分'}\n` +
+        `⏱️ 耗時記錄：${options.duration || '--:--'}\n` +
+        `📅 完成時間：${timestamp}\n` +
+        `🔑 防偽驗證碼：BIO-${hashStr}`;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('✅ 已成功複製成績文字檔至剪貼簿！可以貼到 Google Classroom 繳交囉！\n\n' + textToCopy);
+      }).catch(err => {
+        prompt('請手動選擇複製以下成績內容：', textToCopy);
+      });
     });
 
     submitBtn.addEventListener('click', async () => {
@@ -328,7 +370,6 @@
         payload.nameOrMembers = name;
         localStorage.setItem('bio_games_last_class', cls);
 
-        // 二次確認
         if (!confirm(`請確認資料是否正確：\n\n【${cls}班 ${seat}號】${name}\n得分：${options.scoreDisplay || options.score}`)) return;
       } else {
         const cls = overlay.querySelector('#ssGroupClassSelect').value;
@@ -343,20 +384,17 @@
         if (!confirm(`請確認小組資料是否正確：\n\n【${cls}班 ${grp}】\n組員：${members}\n得分：${options.scoreDisplay || options.score}`)) return;
       }
 
-      // 發送按鈕狀態
       submitBtn.disabled = true;
       submitBtn.innerText = '⏳ 正在傳送成績中...';
 
       try {
-        // 使用 fetch POST 傳送到 GAS
         await fetch(gasUrl, {
           method: 'POST',
-          mode: 'no-cors', // 避開跨網域重定向限制
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        // 成功畫面展示
         overlay.querySelector('#ssForm').style.display = 'none';
         const resultBox = overlay.querySelector('#ssResultContainer');
         resultBox.style.display = 'block';
@@ -366,14 +404,24 @@
             <div class="ss-result-title" style="color:#4ade80">成績上傳成功！</div>
             <div class="ss-result-msg">
               已順利登記至老師的 Google 試算表！<br/>
-              <b>【${payload.class} 班 ${payload.seatOrGroup}】</b><br/>
-              辛苦了！可以安心關閉此視窗囉！
+              <b>【${payload.class} 班 ${payload.seatOrGroup}】</b>
             </div>
-            <button class="ss-submit-btn" id="ssFinishBtn" style="background:linear-gradient(135deg, #16a34a, #15803d);">👌 完成關閉</button>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${options.onBonusChallenge ? `<button class="ss-submit-btn" id="ssBonusBtn" style="background:linear-gradient(135deg, #f59e0b, #d97706);">🔥 挑戰加碼 10 題 (自主進階刷題)</button>` : ''}
+              <button class="ss-submit-btn" id="ssFinishBtn" style="background:linear-gradient(135deg, #16a34a, #15803d);">👌 完成關閉</button>
+            </div>
           </div>
         `;
 
-        overlay.querySelector('#ssFinishBtn').addEventListener('click', () => {
+        const bonusBtn = resultBox.querySelector('#ssBonusBtn');
+        if (bonusBtn) {
+          bonusBtn.addEventListener('click', () => {
+            overlay.remove();
+            if (options.onBonusChallenge) options.onBonusChallenge();
+          });
+        }
+
+        resultBox.querySelector('#ssFinishBtn').addEventListener('click', () => {
           overlay.remove();
           if (options.onSuccess) options.onSuccess(payload);
         });
@@ -382,7 +430,7 @@
         console.error('Submit Score Error:', err);
         submitBtn.disabled = false;
         submitBtn.innerText = '❌ 傳送失敗，請重試';
-        alert('網連線傳送稍慢，請再試一次！');
+        alert('網路傳送稍慢或異常，您可以選擇點擊「📋 複製成績文字檔」備用繳交！');
       }
     });
   }
