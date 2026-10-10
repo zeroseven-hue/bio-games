@@ -333,14 +333,14 @@
           "units": [
             {
               "id": "unit01_10_quick_quiz_50",
-              "title": "[快閃] 快問快答 50題 (7上 跨單元 01~10 綜合測驗)",
+              "title": "[快閃] 快問快答 50題 (7上 第一次段考 跨單元 01~10 綜合測驗)",
               "publisher": "翰林版",
               "semester": "快閃特輯",
               "file": "翰林版/快問快答/unit01_10_quick_quiz_50.json"
             },
             {
               "id": "unit11_15_quick_quiz_50",
-              "title": "[快閃] 快問快答 50題 (7下 跨單元 11~15 綜合測驗)",
+              "title": "[快閃] 快問快答 50題 (7上 第二次段考 跨單元 11~15 綜合測驗)",
               "publisher": "翰林版",
               "semester": "快閃特輯",
               "file": "翰林版/快問快答/unit11_15_quick_quiz_50.json"
@@ -697,14 +697,14 @@
     },
     {
       "id": "unit01_10_quick_quiz_50",
-      "title": "[快閃] 快問快答 50題 (7上 跨單元 01~10 綜合測驗)",
+      "title": "[快閃] 快問快答 50題 (7上 第一次段考 跨單元 01~10 綜合測驗)",
       "publisher": "翰林版",
       "semester": "快閃特輯",
       "file": "翰林版/快問快答/unit01_10_quick_quiz_50.json"
     },
     {
       "id": "unit11_15_quick_quiz_50",
-      "title": "[快閃] 快問快答 50題 (7下 跨單元 11~15 綜合測驗)",
+      "title": "[快閃] 快問快答 50題 (7上 第二次段考 跨單元 11~15 綜合測驗)",
       "publisher": "翰林版",
       "semester": "快閃特輯",
       "file": "翰林版/快問快答/unit11_15_quick_quiz_50.json"
