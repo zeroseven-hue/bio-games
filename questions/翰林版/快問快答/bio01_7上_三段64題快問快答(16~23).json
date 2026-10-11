@@ -1,0 +1,985 @@
+{
+  "unitId": "bio01_ch5_6_quick_quiz_64",
+  "unitTitle": "第五、六章快問快答（64題）",
+  "quizId": "bio01_ch5_6_quick_quiz_64",
+  "quizTitle": "國中生物第五、六章快問快答",
+  "description": "依八個單元比例選題，共64題；包含是非題與二選一題。",
+  "questionCount": 64,
+  "selection": {
+    "units": 8,
+    "distribution": {
+      "bio01_5-1": 5,
+      "bio01_5-2": 9,
+      "bio01_5-3": 9,
+      "bio01_5-4": 9,
+      "bio01_6-1": 9,
+      "bio01_6-2": 9,
+      "bio01_6-3-1體溫": 9,
+      "bio01_6-3-1血糖": 5
+    },
+    "trueFalseCount": 26,
+    "twoChoiceCount": 38
+  },
+  "questions": [
+    {
+      "unitId": "bio01_5-1",
+      "unitTitle": "刺激與反應",
+      "sourceQuestionId": 1,
+      "type": "two_choice",
+      "question": "能接受環境刺激的構造稱為？",
+      "options": [
+        "受器",
+        "動器"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "受器負責接受環境刺激。",
+      "id": 1
+    },
+    {
+      "unitId": "bio01_5-1",
+      "unitTitle": "刺激與反應",
+      "sourceQuestionId": 3,
+      "type": "true_false",
+      "question": "機車喇叭聲可作為聲音刺激。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "聲音可被耳內的聽覺受器接受。",
+      "id": 2
+    },
+    {
+      "unitId": "bio01_5-1",
+      "unitTitle": "刺激與反應",
+      "sourceQuestionId": 9,
+      "type": "two_choice",
+      "question": "分泌淚液的淚腺屬於？",
+      "options": [
+        "受器",
+        "動器"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "腺體可產生分泌反應，因此屬於動器。",
+      "id": 3
+    },
+    {
+      "unitId": "bio01_5-1",
+      "unitTitle": "刺激與反應",
+      "sourceQuestionId": 17,
+      "type": "true_false",
+      "question": "香味聞久後感覺變淡，屬於感覺疲勞。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "受器持續受相同刺激時，敏感度可能暫時降低。",
+      "id": 4
+    },
+    {
+      "unitId": "bio01_5-1",
+      "unitTitle": "刺激與反應",
+      "sourceQuestionId": 27,
+      "type": "two_choice",
+      "question": "凝視物體後移開視線，仍看到的影像稱為？",
+      "options": [
+        "後像",
+        "反射"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "刺激停止後短暫保留的視覺感覺稱為後像。",
+      "id": 5
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 23,
+      "type": "two_choice",
+      "question": "神經系統構造與功能的基本單位是？",
+      "options": [
+        "神經元",
+        "紅血球"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "神經元能接受並傳遞訊息。",
+      "id": 6
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 16,
+      "type": "true_false",
+      "question": "神經元具有突起，有助於傳遞訊息。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "神經元的突起可接收或傳遞神經訊息。",
+      "id": 7
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 11,
+      "type": "two_choice",
+      "question": "思考、記憶與判斷主要由哪裡負責？",
+      "options": [
+        "大腦",
+        "小腦"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "大腦是思考、記憶、感覺與意識活動的重要中樞。",
+      "id": 8
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 7,
+      "type": "two_choice",
+      "question": "協調肌肉活動與維持平衡主要靠？",
+      "options": [
+        "小腦",
+        "脊髓"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "小腦主要協調肌肉活動並維持身體平衡。",
+      "id": 9
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 26,
+      "type": "two_choice",
+      "question": "調節呼吸等重要生命現象的中樞是？",
+      "options": [
+        "腦幹",
+        "大腦"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "腦幹具有調節呼吸等重要生命現象的中樞。",
+      "id": 10
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 24,
+      "type": "true_false",
+      "question": "反射動作通常較快，有助於減少傷害。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "反射能迅速產生反應，具有保護作用。",
+      "id": 11
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 8,
+      "type": "two_choice",
+      "question": "手碰尖物立刻縮回，反射中樞主要在？",
+      "options": [
+        "脊髓",
+        "小腦"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "縮手、縮腳反射通常由脊髓先完成快速反應。",
+      "id": 12
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 19,
+      "type": "true_false",
+      "question": "手碰熱水立刻縮回後再沖冷水，包含反射與意識活動。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "立刻縮手是反射，主動沖冷水則由大腦意識控制。",
+      "id": 13
+    },
+    {
+      "unitId": "bio01_5-2",
+      "unitTitle": "神經系統",
+      "sourceQuestionId": 12,
+      "type": "two_choice",
+      "question": "腦和脊髓合稱為？",
+      "options": [
+        "中樞神經系統",
+        "周圍神經系統"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "中樞神經系統由腦和脊髓組成。",
+      "id": 14
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 17,
+      "type": "two_choice",
+      "question": "激素主要經由什麼運送到全身？",
+      "options": [
+        "血液",
+        "導管"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "內分泌腺沒有導管，激素進入血液後運送。",
+      "id": 15
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 22,
+      "type": "true_false",
+      "question": "神經調節通常快速短暫，激素調節通常較慢而持久。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "兩種協調方式在作用速度與持續時間上不同。",
+      "id": 16
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 2,
+      "type": "two_choice",
+      "question": "腦垂腺分泌的促甲狀腺激素作用於？",
+      "options": [
+        "甲狀腺",
+        "腎上腺"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "促甲狀腺激素會隨血液到甲狀腺並促進其活動。",
+      "id": 17
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "甲狀腺素分泌過多，代謝通常會？",
+      "options": [
+        "變快",
+        "變慢"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "甲狀腺素過多會使代謝過度旺盛，可能心跳快、體重減輕。",
+      "id": 18
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 23,
+      "type": "true_false",
+      "question": "幼年時甲狀腺素不足可能影響生長與智力發育。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "幼年缺乏甲狀腺素可能造成生長及智力發育受阻。",
+      "id": 19
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 4,
+      "type": "two_choice",
+      "question": "血鈣過低且容易抽搐，可能與哪個腺體異常有關？",
+      "options": [
+        "副甲狀腺",
+        "性腺"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "副甲狀腺分泌的激素參與血鈣濃度調節。",
+      "id": 20
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "性腺分泌的激素與青春期第二性徵有關。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "青春期的第二性徵與性腺分泌的性激素密切相關。",
+      "id": 21
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 13,
+      "type": "two_choice",
+      "question": "內分泌腺分泌、能調節生理活動的物質稱為？",
+      "options": [
+        "激素",
+        "酵素"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "激素又稱荷爾蒙，可調節特定生理活動。",
+      "id": 22
+    },
+    {
+      "unitId": "bio01_5-3",
+      "unitTitle": "內分泌系統",
+      "sourceQuestionId": 16,
+      "type": "true_false",
+      "question": "激素通常只需少量，就能調節生理活動。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "激素含量雖少，仍能對特定目標產生調節作用。",
+      "id": 23
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 8,
+      "type": "two_choice",
+      "question": "植物朝向或背離刺激方向生長，稱為？",
+      "options": [
+        "向性",
+        "反射"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "向性是植物對刺激方向產生的生長反應。",
+      "id": 24
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 5,
+      "type": "true_false",
+      "question": "植物莖朝光源彎曲生長，屬於向光性。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "莖朝光源生長，有利葉片獲得較多光線。",
+      "id": 25
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 14,
+      "type": "two_choice",
+      "question": "盆栽橫放後，根通常朝哪個方向生長？",
+      "options": [
+        "向地",
+        "背地"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "根通常具有向地性，會朝重力方向生長。",
+      "id": 26
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 15,
+      "type": "two_choice",
+      "question": "藤蔓攀附支架與哪種向性有關？",
+      "options": [
+        "向觸性",
+        "向水性"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "藤蔓接觸支架後產生生長反應，屬於向觸性。",
+      "id": 27
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 17,
+      "type": "true_false",
+      "question": "含羞草受碰觸後閉合，屬於觸發運動。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "觸發運動能在短時間內發生，並非朝刺激方向生長。",
+      "id": 28
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 11,
+      "type": "two_choice",
+      "question": "酢漿草葉片夜晚閉合，屬於？",
+      "options": [
+        "睡眠運動",
+        "向地性"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "葉片隨日夜開合屬於可重複的睡眠運動。",
+      "id": 29
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 6,
+      "type": "two_choice",
+      "question": "鳥類築巢通常屬於哪類行為？",
+      "options": [
+        "本能行為",
+        "學習行為"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "築巢通常是與生俱來的本能行為。",
+      "id": 30
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 2,
+      "type": "true_false",
+      "question": "動物行為全部與生俱來，不會因學習改變。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "動物除了本能行為，也能經由經驗形成學習行為。",
+      "id": 31
+    },
+    {
+      "unitId": "bio01_5-4",
+      "unitTitle": "行為與反應",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "小卷被燈光吸引，表現哪種趨性？",
+      "options": [
+        "正趨光性",
+        "負趨光性"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "朝光源移動屬於正趨光性。",
+      "id": 32
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 18,
+      "type": "two_choice",
+      "question": "細胞進行呼吸作用的主要目的是？",
+      "options": [
+        "獲得能量",
+        "製造氧氣"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "細胞藉呼吸作用分解養分並釋放可利用的能量。",
+      "id": 33
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 16,
+      "type": "two_choice",
+      "question": "細胞有氧呼吸主要在哪個構造進行？",
+      "options": [
+        "粒線體",
+        "細胞核"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "粒線體是細胞進行有氧呼吸的主要場所。",
+      "id": 34
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 4,
+      "type": "true_false",
+      "question": "植物只有夜晚才進行呼吸作用。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "植物的活細胞白天與夜晚都會進行呼吸作用。",
+      "id": 35
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 15,
+      "type": "two_choice",
+      "question": "氣體交換的基本原理是？",
+      "options": [
+        "擴散作用",
+        "蒸散作用"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "氧氣與二氧化碳會依濃度差進行擴散。",
+      "id": 36
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 24,
+      "type": "true_false",
+      "question": "良好的氣體交換構造通常表面溼潤且微血管豐富。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "溼潤、表面積大及微血管豐富都有利氣體交換。",
+      "id": 37
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 5,
+      "type": "two_choice",
+      "question": "空氣由氣管進入肺前，會先通過？",
+      "options": [
+        "支氣管",
+        "食道"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "空氣依序通過鼻、咽喉、氣管、支氣管，再到肺。",
+      "id": 38
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 3,
+      "type": "true_false",
+      "question": "肺本身具有肌肉，可主動完成呼吸運動。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "呼吸運動主要靠肋骨相關肌肉與橫膈活動改變胸腔容積。",
+      "id": 39
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 22,
+      "type": "two_choice",
+      "question": "人體肺部主要進行氣體交換的位置是？",
+      "options": [
+        "肺泡",
+        "氣管"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "肺泡壁薄且外有微血管，適合進行氣體交換。",
+      "id": 40
+    },
+    {
+      "unitId": "bio01_6-1",
+      "unitTitle": "呼吸與氣體恆定",
+      "sourceQuestionId": 9,
+      "type": "true_false",
+      "question": "血中二氧化碳增加會刺激腦幹，使呼吸加快。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "二氧化碳濃度升高會促使呼吸調節中樞增加呼吸頻率。",
+      "id": 41
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 6,
+      "type": "two_choice",
+      "question": "下列何者不屬於排泄？",
+      "options": [
+        "排糞",
+        "排尿"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "排糞主要排出未消化的食物殘渣，不屬於排泄。",
+      "id": 42
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "蛋白質代謝會產生含氮廢物。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "蛋白質代謝會產生氨等含氮廢物。",
+      "id": 43
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 7,
+      "type": "two_choice",
+      "question": "人體將氨轉變成尿素的器官是？",
+      "options": [
+        "肝臟",
+        "腎臟"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "肝臟會把毒性較強的氨轉變為尿素。",
+      "id": 44
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "人體形成尿液的主要器官是？",
+      "options": [
+        "腎臟",
+        "膀胱"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "腎臟過濾血液並形成尿液。",
+      "id": 45
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 10,
+      "type": "true_false",
+      "question": "輸尿管負責把尿液由腎臟送到膀胱。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "輸尿管連接腎臟與膀胱，尿道則將尿液排出體外。",
+      "id": 46
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 5,
+      "type": "true_false",
+      "question": "血液中水分減少時，較容易產生口渴感。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "水分不足會刺激腦部水分調節中樞，使人感到口渴。",
+      "id": 47
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 4,
+      "type": "two_choice",
+      "question": "體內水分過多時，排尿量通常會？",
+      "options": [
+        "增加",
+        "減少"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "增加排尿可排出較多水分，協助維持水分恆定。",
+      "id": 48
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 17,
+      "type": "true_false",
+      "question": "肺、皮膚及泌尿系統都能排出水分。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "水可隨呼氣、汗液與尿液排出。",
+      "id": 49
+    },
+    {
+      "unitId": "bio01_6-2",
+      "unitTitle": "排泄與水分恆定",
+      "sourceQuestionId": 19,
+      "type": "two_choice",
+      "question": "植物葉片角質層主要有何功能？",
+      "options": [
+        "減少水分散失",
+        "吸收二氧化碳"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "角質層可減少水分由葉片表面散失。",
+      "id": 50
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 21,
+      "type": "two_choice",
+      "question": "能維持較穩定體溫的脊椎動物是？",
+      "options": [
+        "鳥類和哺乳類",
+        "魚類和兩生類"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "鳥類與哺乳類屬於內溫動物。",
+      "id": 51
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 14,
+      "type": "true_false",
+      "question": "魚類的體溫通常會隨環境溫度明顯改變。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "魚類屬於外溫動物，體溫容易受環境溫度影響。",
+      "id": 52
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 2,
+      "type": "two_choice",
+      "question": "內溫動物體熱的主要來源是？",
+      "options": [
+        "養分分解",
+        "吸收陽光"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "細胞分解養分時會釋放能量，其中部分轉為熱。",
+      "id": 53
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 1,
+      "type": "true_false",
+      "question": "汗液蒸發能帶走熱量，幫助散熱。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "液態汗水蒸發為水氣時會吸收並帶走體表熱量。",
+      "id": 54
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 11,
+      "type": "two_choice",
+      "question": "天氣炎熱時，皮膚表層血管通常會？",
+      "options": [
+        "擴張",
+        "收縮"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "血管擴張可使較多血液流到體表，增加散熱。",
+      "id": 55
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 24,
+      "type": "two_choice",
+      "question": "寒冷時皮膚表層血管收縮，可使散熱？",
+      "options": [
+        "減少",
+        "增加"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "流向體表的血液減少，有助保存體熱。",
+      "id": 56
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 26,
+      "type": "true_false",
+      "question": "寒冷時肌肉顫抖可增加產熱。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "肌肉快速收縮會增加能量消耗與熱量產生。",
+      "id": 57
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 18,
+      "type": "two_choice",
+      "question": "蜥蜴曬太陽主要是利用什麼調節體溫？",
+      "options": [
+        "環境熱源",
+        "大量排汗"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "蜥蜴是外溫動物，常藉行為利用環境熱源調節體溫。",
+      "id": 58
+    },
+    {
+      "unitId": "bio01_6-3-1體溫",
+      "unitTitle": "體溫恆定",
+      "sourceQuestionId": 6,
+      "type": "true_false",
+      "question": "發燒時應靠激烈運動、增加流汗來退燒。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 1,
+      "difficulty": "易",
+      "explanation": "激烈運動會增加產熱，不能作為發燒時的退燒方法。",
+      "id": 59
+    },
+    {
+      "unitId": "bio01_6-3-1血糖",
+      "unitTitle": "血糖恆定",
+      "sourceQuestionId": 3,
+      "type": "two_choice",
+      "question": "血糖過高時，哪種激素可幫助降低血糖？",
+      "options": [
+        "胰島素",
+        "升糖素"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "胰島素可促進細胞利用葡萄糖，並促進肝糖形成。",
+      "id": 60
+    },
+    {
+      "unitId": "bio01_6-3-1血糖",
+      "unitTitle": "血糖恆定",
+      "sourceQuestionId": 6,
+      "type": "two_choice",
+      "question": "血糖偏低時，哪種激素分泌會增加？",
+      "options": [
+        "升糖素",
+        "胰島素"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "升糖素可促使肝糖分解，使血糖回升。",
+      "id": 61
+    },
+    {
+      "unitId": "bio01_6-3-1血糖",
+      "unitTitle": "血糖恆定",
+      "sourceQuestionId": 8,
+      "type": "true_false",
+      "question": "多餘的血糖可轉成肝糖，主要儲存在肝臟。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "肝臟可儲存肝糖，並參與血糖濃度調節。",
+      "id": 62
+    },
+    {
+      "unitId": "bio01_6-3-1血糖",
+      "unitTitle": "血糖恆定",
+      "sourceQuestionId": 17,
+      "type": "true_false",
+      "question": "血糖濃度太低可能引發飢餓感。",
+      "options": [
+        "正確",
+        "錯誤"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "血糖偏低是引發飢餓感的重要原因之一。",
+      "id": 63
+    },
+    {
+      "unitId": "bio01_6-3-1血糖",
+      "unitTitle": "血糖恆定",
+      "sourceQuestionId": 7,
+      "type": "two_choice",
+      "question": "緊急狀況下，可促使血糖升高的是？",
+      "options": [
+        "腎上腺素",
+        "胰島素"
+      ],
+      "answer": 0,
+      "difficulty": "易",
+      "explanation": "腎上腺素可在緊急狀況下促使肝糖分解，增加血糖供應。",
+      "id": 64
+    }
+  ]
+}
