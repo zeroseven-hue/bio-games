@@ -1192,19 +1192,19 @@ function renderCanvas() {
   drawPlayerCharacter(ctx, player);
 }
 
-// 侏儸紀靈動向量探險家繪製函式 (依 28x36 碰撞盒精準貼齊，螢光科技探險家主題，跑步/下墜多重動態)
+// 侏儸紀靈動向量探險家繪製函式 (依 28x36 碰撞盒精準貼齊，全螢光金系英雄主題，跑步/下墜多重動態)
 function drawPlayerCharacter(ctx, p) {
   ctx.save();
 
-  // 1. 靈動螢光光暈 (Fluorescent Bioluminescent Aura)
+  // 1. 純粹螢光金動態光暈 (Fluorescent Golden Aura)
   if (p.invincibleTimer > 0) {
-    ctx.shadowColor = "#fbbf24";
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#fef08a";
+    ctx.shadowBlur = 22;
     if (Math.floor(Date.now() / 100) % 2 === 0) ctx.globalAlpha = 0.65;
   } else {
-    // 平時自帶動態螢光呼吸光暈 (Fluorescent Neon Cyan Bloom，深淵中清晰奪目又靈動)
+    // 平時自帶純金呼吸光暈 (Fluorescent Gold Bloom，深淵中穿透力第一)
     const neonBreath = Math.sin(Date.now() / 200) * 2.0 + 8.0; // 6px ~ 10px 柔和呼吸起伏
-    ctx.shadowColor = "#00f5ff";
+    ctx.shadowColor = "#facc15";
     ctx.shadowBlur = neonBreath;
   }
 
@@ -1213,16 +1213,14 @@ function drawPlayerCharacter(ctx, p) {
   const isFalling = !p.isGrounded;
   const runPhase = (Date.now() / 70); // 跑步週期
 
-  // 專業美術色彩配置 (螢光生化探險家主題)：
-  // 骨架線條與頭部外圈：螢光活力金 (#ffea00) / 曜石暖金 (#f59e0b)
-  // 頭部甜甜圈內芯：螢光極光電青面罩 (100% 告別死白！高飽和極光青藍漸層，晶瑩立體)
-  // 核心裝備：螢光薄荷晶石腰帶 (#00ff9d)，冷暖互補對比，視覺焦點極佳
-  const primaryColor = "#f59e0b";      // 曜石暖金外框
-  const limbColor = "#ffea00";         // 螢光亮金肢體骨架
-  const coreGemColor = "#00ff9d";      // 螢光薄荷綠晶石
-  const visorInner = "#00f5ff";        // 面罩核心：高亮極光電青 (絕無死白)
-  const visorMid = "#0891b2";          // 面罩中層：晶瑩水藍
-  const visorOuter = "#0369a1";        // 面罩邊緣：深邃全息青
+  // 專業美術色彩配置 (全螢光曜金系 ‧ 單色系高度統一)：
+  // 告別雜色拼貼，全身上下均採用高純度金黃色階，俐落純粹如金色閃電
+  const primaryColor = "#f59e0b";      // 曜石暖金外框與關節
+  const limbColor = "#facc15";         // 螢光亮金肢體骨架
+  const coreGemColor = "#fde047";      // 核心腰帶：耀金晶石
+  const visorInner = "#fef08a";        // 面罩光心：柔光暖金 (同色系極致發光，無白、無藍、無雜色)
+  const visorMid = "#fde047";          // 面罩中層：明亮耀金
+  const visorOuter = "#d97706";        // 面罩邊緣：深邃琥珀金
 
   ctx.lineWidth = 3.2;
   ctx.lineCap = "round";
@@ -1294,16 +1292,16 @@ function drawPlayerCharacter(ctx, p) {
   }
   ctx.stroke();
 
-  // 5. 繪製核心能量晶石 (探險家腰帶微光晶石，螢光薄荷綠點綴)
-  ctx.shadowColor = "#00ff9d";
-  ctx.shadowBlur = 8;
+  // 5. 繪製核心能量晶石 (探險家腰帶金黃核心節點，全色系統一)
+  ctx.shadowColor = "#facc15";
+  ctx.shadowBlur = 6;
   ctx.fillStyle = coreGemColor;
   ctx.beginPath();
   ctx.arc(cx, hipY - 1, 2.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // 6. 繪製頭部 (侏儸紀甜甜圈環 + 螢光極光電青全息面罩，100% 絕無死白)
-  ctx.shadowColor = "#00f5ff";
+  // 6. 繪製頭部 (侏儸紀甜甜圈環 + 純粹螢光耀金面罩，100% 同色系純淨)
+  ctx.shadowColor = "#facc15";
   ctx.shadowBlur = 8;
 
   const headGrad = ctx.createRadialGradient(cx + tilt - 1.5, headY - 1.5, 0.5, cx + tilt, headY, headRadius);
