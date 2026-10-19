@@ -952,6 +952,9 @@ function endGame() {
       },
       onSuccess: () => {
         $('certModal').style.display = 'flex';
+      },
+      onClose: () => {
+        $('certModal').style.display = 'flex';
       }
     });
   } else {

@@ -895,17 +895,21 @@ function startNewFishingSession() {
   if (isTimerOff) {
     timerDisplay.textContent = "特教無壓力";
   } else {
+    const m = Math.floor(remainingSeconds / 60).toString().padStart(2, "0");
+    const s = (remainingSeconds % 60).toString().padStart(2, "0");
+    timerDisplay.textContent = `${m}:${s}`;
     startTimer();
   }
   presentNextQuestion();
 }
 
 function startTimer() {
+  clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     if (isPaused) return;
     remainingSeconds--;
-    const m = Math.floor(remainingSeconds / 60).toString().padStart(2, "0");
-    const s = (remainingSeconds % 60).toString().padStart(2, "0");
+    const m = Math.max(0, Math.floor(remainingSeconds / 60)).toString().padStart(2, "0");
+    const s = Math.max(0, remainingSeconds % 60).toString().padStart(2, "0");
     timerDisplay.textContent = `${m}:${s}`;
 
     if (remainingSeconds <= 0) {
@@ -939,15 +943,48 @@ function endFishingSession() {
       scoreDisplay: `${score} 分 (共答對 ${answeredCount} 題)`,
       duration: durationStr,
       onBonusChallenge: () => {
-        // 🔥 挑戰加碼 10 題：關閉視窗，再抓 10 題！
+        // 🔥 挑戰加碼 10 題：重置題數、物理吊爪狀態與加碼時間，再抓 10 題！
         answeredCount = 0;
+        targetQCount = 10;
         isOver = false;
+        isPaused = false;
+        isCoolingDown = false;
+        isFreezingRead = false;
+        cooldownOverlay.classList.add("hidden");
+        claw.state = "swinging";
+        claw.length = 30;
+        claw.caughtItem = null;
+        claw.originX = viewW / 2;
+        claw.originY = 16;
+
+        // ⚡ 關鍵修復：重新給予充裕的加碼挑戰時間 (依 gameMinutes 預設 5 分鐘)，避免 remainingSeconds <= 0 導致 1 秒內又強制跳回結算視窗！
+        remainingSeconds = (gameMinutes || 5) * 60;
+        clearInterval(timerInterval);
+        clearInterval(cooldownTimer);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTimerOff = urlParams.get("timer") === "off";
+        if (isTimerOff) {
+          timerDisplay.textContent = "特教無壓力";
+        } else {
+          const m = Math.floor(remainingSeconds / 60).toString().padStart(2, "0");
+          const s = (remainingSeconds % 60).toString().padStart(2, "0");
+          timerDisplay.textContent = `${m}:${s}`;
+          startTimer();
+        }
+
+        idModal.classList.add("hidden");
+        certModal.classList.add("hidden");
+        pauseModal.classList.add("hidden");
+
         prepareQuestionPool().then(() => {
           presentNextQuestion();
-          startTimer();
         });
       },
       onSuccess: (payload) => {
+        idModal.classList.remove("hidden");
+      },
+      onClose: () => {
         idModal.classList.remove("hidden");
       }
     });

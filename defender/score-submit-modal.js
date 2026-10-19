@@ -296,15 +296,31 @@
       indivFields.style.display = 'none';
     });
 
-    closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       overlay.remove();
-      if (options.onClose) options.onClose();
+      if (typeof options.onClose === 'function') {
+        try {
+          options.onClose();
+        } catch (err) {
+          console.error('Error in onClose:', err);
+        }
+      }
     });
 
     if (bonusFormBtn) {
-      bonusFormBtn.addEventListener('click', () => {
+      bonusFormBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         overlay.remove();
-        if (options.onBonusChallenge) options.onBonusChallenge();
+        if (typeof options.onBonusChallenge === 'function') {
+          try {
+            options.onBonusChallenge();
+          } catch (err) {
+            console.error('Error in onBonusChallenge:', err);
+          }
+        }
       });
     }
 
@@ -415,15 +431,31 @@
 
         const bonusBtn = resultBox.querySelector('#ssBonusBtn');
         if (bonusBtn) {
-          bonusBtn.addEventListener('click', () => {
+          bonusBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             overlay.remove();
-            if (options.onBonusChallenge) options.onBonusChallenge();
+            if (typeof options.onBonusChallenge === 'function') {
+              try {
+                options.onBonusChallenge();
+              } catch (err) {
+                console.error('Error in onBonusChallenge:', err);
+              }
+            }
           });
         }
 
-        resultBox.querySelector('#ssFinishBtn').addEventListener('click', () => {
+        resultBox.querySelector('#ssFinishBtn').addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           overlay.remove();
-          if (options.onSuccess) options.onSuccess(payload);
+          if (typeof options.onSuccess === 'function') {
+            try {
+              options.onSuccess(payload);
+            } catch (err) {
+              console.error('Error in onSuccess:', err);
+            }
+          }
         });
 
       } catch (err) {
