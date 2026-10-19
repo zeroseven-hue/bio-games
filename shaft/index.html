@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>生物大墜落：細胞深淵下樓梯 - Bio-Shaft: Cell Abyss</title>
-  <link rel="stylesheet" href="style.css?v=5.5">
+  <link rel="stylesheet" href="style.css?v=6.2">
 </head>
 <body>
 
@@ -52,14 +52,20 @@
       </div>
     </div>
 
-    <!-- 頂部浮動觀念筆記提示 (答錯時不擋住下樓梯，即時提示觀念) -->
-    <div class="concept-toast-banner hidden" id="conceptToast">
-      <span class="toast-icon">💡</span>
-      <span class="toast-text" id="conceptToastText">生物觀念解析：...</span>
+    <!-- 頂部獨立命運題目看板 (專屬全寬度容器，100% 完整字數自然折行，永不切字) -->
+    <div class="fate-question-banner" id="fateQuestionBanner">
+      <div class="fq-badge">❓ 命運問答</div>
+      <div class="fq-content" id="topQuestionStem">正在載入命運試題... 請留意下方命運階梯做出抉擇！</div>
     </div>
 
     <!-- 主遊戲 Canvas 畫布容器 -->
     <div class="canvas-container" id="canvasContainer">
+      <!-- 頂部浮動觀念筆記提示 (位於畫布頂部，答錯時即時提示觀念且不干擾題目看板) -->
+      <div class="concept-toast-banner hidden" id="conceptToast">
+        <span class="toast-icon">💡</span>
+        <span class="toast-text" id="conceptToastText">生物觀念解析：...</span>
+      </div>
+
       <canvas id="gameCanvas" width="800" height="600"></canvas>
 
       <!-- iPad 左右半屏盲操指示微光 (前3秒閃爍提示) -->
@@ -155,6 +161,6 @@
 
   <script src="sounds_b64.js?v=5.8"></script>
   <script src="../score-submit-modal.js?v=2.8"></script>
-  <script src="game.js?v=6.1"></script>
+  <script src="game.js?v=6.2"></script>
 </body>
 </html>

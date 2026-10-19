@@ -151,24 +151,75 @@ body {
 .unit-info { font-weight: 800; color: #4ade80; }
 .styled-unit-select { padding: 2px 6px; border-radius: 6px; border: 1px solid #94a3b8; background: #ffffff; font-weight: bold; }
 
-/* 頂部浮動觀念筆記 Toast 橫條 (位於命運問題盒下方，絕不重疊遮擋題幹) */
+/* 頂部獨立命運題目全寬度看板 (100% 完整字數自然折行，永不切字) */
+.fate-question-banner {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  margin: 6px 16px 6px 16px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 25;
+  min-height: 50px;
+  transition: all 0.2s ease;
+}
+
+.fq-badge {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 900;
+  padding: 5px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.fq-content {
+  color: #fef08a;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.45;
+  flex: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  word-break: break-word;
+}
+
+.fate-question-banner.zoomed-question .fq-content {
+  font-size: 1.25rem;
+}
+
+.fq-content .keyword-highlight {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border-bottom: 2px solid #ef4444;
+}
+
+/* 頂部浮動觀念筆記 Toast 橫條 (位於遊戲畫布頂部，懸浮提示且絕不重疊題幹或干擾操作) */
 .concept-toast-banner {
   position: absolute;
-  top: 122px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(245, 158, 11, 0.95);
+  background: rgba(245, 158, 11, 0.96);
   color: #0f172a;
   padding: 8px 20px;
   border-radius: 20px;
   font-weight: 900;
   font-size: 0.92rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   z-index: 60;
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 90%;
+  max-width: 85%;
+  pointer-events: none;
   animation: toastSlide 0.3s ease;
 }
 

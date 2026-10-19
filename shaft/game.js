@@ -84,6 +84,8 @@ const unitInfoText = document.getElementById("unitInfoText");
 const conceptToast = document.getElementById("conceptToast");
 const conceptToastText = document.getElementById("conceptToastText");
 const touchGuideOverlay = document.getElementById("touchGuideOverlay");
+const fateQuestionBanner = document.getElementById("fateQuestionBanner");
+const topQuestionStem = document.getElementById("topQuestionStem");
 
 const btnTouchLeft = document.getElementById("btnTouchLeft");
 const btnTouchRight = document.getElementById("btnTouchRight");
@@ -165,6 +167,7 @@ function initEventListeners() {
     isTextZoomed = !isTextZoomed;
     btnZoomText.classList.toggle("active-zoom", isTextZoomed);
     btnZoomText.textContent = isTextZoomed ? "🔍 題目已放大" : "🔍 放大題目";
+    if (fateQuestionBanner) fateQuestionBanner.classList.toggle("zoomed-question", isTextZoomed);
   });
 
   btnRules.addEventListener("click", () => openModal(rulesModal));
@@ -522,6 +525,7 @@ function resetGame() {
   stairs = [];
   isFateStairActive = false;
   currentFateQuestion = null;
+  updateTopQuestionBanner(null);
 
   // 1. 開局預設一座 340px 巨型安全初生平台
   stairs.push({
@@ -603,10 +607,27 @@ function spawnBottomStair(spawnY) {
   });
 }
 
+function updateTopQuestionBanner(q) {
+  if (!topQuestionStem) return;
+  if (!q || !q.question) {
+    topQuestionStem.innerHTML = "正在載入命運試題... 請留意下方命運階梯做出抉擇！";
+    return;
+  }
+  let stem = q.question.trim();
+  NEGATIVE_KEYWORDS.forEach(kw => {
+    if (stem.includes(kw)) {
+      stem = stem.replace(new RegExp(kw, "g"), `<span class="keyword-highlight">${kw}</span>`);
+    }
+  });
+  topQuestionStem.innerHTML = stem;
+}
+
 function spawnFateStairPair(y) {
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
   if (!currentFateQuestion) return;
+
+  updateTopQuestionBanner(currentFateQuestion);
 
   const rawOpts = currentFateQuestion.options || ["選項A", "選項B"];
   let correctIdx = 0;
@@ -1093,38 +1114,7 @@ function renderCanvas() {
     }
   });
 
-  // 4. 命運題目頂部醒目橫條 (高度 96px，支援 1~3 行自適應文字與字體縮放，100% 不切字、不爆框)
-  const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && s.y <= 550 && s.y >= -40);
-  if (fateStairActive && currentFateQuestion) {
-    const boxY = 12;
-    const boxH = 96;
-    ctx.fillStyle = "rgba(15, 23, 42, 0.96)";
-    ctx.fillRect(20, boxY, CANVAS_WIDTH - 40, boxH);
-    ctx.strokeStyle = "#f59e0b";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(20, boxY, CANVAS_WIDTH - 40, boxH);
-
-    const qText = currentFateQuestion.question || "";
-    const lines = wrapQuestionText(qText, 23);
-
-    ctx.fillStyle = "#fbbf24";
-
-    if (lines.length === 1) {
-      ctx.font = isTextZoomed ? "bold 19px sans-serif" : "bold 17px sans-serif";
-      ctx.fillText(`❓ 命運問答：${lines[0]}`, 35, boxY + 54);
-    } else if (lines.length === 2) {
-      ctx.font = isTextZoomed ? "bold 17px sans-serif" : "bold 15px sans-serif";
-      ctx.fillText(`❓ 命運問答：${lines[0]}`, 35, boxY + 42);
-      ctx.fillText(`   ${lines[1]}`, 35, boxY + 70);
-    } else {
-      ctx.font = isTextZoomed ? "bold 15px sans-serif" : "bold 13.5px sans-serif";
-      ctx.fillText(`❓ 命運問答：${lines[0]}`, 35, boxY + 34);
-      ctx.fillText(`   ${lines[1]}`, 35, boxY + 58);
-      ctx.fillText(`   ${lines[2]}`, 35, boxY + 82);
-    }
-  }
-
-  // 5. 繪製彩虹星光粒子
+  // 4. 繪製彩虹星光粒子
   starParticles.forEach(p => {
     ctx.save();
     ctx.globalAlpha = Math.max(0, p.alpha);
@@ -1135,15 +1125,138 @@ function renderCanvas() {
     ctx.restore();
   });
 
-  // 6. 繪製玩家角色
+  // 5. 繪製侏儸紀風格靈動探險家角色 (原生 Canvas 向量精繪)
+  drawPlayerCharacter(ctx, player);
+}
+
+// 侏儸紀靈動向量探險家繪製函式 (依 28x36 碰撞盒精準貼齊，金黃探險主題，跑步/下墜多重動態)
+function drawPlayerCharacter(ctx, p) {
   ctx.save();
-  if (player.invincibleTimer > 0) {
+
+  // 無敵狀態與受傷反饋閃爍
+  if (p.invincibleTimer > 0) {
     ctx.shadowColor = "#fbbf24";
-    ctx.shadowBlur = 15;
-    if (Math.floor(Date.now() / 100) % 2 === 0) ctx.globalAlpha = 0.6;
+    ctx.shadowBlur = 18;
+    if (Math.floor(Date.now() / 100) % 2 === 0) ctx.globalAlpha = 0.65;
+  } else {
+    // 平時自帶微光光暈 (在深邃深淵中極具視覺焦點)
+    ctx.shadowColor = "rgba(245, 158, 11, 0.4)";
+    ctx.shadowBlur = 4;
   }
-  ctx.font = "30px sans-serif";
-  ctx.fillText(player.avatar, player.x - 2, player.y + 28);
+
+  const cx = p.x + p.width / 2; // 水平中心
+  const isMoving = Math.abs(p.vx) > 0.15;
+  const isFalling = !p.isGrounded;
+  const runPhase = (Date.now() / 70); // 跑步週期
+
+  // 專業美術色彩配置 (金黃探險家主題)：
+  // 骨架線條與頭部外圈：活力金黃 (#fbbf24) / 琥珀暖金 (#f59e0b)
+  // 頭部甜甜圈內芯：晨曦耀金光核 (雙層漸層，高光白心至暖金光暈，立體晶亮不呆板)
+  // 核心裝備：科技天藍能量晶石腰帶 (#38bdf8)，冷暖互補對比，視覺焦點極佳
+  const primaryColor = "#f59e0b";      // 探險主色：曜石暖金
+  const limbColor = "#fbbf24";         // 肢體骨架：明亮金黃
+  const coreGemColor = "#38bdf8";      // 探險晶石：科技天藍
+  const visorInner = "#ffffff";        // 面罩光心：高亮白心
+  const visorMid = "#fef08a";          // 面罩中層：暖金晨曦
+  const visorOuter = "#fde047";        // 面罩外緣：光暈金黃
+
+  ctx.lineWidth = 3.2;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  // 1. 骨架關節定位 (依 28x36 碰撞盒精準貼齊，腳底剛好踏在 p.y + p.height)
+  const headRadius = 6.8;
+  const headY = p.y + 7.5;             // 頭部中心
+  const neckY = headY + headRadius;    // 頸部 (約 p.y + 14.3)
+  const shoulderY = p.y + 16.5;        // 肩部
+  const hipY = p.y + 24.5;             // 髖骨臀部
+  const feetY = p.y + p.height;        // 腳底 (p.y + 36，剛好踩上階梯表面，零懸空、零沉陷！)
+
+  // 奔跑前傾微角度 (帶出動感)
+  const tilt = isMoving ? (p.vx > 0 ? 1.5 : -1.5) : 0;
+
+  // 2. 繪製軀幹 (脊柱中線)
+  ctx.strokeStyle = limbColor;
+  ctx.beginPath();
+  ctx.moveTo(cx + tilt, neckY);
+  ctx.lineTo(cx, hipY);
+  ctx.stroke();
+
+  // 3. 繪製手臂 (隨移動/下墜動態擺動)
+  ctx.beginPath();
+  if (isFalling) {
+    // 自由下墜姿勢：雙手微彎向外自然張開，維持高空平衡 (探險躍下姿勢)
+    ctx.moveTo(cx + tilt, shoulderY);
+    ctx.lineTo(cx - 12, shoulderY - 5);
+    ctx.moveTo(cx + tilt, shoulderY);
+    ctx.lineTo(cx + 12, shoulderY - 5);
+  } else if (isMoving) {
+    // 奔跑動作：雙手自然前後前後律動擺盪
+    const armSwing = Math.sin(runPhase) * 8.5;
+    ctx.moveTo(cx + tilt, shoulderY);
+    ctx.lineTo(cx - armSwing, shoulderY + 7);
+    ctx.moveTo(cx + tilt, shoulderY);
+    ctx.lineTo(cx + armSwing, shoulderY + 7);
+  } else {
+    // 站立待機：自然垂於身側
+    ctx.moveTo(cx, shoulderY);
+    ctx.lineTo(cx - 7.5, shoulderY + 8);
+    ctx.moveTo(cx, shoulderY);
+    ctx.lineTo(cx + 7.5, shoulderY + 8);
+  }
+  ctx.stroke();
+
+  // 4. 繪製腿部 (依踏面 feetY 貼齊)
+  ctx.beginPath();
+  if (isFalling) {
+    // 下墜姿勢：雙腿微曲迎風張開，準備落地緩衝
+    ctx.moveTo(cx, hipY);
+    ctx.lineTo(cx - 7, feetY - 2);
+    ctx.moveTo(cx, hipY);
+    ctx.lineTo(cx + 7, feetY - 2);
+  } else if (isMoving) {
+    // 奔跑踏步：雙腳交替邁步 (剛好落於階梯表面 feetY)
+    const legStride = Math.sin(runPhase) * 8.0;
+    ctx.moveTo(cx, hipY);
+    ctx.lineTo(cx + legStride, feetY);
+    ctx.moveTo(cx, hipY);
+    ctx.lineTo(cx - legStride, feetY);
+  } else {
+    // 穩健站立：雙腳平穩分開踏在階梯上
+    ctx.moveTo(cx, hipY);
+    ctx.lineTo(cx - 5.5, feetY);
+    ctx.moveTo(cx, hipY);
+    ctx.lineTo(cx + 5.5, feetY);
+  }
+  ctx.stroke();
+
+  // 5. 繪製核心能量晶石 (探險家腰帶微光晶石，藍金互補亮點)
+  ctx.shadowColor = "rgba(56, 189, 248, 0.8)";
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = coreGemColor;
+  ctx.beginPath();
+  ctx.arc(cx, hipY - 1, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 6. 繪製頭部 (侏儸紀風格甜甜圈環 + 晨曦耀金立體光核)
+  ctx.shadowColor = "rgba(245, 158, 11, 0.5)";
+  ctx.shadowBlur = 5;
+
+  const headGrad = ctx.createRadialGradient(cx + tilt - 2, headY - 2, 1, cx + tilt, headY, headRadius);
+  headGrad.addColorStop(0, visorInner);
+  headGrad.addColorStop(0.55, visorMid);
+  headGrad.addColorStop(1, visorOuter);
+
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(cx + tilt, headY, headRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 頭部外圈甜甜圈線條
+  ctx.strokeStyle = primaryColor;
+  ctx.lineWidth = 3.0;
+  ctx.stroke();
+
   ctx.restore();
 }
 
