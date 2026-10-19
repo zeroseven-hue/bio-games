@@ -220,6 +220,11 @@ function initControls() {
   btnClearAll.onclick = () => unitsGrid.querySelectorAll("input").forEach(cb => cb.checked = false);
   btnApplyDrawer.onclick = handleApplyTeacherSettings;
 
+  const selectDrawerPub = document.getElementById("selectDrawerPublisher");
+  if (selectDrawerPub) {
+    selectDrawerPub.onchange = renderDrawerUnitsGrid;
+  }
+
   btnAudio.onclick = () => initAudio();
   btnPause.onclick = togglePause;
   btnResumeGame.onclick = togglePause;
@@ -229,32 +234,102 @@ function initControls() {
   btnRestartFishing.onclick = () => { certModal.classList.add("hidden"); startNewFishingSession(); };
 }
 
-function buildUnitsChecklist() {
-  unitsGrid.innerHTML = "";
-  for (let i = 1; i <= 10; i++) {
-    const uId = `unit${i.toString().padStart(2, "0")}`;
-    const lbl = document.createElement("label");
-    lbl.innerHTML = `<input type="checkbox" value="${uId}" checked> 單元 ${i.toString().padStart(2, "0")}`;
-    unitsGrid.appendChild(lbl);
+let isTeacherDrawerOverridden = false;
+let allManifestUnits = [];
+
+async function buildUnitsChecklist() {
+  unitsGrid.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem; padding:8px;">載入課堂題庫單元中...</div>';
+  try {
+    const res = await fetch("../questions/manifest.json");
+    if (!res.ok) throw new Error("Manifest 載入失敗");
+    const data = await res.json();
+
+    allManifestUnits = [];
+    if (data.publishers && Array.isArray(data.publishers)) {
+      data.publishers.forEach(pub => {
+        if (pub.status === "placeholder") return;
+        pub.semesters.forEach(sem => {
+          if (!sem.units) return;
+          sem.units.forEach(u => {
+            allManifestUnits.push({
+              publisher: pub.name,
+              semester: sem.name,
+              title: u.title,
+              file: u.file,
+              id: u.id
+            });
+          });
+        });
+      });
+    } else if (data.units) {
+      allManifestUnits = data.units.map(u => ({
+        publisher: "生物核心",
+        semester: "7年級",
+        title: u.title,
+        file: u.file,
+        id: u.id
+      }));
+    }
+
+    renderDrawerUnitsGrid();
+  } catch (err) {
+    console.warn("載入題庫索引清單失敗:", err);
+    unitsGrid.innerHTML = '<div style="color:#ef4444; font-size:0.85rem; padding:8px;">題庫清單讀取異常，請使用大廳派卷</div>';
   }
 }
 
-function handleApplyTeacherSettings() {
+function renderDrawerUnitsGrid() {
+  const selectPub = document.getElementById("selectDrawerPublisher");
+  const currentPub = selectPub ? selectPub.value : "all";
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeUnitFromUrl = urlParams.get("unit") || urlParams.get("file");
+
+  unitsGrid.innerHTML = "";
+
+  const filtered = allManifestUnits.filter(u => {
+    if (currentPub === "all") return true;
+    return u.publisher.includes(currentPub);
+  });
+
+  filtered.forEach(u => {
+    const lbl = document.createElement("label");
+    lbl.className = "unit-item";
+
+    let isChecked = false;
+    if (isTeacherDrawerOverridden && selectedUnits && selectedUnits.length > 0) {
+      isChecked = selectedUnits.includes(u.file);
+    } else if (activeUnitFromUrl) {
+      const decoded = decodeURIComponent(activeUnitFromUrl).trim();
+      isChecked = (u.file === decoded || u.id === decoded || u.file.includes(decoded));
+    } else {
+      isChecked = true;
+    }
+
+    lbl.innerHTML = `
+      <input type="checkbox" value="${u.file}" ${isChecked ? "checked" : ""}>
+      <span title="${u.title}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📖 ${u.title}</span>
+    `;
+    unitsGrid.appendChild(lbl);
+  });
+}
+
+async function handleApplyTeacherSettings() {
   const checked = Array.from(unitsGrid.querySelectorAll("input:checked")).map(cb => cb.value);
   if (checked.length === 0) {
     alert("請至少選擇 1 個出題單元！");
     return;
   }
   selectedUnits = checked;
+  isTeacherDrawerOverridden = true;
   playMode = selectPlayMode.value;
   gameMinutes = parseInt(selectGameTime.value, 10);
   remainingSeconds = gameMinutes * 60;
 
   groupTurnTag.classList.toggle("hidden", playMode === "solo");
   drawerPanel.classList.add("hidden");
-  alert("✅ 設定已套用！重新起錨出海！");
 
-  prepareQuestionPool();
+  await prepareQuestionPool();
+  alert(`✅ 已套用設定！成功載入 ${questionPool.length} 題指定單元試題，重新起錨出海！`);
   startNewFishingSession();
 }
 
@@ -294,8 +369,8 @@ async function prepareQuestionPool() {
   const urlParams = new URLSearchParams(window.location.search);
   const unitParam = urlParams.get("unit") || urlParams.get("file");
 
-  // 1. 優先精準讀取 URL 派卷單元 (支援完整中文路徑與段考快閃)
-  if (unitParam) {
+  // 1. 若老師未在抽屜自選，且網址帶有指定派卷單元，優先載入網址單元
+  if (!isTeacherDrawerOverridden && unitParam) {
     try {
       const decodedUnit = decodeURIComponent(unitParam).trim();
       const fetchPath = decodedUnit.endsWith('.json') ? `../questions/${decodedUnit}` : `../questions/${decodedUnit}.json`;
@@ -306,6 +381,8 @@ async function prepareQuestionPool() {
         loaded = sanitizeQuestions(list);
         if (d.unitTitle) {
           unitTag.textContent = `當前單元：${d.unitTitle}`;
+        } else {
+          unitTag.textContent = `當前單元：${decodedUnit.split('/').pop().replace('.json', '')}`;
         }
       }
     } catch (err) {
@@ -313,8 +390,8 @@ async function prepareQuestionPool() {
     }
   }
 
-  // 2. 若無指定或載入失敗，讀取老師抽屜勾選的單元
-  if (loaded.length === 0) {
+  // 2. 老師在抽屜勾選自訂單元（或網址無單元）：精準載入勾選的所有真實單元檔案
+  if (loaded.length === 0 && selectedUnits && selectedUnits.length > 0) {
     try {
       for (const u of selectedUnits) {
         const fetchPath = u.endsWith('.json') ? `../questions/${u}` : `../questions/${u}.json`;
@@ -325,14 +402,21 @@ async function prepareQuestionPool() {
           loaded.push(...sanitizeQuestions(list));
         }
       }
+      if (selectedUnits.length === 1) {
+        const singleName = selectedUnits[0].split('/').pop().replace('.json', '');
+        unitTag.textContent = `當前單元：${singleName}`;
+      } else if (selectedUnits.length > 1) {
+        unitTag.textContent = `自選 ${selectedUnits.length} 個單元混合出題`;
+      }
     } catch (err) {
-      console.warn("外部題庫載入失敗，啟動備用保底題庫", err);
+      console.warn("自選題庫載入失敗，啟動備用保底題庫", err);
     }
   }
 
   // 3. 備用保底題庫
   if (loaded.length === 0) {
     loaded = sanitizeQuestions(FISHING_FALLBACK_QUESTIONS);
+    unitTag.textContent = "當前單元：生物核心精選題";
   }
 
   // 4. 自動去重 (避免重複題目出現)

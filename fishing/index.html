@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>生物大釣手：黃金深海大捕撈 - Bio-Fishing</title>
-  <link rel="stylesheet" href="style.css?v=2.5">
+  <link rel="stylesheet" href="style.css?v=2.6">
 </head>
 <body>
   <div class="fishing-app">
@@ -48,9 +48,15 @@
         </label>
       </div>
       <div class="unit-check-card">
-        <div class="check-actions">
-          <span>勾選本次出題單元 (Unit 01 ~ 10)：</span>
-          <div>
+        <div class="check-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span>勾選出題章節 (支援跨單元多選)：</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <select id="selectDrawerPublisher" style="background:#0f172a; color:#fff; border:1px solid #475569; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold;">
+              <option value="all">📚 全部版本</option>
+              <option value="翰林版" selected>🏫 翰林版</option>
+              <option value="康軒版">🏫 康軒版</option>
+              <option value="南一版">🏫 南一版</option>
+            </select>
             <button id="btnCheckAll" class="btn-mini">全選</button>
             <button id="btnClearAll" class="btn-mini">清空</button>
           </div>
@@ -195,6 +201,6 @@
   </div>
 
   <script src="../score-submit-modal.js"></script>
-  <script src="game.js?v=2.5"></script>
+  <script src="game.js?v=2.6"></script>
 </body>
 </html>
