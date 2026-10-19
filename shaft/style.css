@@ -151,10 +151,10 @@ body {
 .unit-info { font-weight: 800; color: #4ade80; }
 .styled-unit-select { padding: 2px 6px; border-radius: 6px; border: 1px solid #94a3b8; background: #ffffff; font-weight: bold; }
 
-/* 頂部浮動觀念筆記 Toast 橫條 */
+/* 頂部浮動觀念筆記 Toast 橫條 (位於命運問題盒下方，絕不重疊遮擋題幹) */
 .concept-toast-banner {
   position: absolute;
-  top: 80px;
+  top: 122px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(245, 158, 11, 0.95);
@@ -164,7 +164,7 @@ body {
   font-weight: 900;
   font-size: 0.92rem;
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  z-index: 50;
+  z-index: 60;
   display: flex;
   align-items: center;
   gap: 8px;

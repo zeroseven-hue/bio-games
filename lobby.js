@@ -94,14 +94,23 @@ function renderPublisherCards(publishers, container) {
       `;
     } else {
       pub.semesters.forEach(sem => {
-        if (!sem.units || sem.units.length === 0) return;
-
         const semSection = document.createElement("div");
         semSection.className = "semester-section";
 
         let semIcon = "📘";
         if (sem.name === "7下") semIcon = "📙";
         if (sem.name === "快閃特輯") semIcon = "⚡";
+
+        if (sem.status === "placeholder" || !sem.units || sem.units.length === 0) {
+          semSection.innerHTML = `
+            <h4 class="semester-title">${semIcon} ${sem.name} <span class="badge-placeholder" style="margin-left:8px;">${sem.statusText || '(預留擴充 / 暫無試題)'}</span></h4>
+            <div class="placeholder-notice" style="padding:10px 14px; font-size:0.9rem; background:#f5f5f5; border-radius:8px; color:#616161;">
+              📌 <strong>${pub.name} ${sem.name}</strong> 題庫區域已預留擴充，目前暫無試題檔案。
+            </div>
+          `;
+          content.appendChild(semSection);
+          return;
+        }
 
         semSection.innerHTML = `
           <h4 class="semester-title">${semIcon} ${sem.name} (${sem.units.length} 個題庫)</h4>
@@ -408,10 +417,22 @@ function buildDispatchUrl() {
 }
 
 function generateDispatchUrlAndQR() {
-  const selectUnit = document.getElementById("selectUnit").value;
+  const selectUnitElem = document.getElementById("selectUnit");
+  const selectUnit = selectUnitElem ? selectUnitElem.value : "";
   if (!selectUnit) {
+    if (selectUnitElem) {
+      selectUnitElem.style.border = "2px solid #ef4444";
+      selectUnitElem.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => { selectUnitElem.style.border = ""; }, 3000);
+    }
     alert("請先於步驟 2 選擇生物題庫單元！");
     return;
+  }
+
+  const btnGenerateQR = document.getElementById("btnGenerateQR");
+  if (btnGenerateQR) {
+    btnGenerateQR.dataset.origText = btnGenerateQR.textContent;
+    btnGenerateQR.textContent = "⚙️ 正在生成 QR Code...";
   }
 
   const fullUrl = buildDispatchUrl();
@@ -425,21 +446,40 @@ function generateDispatchUrlAndQR() {
 
   qrDiv.innerHTML = "";
 
-  if (window.QRCode) {
-    qrcodeObj = new QRCode(qrDiv, {
-      text: fullUrl,
-      width: 160,
-      height: 160,
-      colorDark: "#1b5e20",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
-    });
-  } else {
-    qrDiv.textContent = "QRCode 庫載入失敗";
+  let qrRendered = false;
+  try {
+    if (window.QRCode) {
+      const correctLevel = (window.QRCode.CorrectLevel && window.QRCode.CorrectLevel.H) ? window.QRCode.CorrectLevel.H : 2;
+      qrcodeObj = new QRCode(qrDiv, {
+        text: fullUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#1b5e20",
+        colorLight: "#ffffff",
+        correctLevel: correctLevel
+      });
+      qrRendered = true;
+    }
+  } catch (err) {
+    console.warn("本機 QRCode.js 生成異常，切換至備用圖庫生成器:", err);
   }
 
-  qrResultArea.classList.remove("hidden");
-  qrResultArea.scrollIntoView({ behavior: "smooth" });
+  // 雙重保底機制：若 QRCode.js 無法執行，自動切換至 API 二維碼圖片
+  if (!qrRendered) {
+    qrDiv.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(fullUrl)}" alt="派發 QR Code" style="width:160px; height:160px; border-radius:8px; display:block; margin:0 auto; box-shadow:0 2px 8px rgba(0,0,0,0.15);" onerror="this.outerHTML='<div style=\'color:#15803d;font-weight:700;padding:12px;\'>📲 請點擊右方按鈕直接複製派發網址！</div>'">`;
+  }
+
+  if (qrResultArea) {
+    qrResultArea.classList.remove("hidden");
+    qrResultArea.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  if (btnGenerateQR) {
+    btnGenerateQR.textContent = "✅ 已生成專屬派發 QR Code！";
+    setTimeout(() => {
+      btnGenerateQR.textContent = btnGenerateQR.dataset.origText || "📱 生成派發 QR Code 與網址";
+    }, 2500);
+  }
 }
 
 function copyDispatchUrl() {

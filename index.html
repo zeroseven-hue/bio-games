@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>國中生物網頁遊戲平台 - bio-games</title>
-  <link rel="stylesheet" href="lobby.css?v=2.0">
-  <!-- QRCode.js CDN for QR Code Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="lobby.css?v=3.0">
+  <!-- QRCode.js (Local first for school networks/TANet with CDN fallback) -->
+  <script src="qrcode.min.js?v=1.0"></script>
+  <script>
+    if (!window.QRCode) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
+    }
+  </script>
 </head>
 <body>
   <div class="lobby-container">
@@ -121,7 +126,7 @@
               <span>📜 FISH-8831防偽證書</span>
             </div>
             <div class="card-actions">
-              <a href="fishing/index.html?v=2.0" class="btn-play btn-gold">🎣 直接進入捕撈</a>
+              <a href="fishing/index.html?v=2.5" class="btn-play btn-gold">🎣 直接進入捕撈</a>
             </div>
           </div>
 
@@ -137,7 +142,7 @@
               <span>📜 SHAFT-9912防偽證書</span>
             </div>
             <div class="card-actions">
-              <a href="shaft/index.html?v=5.7" class="btn-play btn-cyan">🧬 直接進入下樓梯</a>
+              <a href="shaft/index.html?v=6.0" class="btn-play btn-cyan">🧬 直接進入下樓梯</a>
             </div>
           </div>
 
@@ -333,6 +338,6 @@
     </footer>
   </div>
 
-  <script src="lobby.js?v=2.5"></script>
+  <script src="lobby.js?v=3.0"></script>
 </body>
 </html>

@@ -340,32 +340,41 @@ function toggleSound() {
   btnSound.textContent = soundEnabled ? "🔊" : "🔇";
 }
 
-// 智能中文避頭標點與詞組斷行演算法 (防止孤立標點與切字)
-function splitSmartQuestionText(text, maxChars = 22) {
-  if (!text || text.length <= maxChars) return [text || "", ""];
+// 智能中文避頭標點與多行自適應換行演算法 (支援 1~3 行自適應，防止孤立標點與字詞被切斷)
+function wrapQuestionText(text, maxChars = 23) {
+  if (!text) return [""];
+  const noHeadPunctuation = [",", "，", "。", "！", "？", "、", "；", "：", "」", "』", "）", "]", "}", ">", "”"];
+  const lines = [];
+  let remaining = text.trim();
 
-  const noHeadPunctuation = [",", "，", "。", "！", "？", "、", "；", "：", "」", "』", "）", "]", "}", ">"];
-  let splitIdx = maxChars;
-
-  while (splitIdx > 10 && (noHeadPunctuation.includes(text[splitIdx]) || noHeadPunctuation.includes(text[splitIdx - 1]))) {
-    splitIdx--;
+  while (remaining.length > 0 && lines.length < 3) {
+    if (remaining.length <= maxChars) {
+      lines.push(remaining);
+      break;
+    }
+    let splitIdx = maxChars;
+    while (splitIdx > 8 && (noHeadPunctuation.includes(remaining[splitIdx]) || noHeadPunctuation.includes(remaining[splitIdx - 1]))) {
+      splitIdx--;
+    }
+    let line = remaining.substring(0, splitIdx).trim();
+    remaining = remaining.substring(splitIdx).trim();
+    if (remaining.length > 0 && noHeadPunctuation.includes(remaining[0])) {
+      line += remaining[0];
+      remaining = remaining.substring(1).trim();
+    }
+    lines.push(line);
   }
-
-  let l1 = text.substring(0, splitIdx).trim();
-  let l2 = text.substring(splitIdx).trim();
-
-  if (l2.length > 0 && noHeadPunctuation.includes(l2[0])) {
-    l1 += l2[0];
-    l2 = l2.substring(1).trim();
+  if (remaining.length > 0 && lines.length === 3) {
+    lines[2] += remaining;
   }
-
-  return [l1, l2];
+  return lines;
 }
 
-function splitSmartOptionText(content, maxChars = 14) {
-  if (!content || content.length <= 15) return [content || "", ""];
+function wrapOptionText(content, maxChars = 14) {
+  if (!content) return ["", ""];
+  if (content.length <= maxChars) return [content, ""];
 
-  const compoundWords = ["冷藏", "保存", "進行", "結果", "作用", "細胞", "養分", "環境", "避光", "密封", "低溫", "處理", "活性", "酵素"];
+  const compoundWords = ["冷藏", "保存", "進行", "結果", "作用", "細胞", "養分", "環境", "避光", "密封", "低溫", "處理", "活性", "酵素", "風車草", "葉片", "表皮", "口腔", "皮膜"];
   let splitIdx = maxChars;
 
   compoundWords.forEach(w => {
@@ -593,26 +602,37 @@ function spawnBottomStair(spawnY) {
 }
 
 function spawnFateStairPair(y) {
-  // 1. 僅清空命運階梯上方 120px 的雜亂遮擋階梯，絕不清空下方階梯
-  stairs = stairs.filter(s => !(s.y < y && s.y > y - 120));
-
   const unitFile = selectUnit.value || "ALL";
   currentFateQuestion = getNextQuestionFromPool(unitFile);
+  if (!currentFateQuestion) return;
 
-  const opts = currentFateQuestion.options || ["選項A", "選項B"];
-  const correctIdx = currentFateQuestion.answer;
+  const rawOpts = currentFateQuestion.options || ["選項A", "選項B"];
+  let correctIdx = 0;
+  if (typeof currentFateQuestion.answer === "number" && currentFateQuestion.answer >= 0 && currentFateQuestion.answer < rawOpts.length) {
+    correctIdx = currentFateQuestion.answer;
+  } else if (typeof currentFateQuestion.answer === "string") {
+    const trimmed = currentFateQuestion.answer.trim().toUpperCase();
+    const idx = ["A", "B", "C", "D"].indexOf(trimmed);
+    if (idx >= 0 && idx < rawOpts.length) correctIdx = idx;
+    else {
+      const found = rawOpts.findIndex(opt => opt && opt.trim() === currentFateQuestion.answer.trim());
+      if (found >= 0) correctIdx = found;
+    }
+  }
 
-  const correctText = opts[correctIdx];
-  let wrongIdx = (correctIdx + 1) % opts.length;
-  const wrongText = opts[wrongIdx];
+  const correctText = rawOpts[correctIdx] || "正確選項";
+  // 挑選具鑑別度之誘答選項 (非正解之選項)
+  const wrongIndices = rawOpts.map((_, i) => i).filter(i => i !== correctIdx && Boolean(rawOpts[i]));
+  const wrongIdx = wrongIndices.length > 0 ? wrongIndices[Math.floor(Math.random() * wrongIndices.length)] : ((correctIdx + 1) % rawOpts.length);
+  const wrongText = rawOpts[wrongIdx] || "錯誤選項";
 
   const isLeftCorrect = Math.random() < 0.5;
 
-  // 2. 100% 壁貼壁全寬度無落空設計 (單座寬度 370px, 高度 44px)
-  const stairWidth = 370;
-  const stairHeight = 44;
-  const leftX = 10;   // 左邊貼緊 x = 10 (絕不落空)
-  const rightX = 420; // 右邊貼緊 x = 790 (絕不落空)，中間保留 40px 中央天井
+  // 100% 畫面均勻分佈無落空 (單座寬度 365px, 高度 48px，左右對稱)
+  const stairWidth = 365;
+  const stairHeight = 48;
+  const leftX = 18;
+  const rightX = 417; // 18 + 365 = 383, 417 + 365 = 782
 
   const leftObj = {
     id: stairIdCounter++,
@@ -624,10 +644,10 @@ function spawnFateStairPair(y) {
     isCorrect: isLeftCorrect,
     optionLabel: "🅰️",
     optionText: isLeftCorrect ? correctText : wrongText,
-    text: `🅰️ ${isLeftCorrect ? correctText : wrongText}`,
     question: currentFateQuestion,
     isCrumbled: false,
-    isTriggered: false
+    isTriggered: false,
+    answeredState: "unanswered"
   };
 
   const rightObj = {
@@ -640,10 +660,10 @@ function spawnFateStairPair(y) {
     isCorrect: !isLeftCorrect,
     optionLabel: "🅱️",
     optionText: !isLeftCorrect ? correctText : wrongText,
-    text: `🅱️ ${!isLeftCorrect ? correctText : wrongText}`,
     question: currentFateQuestion,
     isCrumbled: false,
-    isTriggered: false
+    isTriggered: false,
+    answeredState: "unanswered"
   };
 
   stairs.push(leftObj, rightObj);
@@ -764,6 +784,14 @@ function updatePhysics(dt) {
       }
     }
 
+    if (s.type === "CRUMBLE" && s.isTriggered) {
+      s.crumbleTimer += dt;
+      if (s.crumbleTimer >= 0.7) {
+        s.isCrumbled = true;
+        spawnStarParticles(s.x + s.width / 2, s.y);
+      }
+    }
+
     const prevY = player.y - player.vy;
     if (
       player.vy >= 0 &&
@@ -771,7 +799,8 @@ function updatePhysics(dt) {
       player.y + player.height >= s.y &&
       player.x + player.width > s.x &&
       player.x < s.x + s.width &&
-      !s.isCrumbled
+      !s.isCrumbled &&
+      !(s.type === "FATE_OPTION" && s.answeredState === "wrong")
     ) {
       // 僅在「從空中首次著陸於階梯」的瞬間觸發一次清爽 Tap 著地音效，絕不上著陸重複洗音！
       if (!wasGroundedLastFrame && s.type !== "SPRING") {
@@ -847,16 +876,18 @@ function handleStairCollision(s) {
       }
     }
   } else if (s.type === "CRUMBLE") {
-    s.crumbleTimer = (s.crumbleTimer || 0) + 1;
-    if (s.crumbleTimer > 3) {
-      s.isCrumbled = true;
+    if (!s.isTriggered) {
+      s.isTriggered = true;
+      s.crumbleTimer = 0;
       playHitSound();
+      showConceptToast("⚠️ 踩中易碎階梯！階梯劇烈震動塌陷中，快跳！");
     }
   } else if (s.type === "FATE_OPTION") {
     // 命運問答階梯：站立時平穩上升，絕不重複發動起跳！
     if (s.isCorrect) {
       if (!s.isTriggered) {
         s.isTriggered = true;
+        s.answeredState = "correct";
         correctAnswersCount++;
         playFanfare();
         player.invincibleTimer = 3.0;
@@ -877,13 +908,16 @@ function handleStairCollision(s) {
     } else {
       if (!s.isTriggered) {
         s.isTriggered = true;
+        s.answeredState = "wrong";
         playHitSound();
-        s.isCrumbled = true;
         takeDamage();
+        player.vy = 3.5; // 踩錯落空下墜
+        player.isGrounded = false;
+        spawnStarParticles(s.x + s.width / 2, s.y);
         showConceptToast(`💡 答錯觀念解析：${s.question.explanation || "請仔細查看解析！"}`);
         isFateStairActive = false;
 
-        createSafetyStair(player.x - 70, player.y + 70, 200);
+        createSafetyStair(player.x - 70, player.y + 75, 200);
       }
     }
   }
@@ -964,7 +998,12 @@ function renderCanvas() {
     if (s.type === "NORMAL") {
       ctx.fillStyle = "#16a34a";
       ctx.fillRect(s.x, s.y, s.width, s.height);
-      ctx.strokeStyle = "#4ade80"; ctx.strokeRect(s.x, s.y, s.width, s.height);
+      ctx.strokeStyle = "#4ade80";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(s.x, s.y, s.width, s.height);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText("🌿 穩固安全", s.x + s.width / 2 - 28, s.y + 13);
     } else if (s.type === "CONVEYOR_LEFT") {
       ctx.fillStyle = "#0284c7";
       ctx.fillRect(s.x, s.y, s.width, s.height);
@@ -986,55 +1025,100 @@ function renderCanvas() {
       ctx.fillStyle = "#ffffff"; ctx.font = "bold 12px sans-serif";
       ctx.fillText(s.isTriggered ? "⏳ 1.5s碎裂" : "💖 補血", s.x + s.width / 2 - 25, s.y + 13);
     } else if (s.type === "CRUMBLE") {
-      ctx.fillStyle = "#78350f";
-      ctx.fillRect(s.x, s.y, s.width, s.height);
-    } else if (s.type === "FATE_OPTION") {
-      ctx.fillStyle = s.isCorrect ? "#15803d" : "#b91c1c";
-      ctx.fillRect(s.x, s.y, s.width, s.height);
-      ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 3.0;
-      ctx.strokeRect(s.x, s.y, s.width, s.height);
+      // ⚠️ 易碎塌陷階梯：使用高警示琥珀/橙黃色與斑馬警戒斜紋，絕不使用綠色！
+      ctx.save();
+      const shakeOffset = (s.isTriggered && s.crumbleTimer) ? Math.sin(s.crumbleTimer * 35) * 3 : 0;
+      ctx.translate(s.x + shakeOffset, s.y);
+
+      // 底色：砂岩警示深赭
+      ctx.fillStyle = s.isTriggered ? "#b45309" : "#92400e";
+      ctx.fillRect(0, 0, s.width, s.height);
+
+      // 斜角警戒斑馬紋
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.4)";
+      ctx.lineWidth = 3;
+      for (let ox = -s.height; ox < s.width; ox += 16) {
+        ctx.beginPath();
+        ctx.moveTo(ox, s.height);
+        ctx.lineTo(ox + s.height, 0);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = s.isTriggered ? "#ef4444" : "#f59e0b";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, s.width, s.height);
 
       ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px sans-serif";
+      const crumbleText = s.isTriggered ? "💥 塌陷中！快跳！" : "⚠️ 易碎 (會塌陷)";
+      ctx.fillText(crumbleText, s.width / 2 - 42, 13);
+
+      ctx.restore();
+    } else if (s.type === "FATE_OPTION") {
+      // 依作答狀態決定背景色：未作答時為中立深邃冷夜藍（絕不提前劇透正解），作答後答對變翡翠綠、答錯變警示緋紅
+      if (!s.isTriggered) {
+        ctx.fillStyle = "#1e293b"; // 深邃冷夜藍
+        ctx.strokeStyle = "#f59e0b"; // 燙金微光邊框
+      } else if (s.answeredState === "correct") {
+        ctx.fillStyle = "#15803d"; // 正確：翡翠綠
+        ctx.strokeStyle = "#4ade80";
+      } else {
+        ctx.fillStyle = "#991b1b"; // 錯誤：深緋紅
+        ctx.strokeStyle = "#ef4444";
+      }
+
+      ctx.lineWidth = 3.0;
+      ctx.fillRect(s.x, s.y, s.width, s.height);
+      ctx.strokeRect(s.x, s.y, s.width, s.height);
+
+      // 選項文字
+      ctx.fillStyle = "#ffffff";
       const label = s.optionLabel || "";
-      const content = s.optionText || s.text || "";
-      const fullText = `${label} ${content}`;
+      const content = s.optionText || "";
+      const statusPrefix = s.isTriggered ? (s.answeredState === "correct" ? "✅ " : "💥 ") : "";
 
       if (content.length <= 15) {
-        let fSize = isTextZoomed ? 17 : 15;
+        let fSize = isTextZoomed ? 16 : 14.5;
         ctx.font = `bold ${fSize}px sans-serif`;
-        ctx.fillText(fullText, s.x + 12, s.y + 27);
+        ctx.fillText(`${statusPrefix}${label} ${content}`, s.x + 12, s.y + 29);
       } else {
-        // 智能避詞切字：避免將「冷藏保存」切成「冷」與「藏保存」
-        let fSize = isTextZoomed ? 14 : 13;
+        let fSize = isTextZoomed ? 13 : 12;
         ctx.font = `bold ${fSize}px sans-serif`;
-        const [optL1, optL2] = splitSmartOptionText(content, 14);
-        ctx.fillText(`${label} ${optL1}`, s.x + 10, s.y + 19);
-        ctx.fillText(`   ${optL2}`, s.x + 10, s.y + 36);
+        const [optL1, optL2] = wrapOptionText(content, 14);
+        ctx.fillText(`${statusPrefix}${label} ${optL1}`, s.x + 10, s.y + 20);
+        ctx.fillText(`   ${optL2}`, s.x + 10, s.y + 38);
       }
     }
   });
 
-  // 4. 命運題目頂部醒目橫條 (高度 80px，智能避頭標點演算法，徹底杜絕逗號孤立在開頭)
-  const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && s.y <= 550);
+  // 4. 命運題目頂部醒目橫條 (高度 96px，支援 1~3 行自適應文字與字體縮放，100% 不切字、不爆框)
+  const fateStairActive = stairs.find(s => s.type === "FATE_OPTION" && s.y <= 550 && s.y >= -40);
   if (fateStairActive && currentFateQuestion) {
-    ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
-    ctx.fillRect(20, 15, CANVAS_WIDTH - 40, 80);
+    const boxY = 12;
+    const boxH = 96;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.96)";
+    ctx.fillRect(20, boxY, CANVAS_WIDTH - 40, boxH);
     ctx.strokeStyle = "#f59e0b";
     ctx.lineWidth = 3;
-    ctx.strokeRect(20, 15, CANVAS_WIDTH - 40, 80);
+    ctx.strokeRect(20, boxY, CANVAS_WIDTH - 40, boxH);
 
     const qText = currentFateQuestion.question || "";
-    const titleFont = isTextZoomed ? "bold 19px sans-serif" : "bold 17px sans-serif";
-    ctx.fillStyle = "#fbbf24";
-    ctx.font = titleFont;
+    const lines = wrapQuestionText(qText, 23);
 
-    if (qText.length <= 22) {
-      ctx.fillText(`❓ 命運問答：${qText}`, 35, 60);
+    ctx.fillStyle = "#fbbf24";
+
+    if (lines.length === 1) {
+      ctx.font = isTextZoomed ? "bold 19px sans-serif" : "bold 17px sans-serif";
+      ctx.fillText(`❓ 命運問答：${lines[0]}`, 35, boxY + 54);
+    } else if (lines.length === 2) {
+      ctx.font = isTextZoomed ? "bold 17px sans-serif" : "bold 15px sans-serif";
+      ctx.fillText(`❓ 命運問答：${lines[0]}`, 35, boxY + 42);
+      ctx.fillText(`   ${lines[1]}`, 35, boxY + 70);
     } else {
-      const [qL1, qL2] = splitSmartQuestionText(qText, 22);
-      ctx.fillText(`❓ 命運問答：${qL1}`, 35, 48);
-      ctx.fillText(`   ${qL2}`, 35, 76);
+      ctx.font = isTextZoomed ? "bold 15px sans-serif" : "bold 13.5px sans-serif";
+      ctx.fillText(`❓ 命運問答：${lines[0]}`, 35, boxY + 34);
+      ctx.fillText(`   ${lines[1]}`, 35, boxY + 58);
+      ctx.fillText(`   ${lines[2]}`, 35, boxY + 82);
     }
   }
 

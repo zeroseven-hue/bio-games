@@ -173,11 +173,36 @@ function resizeCanvas() {
 }
 
 function initControls() {
-  // 點擊螢幕任意處發射釣爪
-  touchLaunchZone.addEventListener("pointerdown", () => {
+  // 點擊螢幕任意處發射釣爪 (若點擊海中魚群則高亮對應選項卡片)
+  touchLaunchZone.addEventListener("pointerdown", (e) => {
     initAudio();
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      const tappedFish = oceanFishes.find(f => {
+        const dx = clickX - f.x;
+        const dy = clickY - f.y;
+        return Math.sqrt(dx * dx + dy * dy) < (f.radius * 1.5);
+      });
+
+      if (tappedFish) {
+        highlightOptionCard(tappedFish.optIndex);
+      }
+    }
     triggerClawLaunch();
   });
+
+  // 底部四選一選項卡片點擊監聽 (點擊高亮卡片)
+  for (let i = 0; i < 4; i++) {
+    const card = document.getElementById(`optCard${i}`);
+    if (card) {
+      card.addEventListener("click", () => {
+        highlightOptionCard(i);
+      });
+    }
+  }
 
   // 鍵盤空白鍵 / 向下箭頭發射
   window.addEventListener("keydown", (e) => {
@@ -325,6 +350,35 @@ async function prepareQuestionPool() {
   questionPool = shuffleArray([...deduped]);
 }
 
+function highlightOptionCard(idx) {
+  for (let i = 0; i < 4; i++) {
+    const c = document.getElementById(`optCard${i}`);
+    if (c) c.classList.remove("highlight");
+  }
+  const target = document.getElementById(`optCard${idx}`);
+  if (target) {
+    target.classList.add("highlight");
+    setTimeout(() => target.classList.remove("highlight"), 2500);
+  }
+}
+
+function renderBottomOptionCards(options) {
+  const letters = ["a", "b", "c", "d"];
+  for (let i = 0; i < 4; i++) {
+    const card = document.getElementById(`optCard${i}`);
+    const textElem = document.getElementById(`optText${i}`);
+    if (card && textElem) {
+      if (options[i]) {
+        card.style.display = "flex";
+        card.className = `opt-card opt-card-${letters[i]}`;
+        textElem.textContent = options[i];
+      } else {
+        card.style.display = "none";
+      }
+    }
+  }
+}
+
 function presentNextQuestion() {
   if (questionPool.length === 0) prepareQuestionPool();
   currentQuestion = questionPool.pop(); // Fisher-Yates 抽過即移除
@@ -350,6 +404,9 @@ function presentNextQuestion() {
     }
   });
   questionStem.innerHTML = stemText;
+
+  // 渲染底部四選一選項卡片 (完全不縮寫截斷，全字顯示)
+  renderBottomOptionCards(currentQuestion.options || []);
 
   // 部署 4 隻選項魚群並啟動「2.5 秒全場靜止讀題期」
   spawnOceanFishesForCurrentQuestion();
@@ -379,52 +436,50 @@ function spawnOceanFishesForCurrentQuestion() {
   if (!currentQuestion) return;
   const rawOptions = currentQuestion.options || [];
 
-  let correctText = "";
+  let correctIdx = -1;
   if (typeof currentQuestion.answer === "number") {
-    correctText = rawOptions[currentQuestion.answer];
+    correctIdx = currentQuestion.answer;
   } else if (typeof currentQuestion.answer === "string") {
     const ansKey = currentQuestion.answer.trim().toUpperCase();
     const idx = ["A", "B", "C", "D"].indexOf(ansKey);
-    correctText = (idx >= 0 && rawOptions[idx]) ? rawOptions[idx] : currentQuestion.answer.trim();
+    if (idx >= 0 && idx < rawOptions.length) {
+      correctIdx = idx;
+    } else {
+      correctIdx = rawOptions.findIndex(opt => opt && opt.trim() === currentQuestion.answer.trim());
+    }
   }
+  if (correctIdx < 0 || correctIdx >= rawOptions.length) correctIdx = 0;
 
-  let optionItems = rawOptions.map(opt => ({
-    text: opt,
-    isCorrect: (opt === correctText)
-  }));
-
-  // 防呆機制：若無正解標籤，強制將第 1 項設為正解
-  if (!optionItems.some(o => o.isCorrect) && optionItems.length > 0) {
-    optionItems[0].isCorrect = true;
-  }
-
-  optionItems = shuffleArray(optionItems);
-
-  // 🌟 動態水深分佈：依照當前畫面實際高度 (viewH) 等比例分配水層 (22% ~ 80%)，100% 絕不沉底被切掉
+  const count = Math.min(4, rawOptions.length);
   const minLayer = Math.max(75, viewH * 0.22);
   const maxLayer = Math.min(viewH - 55, viewH * 0.80);
-  const count = optionItems.length;
   const step = count > 1 ? (maxLayer - minLayer) / (count - 1) : 0;
-  const layers = optionItems.map((_, i) => minLayer + i * step);
 
-  optionItems.forEach((item, idx) => {
-    const yPos = layers[idx] + (Math.random() * 12 - 6);
-    const dir = (idx % 2 === 0) ? 1 : -1;
-    const startX = (dir === 1) ? -40 - (idx * 50) : viewW + 40 + (idx * 50);
+  // 隨機分佈海中泳層深度，但每條魚的 A/B/C/D 字母徽章與底部選項完全鎖定對齊
+  const layerIndices = shuffleArray([...Array(count).keys()]);
+  const letters = ["A", "B", "C", "D"];
+
+  for (let i = 0; i < count; i++) {
+    const layerIdx = layerIndices[i];
+    const yPos = minLayer + layerIdx * step + (Math.random() * 10 - 5);
+    const dir = (i % 2 === 0) ? 1 : -1;
+    const startX = (dir === 1) ? -40 - (i * 60) : viewW + 40 + (i * 60);
 
     oceanFishes.push({
-      id: idx,
-      text: item.text,
-      isCorrect: item.isCorrect,
+      id: i,
+      optIndex: i,
+      letter: letters[i],
+      text: rawOptions[i],
+      isCorrect: (i === correctIdx),
       x: startX,
       y: yPos,
       radius: 34,
       dir: dir,
       speed: 1.1 + Math.random() * 0.35,
-      color: getFishColor(idx),
-      fishType: ["🐠", "🐟", "🐡", "🐙"][idx % 4]
+      color: getFishColor(i),
+      fishType: ["🐠", "🐟", "🐡", "🐙"][i % 4]
     });
-  });
+  }
 }
 
 function getFishColor(idx) {
@@ -504,8 +559,14 @@ function updateFishingPhysics() {
 }
 
 function handleFishPulledAboard(fish) {
+  const cardElem = document.getElementById(`optCard${fish.optIndex}`);
+
   if (fish.isCorrect) {
     // 🎯 抓中正確答案！
+    if (cardElem) {
+      cardElem.classList.add("correct-flash");
+      setTimeout(() => cardElem.classList.remove("correct-flash"), 1800);
+    }
     playCatchFishSound();
     score += 100 + streak * 25;
     streak++;
@@ -526,15 +587,19 @@ function handleFishPulledAboard(fish) {
     // 短暫慶祝後自動換下一題
     setTimeout(() => {
       presentNextQuestion();
-    }, 400);
+    }, 450);
 
   } else {
     // ❌ 方案 B：抓錯魚掙脫逃跑！
+    if (cardElem) {
+      cardElem.classList.add("wrong-flash");
+      setTimeout(() => cardElem.classList.remove("wrong-flash"), 2500);
+    }
     playFishEscapeSound();
     streak = 0;
     streakBadge.classList.add("hidden");
 
-    noteContent.textContent = `您剛才抓到的是「${fish.text}」。\n${currentQuestion.explanation || "觀念不符，請重新思考並抓出正確的答案！"}`;
+    noteContent.textContent = `您剛才抓到的是選項 (${fish.letter})「${fish.text}」。\n${currentQuestion.explanation || "觀念不符，請先吸收解析後再鎖定海中正確的字母大魚！"}`;
     noteModal.classList.remove("hidden");
   }
 }
@@ -612,26 +677,48 @@ function drawFish(f) {
   ctx.save();
   ctx.translate(f.x, f.y);
 
-  // 魚身發光圓底
+  // 1. 魚身外發光
+  ctx.shadowColor = f.color;
+  ctx.shadowBlur = 10;
+
+  // 2. 魚身發光圓底
   ctx.fillStyle = f.color;
   ctx.beginPath();
   ctx.arc(0, 0, f.radius, 0, Math.PI * 2);
   ctx.fill();
+  ctx.shadowBlur = 0;
+
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // 魚圖示
-  ctx.font = "26px sans-serif";
+  // 3. 魚圖示 (微移偏上)
+  ctx.font = "22px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(f.fishType, 0, -8);
+  ctx.fillText(f.fishType, 0, -9);
 
-  // 選項文字標籤 (自動縮短防爆框)
+  // 4. 超醒目 A/B/C/D 字母徽章 (白底金邊黑字，高對比大字體，學生一目了然)
+  const letter = f.letter || ["A", "B", "C", "D"][f.id % 4];
+
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 12px sans-serif";
-  const label = f.text.length > 7 ? f.text.substring(0, 6) + "…" : f.text;
-  ctx.fillText(label, 0, 16);
+  if (typeof ctx.roundRect === "function") {
+    ctx.beginPath();
+    ctx.roundRect(-16, 5, 32, 20, 6);
+    ctx.fill();
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  } else {
+    ctx.fillRect(-16, 5, 32, 20);
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-16, 5, 32, 20);
+  }
+
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "900 14px sans-serif";
+  ctx.fillText(letter, 0, 16);
 
   ctx.restore();
 }

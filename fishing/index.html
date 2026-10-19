@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>生物大釣手：黃金深海大捕撈 - Bio-Fishing</title>
-  <link rel="stylesheet" href="style.css?v=2.0">
+  <link rel="stylesheet" href="style.css?v=2.5">
 </head>
 <body>
   <div class="fishing-app">
@@ -94,9 +94,29 @@
       </div>
     </main>
 
+    <!-- 🎯 底部四選一試題選項卡片看板 (完全不截斷選項文字，與海中 A/B/C/D 魚群一一對應) -->
+    <section class="fishing-options-tray" id="fishingOptionsTray">
+      <div class="opt-card opt-card-a" id="optCard0" data-index="0">
+        <span class="opt-badge badge-a">🅰️</span>
+        <span class="opt-content" id="optText0">載入選項 A...</span>
+      </div>
+      <div class="opt-card opt-card-b" id="optCard1" data-index="1">
+        <span class="opt-badge badge-b">🅱️</span>
+        <span class="opt-content" id="optText1">載入選項 B...</span>
+      </div>
+      <div class="opt-card opt-card-c" id="optCard2" data-index="2">
+        <span class="opt-badge badge-c">🅲</span>
+        <span class="opt-content" id="optText2">載入選項 C...</span>
+      </div>
+      <div class="opt-card opt-card-d" id="optCard3" data-index="3">
+        <span class="opt-badge badge-d">🅳</span>
+        <span class="opt-content" id="optText3">載入選項 D...</span>
+      </div>
+    </section>
+
     <!-- 底部資訊條 -->
     <footer class="app-footer">
-      <span>操作提示：看準角度點擊發射，抓中正確生物大魚獲得高分！</span>
+      <span>💡 操作提示：先看下方 🅰️🅱️🅲🅳 選項卡片，再瞄準海中對應字母的游動大魚發射！</span>
     </footer>
 
     <!-- ==================== 彈窗面板 ==================== -->
@@ -175,6 +195,6 @@
   </div>
 
   <script src="../score-submit-modal.js"></script>
-  <script src="game.js?v=2.0"></script>
+  <script src="game.js?v=2.5"></script>
 </body>
 </html>

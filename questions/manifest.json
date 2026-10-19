@@ -1,6 +1,6 @@
 {
-  "version": "2.2",
-  "lastUpdated": "2026-10-11",
+  "version": "3.0",
+  "lastUpdated": "2026-10-19",
   "publishers": [
     {
       "id": "hanlin",
@@ -75,18 +75,18 @@
               "file": "翰林版/bio01/bio01_3-2酵素.json"
             },
             {
-              "id": "bio01_3-3 植物如何獲得養分",
-              "title": "[7上] 3-3  植物如何獲得養分",
+              "id": "bio01_3-3植物如何獲得養分",
+              "title": "[7上] 3-3 植物如何獲得養分",
               "publisher": "翰林版",
               "semester": "7上",
-              "file": "翰林版/bio01/bio01_3-3 植物如何獲得養分.json"
+              "file": "翰林版/bio01/bio01_3-3植物如何獲得養分.json"
             },
             {
-              "id": "bio01_3-4 動物如何獲得養分",
-              "title": "[7上] 3-4  動物如何獲得養分",
+              "id": "bio01_3-4動物如何獲得養分",
+              "title": "[7上] 3-4 動物如何獲得養分",
               "publisher": "翰林版",
               "semester": "7上",
-              "file": "翰林版/bio01/bio01_3-4 動物如何獲得養分.json"
+              "file": "翰林版/bio01/bio01_3-4動物如何獲得養分.json"
             },
             {
               "id": "bio01_4-1植物運輸構造",
@@ -263,18 +263,18 @@
               "file": "翰林版/bio02/bio02_3-3原核、原生與真菌.json"
             },
             {
-              "id": "bio02_3-4 植物界",
-              "title": "[7下] 3-4  植物界",
+              "id": "bio02_3-4植物界",
+              "title": "[7下] 3-4 植物界",
               "publisher": "翰林版",
               "semester": "7下",
-              "file": "翰林版/bio02/bio02_3-4 植物界.json"
+              "file": "翰林版/bio02/bio02_3-4植物界.json"
             },
             {
-              "id": "bio02_3-5 動物界",
-              "title": "[7下] 3-5  動物界",
+              "id": "bio02_3-5動物界",
+              "title": "[7下] 3-5 動物界",
               "publisher": "翰林版",
               "semester": "7下",
-              "file": "翰林版/bio02/bio02_3-5 動物界.json"
+              "file": "翰林版/bio02/bio02_3-5動物界.json"
             },
             {
               "id": "bio02_4-1族群、群集與演替",
@@ -359,36 +359,381 @@
     {
       "id": "kangxuan",
       "name": "康軒版",
-      "status": "placeholder",
-      "statusText": "(預留擴充 / 暫無試題)",
+      "status": "active",
       "semesters": [
         {
           "id": "71",
           "name": "7上",
-          "units": []
+          "units": [
+            {
+              "id": "bio01_1-0科學方法與進到實驗教室",
+              "title": "[7上] 1-0 科學方法與進到實驗教室",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_1-0科學方法與進到實驗教室.json"
+            },
+            {
+              "id": "bio01_1-1生命現象",
+              "title": "[7上] 1-1 生命現象",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_1-1生命現象.json"
+            },
+            {
+              "id": "bio01_1-2細胞",
+              "title": "[7上] 1-2 細胞",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_1-2細胞.json"
+            },
+            {
+              "id": "bio01_1-3細胞所需的物質",
+              "title": "[7上] 1-3 細胞所需的物質",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_1-3細胞所需的物質.json"
+            },
+            {
+              "id": "bio01_1-4從細胞到個體",
+              "title": "[7上] 1-4 從細胞到個體",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_1-4從細胞到個體.json"
+            },
+            {
+              "id": "bio01_2-1食物中的養分",
+              "title": "[7上] 2-1 食物中的養分",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_2-1食物中的養分.json"
+            },
+            {
+              "id": "bio01_2-2酵素",
+              "title": "[7上] 2-2 酵素",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_2-2酵素.json"
+            },
+            {
+              "id": "bio01_2-3植物如何獲得養分",
+              "title": "[7上] 2-3 植物如何獲得養分",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_2-3植物如何獲得養分.json"
+            },
+            {
+              "id": "bio01_2-4動物如何獲得養分",
+              "title": "[7上] 2-4 動物如何獲得養分",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_2-4動物如何獲得養分.json"
+            },
+            {
+              "id": "bio01_3-1植物的運輸",
+              "title": "[7上] 3-1 植物的運輸",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_3-1植物的運輸.json"
+            },
+            {
+              "id": "bio01_3-2植物體內的物質運輸",
+              "title": "[7上] 3-2 植物體內的物質運輸",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_3-2植物體內的物質運輸.json"
+            },
+            {
+              "id": "bio01_3-3人體內物質運輸",
+              "title": "[7上] 3-3 人體內物質運輸",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_3-3人體內物質運輸.json"
+            },
+            {
+              "id": "bio01_3-4人體防禦系統",
+              "title": "[7上] 3-4 人體防禦系統",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_3-4人體防禦系統.json"
+            },
+            {
+              "id": "bio01_4-1神經系統",
+              "title": "[7上] 4-1 神經系統",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_4-1神經系統.json"
+            },
+            {
+              "id": "bio01_4-2內分泌系統",
+              "title": "[7上] 4-2 內分泌系統",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_4-2內分泌系統.json"
+            },
+            {
+              "id": "bio01_4-3生物的感應",
+              "title": "[7上] 4-3 生物的感應",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_4-3生物的感應.json"
+            },
+            {
+              "id": "bio01_5-1恆定性與體溫恆定",
+              "title": "[7上] 5-1 恆定性與體溫恆定",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_5-1恆定性與體溫恆定.json"
+            },
+            {
+              "id": "bio01_5-2呼吸與氣體恆定",
+              "title": "[7上] 5-2 呼吸與氣體恆定",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_5-2呼吸與氣體恆定.json"
+            },
+            {
+              "id": "bio01_5-3血糖的恆定",
+              "title": "[7上] 5-3 血糖的恆定",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_5-3血糖的恆定.json"
+            },
+            {
+              "id": "bio01_5-4排泄與水分恆定",
+              "title": "[7上] 5-4 排泄與水分恆定",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_5-4排泄與水分恆定.json"
+            },
+            {
+              "id": "bio01_尺度",
+              "title": "[7上] 跨科_尺度",
+              "publisher": "康軒版",
+              "semester": "7上",
+              "file": "康軒版/bio01/bio01_尺度.json"
+            }
+          ]
         },
         {
           "id": "72",
           "name": "7下",
-          "units": []
+          "units": [],
+          "status": "placeholder",
+          "statusText": "(預留擴充 / 暫無試題)"
+        },
+        {
+          "id": "quick",
+          "name": "快閃特輯",
+          "units": [
+            {
+              "id": "bio01_7上_一段50題快問快答(第1~2章)",
+              "title": "[快閃] 快問快答 50題 (7上 第一次段考 第1~2章 綜合測驗)",
+              "publisher": "康軒版",
+              "semester": "快閃特輯",
+              "file": "康軒版/快問快答/bio01_7上_一段50題快問快答(第1~2章).json"
+            },
+            {
+              "id": "bio01_7上_二段50題快問快答(第3~4章)",
+              "title": "[快閃] 快問快答 50題 (7上 第二次段考 第3~4章 綜合測驗)",
+              "publisher": "康軒版",
+              "semester": "快閃特輯",
+              "file": "康軒版/快問快答/bio01_7上_二段50題快問快答(第3~4章).json"
+            },
+            {
+              "id": "bio01_7上_三段50題快問快答(第5章)",
+              "title": "[快閃] 快問快答 50題 (7上 第三次段考 第5章 綜合測驗)",
+              "publisher": "康軒版",
+              "semester": "快閃特輯",
+              "file": "康軒版/快問快答/bio01_7上_三段50題快問快答(第5章).json"
+            }
+          ]
         }
       ]
     },
     {
       "id": "nani",
       "name": "南一版",
-      "status": "placeholder",
-      "statusText": "(預留擴充 / 暫無試題)",
+      "status": "active",
       "semesters": [
         {
           "id": "71",
           "name": "7上",
-          "units": []
+          "units": [
+            {
+              "id": "bio01_1-1探究自然的方法",
+              "title": "[7上] 1-1 探究自然的方法",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_1-1探究自然的方法.json"
+            },
+            {
+              "id": "bio01_1-2生命現象與細胞的發現",
+              "title": "[7上] 1-2 生命現象與細胞的發現",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_1-2生命現象與細胞的發現.json"
+            },
+            {
+              "id": "bio01_1-3細胞的形態與構造",
+              "title": "[7上] 1-3 細胞的形態與構造",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_1-3細胞的形態與構造.json"
+            },
+            {
+              "id": "bio01_1-4細胞所組成與物質進出方式",
+              "title": "[7上] 1-4 細胞所組成與物質進出方式",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_1-4細胞所組成與物質進出方式.json"
+            },
+            {
+              "id": "bio01_1-5生物體的組成層次",
+              "title": "[7上] 1-5 生物體的組成層次",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_1-5生物體的組成層次.json"
+            },
+            {
+              "id": "bio01_2-1食物中的養分",
+              "title": "[7上] 2-1 食物中的養分",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_2-1食物中的養分.json"
+            },
+            {
+              "id": "bio01_2-2酵素",
+              "title": "[7上] 2-2 酵素",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_2-2酵素.json"
+            },
+            {
+              "id": "bio01_2-3植物如何製造養分",
+              "title": "[7上] 2-3 植物如何製造養分",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_2-3植物如何製造養分.json"
+            },
+            {
+              "id": "bio01_2-4人體如何獲得養分",
+              "title": "[7上] 2-4 人體如何獲得養分",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_2-4人體如何獲得養分.json"
+            },
+            {
+              "id": "bio01_3-1植物的運輸構造",
+              "title": "[7上] 3-1 植物的運輸構造",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_3-1植物的運輸構造.json"
+            },
+            {
+              "id": "bio01_3-2人體的循環",
+              "title": "[7上] 3-2 人體的循環",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_3-2人體的循環.json"
+            },
+            {
+              "id": "bio01_3-3人體的防禦",
+              "title": "[7上] 3-3 人體的防禦",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_3-3人體的防禦.json"
+            },
+            {
+              "id": "bio01_4-1神經系統",
+              "title": "[7上] 4-1 神經系統",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_4-1神經系統.json"
+            },
+            {
+              "id": "bio01_4-2內分泌系統",
+              "title": "[7上] 4-2 內分泌系統",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_4-2內分泌系統.json"
+            },
+            {
+              "id": "bio01_4-3植物的感應",
+              "title": "[7上] 4-3 植物的感應",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_4-3植物的感應.json"
+            },
+            {
+              "id": "bio01_5-1呼吸與氣體的恆定",
+              "title": "[7上] 5-1 呼吸與氣體的恆定",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_5-1呼吸與氣體的恆定.json"
+            },
+            {
+              "id": "bio01_5-2血糖的恆定",
+              "title": "[7上] 5-2 血糖的恆定",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_5-2血糖的恆定.json"
+            },
+            {
+              "id": "bio01_5-3排泄與水分的恆定",
+              "title": "[7上] 5-3 排泄與水分的恆定",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_5-3排泄與水分的恆定.json"
+            },
+            {
+              "id": "bio01_5-4體溫的恆定",
+              "title": "[7上] 5-4 體溫的恆定",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_5-4體溫的恆定.json"
+            },
+            {
+              "id": "bio01_尺度",
+              "title": "[7上] 跨科 尺度",
+              "publisher": "南一版",
+              "semester": "7上",
+              "file": "南一版/bio01/bio01_尺度.json"
+            }
+          ]
         },
         {
           "id": "72",
           "name": "7下",
-          "units": []
+          "units": [],
+          "status": "placeholder",
+          "statusText": "(預留擴充 / 暫無試題)"
+        },
+        {
+          "id": "quick",
+          "name": "快閃特輯",
+          "units": [
+            {
+              "id": "bio01_7上_一段50題快問快答(第1~2章)",
+              "title": "[快閃] 快問快答 50題 (7上 第一次段考 第1~2章 綜合測驗)",
+              "publisher": "南一版",
+              "semester": "快閃特輯",
+              "file": "南一版/快問快答/bio01_7上_一段50題快問快答(第1~2章).json"
+            },
+            {
+              "id": "bio01_7上_二段50題快問快答(第3~4章)",
+              "title": "[快閃] 快問快答 50題 (7上 第二次段考 第3~4章 綜合測驗)",
+              "publisher": "南一版",
+              "semester": "快閃特輯",
+              "file": "南一版/快問快答/bio01_7上_二段50題快問快答(第3~4章).json"
+            },
+            {
+              "id": "bio01_7上_三段50題快問快答(第5章)",
+              "title": "[快閃] 快問快答 50題 (7上 第三次段考 第5章 綜合測驗)",
+              "publisher": "南一版",
+              "semester": "快閃特輯",
+              "file": "南一版/快問快答/bio01_7上_三段50題快問快答(第5章).json"
+            }
+          ]
         }
       ]
     }
@@ -458,18 +803,18 @@
       "file": "翰林版/bio01/bio01_3-2酵素.json"
     },
     {
-      "id": "bio01_3-3 植物如何獲得養分",
-      "title": "[7上] 3-3  植物如何獲得養分",
+      "id": "bio01_3-3植物如何獲得養分",
+      "title": "[7上] 3-3 植物如何獲得養分",
       "publisher": "翰林版",
       "semester": "7上",
-      "file": "翰林版/bio01/bio01_3-3 植物如何獲得養分.json"
+      "file": "翰林版/bio01/bio01_3-3植物如何獲得養分.json"
     },
     {
-      "id": "bio01_3-4 動物如何獲得養分",
-      "title": "[7上] 3-4  動物如何獲得養分",
+      "id": "bio01_3-4動物如何獲得養分",
+      "title": "[7上] 3-4 動物如何獲得養分",
       "publisher": "翰林版",
       "semester": "7上",
-      "file": "翰林版/bio01/bio01_3-4 動物如何獲得養分.json"
+      "file": "翰林版/bio01/bio01_3-4動物如何獲得養分.json"
     },
     {
       "id": "bio01_4-1植物運輸構造",
@@ -640,18 +985,18 @@
       "file": "翰林版/bio02/bio02_3-3原核、原生與真菌.json"
     },
     {
-      "id": "bio02_3-4 植物界",
-      "title": "[7下] 3-4  植物界",
+      "id": "bio02_3-4植物界",
+      "title": "[7下] 3-4 植物界",
       "publisher": "翰林版",
       "semester": "7下",
-      "file": "翰林版/bio02/bio02_3-4 植物界.json"
+      "file": "翰林版/bio02/bio02_3-4植物界.json"
     },
     {
-      "id": "bio02_3-5 動物界",
-      "title": "[7下] 3-5  動物界",
+      "id": "bio02_3-5動物界",
+      "title": "[7下] 3-5 動物界",
       "publisher": "翰林版",
       "semester": "7下",
-      "file": "翰林版/bio02/bio02_3-5 動物界.json"
+      "file": "翰林版/bio02/bio02_3-5動物界.json"
     },
     {
       "id": "bio02_4-1族群、群集與演替",
@@ -722,6 +1067,335 @@
       "publisher": "翰林版",
       "semester": "快閃特輯",
       "file": "翰林版/快問快答/bio01_7上_三段64題快問快答(第5~6章).json"
+    },
+    {
+      "id": "bio01_1-0科學方法與進到實驗教室",
+      "title": "[7上] 1-0 科學方法與進到實驗教室",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_1-0科學方法與進到實驗教室.json"
+    },
+    {
+      "id": "bio01_1-1生命現象",
+      "title": "[7上] 1-1 生命現象",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_1-1生命現象.json"
+    },
+    {
+      "id": "bio01_1-2細胞",
+      "title": "[7上] 1-2 細胞",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_1-2細胞.json"
+    },
+    {
+      "id": "bio01_1-3細胞所需的物質",
+      "title": "[7上] 1-3 細胞所需的物質",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_1-3細胞所需的物質.json"
+    },
+    {
+      "id": "bio01_1-4從細胞到個體",
+      "title": "[7上] 1-4 從細胞到個體",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_1-4從細胞到個體.json"
+    },
+    {
+      "id": "bio01_2-1食物中的養分",
+      "title": "[7上] 2-1 食物中的養分",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_2-1食物中的養分.json"
+    },
+    {
+      "id": "bio01_2-2酵素",
+      "title": "[7上] 2-2 酵素",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_2-2酵素.json"
+    },
+    {
+      "id": "bio01_2-3植物如何獲得養分",
+      "title": "[7上] 2-3 植物如何獲得養分",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_2-3植物如何獲得養分.json"
+    },
+    {
+      "id": "bio01_2-4動物如何獲得養分",
+      "title": "[7上] 2-4 動物如何獲得養分",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_2-4動物如何獲得養分.json"
+    },
+    {
+      "id": "bio01_3-1植物的運輸",
+      "title": "[7上] 3-1 植物的運輸",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_3-1植物的運輸.json"
+    },
+    {
+      "id": "bio01_3-2植物體內的物質運輸",
+      "title": "[7上] 3-2 植物體內的物質運輸",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_3-2植物體內的物質運輸.json"
+    },
+    {
+      "id": "bio01_3-3人體內物質運輸",
+      "title": "[7上] 3-3 人體內物質運輸",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_3-3人體內物質運輸.json"
+    },
+    {
+      "id": "bio01_3-4人體防禦系統",
+      "title": "[7上] 3-4 人體防禦系統",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_3-4人體防禦系統.json"
+    },
+    {
+      "id": "bio01_4-1神經系統",
+      "title": "[7上] 4-1 神經系統",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_4-1神經系統.json"
+    },
+    {
+      "id": "bio01_4-2內分泌系統",
+      "title": "[7上] 4-2 內分泌系統",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_4-2內分泌系統.json"
+    },
+    {
+      "id": "bio01_4-3生物的感應",
+      "title": "[7上] 4-3 生物的感應",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_4-3生物的感應.json"
+    },
+    {
+      "id": "bio01_5-1恆定性與體溫恆定",
+      "title": "[7上] 5-1 恆定性與體溫恆定",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_5-1恆定性與體溫恆定.json"
+    },
+    {
+      "id": "bio01_5-2呼吸與氣體恆定",
+      "title": "[7上] 5-2 呼吸與氣體恆定",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_5-2呼吸與氣體恆定.json"
+    },
+    {
+      "id": "bio01_5-3血糖的恆定",
+      "title": "[7上] 5-3 血糖的恆定",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_5-3血糖的恆定.json"
+    },
+    {
+      "id": "bio01_5-4排泄與水分恆定",
+      "title": "[7上] 5-4 排泄與水分恆定",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_5-4排泄與水分恆定.json"
+    },
+    {
+      "id": "bio01_尺度",
+      "title": "[7上] 跨科_尺度",
+      "publisher": "康軒版",
+      "semester": "7上",
+      "file": "康軒版/bio01/bio01_尺度.json"
+    },
+    {
+      "id": "bio01_7上_一段50題快問快答(第1~2章)",
+      "title": "[快閃] 快問快答 50題 (7上 第一次段考 第1~2章 綜合測驗)",
+      "publisher": "康軒版",
+      "semester": "快閃特輯",
+      "file": "康軒版/快問快答/bio01_7上_一段50題快問快答(第1~2章).json"
+    },
+    {
+      "id": "bio01_7上_二段50題快問快答(第3~4章)",
+      "title": "[快閃] 快問快答 50題 (7上 第二次段考 第3~4章 綜合測驗)",
+      "publisher": "康軒版",
+      "semester": "快閃特輯",
+      "file": "康軒版/快問快答/bio01_7上_二段50題快問快答(第3~4章).json"
+    },
+    {
+      "id": "bio01_7上_三段50題快問快答(第5章)",
+      "title": "[快閃] 快問快答 50題 (7上 第三次段考 第5章 綜合測驗)",
+      "publisher": "康軒版",
+      "semester": "快閃特輯",
+      "file": "康軒版/快問快答/bio01_7上_三段50題快問快答(第5章).json"
+    },
+    {
+      "id": "bio01_1-1探究自然的方法",
+      "title": "[7上] 1-1 探究自然的方法",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_1-1探究自然的方法.json"
+    },
+    {
+      "id": "bio01_1-2生命現象與細胞的發現",
+      "title": "[7上] 1-2 生命現象與細胞的發現",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_1-2生命現象與細胞的發現.json"
+    },
+    {
+      "id": "bio01_1-3細胞的形態與構造",
+      "title": "[7上] 1-3 細胞的形態與構造",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_1-3細胞的形態與構造.json"
+    },
+    {
+      "id": "bio01_1-4細胞所組成與物質進出方式",
+      "title": "[7上] 1-4 細胞所組成與物質進出方式",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_1-4細胞所組成與物質進出方式.json"
+    },
+    {
+      "id": "bio01_1-5生物體的組成層次",
+      "title": "[7上] 1-5 生物體的組成層次",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_1-5生物體的組成層次.json"
+    },
+    {
+      "id": "bio01_2-1食物中的養分",
+      "title": "[7上] 2-1 食物中的養分",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_2-1食物中的養分.json"
+    },
+    {
+      "id": "bio01_2-2酵素",
+      "title": "[7上] 2-2 酵素",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_2-2酵素.json"
+    },
+    {
+      "id": "bio01_2-3植物如何製造養分",
+      "title": "[7上] 2-3 植物如何製造養分",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_2-3植物如何製造養分.json"
+    },
+    {
+      "id": "bio01_2-4人體如何獲得養分",
+      "title": "[7上] 2-4 人體如何獲得養分",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_2-4人體如何獲得養分.json"
+    },
+    {
+      "id": "bio01_3-1植物的運輸構造",
+      "title": "[7上] 3-1 植物的運輸構造",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_3-1植物的運輸構造.json"
+    },
+    {
+      "id": "bio01_3-2人體的循環",
+      "title": "[7上] 3-2 人體的循環",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_3-2人體的循環.json"
+    },
+    {
+      "id": "bio01_3-3人體的防禦",
+      "title": "[7上] 3-3 人體的防禦",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_3-3人體的防禦.json"
+    },
+    {
+      "id": "bio01_4-1神經系統",
+      "title": "[7上] 4-1 神經系統",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_4-1神經系統.json"
+    },
+    {
+      "id": "bio01_4-2內分泌系統",
+      "title": "[7上] 4-2 內分泌系統",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_4-2內分泌系統.json"
+    },
+    {
+      "id": "bio01_4-3植物的感應",
+      "title": "[7上] 4-3 植物的感應",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_4-3植物的感應.json"
+    },
+    {
+      "id": "bio01_5-1呼吸與氣體的恆定",
+      "title": "[7上] 5-1 呼吸與氣體的恆定",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_5-1呼吸與氣體的恆定.json"
+    },
+    {
+      "id": "bio01_5-2血糖的恆定",
+      "title": "[7上] 5-2 血糖的恆定",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_5-2血糖的恆定.json"
+    },
+    {
+      "id": "bio01_5-3排泄與水分的恆定",
+      "title": "[7上] 5-3 排泄與水分的恆定",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_5-3排泄與水分的恆定.json"
+    },
+    {
+      "id": "bio01_5-4體溫的恆定",
+      "title": "[7上] 5-4 體溫的恆定",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_5-4體溫的恆定.json"
+    },
+    {
+      "id": "bio01_尺度",
+      "title": "[7上] 跨科 尺度",
+      "publisher": "南一版",
+      "semester": "7上",
+      "file": "南一版/bio01/bio01_尺度.json"
+    },
+    {
+      "id": "bio01_7上_一段50題快問快答(第1~2章)",
+      "title": "[快閃] 快問快答 50題 (7上 第一次段考 第1~2章 綜合測驗)",
+      "publisher": "南一版",
+      "semester": "快閃特輯",
+      "file": "南一版/快問快答/bio01_7上_一段50題快問快答(第1~2章).json"
+    },
+    {
+      "id": "bio01_7上_二段50題快問快答(第3~4章)",
+      "title": "[快閃] 快問快答 50題 (7上 第二次段考 第3~4章 綜合測驗)",
+      "publisher": "南一版",
+      "semester": "快閃特輯",
+      "file": "南一版/快問快答/bio01_7上_二段50題快問快答(第3~4章).json"
+    },
+    {
+      "id": "bio01_7上_三段50題快問快答(第5章)",
+      "title": "[快閃] 快問快答 50題 (7上 第三次段考 第5章 綜合測驗)",
+      "publisher": "南一版",
+      "semester": "快閃特輯",
+      "file": "南一版/快問快答/bio01_7上_三段50題快問快答(第5章).json"
     }
   ]
 }

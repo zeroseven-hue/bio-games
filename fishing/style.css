@@ -517,3 +517,80 @@ body {
 .btn-secondary { flex: 1; background: #64748b; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
 .hidden { display: none !important; }
+
+/* 🎯 底部四選一試題選項卡片看板樣式 (防截斷、字體清晰、觸控高亮) */
+.fishing-options-tray {
+  background: #0b1e33;
+  border-top: 2px solid #ca8a04;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  z-index: 9;
+}
+
+@media (max-width: 680px) {
+  .fishing-options-tray {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 6px 8px;
+    gap: 6px;
+  }
+}
+
+.opt-card {
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.opt-card:hover {
+  background: #334155;
+  border-color: #f59e0b;
+}
+
+.opt-card.highlight {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+  transform: scale(1.02);
+}
+
+.opt-card.correct-flash {
+  background: #064e3b !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+}
+
+.opt-card.wrong-flash {
+  background: #7f1d1d !important;
+  border-color: #ef4444 !important;
+}
+
+.opt-badge {
+  font-size: 1.15rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.badge-a { color: #38bdf8; }
+.badge-b { color: #4ade80; }
+.badge-c { color: #fbbf24; }
+.badge-d { color: #c084fc; }
+
+.opt-content {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
