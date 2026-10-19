@@ -164,6 +164,12 @@ function initEventListeners() {
     baseSpeed = parseFloat(e.target.value) || 0.4;
   });
 
+  selectUnit.addEventListener("change", () => {
+    updateUnitDisplay();
+    currentFateQuestion = null;
+    updateTopQuestionBanner(null);
+  });
+
   btnZoomText.addEventListener("click", () => {
     isTextZoomed = !isTextZoomed;
     btnZoomText.classList.toggle("active-zoom", isTextZoomed);
@@ -393,6 +399,18 @@ function wrapOptionText(content, maxChars = 14) {
   return [l1, l2];
 }
 
+// 同步左側當前關卡文字與右側下拉選單
+function updateUnitDisplay() {
+  if (!unitInfoText || !selectUnit) return;
+  const selectedOption = selectUnit.options[selectUnit.selectedIndex];
+  if (!selectedOption) return;
+  if (selectUnit.value === "ALL") {
+    unitInfoText.textContent = "🌱 當前關卡：全單元綜合大亂鬥 (1~10單元混合)";
+  } else {
+    unitInfoText.textContent = `🌱 當前關卡：${selectedOption.textContent}`;
+  }
+}
+
 // 載入題庫
 async function loadManifestAndUnits() {
   try {
@@ -425,6 +443,7 @@ async function loadManifestAndUnits() {
     const urlParams = new URLSearchParams(window.location.search);
     const unitParam = urlParams.get("unit") || urlParams.get("file");
     const qcountParam = parseInt(urlParams.get("qcount") || urlParams.get("count"), 10);
+    const modeParam = urlParams.get("mode");
 
     if (unitParam) {
       const decoded = decodeURIComponent(unitParam).trim();
@@ -447,6 +466,15 @@ async function loadManifestAndUnits() {
     if (qcountParam && qcountParam > 0) {
       TARGET_CORRECT_GOAL = qcountParam;
     }
+
+    if (modeParam && modeTag) {
+      if (modeParam === "solo") modeTag.textContent = "🧑‍🚀 個人單機自主挑戰";
+      else if (modeParam === "projector") modeTag.textContent = "🖥️ 全班大螢幕投影主持";
+      else if (modeParam === "group-tablet") modeTag.textContent = "👥 各組平板輪流競賽";
+    }
+
+    // 即時更新左側當前關卡資訊，確保與右側選單 100% 同步
+    updateUnitDisplay();
   } catch (err) {
     console.warn("題庫載入警告:", err);
   }
