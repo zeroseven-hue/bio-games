@@ -359,6 +359,27 @@ async function loadManifestAndUnits() {
         rawQuestionsByUnit[u.file] = qData.questions || [];
       }
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const unitParam = urlParams.get("unit") || urlParams.get("file");
+
+    if (unitParam) {
+      const decoded = decodeURIComponent(unitParam).trim();
+      const match = allManifestUnits.find(u => u.file === decoded || u.id === decoded);
+      if (match) {
+        selectUnit.value = match.file;
+      } else {
+        const customOpt = document.createElement("option");
+        customOpt.value = decoded;
+        customOpt.textContent = decoded;
+        selectUnit.appendChild(customOpt);
+        selectUnit.value = decoded;
+        const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;
+        fetch(fetchPath).then(r => r.json()).then(d => {
+          rawQuestionsByUnit[decoded] = d.questions || [];
+        }).catch(e => {});
+      }
+    }
   } catch (err) {
     console.warn("大富翁題庫載入警告:", err);
   }

@@ -193,7 +193,7 @@ async function initManifestAndUnits() {
   if (manifestData && manifestData.units) {
     populateUnitSelects(manifestData.units);
     if (paramUnit) {
-      currentUnitId = paramUnit;
+      currentUnitId = decodeURIComponent(paramUnit).trim();
     } else {
       currentUnitId = manifestData.units[0].file || manifestData.units[0].id;
     }

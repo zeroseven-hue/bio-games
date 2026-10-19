@@ -121,7 +121,6 @@
 
       <div class="start-actions">
         <button type="button" class="btn-action" id="startBtn" onclick="startGame()">開始挑戰 🔨</button>
-        <a href="../index.html" class="btn-ghost">🏠 返回大廳</a>
       </div>
     </div>
   </section>
@@ -129,7 +128,6 @@
   <!-- 頂部 HUD 狀態列 -->
   <header class="hud">
     <div class="hud-left">
-      <a href="../index.html" class="btn-back-lobby">🏠 大廳</a>
       <button type="button" class="btn-back-lobby btn-rule-help" onclick="toggleInstructionsModal(true)">📖 遊戲說明</button>
     </div>
     <div class="hud-right">
@@ -242,13 +240,12 @@
         <button type="button" class="btn-copy-cert" id="btnCopyCert" onclick="copyCertToClipboard()">📋 複製成績單驗證碼 (Google Classroom 繳交)</button>
         <div class="cert-btn-group">
           <button type="button" class="btn-restart" onclick="resetToStart()">再戰一局 🔄</button>
-          <a href="../index.html" class="btn-home">🏠 返回遊戲大廳</a>
         </div>
       </div>
     </div>
   </div>
 
   <script src="../score-submit-modal.js"></script>
-  <script src="game.js?v=1.0"></script>
+  <script src="game.js?v=2.0"></script>
 </body>
 </html>

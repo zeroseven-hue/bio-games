@@ -357,12 +357,22 @@ async function loadManifestAndInitBank() {
     });
 
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUnit = urlParams.get("unit");
-    const found = manifest.units.find(u => u.file === targetUnit);
+    const targetUnit = urlParams.get("unit") || urlParams.get("file");
 
-    if (found) {
-      unitSelect.value = found.file;
-      loadSingleUnit(found.file);
+    if (targetUnit) {
+      const decoded = decodeURIComponent(targetUnit).trim();
+      const found = manifest.units.find(u => u.file === decoded || u.id === decoded);
+      if (found) {
+        unitSelect.value = found.file;
+        loadSingleUnit(found.file);
+      } else {
+        const opt = document.createElement("option");
+        opt.value = decoded;
+        opt.textContent = decoded;
+        unitSelect.appendChild(opt);
+        unitSelect.value = decoded;
+        loadSingleUnit(decoded);
+      }
     } else if (manifest.units.length > 0) {
       loadSingleUnit(manifest.units[0].file);
     }

@@ -7,12 +7,12 @@
  * 5. 高對比標籤文字防護，確保黑底與岩漿色彩下 100% 清晰可讀。
  */
 
-// 4 大主題關卡設定
+// 4 大主題關卡設定 (預設關卡單元，有 URL 派卷時將自動切換為教師指定單元)
 const STAGE_CONFIG = [
-  { stageKey: "1", title: "第 1 關 (綠意森林)", unitFile: "unit01_scientific_method.json", bgClass: "stage-forest", badge: "🌲 關卡 1/4 (森林關)", stepsNeeded: 5 },
-  { stageKey: "2", title: "第 2 關 (地底洞穴)", unitFile: "unit05_cell_structure.json", bgClass: "stage-cave", badge: "🪨 關卡 2/4 (洞穴關)", stepsNeeded: 5 },
-  { stageKey: "3", title: "第 3 關 (水底世界)", unitFile: "unit06_membrane_transport.json", bgClass: "stage-water", badge: "🌊 關卡 3/4 (海底關)", stepsNeeded: 5 },
-  { stageKey: "4", title: "第 4 關 (岩漿城堡)", unitFile: "unit10_enzymes.json", bgClass: "stage-castle", badge: "🌋 關卡 4/4 (城堡關)", stepsNeeded: 5 }
+  { stageKey: "1", title: "第 1 關 (綠意森林)", unitFile: "翰林版/bio01/bio01_1-2科學方法.json", bgClass: "stage-forest", badge: "🌲 關卡 1/4 (森林關)", stepsNeeded: 5 },
+  { stageKey: "2", title: "第 2 關 (地底洞穴)", unitFile: "翰林版/bio01/bio01_2-2細胞構造.json", bgClass: "stage-cave", badge: "🪨 關卡 2/4 (洞穴關)", stepsNeeded: 5 },
+  { stageKey: "3", title: "第 3 關 (水底世界)", unitFile: "翰林版/bio01/bio01_2-3物質進出細胞的方式.json", bgClass: "stage-water", badge: "🌊 關卡 3/4 (海底關)", stepsNeeded: 5 },
+  { stageKey: "4", title: "第 4 關 (岩漿城堡)", unitFile: "翰林版/bio01/bio01_3-2酵素.json", bgClass: "stage-castle", badge: "🌋 關卡 4/4 (城堡關)", stepsNeeded: 5 }
 ];
 
 // 關鍵字高亮正則
@@ -27,6 +27,10 @@ let isAnsweringLocked = false;
 let isTextZoomed = false;
 let isTeacherFrozen = false;
 let isSoundMuted = false;
+
+let dispatchedUnitTitle = "";
+let targetQCount = 10;
+let totalAnsweredCount = 0;
 
 let allManifestUnits = [];
 let rawQuestionsByUnit = {}; // 原始題庫字典
@@ -159,7 +163,7 @@ function initEventListeners() {
   btnGenerateCert.addEventListener("click", generateCertificate);
   btnCloseCert.addEventListener("click", () => {
     closeModal(certModal);
-    window.location.href = "../index.html";
+    startNewGame();
   });
 
   btnRestoreSnapshot.addEventListener("click", restoreSnapshot);
@@ -213,23 +217,99 @@ function playStageClearSound() {
   });
 }
 
-// 3. 載入題庫與 manifest.json
+// 3. 試題校驗與載入題庫
+function getCorrectAnswerIndex(q) {
+  if (!q || !Array.isArray(q.options) || q.options.length < 2) return -1;
+  if (typeof q.answer === "number" && q.answer >= 0 && q.answer < q.options.length && Boolean(q.options[q.answer])) {
+    return q.answer;
+  }
+  if (typeof q.answer === "string") {
+    const trimmed = q.answer.trim().toUpperCase();
+    const idx = ["A", "B", "C", "D"].indexOf(trimmed);
+    if (idx >= 0 && idx < q.options.length && Boolean(q.options[idx])) {
+      return idx;
+    }
+    const directIdx = q.options.findIndex(opt => opt && opt.trim() === q.answer.trim());
+    if (directIdx >= 0) return directIdx;
+  }
+  return -1;
+}
+
+function sanitizeQuestions(list) {
+  if (!Array.isArray(list)) return [];
+  const seenStems = new Set();
+  const valid = [];
+  for (const q of list) {
+    if (!q || !q.question || typeof q.question !== "string" || !Array.isArray(q.options) || q.options.length < 2) continue;
+    const correctIdx = getCorrectAnswerIndex(q);
+    if (correctIdx === -1) continue;
+    const stem = q.question.trim();
+    if (seenStems.has(stem)) continue;
+    seenStems.add(stem);
+    valid.push({ ...q, answer: correctIdx });
+  }
+  return valid;
+}
+
 async function loadManifestAndUnits() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const unitParam = urlParams.get("unit") || urlParams.get("file");
+  const qcountParam = parseInt(urlParams.get("qcount") || urlParams.get("count"), 10);
+  if (qcountParam && qcountParam > 0) targetQCount = qcountParam;
+
   try {
     const res = await fetch("../questions/manifest.json");
-    if (!res.ok) throw new Error("Manifest 載入失敗");
-    const manifest = await res.json();
-    allManifestUnits = manifest.units || [];
-
-    for (const u of allManifestUnits) {
-      const qRes = await fetch(`../questions/${u.file}`);
-      if (qRes.ok) {
-        const qData = await qRes.json();
-        rawQuestionsByUnit[u.file] = qData.questions || [];
-      }
+    if (res.ok) {
+      const manifest = await res.json();
+      allManifestUnits = manifest.units || [];
     }
   } catch (err) {
-    console.warn("題庫載入警告:", err);
+    console.warn("Manifest 載入警告:", err);
+  }
+
+  // 1. 若有 URL 派卷單元，精準載入指定題庫
+  if (unitParam) {
+    const targetUnit = decodeURIComponent(unitParam).trim();
+    const fetchPath = targetUnit.endsWith('.json') ? `../questions/${targetUnit}` : `../questions/${targetUnit}.json`;
+    try {
+      const qRes = await fetch(fetchPath);
+      if (qRes.ok) {
+        const qData = await qRes.json();
+        const rawList = qData.questions || (Array.isArray(qData) ? qData : []);
+        const sanitized = sanitizeQuestions(rawList);
+        rawQuestionsByUnit[targetUnit] = sanitized;
+        dispatchedUnitTitle = qData.unitTitle || targetUnit;
+
+        // 將 4 大關卡出題單元全部設定為該指定題庫
+        STAGE_CONFIG.forEach(stage => {
+          stage.unitFile = targetUnit;
+        });
+      }
+    } catch (e) {
+      console.warn("載入派發單元失敗:", e);
+    }
+  }
+
+  // 2. 預載入其他單元題庫 (備用)
+  for (const u of allManifestUnits) {
+    if (!rawQuestionsByUnit[u.file]) {
+      try {
+        const qRes = await fetch(`../questions/${u.file}`);
+        if (qRes.ok) {
+          const qData = await qRes.json();
+          const rawList = qData.questions || (Array.isArray(qData) ? qData : []);
+          rawQuestionsByUnit[u.file] = sanitizeQuestions(rawList);
+        }
+      } catch (e) {}
+    }
+  }
+
+  // 3. 若無派卷且關卡檔案不存在，自動對應 manifest 有效單元
+  if (!unitParam && allManifestUnits.length >= 4) {
+    STAGE_CONFIG[0].unitFile = allManifestUnits[0].file;
+    STAGE_CONFIG[1].unitFile = allManifestUnits[1].file;
+    STAGE_CONFIG[2].unitFile = allManifestUnits[2].file;
+    STAGE_CONFIG[3].unitFile = allManifestUnits[3].file;
   }
 }
 
@@ -261,18 +341,23 @@ function applyTeacherSettings() {
 // 4. 100% 不重複 Fisher-Yates 洗牌佇列
 function getNextQuestionFromPool(unitFile) {
   if (!questionPoolByUnit[unitFile] || questionPoolByUnit[unitFile].length === 0) {
-    const rawList = rawQuestionsByUnit[unitFile] || getFallbackQuestions();
+    let rawList = rawQuestionsByUnit[unitFile];
+    if (!rawList || rawList.length === 0) {
+      const firstAvailable = Object.values(rawQuestionsByUnit).find(l => Array.isArray(l) && l.length > 0);
+      rawList = firstAvailable || getFallbackQuestions();
+    }
     questionPoolByUnit[unitFile] = shuffleArray([...rawList]);
   }
   return questionPoolByUnit[unitFile].pop();
 }
 
 function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [result[i], result[j]] = [result[j], result[i]];
   }
-  return arr;
+  return result;
 }
 
 function getFallbackQuestions() {
@@ -286,9 +371,11 @@ function getFallbackQuestions() {
 function startNewGame() {
   currentStageIndex = 0;
   currentStepInStage = 0;
+  totalAnsweredCount = 0;
   hearts = 3;
   coins = 0;
   isAnsweringLocked = false;
+  questionPoolByUnit = {};
   updateUI();
   renderCurrentQuestion();
 }
@@ -372,12 +459,17 @@ function renderCurrentQuestion() {
   const unitFile = currentStage.unitFile;
 
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
-  currentUnitTitle.textContent = unitObj ? `${unitObj.id.toUpperCase()} ‧ ${unitObj.title}` : currentStage.title;
+  const titleText = dispatchedUnitTitle || (unitObj ? `${unitObj.id.toUpperCase()} ‧ ${unitObj.title}` : currentStage.title);
+  currentUnitTitle.textContent = titleText;
 
   const pool = questionPoolByUnit[unitFile] || [];
-  poolCounter.textContent = `題庫佇列剩餘: ${pool.length} 題`;
+  poolCounter.textContent = `本卷佇列剩餘: ${pool.length} 題`;
 
   currentActiveQuestion = getNextQuestionFromPool(unitFile);
+  if (!currentActiveQuestion) {
+    handleStageComplete();
+    return;
+  }
 
   let htmlStem = currentActiveQuestion.question;
   HIGHLIGHT_KEYWORDS.forEach(kw => {
@@ -430,10 +522,11 @@ function handleOptionSelect(selectedIndex, btnEl) {
 
     coins += 10;
     currentStepInStage += 1;
+    totalAnsweredCount += 1;
     updateUI();
 
     setTimeout(() => {
-      if (currentStepInStage >= 5) {
+      if (totalAnsweredCount >= targetQCount || currentStepInStage >= 5) {
         handleStageComplete();
       } else {
         renderCurrentQuestion();
@@ -474,7 +567,7 @@ function spawnPopItem(parentEl, emoji) {
 function handleStageComplete() {
   playStageClearSound();
 
-  if (currentStageIndex >= STAGE_CONFIG.length - 1) {
+  if (totalAnsweredCount >= targetQCount || currentStageIndex >= STAGE_CONFIG.length - 1) {
     openModal(studentIdModal);
   } else {
     const nextStg = STAGE_CONFIG[currentStageIndex + 1];

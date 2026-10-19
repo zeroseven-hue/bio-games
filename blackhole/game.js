@@ -339,8 +339,20 @@ async function loadManifestAndUnits() {
   const urlParams = new URLSearchParams(window.location.search);
   const targetUnit = urlParams.get("unit") || urlParams.get("file") || "ALL";
   if (selectUnit) {
-    if (Array.from(selectUnit.options).some(opt => opt.value === targetUnit)) {
-      selectUnit.value = targetUnit;
+    const decoded = decodeURIComponent(targetUnit).trim();
+    if (Array.from(selectUnit.options).some(opt => opt.value === decoded)) {
+      selectUnit.value = decoded;
+    } else if (decoded !== "ALL") {
+      const opt = document.createElement("option");
+      opt.value = decoded;
+      opt.textContent = decoded;
+      selectUnit.appendChild(opt);
+      selectUnit.value = decoded;
+      const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;
+      fetch(fetchPath).then(r => r.json()).then(d => {
+        rawQuestionsByUnit[decoded] = d.questions || (Array.isArray(d) ? d : []);
+        initGame();
+      }).catch(e => {});
     }
     selectUnit.addEventListener("change", () => {
       initGame();

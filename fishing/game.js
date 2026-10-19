@@ -114,7 +114,6 @@ const certScoreText = document.getElementById("certScoreText");
 const certStreakText = document.getElementById("certStreakText");
 const certTimeText = document.getElementById("certTimeText");
 const btnRestartFishing = document.getElementById("btnRestartFishing");
-const btnExitToLobby = document.getElementById("btnExitToLobby");
 
 // Web Audio API
 let audioCtx = null;
@@ -203,7 +202,6 @@ function initControls() {
   btnCloseNote.onclick = handleCloseNoteModal;
   btnCreateCert.onclick = handleGenerateCert;
   btnRestartFishing.onclick = () => { certModal.classList.add("hidden"); startNewFishingSession(); };
-  btnExitToLobby.onclick = () => { window.location.href = "../index.html"; };
 }
 
 function buildUnitsChecklist() {

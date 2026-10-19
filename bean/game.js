@@ -311,7 +311,7 @@ async function loadManifestAndUnits() {
     manifestUnits = manifestData.units;
     manifestUnits.forEach(u => {
       const opt = document.createElement('option');
-      opt.value = u.id;
+      opt.value = u.file;
       opt.textContent = u.title;
       select.appendChild(opt);
     });
@@ -321,7 +321,7 @@ async function loadManifestAndUnits() {
 // 檢查 URL 參數
 function checkUrlParams() {
   const p = new URLSearchParams(location.search);
-  const paramUnit = p.get('unit');
+  const paramUnit = p.get('unit') || p.get('file');
   const paramCount = p.get('count') || p.get('qcount');
   const paramClass = p.get('class');
   const paramSeat = p.get('seat');
@@ -332,8 +332,18 @@ function checkUrlParams() {
   if (paramName) $('inputName').value = paramName;
 
   if (paramUnit) {
-    $('unitSelect').value = paramUnit;
-    selectedUnitId = paramUnit;
+    const decoded = decodeURIComponent(paramUnit).trim();
+    const match = manifestUnits.find(u => u.file === decoded || u.id === decoded);
+    selectedUnitId = match ? match.file : decoded;
+    if (Array.from($('unitSelect').options).some(o => o.value === selectedUnitId)) {
+      $('unitSelect').value = selectedUnitId;
+    } else {
+      const customOpt = document.createElement('option');
+      customOpt.value = selectedUnitId;
+      customOpt.textContent = selectedUnitId;
+      $('unitSelect').appendChild(customOpt);
+      $('unitSelect').value = selectedUnitId;
+    }
   }
 
   if (paramCount) {
@@ -471,8 +481,8 @@ async function fetchQuestionsForUnit(unitId) {
       }
     }
   } else {
-    const target = manifestUnits.find(u => u.id === unitId);
-    const fileName = target ? target.file : `unit_${unitId}.json`;
+    const target = manifestUnits.find(u => u.file === unitId || u.id === unitId);
+    const fileName = target ? target.file : (unitId.endsWith('.json') ? unitId : `${unitId}.json`);
     for (const basePath of basePathCandidates) {
       try {
         const res = await fetch(basePath + fileName);
