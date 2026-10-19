@@ -247,29 +247,84 @@ function shuffleArray(arr) {
   return arr;
 }
 
+// 嚴格審題過濾器：確保每題 100% 具備合法正解與至少 2 個有效選項，缺答案自動剔除
+function sanitizeQuestions(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(q => {
+    if (!q || !q.question || !Array.isArray(q.options) || q.options.length < 2) return false;
+    // 檢查是否有有效正確答案
+    if (typeof q.answer === "number") {
+      return q.answer >= 0 && q.answer < q.options.length && Boolean(q.options[q.answer]);
+    }
+    if (typeof q.answer === "string") {
+      const ansUpper = q.answer.trim().toUpperCase();
+      const idx = ["A", "B", "C", "D"].indexOf(ansUpper);
+      if (idx >= 0 && idx < q.options.length) return Boolean(q.options[idx]);
+      return q.options.includes(q.answer.trim());
+    }
+    return false;
+  });
+}
+
 async function prepareQuestionPool() {
   let loaded = [];
-  try {
-    for (const u of selectedUnits) {
-      const fetchPath = u.endsWith('.json') ? `../questions/${u}` : `../questions/${u}.json`;
+  const urlParams = new URLSearchParams(window.location.search);
+  const unitParam = urlParams.get("unit") || urlParams.get("file");
+
+  // 1. 優先精準讀取 URL 派卷單元 (支援完整中文路徑與段考快閃)
+  if (unitParam) {
+    try {
+      const decodedUnit = decodeURIComponent(unitParam).trim();
+      const fetchPath = decodedUnit.endsWith('.json') ? `../questions/${decodedUnit}` : `../questions/${decodedUnit}.json`;
       const res = await fetch(fetchPath);
       if (res.ok) {
         const d = await res.json();
         const list = d.questions || (Array.isArray(d) ? d : []);
-        loaded.push(...list);
+        loaded = sanitizeQuestions(list);
+        if (d.unitTitle) {
+          unitTag.textContent = `當前單元：${d.unitTitle}`;
+        }
       }
+    } catch (err) {
+      console.warn("URL 指定題庫載入失敗，切換備用清單", err);
     }
-  } catch (err) {
-    console.warn("外部題庫載入失敗，啟動備用保底題庫", err);
   }
 
+  // 2. 若無指定或載入失敗，讀取老師抽屜勾選的單元
   if (loaded.length === 0) {
-    loaded = FISHING_FALLBACK_QUESTIONS.filter(q => selectedUnits.includes(q.unit));
-    if (loaded.length === 0) loaded = [...FISHING_FALLBACK_QUESTIONS];
+    try {
+      for (const u of selectedUnits) {
+        const fetchPath = u.endsWith('.json') ? `../questions/${u}` : `../questions/${u}.json`;
+        const res = await fetch(fetchPath);
+        if (res.ok) {
+          const d = await res.json();
+          const list = d.questions || (Array.isArray(d) ? d : []);
+          loaded.push(...sanitizeQuestions(list));
+        }
+      }
+    } catch (err) {
+      console.warn("外部題庫載入失敗，啟動備用保底題庫", err);
+    }
   }
 
-  // 洗牌打亂，保證本局絕不重複
-  questionPool = shuffleArray([...loaded]);
+  // 3. 備用保底題庫
+  if (loaded.length === 0) {
+    loaded = sanitizeQuestions(FISHING_FALLBACK_QUESTIONS);
+  }
+
+  // 4. 自動去重 (避免重複題目出現)
+  const seenStems = new Set();
+  const deduped = [];
+  for (const q of loaded) {
+    const key = q.question.trim();
+    if (!seenStems.has(key)) {
+      seenStems.add(key);
+      deduped.push(q);
+    }
+  }
+
+  // 5. Fisher-Yates 真正隨機洗牌打亂
+  questionPool = shuffleArray([...deduped]);
 }
 
 function presentNextQuestion() {
@@ -278,12 +333,16 @@ function presentNextQuestion() {
   if (!currentQuestion) return;
 
   // 棒次輪流提示
-  if (playMode === "group") {
+  if (playMode === "group" || playMode === "group-tablet") {
     groupTurnTag.textContent = `🎣 本回合神釣手：第 ${groupTurn} 棒組員`;
     groupTurn = (groupTurn % 4) + 1;
   }
 
-  unitTag.textContent = `當前單元：${currentQuestion.unit || "生物核心"}`;
+  if (currentQuestion.unitTitle) {
+    unitTag.textContent = `當前單元：${currentQuestion.unitTitle}`;
+  } else {
+    unitTag.textContent = `當前單元：${currentQuestion.unit || "生物核心"}`;
+  }
 
   // 關鍵字高亮
   let stemText = currentQuestion.question;
@@ -319,15 +378,16 @@ function triggerFreezeReadingPhase() {
 
 function spawnOceanFishesForCurrentQuestion() {
   oceanFishes = [];
+  if (!currentQuestion) return;
   const rawOptions = currentQuestion.options || [];
 
   let correctText = "";
   if (typeof currentQuestion.answer === "number") {
-    correctText = rawOptions[currentQuestion.answer] || rawOptions[0];
+    correctText = rawOptions[currentQuestion.answer];
   } else if (typeof currentQuestion.answer === "string") {
-    const ansKey = currentQuestion.answer.toUpperCase();
+    const ansKey = currentQuestion.answer.trim().toUpperCase();
     const idx = ["A", "B", "C", "D"].indexOf(ansKey);
-    correctText = (idx >= 0 && rawOptions[idx]) ? rawOptions[idx] : (currentQuestion.options[ansKey] || rawOptions[0]);
+    correctText = (idx >= 0 && rawOptions[idx]) ? rawOptions[idx] : currentQuestion.answer.trim();
   }
 
   let optionItems = rawOptions.map(opt => ({
@@ -335,13 +395,24 @@ function spawnOceanFishesForCurrentQuestion() {
     isCorrect: (opt === correctText)
   }));
 
+  // 防呆機制：若無正解標籤，強制將第 1 項設為正解
+  if (!optionItems.some(o => o.isCorrect) && optionItems.length > 0) {
+    optionItems[0].isCorrect = true;
+  }
+
   optionItems = shuffleArray(optionItems);
-  const layers = [100, 180, 260, 340]; // 4 個深度水層
+
+  // 🌟 動態水深分佈：依照當前畫面實際高度 (viewH) 等比例分配水層 (22% ~ 80%)，100% 絕不沉底被切掉
+  const minLayer = Math.max(75, viewH * 0.22);
+  const maxLayer = Math.min(viewH - 55, viewH * 0.80);
+  const count = optionItems.length;
+  const step = count > 1 ? (maxLayer - minLayer) / (count - 1) : 0;
+  const layers = optionItems.map((_, i) => minLayer + i * step);
 
   optionItems.forEach((item, idx) => {
-    const yPos = layers[idx] + (Math.random() * 20 - 10);
+    const yPos = layers[idx] + (Math.random() * 12 - 6);
     const dir = (idx % 2 === 0) ? 1 : -1;
-    const startX = (dir === 1) ? -40 - (idx * 60) : viewW + 40 + (idx * 60);
+    const startX = (dir === 1) ? -40 - (idx * 50) : viewW + 40 + (idx * 50);
 
     oceanFishes.push({
       id: idx,
@@ -353,7 +424,7 @@ function spawnOceanFishesForCurrentQuestion() {
       dir: dir,
       speed: 1.1 + Math.random() * 0.35,
       color: getFishColor(idx),
-      fishType: ["🐠", "🐟", "🐡", "🐙"][idx]
+      fishType: ["🐠", "🐟", "🐡", "🐙"][idx % 4]
     });
   });
 }
@@ -389,8 +460,8 @@ function updateFishingPhysics() {
     let tipX = claw.originX + Math.sin(claw.angle) * claw.length;
     let tipY = claw.originY + Math.cos(claw.angle) * claw.length;
 
-    // 觸碰邊界：空手收回
-    if (tipX < 0 || tipX > viewW || tipY > viewH - 20) {
+    // 觸碰邊界：空手收回 (允許延伸至接近畫布底端)
+    if (tipX < 0 || tipX > viewW || tipY > viewH - 10) {
       claw.state = "retracting";
     }
 
@@ -472,8 +543,13 @@ function handleFishPulledAboard(fish) {
 
 function handleCloseNoteModal() {
   noteModal.classList.add("hidden");
-  // 啟動防盲猜過熱冷卻 4 秒
-  triggerCooldownPenalty(4);
+  // 🌟 防卡死機制：檢查當前海域中是否仍有正確答案的魚，若無魚或正解已被抓光，自動補滿選項避免卡死
+  const hasCorrectFish = oceanFishes.some(f => f.isCorrect);
+  if (oceanFishes.length === 0 || !hasCorrectFish) {
+    spawnOceanFishesForCurrentQuestion();
+  }
+  // 啟動防盲猜過熱冷卻 3 秒
+  triggerCooldownPenalty(3);
 }
 
 function triggerCooldownPenalty(seconds) {
@@ -628,6 +704,9 @@ function gameMainLoop() {
 function startNewFishingSession() {
   const urlParams = new URLSearchParams(window.location.search);
   targetQCount = parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10;
+  if (urlParams.get("mode")) playMode = urlParams.get("mode");
+  const isTimerOff = urlParams.get("timer") === "off";
+
   answeredCount = 0;
   score = 0;
   streak = 0;
@@ -644,7 +723,11 @@ function startNewFishingSession() {
 
   clearInterval(timerInterval);
   clearInterval(cooldownTimer);
-  startTimer();
+  if (isTimerOff) {
+    timerDisplay.textContent = "特教無壓力";
+  } else {
+    startTimer();
+  }
   presentNextQuestion();
 }
 

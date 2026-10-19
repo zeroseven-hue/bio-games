@@ -121,7 +121,7 @@
               <span>📜 FISH-8831防偽證書</span>
             </div>
             <div class="card-actions">
-              <a href="fishing/index.html?v=1.0" class="btn-play btn-gold">🎣 直接進入捕撈</a>
+              <a href="fishing/index.html?v=2.0" class="btn-play btn-gold">🎣 直接進入捕撈</a>
             </div>
           </div>
 
@@ -280,8 +280,26 @@
             </div>
 
             <div class="dispatch-buttons">
-              <button id="btnGenerateQR" class="btn-dispatch">📱 生成派發 QR Code 與網址</button>
+              <button id="btnPreviewQuestions" class="btn-dispatch btn-preview" style="background:#0284c7;">🔍 預覽本卷試題 (審核與重抽)</button>
+              <button id="btnGenerateQR" class="btn-dispatch" style="background:#16a34a;">📱 生成派發 QR Code 與網址</button>
               <button id="btnCopyUrl" class="btn-dispatch btn-secondary">🔗 複製派發網址</button>
+            </div>
+
+            <!-- 試題預覽與換題審核區 -->
+            <div id="previewQuestionsArea" class="preview-questions-area hidden" style="margin-top:20px; background:#ffffff; border:2px solid #0284c7; border-radius:14px; padding:18px; box-shadow:0 6px 18px rgba(2,132,199,0.12);">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1.5px solid #e2e8f0; padding-bottom:10px;">
+                <div>
+                  <h3 style="margin:0; font-size:1.1rem; color:#0f172a; font-weight:800;">📋 課堂派卷試題預檢清單 (<span id="previewCountBadge">10</span> 題)</h3>
+                  <small id="previewStatusBadge" style="color:#059669; font-weight:700;">✅ 所有試題已通過校驗：皆含標準答案與4個選項，無無效題</small>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button id="btnRerollQuestions" class="btn-dispatch" style="background:#ea580c; padding:8px 16px; font-size:0.9rem; min-width:auto;">🎲 換一批題目 (重新抽題)</button>
+                  <button id="btnClosePreview" class="btn-dispatch btn-secondary" style="padding:8px 14px; font-size:0.9rem; min-width:auto;">收起 🔼</button>
+                </div>
+              </div>
+              <div id="previewQuestionsList" style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding-right:6px;">
+                <!-- 動態注入題目卡片 -->
+              </div>
             </div>
 
             <!-- QR Code 與網址顯示區 -->
@@ -315,6 +333,6 @@
     </footer>
   </div>
 
-  <script src="lobby.js?v=2.0"></script>
+  <script src="lobby.js?v=2.5"></script>
 </body>
 </html>
