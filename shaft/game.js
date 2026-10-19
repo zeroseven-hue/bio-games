@@ -57,6 +57,7 @@ let stairs = [];
 let stairIdCounter = 0;
 let stairCountCounter = 0;
 let starParticles = [];
+let crumbleDebris = [];
 
 let currentFateQuestion = null;
 let isFateStairActive = false;
@@ -514,6 +515,7 @@ function resetGame() {
   slowdownBoostTimer = 0;
   stairCountCounter = 0;
   starParticles = [];
+  crumbleDebris = [];
 
   player.x = CANVAS_WIDTH / 2 - 14;
   player.y = 200;
@@ -717,20 +719,42 @@ function spawnFateStairPair(y) {
   });
 }
 
+// 輕量微型碎石瓦解特效 (僅在階梯原位短暫向下散落，0.35 秒極速淡出，向下掉落，絕不遮蔽螢幕與題目)
+function spawnCrumbleDebris(x, y, width, height) {
+  const cols = 5;
+  const chunkW = width / cols;
+  for (let i = 0; i < cols; i++) {
+    crumbleDebris.push({
+      x: x + i * chunkW,
+      y: y,
+      w: chunkW * 0.85,
+      h: height * 0.65,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 1.5 + Math.random() * 2.5, // 向下自然掉落
+      angle: 0,
+      vAngle: (Math.random() - 0.5) * 0.2,
+      alpha: 1.0,
+      life: 0.35, // 0.35 秒極速淡出
+      color: i % 2 === 0 ? "#b45309" : "#78350f" // 砂岩碎塊赭色
+    });
+  }
+}
+
 function spawnStarParticles(x, y) {
   const colors = ["#fbbf24", "#4ade80", "#38bdf8", "#f472b6", "#a855f7"];
-  for (let i = 0; i < 35; i++) {
+  // 精緻微型慶祝星光微粒 (數量精簡至 14 顆，體積縮小至 2~3.5px，0.45 秒快速消散，絕不遮蔽視線)
+  for (let i = 0; i < 14; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 6;
+    const speed = 2 + Math.random() * 4.5;
     starParticles.push({
       x,
       y,
       vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 2,
-      size: 4 + Math.random() * 6,
+      vy: Math.sin(angle) * speed - 1.5,
+      size: 2.2 + Math.random() * 2.2,
       color: colors[Math.floor(Math.random() * colors.length)],
       alpha: 1.0,
-      life: 0.8 + Math.random() * 0.4
+      life: 0.45
     });
   }
 }
@@ -800,18 +824,29 @@ function updatePhysics(dt) {
     const s = stairs[i];
     s.y -= stairRiseSpeed;
 
-    if (s.type === "HEART" && s.isTriggered) {
+    if (s.type === "HEART" && s.isTriggered && !s.isCrumbled) {
       s.crumbleTimer += dt;
-      if (s.crumbleTimer >= 1.5) {
+      if (s.crumbleTimer >= 1.2) {
         s.isCrumbled = true;
+        spawnCrumbleDebris(s.x, s.y, s.width, s.height);
+        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
+          player.isGrounded = false;
+        }
+        stairs.splice(i, 1);
+        continue;
       }
     }
 
-    if (s.type === "CRUMBLE" && s.isTriggered) {
+    if (s.type === "CRUMBLE" && s.isTriggered && !s.isCrumbled) {
       s.crumbleTimer += dt;
-      if (s.crumbleTimer >= 0.7) {
+      if (s.crumbleTimer >= 0.45) {
         s.isCrumbled = true;
-        spawnStarParticles(s.x + s.width / 2, s.y);
+        spawnCrumbleDebris(s.x, s.y, s.width, s.height);
+        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
+          player.isGrounded = false;
+        }
+        stairs.splice(i, 1);
+        continue;
       }
     }
 
@@ -947,6 +982,7 @@ function handleStairCollision(s) {
 }
 
 function updateParticles(dt) {
+  // 1. 星光微粒
   for (let i = starParticles.length - 1; i >= 0; i--) {
     const p = starParticles[i];
     p.x += p.vx;
@@ -955,6 +991,19 @@ function updateParticles(dt) {
     p.alpha -= dt / p.life;
     if (p.alpha <= 0) {
       starParticles.splice(i, 1);
+    }
+  }
+
+  // 2. 瓦解落石碎屑 (重力加速下墜，極速淡出)
+  for (let i = crumbleDebris.length - 1; i >= 0; i--) {
+    const d = crumbleDebris[i];
+    d.x += d.vx;
+    d.y += d.vy;
+    d.vy += 0.3;
+    d.angle += d.vAngle;
+    d.alpha -= dt / d.life;
+    if (d.alpha <= 0 || d.y > CANVAS_HEIGHT) {
+      crumbleDebris.splice(i, 1);
     }
   }
 }
@@ -1114,7 +1163,21 @@ function renderCanvas() {
     }
   });
 
-  // 4. 繪製彩虹星光粒子
+  // 4. 繪製微型階梯瓦解落石碎屑 (向下自然墜落，0.35秒極速淡出，在背景層絕不擋視線與題目)
+  crumbleDebris.forEach(d => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, d.alpha);
+    ctx.translate(d.x + d.w / 2, d.y + d.h / 2);
+    ctx.rotate(d.angle);
+    ctx.fillStyle = d.color;
+    ctx.fillRect(-d.w / 2, -d.h / 2, d.w, d.h);
+    ctx.strokeStyle = "#f59e0b";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-d.w / 2, -d.h / 2, d.w, d.h);
+    ctx.restore();
+  });
+
+  // 5. 繪製彩虹星光粒子
   starParticles.forEach(p => {
     ctx.save();
     ctx.globalAlpha = Math.max(0, p.alpha);
@@ -1129,19 +1192,20 @@ function renderCanvas() {
   drawPlayerCharacter(ctx, player);
 }
 
-// 侏儸紀靈動向量探險家繪製函式 (依 28x36 碰撞盒精準貼齊，金黃探險主題，跑步/下墜多重動態)
+// 侏儸紀靈動向量探險家繪製函式 (依 28x36 碰撞盒精準貼齊，螢光科技探險家主題，跑步/下墜多重動態)
 function drawPlayerCharacter(ctx, p) {
   ctx.save();
 
-  // 無敵狀態與受傷反饋閃爍
+  // 1. 靈動螢光光暈 (Fluorescent Bioluminescent Aura)
   if (p.invincibleTimer > 0) {
     ctx.shadowColor = "#fbbf24";
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 20;
     if (Math.floor(Date.now() / 100) % 2 === 0) ctx.globalAlpha = 0.65;
   } else {
-    // 平時自帶微光光暈 (在深邃深淵中極具視覺焦點)
-    ctx.shadowColor = "rgba(245, 158, 11, 0.4)";
-    ctx.shadowBlur = 4;
+    // 平時自帶動態螢光呼吸光暈 (Fluorescent Neon Cyan Bloom，深淵中清晰奪目又靈動)
+    const neonBreath = Math.sin(Date.now() / 200) * 2.0 + 8.0; // 6px ~ 10px 柔和呼吸起伏
+    ctx.shadowColor = "#00f5ff";
+    ctx.shadowBlur = neonBreath;
   }
 
   const cx = p.x + p.width / 2; // 水平中心
@@ -1149,16 +1213,16 @@ function drawPlayerCharacter(ctx, p) {
   const isFalling = !p.isGrounded;
   const runPhase = (Date.now() / 70); // 跑步週期
 
-  // 專業美術色彩配置 (金黃探險家主題)：
-  // 骨架線條與頭部外圈：活力金黃 (#fbbf24) / 琥珀暖金 (#f59e0b)
-  // 頭部甜甜圈內芯：晨曦耀金光核 (雙層漸層，高光白心至暖金光暈，立體晶亮不呆板)
-  // 核心裝備：科技天藍能量晶石腰帶 (#38bdf8)，冷暖互補對比，視覺焦點極佳
-  const primaryColor = "#f59e0b";      // 探險主色：曜石暖金
-  const limbColor = "#fbbf24";         // 肢體骨架：明亮金黃
-  const coreGemColor = "#38bdf8";      // 探險晶石：科技天藍
-  const visorInner = "#ffffff";        // 面罩光心：高亮白心
-  const visorMid = "#fef08a";          // 面罩中層：暖金晨曦
-  const visorOuter = "#fde047";        // 面罩外緣：光暈金黃
+  // 專業美術色彩配置 (螢光生化探險家主題)：
+  // 骨架線條與頭部外圈：螢光活力金 (#ffea00) / 曜石暖金 (#f59e0b)
+  // 頭部甜甜圈內芯：螢光極光電青面罩 (100% 告別死白！高飽和極光青藍漸層，晶瑩立體)
+  // 核心裝備：螢光薄荷晶石腰帶 (#00ff9d)，冷暖互補對比，視覺焦點極佳
+  const primaryColor = "#f59e0b";      // 曜石暖金外框
+  const limbColor = "#ffea00";         // 螢光亮金肢體骨架
+  const coreGemColor = "#00ff9d";      // 螢光薄荷綠晶石
+  const visorInner = "#00f5ff";        // 面罩核心：高亮極光電青 (絕無死白)
+  const visorMid = "#0891b2";          // 面罩中層：晶瑩水藍
+  const visorOuter = "#0369a1";        // 面罩邊緣：深邃全息青
 
   ctx.lineWidth = 3.2;
   ctx.lineCap = "round";
@@ -1230,19 +1294,19 @@ function drawPlayerCharacter(ctx, p) {
   }
   ctx.stroke();
 
-  // 5. 繪製核心能量晶石 (探險家腰帶微光晶石，藍金互補亮點)
-  ctx.shadowColor = "rgba(56, 189, 248, 0.8)";
-  ctx.shadowBlur = 6;
+  // 5. 繪製核心能量晶石 (探險家腰帶微光晶石，螢光薄荷綠點綴)
+  ctx.shadowColor = "#00ff9d";
+  ctx.shadowBlur = 8;
   ctx.fillStyle = coreGemColor;
   ctx.beginPath();
   ctx.arc(cx, hipY - 1, 2.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // 6. 繪製頭部 (侏儸紀風格甜甜圈環 + 晨曦耀金立體光核)
-  ctx.shadowColor = "rgba(245, 158, 11, 0.5)";
-  ctx.shadowBlur = 5;
+  // 6. 繪製頭部 (侏儸紀甜甜圈環 + 螢光極光電青全息面罩，100% 絕無死白)
+  ctx.shadowColor = "#00f5ff";
+  ctx.shadowBlur = 8;
 
-  const headGrad = ctx.createRadialGradient(cx + tilt - 2, headY - 2, 1, cx + tilt, headY, headRadius);
+  const headGrad = ctx.createRadialGradient(cx + tilt - 1.5, headY - 1.5, 0.5, cx + tilt, headY, headRadius);
   headGrad.addColorStop(0, visorInner);
   headGrad.addColorStop(0.55, visorMid);
   headGrad.addColorStop(1, visorOuter);
