@@ -455,7 +455,9 @@ function filterPositiveQuestions(rawList) {
   const filtered = rawList.filter(q => {
     if (!q || !q.question || !Array.isArray(q.options) || q.options.length < 2) return false;
     const isNegative = NEGATIVE_KEYWORDS.some(kw => q.question.includes(kw));
-    return !isNegative;
+    // 動作遊戲下樓梯專屬優化：過濾長度 > 130 字長文，保證階梯下墜時讀題反應時間
+    const isTooLong = q.question.length > 130;
+    return !isNegative && !isTooLong;
   });
   return filtered.length > 0 ? filtered : rawList;
 }
