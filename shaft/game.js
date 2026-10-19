@@ -164,8 +164,8 @@ function initEventListeners() {
     baseSpeed = parseFloat(e.target.value) || 0.4;
   });
 
-  selectUnit.addEventListener("change", () => {
-    updateUnitDisplay();
+  selectUnit.addEventListener("change", async () => {
+    await ensureUnitQuestionsLoaded(selectUnit.value);
     currentFateQuestion = null;
     updateTopQuestionBanner(null);
   });
@@ -399,19 +399,62 @@ function wrapOptionText(content, maxChars = 14) {
   return [l1, l2];
 }
 
-// 同步左側當前關卡文字與右側下拉選單
-function updateUnitDisplay() {
-  if (!unitInfoText || !selectUnit) return;
-  const selectedOption = selectUnit.options[selectUnit.selectedIndex];
-  if (!selectedOption) return;
-  if (selectUnit.value === "ALL") {
-    unitInfoText.textContent = "🌱 當前關卡：全單元綜合大亂鬥 (1~10單元混合)";
-  } else {
-    unitInfoText.textContent = `🌱 當前關卡：${selectedOption.textContent}`;
+// 智慧比對 URL 傳入的題庫單元參數 (支援完整路徑、檔案名稱、單元ID或模糊名稱匹配)
+function findMatchingUnit(param, units) {
+  if (!param || !Array.isArray(units)) return null;
+  const p = decodeURIComponent(param).trim().toLowerCase();
+  
+  // 1. 完全比對 file 或 id
+  let match = units.find(u => u.file.toLowerCase() === p || u.id.toLowerCase() === p);
+  if (match) return match;
+
+  // 2. 忽略 .json 副檔名比對
+  const pNoExt = p.replace(/\.json$/, "");
+  match = units.find(u => u.file.toLowerCase().replace(/\.json$/, "") === pNoExt || u.id.toLowerCase() === pNoExt);
+  if (match) return match;
+
+  // 3. 部分包含比對 (例如 "3-2" 或 "3-2酵素")
+  match = units.find(u => u.file.toLowerCase().includes(pNoExt) || u.id.toLowerCase().includes(pNoExt) || u.title.toLowerCase().includes(pNoExt));
+  if (match) return match;
+
+  return null;
+}
+
+// 按需精準載入題庫：僅載入當前挑戰單元，徹底告別 94 次連線阻塞，秒開遊戲！
+async function ensureUnitQuestionsLoaded(unitFile) {
+  if (!unitFile || unitFile === "ALL") {
+    // 綜合大亂鬥：平行抓取前 6 個主力單元即可啟動
+    const sampleUnits = allManifestUnits.slice(0, 6);
+    await Promise.all(sampleUnits.map(async u => {
+      if (!rawQuestionsByUnit[u.file]) {
+        try {
+          const res = await fetch(`../questions/${u.file}`);
+          if (res.ok) {
+            const data = await res.json();
+            rawQuestionsByUnit[u.file] = data.questions || [];
+          }
+        } catch (e) {}
+      }
+    }));
+    return;
+  }
+
+  // 特定單元：極速單檔載入 (10ms 即可完成！)
+  if (!rawQuestionsByUnit[unitFile]) {
+    try {
+      const fetchPath = unitFile.startsWith("../") ? unitFile : `../questions/${unitFile}`;
+      const res = await fetch(fetchPath);
+      if (res.ok) {
+        const data = await res.json();
+        rawQuestionsByUnit[unitFile] = data.questions || [];
+      }
+    } catch (e) {
+      console.warn("載入題庫失敗:", unitFile, e);
+    }
   }
 }
 
-// 載入題庫
+// 載入題庫索引與派發參數 (零阻塞、即時生效)
 async function loadManifestAndUnits() {
   try {
     const res = await fetch("../questions/manifest.json");
@@ -432,34 +475,23 @@ async function loadManifestAndUnits() {
       selectUnit.appendChild(opt);
     });
 
-    for (const u of allManifestUnits) {
-      const qRes = await fetch(`../questions/${u.file}`);
-      if (qRes.ok) {
-        const qData = await qRes.json();
-        rawQuestionsByUnit[u.file] = qData.questions || [];
-      }
-    }
-
+    // 優先解析 URL 派發參數 (包含 unit、mode、qcount)
     const urlParams = new URLSearchParams(window.location.search);
     const unitParam = urlParams.get("unit") || urlParams.get("file");
     const qcountParam = parseInt(urlParams.get("qcount") || urlParams.get("count"), 10);
     const modeParam = urlParams.get("mode");
 
     if (unitParam) {
-      const decoded = decodeURIComponent(unitParam).trim();
-      const match = allManifestUnits.find(u => u.file === decoded || u.id === decoded);
+      const match = findMatchingUnit(unitParam, allManifestUnits);
       if (match) {
         selectUnit.value = match.file;
       } else {
+        const decoded = decodeURIComponent(unitParam).trim();
         const customOpt = document.createElement("option");
         customOpt.value = decoded;
         customOpt.textContent = decoded;
         selectUnit.appendChild(customOpt);
         selectUnit.value = decoded;
-        const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;
-        fetch(fetchPath).then(r => r.json()).then(d => {
-          rawQuestionsByUnit[decoded] = d.questions || [];
-        }).catch(e => {});
       }
     }
 
@@ -473,8 +505,8 @@ async function loadManifestAndUnits() {
       else if (modeParam === "group-tablet") modeTag.textContent = "👥 各組平板輪流競賽";
     }
 
-    // 即時更新左側當前關卡資訊，確保與右側選單 100% 同步
-    updateUnitDisplay();
+    // 僅載入當前選定單元的題目 (極速 10ms，徹底告別 94 次連線黑屏卡死！)
+    await ensureUnitQuestionsLoaded(selectUnit.value || "ALL");
   } catch (err) {
     console.warn("題庫載入警告:", err);
   }

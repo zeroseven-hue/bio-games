@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>生物大墜落：細胞深淵下樓梯 - Bio-Shaft: Cell Abyss</title>
-  <link rel="stylesheet" href="style.css?v=6.6">
+  <link rel="stylesheet" href="style.css?v=6.7">
 </head>
 <body>
 
@@ -43,11 +43,10 @@
       </div>
     </header>
 
-    <!-- 題庫單元選擇 Bar -->
+    <!-- 題庫單元選擇 Bar (單一權威來源，移除左側重複多餘標籤，置中大器且防歧義) -->
     <div class="unit-bar">
-      <div class="unit-info" id="unitInfoText">🌱 當前關卡：全單元綜合大亂鬥 (1~10單元混合)</div>
       <div class="unit-selector-box">
-        <label for="selectUnit">📚 生物題庫單元：</label>
+        <label for="selectUnit" class="unit-label">📚 當前挑戰題庫單元：</label>
         <select id="selectUnit" class="styled-unit-select"></select>
       </div>
     </div>
@@ -161,6 +160,6 @@
 
   <script src="sounds_b64.js?v=5.8"></script>
   <script src="../score-submit-modal.js?v=2.8"></script>
-  <script src="game.js?v=6.6"></script>
+  <script src="game.js?v=6.7"></script>
 </body>
 </html>

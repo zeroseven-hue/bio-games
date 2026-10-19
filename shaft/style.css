@@ -137,19 +137,48 @@ body {
   transition: width 0.3s ease;
 }
 
-/* 題庫單元 Bar */
+/* 題庫單元 Bar (純淨置中，科技暗夜風格) */
 .unit-bar {
   background: #1e293b;
   color: #ffffff;
-  padding: 4px 16px;
+  padding: 6px 16px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   border-bottom: 1.5px solid #334155;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
-.unit-info { font-weight: 800; color: #4ade80; }
-.styled-unit-select { padding: 2px 6px; border-radius: 6px; border: 1px solid #94a3b8; background: #ffffff; font-weight: bold; }
+
+.unit-selector-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 850px;
+}
+
+.unit-label {
+  font-weight: 800;
+  color: #4ade80;
+  white-space: nowrap;
+  font-size: 0.92rem;
+}
+
+.styled-unit-select {
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #38bdf8;
+  background: #0f172a;
+  color: #fef08a;
+  font-weight: 800;
+  font-size: 0.95rem;
+  max-width: 600px;
+  flex: 1;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
 
 /* 頂部獨立命運題目全寬度看板 (100% 完整字數自然折行，永不切字) */
 .fate-question-banner {
