@@ -783,10 +783,7 @@
   <!-- 手動補登成績彈窗 -->
   <div class="modal-overlay" id="manualModal">
     <div class="modal-box">
-      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center;">
-        <span>✍️ 課堂手動補登成績</span>
-        <button type="button" onclick="changeTeacherPin()" style="font-size:0.75rem; background:none; border:none; color:var(--text-muted); cursor:pointer; text-decoration:underline;">🔑 修改管理密碼</button>
-      </div>
+      <div class="modal-title">✍️ 課堂手動補登成績</div>
       <div class="modal-field">
         <label>座號：</label>
         <input type="number" class="modal-input" id="manualSeat" min="1" max="50" placeholder="例如：08 或 8" />
@@ -1295,37 +1292,8 @@
       showToast(`📥 已成功匯出 ${selectedClassRaw} 班成績單 CSV！`);
     }
 
-    // 13. 手動補登成績彈窗控制與教師權限驗證
-    function verifyTeacherAuth() {
-      if (sessionStorage.getItem("bio_teacher_auth") === "true") {
-        return true;
-      }
-      const savedPin = localStorage.getItem("bio_teacher_pin") || "0000";
-      const pin = prompt("🔒 教師權限驗證：\n請輸入教師管理密碼以開啟手動補登成績 (預設密碼為 0000)：");
-      if (pin === null) return false;
-      if (pin.trim() === savedPin) {
-        sessionStorage.setItem("bio_teacher_auth", "true");
-        showToast("🔓 教師權限驗證成功！");
-        return true;
-      } else {
-        alert("❌ 密碼錯誤！無法開啟教師補登功能。");
-        return false;
-      }
-    }
-
-    function changeTeacherPin() {
-      if (!verifyTeacherAuth()) return;
-      const newPin = prompt("🔑 請輸入新的教師管理密碼 (4~8 位數字或字母)：");
-      if (!newPin || newPin.trim().length < 4) {
-        if (newPin !== null) alert("⚠️ 密碼長度至少需 4 碼！");
-        return;
-      }
-      localStorage.setItem("bio_teacher_pin", newPin.trim());
-      showToast("✅ 教師管理密碼已成功修改！");
-    }
-
+    // 13. 手動補登成績彈窗控制
     function openManualGradeModal() {
-      if (!verifyTeacherAuth()) return;
       document.getElementById("manualModal").classList.add("active");
     }
 
