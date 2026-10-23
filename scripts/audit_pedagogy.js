@@ -14,9 +14,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT_DIR = __dirname;
+const ROOT_DIR = path.resolve(__dirname, '..');
 const QUESTIONS_DIR = path.join(ROOT_DIR, 'questions');
-const REPORT_FILE = path.join(ROOT_DIR, 'TEACHER_PEDAGOGICAL_AUDIT.md');
+const REPORT_FILE = path.join(ROOT_DIR, 'docs', 'TEACHER_PEDAGOGICAL_AUDIT.md');
 
 // 顏色輔助輸出
 const colors = {

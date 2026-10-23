@@ -26,10 +26,10 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const ROOT_DIR = __dirname;
+const ROOT_DIR = path.resolve(__dirname, '..');
 const QUESTIONS_DIR = path.join(ROOT_DIR, 'questions');
 const MANIFEST_PATH = path.join(QUESTIONS_DIR, 'manifest.json');
-const REPORT_PATH = path.join(ROOT_DIR, 'DEFECTIVES_AUDIT_REPORT.md');
+const REPORT_PATH = path.join(ROOT_DIR, 'docs', 'DEFECTIVES_AUDIT_REPORT.md');
 
 const BIO1_ROOT = 'D:\\AI Agent\\web-mini-app\\bio_1\\題庫';
 const BIO2_ROOT = 'D:\\AI Agent\\web-mini-app\\bio_2\\題庫';
