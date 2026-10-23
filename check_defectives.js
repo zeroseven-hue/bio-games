@@ -320,41 +320,37 @@ function syncQuestionBanksToWorkspaces() {
   const publishers = ['翰林版', '康軒版', '南一版'];
 
   publishers.forEach(pub => {
-    // 1. bio01 -> bio_1
+    // 1. bio01 -> bio_1/題庫/{pub}/bio01
     const srcBio01 = path.join(QUESTIONS_DIR, pub, 'bio01');
     if (fs.existsSync(srcBio01)) {
       const destPubRoot1 = path.join(BIO1_ROOT, pub);
       const destBio01 = path.join(destPubRoot1, 'bio01');
-      if (!fs.existsSync(destPubRoot1)) fs.mkdirSync(destPubRoot1, { recursive: true });
       if (!fs.existsSync(destBio01)) fs.mkdirSync(destBio01, { recursive: true });
 
       for (const f of fs.readdirSync(srcBio01)) {
         if (f.endsWith('.json')) {
           const srcFile = path.join(srcBio01, f);
-          fs.copyFileSync(srcFile, path.join(destPubRoot1, f));
           fs.copyFileSync(srcFile, path.join(destBio01, f));
         }
       }
     }
 
-    // 2. bio02 -> bio_2
+    // 2. bio02 -> bio_2/題庫/{pub}/bio02
     const srcBio02 = path.join(QUESTIONS_DIR, pub, 'bio02');
     if (fs.existsSync(srcBio02)) {
       const destPubRoot2 = path.join(BIO2_ROOT, pub);
       const destBio02 = path.join(destPubRoot2, 'bio02');
-      if (!fs.existsSync(destPubRoot2)) fs.mkdirSync(destPubRoot2, { recursive: true });
       if (!fs.existsSync(destBio02)) fs.mkdirSync(destBio02, { recursive: true });
 
       for (const f of fs.readdirSync(srcBio02)) {
         if (f.endsWith('.json')) {
           const srcFile = path.join(srcBio02, f);
-          fs.copyFileSync(srcFile, path.join(destPubRoot2, f));
           fs.copyFileSync(srcFile, path.join(destBio02, f));
         }
       }
     }
 
-    // 3. 快問快答 -> bio_1
+    // 3. 快問快答 -> bio_1/題庫/{pub}/快問快答
     const srcQQ = path.join(QUESTIONS_DIR, pub, '快問快答');
     if (fs.existsSync(srcQQ)) {
       const destPubRoot1 = path.join(BIO1_ROOT, pub);
@@ -364,14 +360,25 @@ function syncQuestionBanksToWorkspaces() {
       for (const f of fs.readdirSync(srcQQ)) {
         if (f.endsWith('.json')) {
           const srcFile = path.join(srcQQ, f);
-          fs.copyFileSync(srcFile, path.join(destPubRoot1, f));
           fs.copyFileSync(srcFile, path.join(destQQ, f));
         }
       }
     }
+
+    // 清理外層任何可能殘留的散落 .json 檔案
+    [BIO1_ROOT, BIO2_ROOT].forEach(bRoot => {
+      const pRoot = path.join(bRoot, pub);
+      if (fs.existsSync(pRoot)) {
+        fs.readdirSync(pRoot, { withFileTypes: true }).forEach(e => {
+          if (e.isFile() && e.name.endsWith('.json')) {
+            fs.unlinkSync(path.join(pRoot, e.name));
+          }
+        });
+      }
+    });
   });
 
-  console.log(`[2/5 完成] 三方題庫目錄均勻同步覆蓋完畢。`);
+  console.log(`[2/5 完成] 三方題庫目錄均勻同步覆蓋完畢（維持子資料夾收納，零重複檔案）。`);
 }
 
 // 更新 manifest.json 索引與題數
