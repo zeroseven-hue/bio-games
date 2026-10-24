@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🏆 Bio-Games 通用成績自動登錄組件 (Score Submit Modal Component)
  * 版本: v1.0
  * 功能: 提供個人/小組成績自動上傳至 Google 試算表 (GAS) 介面
@@ -179,7 +179,7 @@
     overlay.id = 'ssModalOverlay';
 
     const savedClass = localStorage.getItem('bio_games_last_class') || '701';
-    const classOptionsHtml = Array.from({ length: 12 }, (_, i) => {
+    const classOptionsHtml = Array.from({ length: 10 }, (_, i) => {
       const cls = `7${String(i + 1).padStart(2, '0')}`;
       return `<option value="${cls}" ${cls === savedClass ? 'selected' : ''}>${cls} 班</option>`;
     }).join('');
@@ -189,7 +189,7 @@
       return `<option value="${seat}">${seat} 號</option>`;
     }).join('');
 
-    const groupOptionsHtml = Array.from({ length: 12 }, (_, i) => {
+    const groupOptionsHtml = Array.from({ length: 10 }, (_, i) => {
       const grp = `第 ${i + 1} 組`;
       return `<option value="${grp}">${grp}</option>`;
     }).join('');
@@ -474,3 +474,4 @@
   };
 
 })(window);
+
