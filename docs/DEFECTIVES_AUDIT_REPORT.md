@@ -1,11 +1,11 @@
-# 🛡️ Bio-Games 題庫資深教師級深度檢核與修復報告
+﻿# 🛡️ Bio-Games 題庫資深教師級深度檢核與修復報告
 
 **生成時間**：2026/10/23 下午9:19:58  
 **檢核標準**：國中七年級生物 108 課綱資深教師最嚴格標準（100% 純文字可答、零缺失圖表參照、零殘缺代號選項、零重複選項、正解解析 100% 一致）  
 **檢核範圍**：
-1. `D:\AI Agent\web-mini-app\bio-games\questions`（翰林版、康軒版、南一版，共 94 單元檔案）
-2. `D:\AI Agent\web-mini-app\bio_1\題庫`（7上各版本題庫與快問快答）
-3. `D:\AI Agent\web-mini-app\bio_2\題庫`（7下各版本題庫）
+1. `D:\antigravity\web-mini-app\bio-games\questions`（翰林版、康軒版、南一版，共 94 單元檔案）
+2. `D:\antigravity\web-mini-app\bio_1\題庫`（7上各版本題庫與快問快答）
+3. `D:\antigravity\web-mini-app\bio_2\題庫`（7下各版本題庫）
 
 ---
 

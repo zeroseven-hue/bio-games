@@ -1,4 +1,4 @@
-# 🎮 專案 01：國中生物課堂網頁遊戲平台 (bio-games)
+﻿# 🎮 專案 01：國中生物課堂網頁遊戲平台 (bio-games)
 
 本檔案為 **大廳一（bio-games）** 之權威專案身分證與架構設定檔。
 
@@ -7,7 +7,7 @@
 ## 📌 專案基本資料
 
 * **專案識別名稱**：`01_大廳一_生物互動遊戲平台 (bio-games)`
-* **本機唯一路徑**：`D:\AI Agent\教學專案系統\01_大廳一_生物互動遊戲平台 (bio-games)`
+* **本機唯一路徑**：`D:\antigravity\教學專案系統\01_大廳一_生物互動遊戲平台 (bio-games)`
 * **GitHub 倉庫**：[`zeroseven-hue/bio-games`](https://github.com/zeroseven-hue/bio-games)
 * **GitHub Pages 線上站點**：[https://zeroseven-hue.github.io/bio-games/](https://zeroseven-hue.github.io/bio-games/)
 * **Git 主要分支**：`master`
