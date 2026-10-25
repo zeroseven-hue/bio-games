@@ -489,6 +489,7 @@
     $('awardCurtain').classList.add('hidden');
     $('dialogue').classList.add('hidden');
     $('timeoutOverlay').classList.add('hidden');
+    $('teacher').classList.add('hidden');
 
     renderScene();
 
@@ -1211,45 +1212,51 @@
 
   // 18. 事件綁定
   function bindUIEvents() {
-    // 首頁開始
-    $('startBtn').onclick = () => gotoScene(1, false);
+    // 首頁封面按鈕
     $('coverStart').onclick = () => gotoScene(1, false);
 
     // 整合遊戲說明與成就指引彈窗（取代陽春 alert，無縫銜接開始遊戲）
     $('coverHow').onclick = showGameInstructionsModal;
-    $('storyBtn').onclick = showGameInstructionsModal;
-
     $('coverAwards').onclick = showAwardsModal;
     $('endingAwards').onclick = showAwardsModal;
 
-    // 教師設定面板縮小/展開切換
-    const toggleHomeBtn = $('toggleHomePanelBtn');
-    const expandHomeBtn = $('expandHomePanelBtn');
-    const homeEl = $('home');
-    if (toggleHomeBtn && expandHomeBtn && homeEl) {
-      toggleHomeBtn.onclick = () => {
-        homeEl.classList.add('is-collapsed');
-        expandHomeBtn.classList.remove('hidden');
-      };
-      expandHomeBtn.onclick = () => {
-        homeEl.classList.remove('is-collapsed');
-        expandHomeBtn.classList.add('hidden');
-      };
-    }
-
-    // 教師相關按鈕
+    // 單一整合式教師控制台按鈕 (開啟/關閉)
     $('teacherToggle').onclick = () => $('teacher').classList.toggle('hidden');
-    $('coverTeacher').onclick = () => $('teacher').classList.remove('hidden');
-    $('teacherPreviewBtn').onclick = () => $('teacher').classList.remove('hidden');
-    $('closeTeacher').onclick = () => $('teacher').classList.add('hidden');
+    if ($('teacherCoverBtn')) $('teacherCoverBtn').onclick = () => $('teacher').classList.remove('hidden');
+    if ($('coverTeacher')) $('coverTeacher').onclick = () => $('teacher').classList.remove('hidden');
+    if ($('closeTeacherTop')) $('closeTeacherTop').onclick = () => $('teacher').classList.add('hidden');
+    if ($('closeTeacherBottom')) $('closeTeacherBottom').onclick = () => $('teacher').classList.add('hidden');
 
-    // 快捷跳關按鈕
+    // 快捷跳關按鈕 (點選後自動收起教師控制台，提供 100% 無遮擋視野)
     document.querySelectorAll('[data-jump]').forEach(btn => {
       btn.onclick = () => {
         const j = Number(btn.dataset.jump);
         gotoScene(j, true);
+        $('teacher').classList.add('hidden');
       };
     });
+
+    // 特殊機關與進度重設按鈕
+    $('testPuzzle2Btn').onclick = () => {
+      currentScene = 2;
+      renderScene();
+      openStage2Puzzle();
+      $('teacher').classList.add('hidden');
+    };
+    $('testPuzzle3Btn').onclick = () => {
+      currentScene = 3;
+      renderScene();
+      openStage3Puzzle();
+      $('teacher').classList.add('hidden');
+    };
+    $('resetProgressBtn').onclick = () => {
+      solvedClues = [new Set(), new Set(), new Set()];
+      earnedCertificates = [false, false, false];
+      gameFinished = false;
+      totalTimerStarted = false;
+      gotoScene(0, true);
+      $('teacher').classList.add('hidden');
+    };
 
     // 題庫切換
     $('unitSelect').onchange = e => switchQuestionUnit(e.target.value);
@@ -1394,28 +1401,12 @@
       }
     };
 
-    // 教師面板特殊機關測試按鈕
-    $('testPuzzle2Btn').onclick = () => {
-      currentScene = 2;
-      openStage2Puzzle();
-    };
-    $('testPuzzle3Btn').onclick = () => {
-      currentScene = 3;
-      openStage3Puzzle();
-    };
-    $('resumeTimerBtn').onclick = () => {
-      gamePaused = false;
-      updatePauseButton();
-      $('teacher').classList.add('hidden');
-    };
-    $('resetProgressBtn').onclick = () => {
-      solvedClues = [new Set(), new Set(), new Set()];
-      earnedCertificates = [false, false, false];
-      gameFinished = false;
-      totalTimerStarted = false;
-      gotoScene(0, true);
-      $('teacher').classList.add('hidden');
-    };
+    // 點擊背景空白處關閉教師控制台
+    $('teacher').addEventListener('click', e => {
+      if (e.target === $('teacher')) {
+        $('teacher').classList.add('hidden');
+      }
+    });
   }
 
   // 19. 初始化入口
