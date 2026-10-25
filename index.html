@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>國中生物網頁遊戲平台 - bio-games</title>
-  <link rel="stylesheet" href="lobby.css?v=3.0">
+  <link rel="stylesheet" href="lobby.css?v=3.1">
   <!-- QRCode.js (Local first for school networks/TANet with CDN fallback) -->
   <script src="qrcode.min.js?v=1.0"></script>
   <script>
@@ -31,269 +31,350 @@
     <main class="lobby-main">
       <!-- 遊戲卡片區域 -->
       <section class="games-section">
-        <h2>🎮 課堂遊戲大廳 (共用題庫主題遊戲 ‧ 專注計時)</h2>
-        <div class="game-cards-grid">
-
-          <!-- 遊戲 1: 侏羅紀逃生記 -->
-          <div class="game-card card-jurassic">
-            <div class="card-badge">熱門推薦</div>
-            <div class="card-icon">🦖</div>
-            <h3>侏羅紀叢林逃生記</h3>
-            <p class="card-desc">探險隊在叢林中避開暴龍爪痕、攀爬攀藤升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。</p>
-            <div class="card-tags">
-              <span>👥 小組輪流</span>
-              <span>🖥️ 投影主持</span>
-              <span>📄 錯題戰報 TXT</span>
-            </div>
-            <div class="card-actions">
-              <a href="jurassic/index.html?v=3.4" class="btn-play">🚀 直接進入遊戲</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 2: 動物方城市大富翁 -->
-          <div class="game-card card-monopoly">
-            <div class="card-badge bg-orange">熱烈迴響</div>
-            <div class="card-icon">🐰</div>
-            <h3>動物方城市生物大富翁</h3>
-            <p class="card-desc">茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！</p>
-            <div class="card-tags">
-              <span>🎲 隨機抽籤</span>
-              <span>🏠 答題蓋房</span>
-              <span>✨ 閃亮機會</span>
-            </div>
-            <div class="card-actions">
-              <a href="monopoly/index.html?v=4.6" class="btn-play btn-orange">🎲 直接進入遊戲</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 3: 超級馬力歐生物闖關 -->
-          <div class="game-card card-mario">
-            <div class="card-badge bg-red">熱門登場</div>
-            <div class="card-icon">🍄</div>
-            <h3>超級馬力歐生物闖關</h3>
-            <p class="card-desc">冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼供截圖繳交！</p>
-            <div class="card-tags">
-              <span>🏃 4大關卡闖關</span>
-              <span>🪙 金幣積累</span>
-              <span>📜 GC 截圖繳交</span>
-            </div>
-            <div class="card-actions">
-              <a href="mario/index.html" class="btn-play btn-red">🍄 直接進入遊戲</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 4: 樂透大冒險 RPG -->
-          <div class="game-card card-rpg">
-            <div class="card-badge bg-purple">重磅推薦</div>
-            <div class="card-icon">🗡️</div>
-            <h3>樂透大冒險：生物勇者傳奇</h3>
-            <p class="card-desc">勇者擊敗史萊姆與三眼大魔王 Boss！營地購買神兵利器，解救夥伴樂樂🐶與布丁🐱，含 Google Classroom 防偽認證碼與心得填寫！</p>
-            <div class="card-tags">
-              <span>🗡️ RPG三關冒險</span>
-              <span>🏕️ 裝備升級商店</span>
-              <span>🐶🐱 夥伴護盾技能</span>
-            </div>
-            <div class="card-actions">
-              <a href="rpg/index.html?v=2.7" class="btn-play btn-purple">🗡️ 直接進入冒險</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 5: 植物大戰殭屍 細胞防衛戰 -->
-          <div class="game-card card-pvz">
-            <div class="card-badge bg-green">最新強檔</div>
-            <div class="card-icon">🌱</div>
-            <h3>植物大戰殭屍：細胞防衛戰</h3>
-            <p class="card-desc">答對題目賺陽光部署胞器植物！巨型觸控按鈕免拖曳、讀題10%龜速緩速防焦慮，12分鐘波次防衛與美式卡通防偽證書！</p>
-            <div class="card-tags">
-              <span>🌱 5路細胞防線</span>
-              <span>🐢 讀題10%龜速緩速</span>
-              <span>📜 PVZ-7712防偽證書</span>
-            </div>
-            <div class="card-actions">
-              <a href="pvz/index.html" class="btn-play btn-green">🌱 直接進入防衛</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 6: 生物大釣手 黃金深海大捕撈 -->
-          <div class="game-card card-fishing">
-            <div class="card-badge bg-gold">最新登場</div>
-            <div class="card-icon">🎣</div>
-            <h3>生物大釣手：黃金深海大捕撈</h3>
-            <p class="card-desc">經典黃金礦工擺盪吊爪！結合磁吸助瞄、2.5秒靜止讀題聲納與抓錯魚逃跑機制，全關卡解鎖 Google Classroom 防偽研究員證書！</p>
-            <div class="card-tags">
-              <span>🎣 擺盪機械爪</span>
-              <span>🧲 磁吸助瞄</span>
-              <span>📜 FISH-8831防偽證書</span>
-            </div>
-            <div class="card-actions">
-              <a href="fishing/index.html?v=2.7" class="btn-play btn-gold">🎣 直接進入捕撈</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 7: 生物大墜落 下樓梯 -->
-          <div class="game-card card-shaft">
-            <div class="card-badge bg-cyan">最新第七款</div>
-            <div class="card-icon">🧬</div>
-            <h3>生物大墜落：細胞深淵下樓梯</h3>
-            <p class="card-desc">經典下樓梯跑酷！28% 子彈時間二選一命運階梯、iPad 雙側觸控盲操、深淵熱氣流救援與 Google Classroom 防偽通關證書！</p>
-            <div class="card-tags">
-              <span>🪜 28%子彈時間</span>
-              <span>🌪️ 深淵熱氣流救援</span>
-              <span>📜 SHAFT-9912防偽證書</span>
-            </div>
-            <div class="card-actions">
-              <a href="shaft/index.html?v=6.7" class="btn-play btn-cyan">🧬 直接進入下樓梯</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 8: 生物小精靈塔防 微觀免疫大作戰 -->
-          <div class="game-card card-pacman">
-            <div class="card-badge bg-indigo">重磅 V2.0</div>
-            <div class="card-icon">👾</div>
-            <h3>生物小精靈塔防：微觀免疫大作戰</h3>
-            <p class="card-desc">21x15 超大雙倍迷宮！三大漸進關卡、動態偽足巨噬細胞、冠狀刺突病毒、B細胞特異抗體砲塔、PAC-8812 防偽證書與課堂英雄榜！</p>
-            <div class="card-tags">
-              <span>🗺️ 21x15 三大關卡</span>
-              <span>📜 PAC-8812防偽證書</span>
-              <span>🏆 課堂英雄排行榜</span>
-            </div>
-            <div class="card-actions">
-              <a href="pacman/index.html?v=2.0" class="btn-play btn-indigo">👾 直接進入塔防 V2.0</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 9: 生物星際大逃亡 逃離黑洞 -->
-          <div class="game-card card-blackhole">
-            <div class="card-badge bg-cyan">最新 V1.0</div>
-            <div class="card-icon">🚀</div>
-            <h3>生物星際大逃亡：逃離黑洞</h3>
-            <p class="card-desc">黑洞動態引力追擊！Kahoot 4 色符號答題、5秒過載冷卻防盲猜、雙軌躍遷進度與黑盒子觀念修復日誌！</p>
-            <div class="card-tags">
-              <span>🌌 黑洞動態追逐</span>
-              <span>⚡ 5秒過載防盲猜</span>
-              <span>📜 黑盒子觀念檢討</span>
-            </div>
-            <div class="card-actions">
-              <a href="blackhole/index.html?v=1.0" class="btn-play btn-purple">🚀 直接進入逃離黑洞</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 10: 生物小蜜蜂 星際防衛隊 -->
-          <div class="game-card card-defender">
-            <div class="card-badge bg-green">最新 V2.0</div>
-            <div class="card-icon">🐝</div>
-            <h3>生物小蜜蜂：星際防衛隊</h3>
-            <p class="card-desc">經典 Space Invaders 街機戰鬥！A/B/C/D 直覺鎖定雷射發射、無限子彈連擊、錯題說明自動暫停與一鍵複製 Google Classroom 防偽證書！</p>
-            <div class="card-tags">
-              <span>🐝 經典小蜜蜂街機</span>
-              <span>🎯 A/B/C/D鎖定雷射</span>
-              <span>📋 複製防偽成績單</span>
-            </div>
-            <div class="card-actions">
-              <a href="defender/index.html?v=2.0" class="btn-play btn-green">🐝 直接進入小蜜蜂 V2.0</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 11: 淘氣豆 生物敲敲研究所 -->
-          <div class="game-card card-bean">
-            <div class="card-badge bg-green">最新第十一款</div>
-            <div class="card-icon">🫘</div>
-            <h3>淘氣豆：生物敲敲研究所</h3>
-            <p class="card-desc">看準生物題目敲擊對應答案洞口的淘氣豆！Combo 連擊大錘升級、錯題觀念解析與 BEAN 防偽驗證碼證書！</p>
-            <div class="card-tags">
-              <span>🫘 原創淘氣豆</span>
-              <span>🔨 Combo 錘子升級</span>
-              <span>📜 BEAN 防偽證書</span>
-            </div>
-            <div class="card-actions">
-              <a href="bean/index.html?v=1.0" class="btn-play btn-green">🫘 直接進入敲敲研究所</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 12: 皇家古堡 生物密室逃脫 -->
-          <div class="game-card card-castle">
-            <div class="card-badge bg-purple">密室逃脫系列</div>
-            <div class="card-icon">🏰</div>
-            <h3>皇家古堡：生物密室逃脫</h3>
-            <p class="card-desc">探索三重皇家封印！起居室、秘典室與禁閣，點選古老物件解開生物密碼，支援全場統一與分關計時！</p>
-            <div class="card-tags">
-              <span>🏰 三重古堡封印</span>
-              <span>🦉 學者奧利引導</span>
-              <span>📜 皇家成就認證</span>
-            </div>
-            <div class="card-actions">
-              <a href="escape-castle/index.html?v=1.4" class="btn-play btn-purple">🏰 進入皇家古堡</a>
-            </div>
-          </div>
-
-          <!-- [依序部署中暫時保留]
-<!-- 遊戲 13: 微觀特攻隊 細胞世界大暴走 -->
-          <div class="game-card card-micro">
-            <div class="card-badge bg-cyan">密室逃脫系列</div>
-            <div class="card-icon">🔬</div>
-            <h3>微觀特攻隊：細胞世界大暴走</h3>
-            <p class="card-desc">校園縮小裝置啟動！深入微觀生命城市，偕同生物夥伴葉可排解交通阻塞、修復防衛掃描器並重啟生命核心！</p>
-            <div class="card-tags">
-              <span>🔬 細胞城市科幻</span>
-              <span>🌱 葉可語音陪伴</span>
-              <span>🏅 核心重啟徽章</span>
-            </div>
-            <div class="card-actions">
-              <a href="escape-micro/index.html?v=1.0" class="btn-play btn-cyan">🔬 進入微觀城市</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 14: 奇幻仙境 愛麗絲生物密室逃脫 -->
-          <div class="game-card card-alice">
-            <div class="card-badge bg-gold">密室逃脫系列</div>
-            <div class="card-icon">🐇</div>
-            <h3>奇幻仙境：愛麗絲生物密室逃脫</h3>
-            <p class="card-desc">墜入兔子洞追尋白兔懷錶！破解魔法蘑菇森林謎題、參與瘋帽子尺度茶會，依尺度排序茶杯重返現實！</p>
-            <div class="card-tags">
-              <span>🐇 兔子洞魔法森林</span>
-              <span>☕ 瘋帽子尺度排序</span>
-              <span>✨ 仙境解謎勳章</span>
-            </div>
-            <div class="card-actions">
-              <a href="escape-alice/index.html?v=1.0" class="btn-play btn-gold">🐇 進入奇幻仙境</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 15: 現代校園 生物密室逃脫 -->
-          <div class="game-card card-school">
-            <div class="card-badge bg-red">密室逃脫系列</div>
-            <div class="card-icon">🏫</div>
-            <h3>現代校園：生物密室逃脫</h3>
-            <p class="card-desc">放學後異常教室與失控生物實驗室！跟隨阿歪 AI 破解 16 道生物謎題，找回記憶並解除校園神秘危機！</p>
-            <div class="card-tags">
-              <span>🏫 放學異常教室</span>
-              <span>🤖 阿歪 AI 對話</span>
-              <span>🏆 雙計時三關認證</span>
-            </div>
-            <div class="card-actions">
-              <a href="escape-school/index.html?v=1.0" class="btn-play btn-red">🏫 進入現代校園</a>
-            </div>
-          </div>
-
-          <!-- 遊戲 16: 羊羊農場 生物大逃脫 -->
-          <div class="game-card card-farm">
-            <div class="card-badge bg-green">密室逃脫系列</div>
-            <div class="card-icon">🐑</div>
-            <h3>羊羊農場：生物大逃脫</h3>
-            <p class="card-desc">植物界、動物界與真菌界三張圖卡連消！野狼追逐隨機限時選牌，解救受困羊群並獲取終極救援王獎狀！</p>
-            <div class="card-tags">
-              <span>🐑 經典圖卡三消</span>
-              <span>🐺 野狼倒數逃脫</span>
-              <span>📜 羊羊終極救援王</span>
-            </div>
-            <div class="card-actions">
-              <a href="escape-farm/index.html?v=1.0" class="btn-play btn-green">🐑 進入羊羊農場</a>
-            </div>
+        <div class="games-section-header">
+          <h2>🎮 課堂遊戲大廳 (共用題庫主題遊戲 ‧ 專注計時)</h2>
           
--->
-</div>
+          <!-- 類別篩選標籤 (Category Tabs) 與收放控制列 -->
+          <div class="category-tabs-wrapper">
+            <div class="category-tabs-bar" id="categoryTabs" role="tablist">
+              <button type="button" class="cat-tab active" data-cat="all" role="tab" aria-selected="true">
+                🌟 全部遊戲 <span class="cat-badge">16</span>
+              </button>
+              <button type="button" class="cat-tab" data-cat="escape" role="tab" aria-selected="false">
+                🏰 密室解謎系列 <span class="cat-badge">5</span>
+              </button>
+              <button type="button" class="cat-tab" data-cat="arcade" role="tab" aria-selected="false">
+                🕹️ 經典街機系列 <span class="cat-badge">7</span>
+              </button>
+              <button type="button" class="cat-tab" data-cat="board" role="tab" aria-selected="false">
+                🎲 角色桌遊系列 <span class="cat-badge">4</span>
+              </button>
+            </div>
+            
+            <div class="category-controls-bar">
+              <span class="category-summary-hint" id="categorySummaryHint">💡 點選上方標籤秒速過濾，或點擊下方分區收放卡片</span>
+              <div class="collapse-actions">
+                <button type="button" id="btnExpandAll" class="btn-collapse-tool">📂 全部展開</button>
+                <button type="button" id="btnCollapseAll" class="btn-collapse-tool">📁 全部收合</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <!-- 分類 1: 🏰 密室解謎與情境逃脫系列 -->
+        <div class="category-group" data-category="escape" id="group-escape">
+          <div class="category-group-header" role="button" tabindex="0" aria-expanded="true" aria-controls="content-escape">
+            <div class="group-title-wrap">
+              <span class="group-icon">🏰</span>
+              <h3 class="group-title">密室解謎與情境逃脫系列</h3>
+              <span class="group-badge">5 款探索冒險</span>
+            </div>
+            <div class="group-toggle-indicator">
+              <span class="toggle-text">收合</span>
+              <span class="toggle-arrow">🔼</span>
+            </div>
+          </div>
+          <div class="category-group-content" id="content-escape">
+            <div class="game-cards-grid">
 
+              <!-- 遊戲 1: 皇家古堡 生物密室逃脫 -->
+              <div class="game-card card-castle">
+                <div class="card-badge bg-purple">密室逃脫系列</div>
+                <div class="card-icon">🏰</div>
+                <h3>皇家古堡：生物密室逃脫</h3>
+                <p class="card-desc">探索三重皇家封印！起居室、秘典室與禁閣，點選古老物件解開生物密碼，支援全場統一與分關計時！</p>
+                <div class="card-tags">
+                  <span>🏰 三重古堡封印</span>
+                  <span>🦉 學者奧利引導</span>
+                  <span>📜 皇家成就認證</span>
+                </div>
+                <div class="card-actions">
+                  <a href="escape-castle/index.html?v=1.4" class="btn-play btn-purple">🏰 進入皇家古堡</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 2: 微觀特攻隊 細胞世界大暴走 -->
+              <div class="game-card card-micro">
+                <div class="card-badge bg-cyan">依序登場中</div>
+                <div class="card-icon">🔬</div>
+                <h3>微觀特攻隊：細胞世界大暴走</h3>
+                <p class="card-desc">校園縮小裝置啟動！深入微觀生命城市，偕同生物夥伴葉可排解交通阻塞、修復防衛掃描器並重啟生命核心！</p>
+                <div class="card-tags">
+                  <span>🔬 細胞城市科幻</span>
+                  <span>🌱 葉可語音陪伴</span>
+                  <span>🏅 核心重啟徽章</span>
+                </div>
+                <div class="card-actions">
+                  <a href="escape-micro/index.html?v=1.0" class="btn-play btn-cyan" onclick="if(location.hostname==='localhost'||location.protocol==='file:'){return true;} alert('🔬 微觀特攻隊正依序進行課堂校驗，即將發布，敬請期待！'); return false;">🔬 進入微觀城市 (即將發布)</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 3: 奇幻仙境 愛麗絲生物密室逃脫 -->
+              <div class="game-card card-alice">
+                <div class="card-badge bg-gold">依序登場中</div>
+                <div class="card-icon">🐇</div>
+                <h3>奇幻仙境：愛麗絲生物密室逃脫</h3>
+                <p class="card-desc">墜入兔子洞追尋白兔懷錶！破解魔法蘑菇森林謎題、參與瘋帽子尺度茶會，依尺度排序茶杯重返現實！</p>
+                <div class="card-tags">
+                  <span>🐇 兔子洞魔法森林</span>
+                  <span>☕ 瘋帽子尺度排序</span>
+                  <span>✨ 仙境解謎勳章</span>
+                </div>
+                <div class="card-actions">
+                  <a href="escape-alice/index.html?v=1.0" class="btn-play btn-gold" onclick="if(location.hostname==='localhost'||location.protocol==='file:'){return true;} alert('🐇 奇幻仙境正依序進行課堂校驗，即將發布，敬請期待！'); return false;">🐇 進入奇幻仙境 (即將發布)</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 4: 現代校園 生物密室逃脫 -->
+              <div class="game-card card-school">
+                <div class="card-badge bg-red">依序登場中</div>
+                <div class="card-icon">🏫</div>
+                <h3>現代校園：生物密室逃脫</h3>
+                <p class="card-desc">放學後異常教室與失控生物實驗室！跟隨阿歪 AI 破解 16 道生物謎題，找回記憶並解除校園神秘危機！</p>
+                <div class="card-tags">
+                  <span>🏫 放學異常教室</span>
+                  <span>🤖 阿歪 AI 對話</span>
+                  <span>🏆 雙計時三關認證</span>
+                </div>
+                <div class="card-actions">
+                  <a href="escape-school/index.html?v=1.0" class="btn-play btn-red" onclick="if(location.hostname==='localhost'||location.protocol==='file:'){return true;} alert('🏫 現代校園正依序進行課堂校驗，即將發布，敬請期待！'); return false;">🏫 進入現代校園 (即將發布)</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 5: 羊羊農場 生物大逃脫 -->
+              <div class="game-card card-farm">
+                <div class="card-badge bg-green">依序登場中</div>
+                <div class="card-icon">🐑</div>
+                <h3>羊羊農場：生物大逃脫</h3>
+                <p class="card-desc">植物界、動物界與真菌界三張圖卡連消！野狼追逐隨機限時選牌，解救受困羊群並獲取終極救援王獎狀！</p>
+                <div class="card-tags">
+                  <span>🐑 經典圖卡三消</span>
+                  <span>🐺 野狼倒數逃脫</span>
+                  <span>📜 羊羊終極救援王</span>
+                </div>
+                <div class="card-actions">
+                  <a href="escape-farm/index.html?v=1.0" class="btn-play btn-green" onclick="if(location.hostname==='localhost'||location.protocol==='file:'){return true;} alert('🐑 羊羊農場正依序進行課堂校驗，即將發布，敬請期待！'); return false;">🐑 進入羊羊農場 (即將發布)</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- 分類 2: 🕹️ 經典街機與動作防衛系列 -->
+        <div class="category-group" data-category="arcade" id="group-arcade">
+          <div class="category-group-header" role="button" tabindex="0" aria-expanded="true" aria-controls="content-arcade">
+            <div class="group-title-wrap">
+              <span class="group-icon">🕹️</span>
+              <h3 class="group-title">經典街機與動作防衛系列</h3>
+              <span class="group-badge">7 款高能挑戰</span>
+            </div>
+            <div class="group-toggle-indicator">
+              <span class="toggle-text">收合</span>
+              <span class="toggle-arrow">🔼</span>
+            </div>
+          </div>
+          <div class="category-group-content" id="content-arcade">
+            <div class="game-cards-grid">
+
+              <!-- 遊戲 6: 淘氣豆 生物敲敲研究所 -->
+              <div class="game-card card-bean">
+                <div class="card-badge bg-green">最新第十一款</div>
+                <div class="card-icon">🫘</div>
+                <h3>淘氣豆：生物敲敲研究所</h3>
+                <p class="card-desc">看準生物題目敲擊對應答案洞口的淘氣豆！Combo 連擊大錘升級、錯題觀念解析與 BEAN 防偽驗證碼證書！</p>
+                <div class="card-tags">
+                  <span>🫘 原創淘氣豆</span>
+                  <span>🔨 Combo 錘子升級</span>
+                  <span>📜 BEAN 防偽證書</span>
+                </div>
+                <div class="card-actions">
+                  <a href="bean/index.html?v=1.0" class="btn-play btn-green">🫘 直接進入敲敲研究所</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 7: 生物小蜜蜂 星際防衛隊 -->
+              <div class="game-card card-defender">
+                <div class="card-badge bg-green">最新 V2.0</div>
+                <div class="card-icon">🐝</div>
+                <h3>生物小蜜蜂：星際防衛隊</h3>
+                <p class="card-desc">經典 Space Invaders 街機戰鬥！A/B/C/D 直覺鎖定雷射發射、無限子彈連擊、錯題說明自動暫停與一鍵複製 Google Classroom 防偽證書！</p>
+                <div class="card-tags">
+                  <span>🐝 經典小蜜蜂街機</span>
+                  <span>🎯 A/B/C/D鎖定雷射</span>
+                  <span>📋 複製防偽成績單</span>
+                </div>
+                <div class="card-actions">
+                  <a href="defender/index.html?v=2.0" class="btn-play btn-green">🐝 直接進入小蜜蜂 V2.0</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 8: 生物星際大逃亡 逃離黑洞 -->
+              <div class="game-card card-blackhole">
+                <div class="card-badge bg-cyan">最新 V1.0</div>
+                <div class="card-icon">🚀</div>
+                <h3>生物星際大逃亡：逃離黑洞</h3>
+                <p class="card-desc">黑洞動態引力追擊！Kahoot 4 色符號答題、5秒過載冷卻防盲猜、雙軌躍遷進度與黑盒子觀念修復日誌！</p>
+                <div class="card-tags">
+                  <span>🌌 黑洞動態追逐</span>
+                  <span>⚡ 5秒過載防盲猜</span>
+                  <span>📜 黑盒子觀念檢討</span>
+                </div>
+                <div class="card-actions">
+                  <a href="blackhole/index.html?v=1.0" class="btn-play btn-purple">🚀 直接進入逃離黑洞</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 9: 生物小精靈塔防 微觀免疫大作戰 -->
+              <div class="game-card card-pacman">
+                <div class="card-badge bg-indigo">重磅 V2.0</div>
+                <div class="card-icon">👾</div>
+                <h3>生物小精靈塔防：微觀免疫大作戰</h3>
+                <p class="card-desc">21x15 超大雙倍迷宮！三大漸進關卡、動態偽足巨噬細胞、冠狀刺突病毒、B細胞特異抗體砲塔、PAC-8812 防偽證書與課堂英雄榜！</p>
+                <div class="card-tags">
+                  <span>🗺️ 21x15 三大關卡</span>
+                  <span>📜 PAC-8812防偽證書</span>
+                  <span>🏆 課堂英雄排行榜</span>
+                </div>
+                <div class="card-actions">
+                  <a href="pacman/index.html?v=2.0" class="btn-play btn-indigo">👾 直接進入塔防 V2.0</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 10: 生物大墜落 下樓梯 -->
+              <div class="game-card card-shaft">
+                <div class="card-badge bg-cyan">最新第七款</div>
+                <div class="card-icon">🧬</div>
+                <h3>生物大墜落：細胞深淵下樓梯</h3>
+                <p class="card-desc">經典下樓梯跑酷！28% 子彈時間二選一命運階梯、iPad 雙側觸控盲操、深淵熱氣流救援與 Google Classroom 防偽通關證書！</p>
+                <div class="card-tags">
+                  <span>🪜 28%子彈時間</span>
+                  <span>🌪️ 深淵熱氣流救援</span>
+                  <span>📜 SHAFT-9912防偽證書</span>
+                </div>
+                <div class="card-actions">
+                  <a href="shaft/index.html?v=6.7" class="btn-play btn-cyan">🧬 直接進入下樓梯</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 11: 生物大釣手 黃金深海大捕撈 -->
+              <div class="game-card card-fishing">
+                <div class="card-badge bg-gold">最新登場</div>
+                <div class="card-icon">🎣</div>
+                <h3>生物大釣手：黃金深海大捕撈</h3>
+                <p class="card-desc">經典黃金礦工擺盪吊爪！結合磁吸助瞄、2.5秒靜止讀題聲納與抓錯魚逃跑機制，全關卡解鎖 Google Classroom 防偽研究員證書！</p>
+                <div class="card-tags">
+                  <span>🎣 擺盪機械爪</span>
+                  <span>🧲 磁吸助瞄</span>
+                  <span>📜 FISH-8831防偽證書</span>
+                </div>
+                <div class="card-actions">
+                  <a href="fishing/index.html?v=2.7" class="btn-play btn-gold">🎣 直接進入捕撈</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 12: 植物大戰殭屍 細胞防衛戰 -->
+              <div class="game-card card-pvz">
+                <div class="card-badge bg-green">最新強檔</div>
+                <div class="card-icon">🌱</div>
+                <h3>植物大戰殭屍：細胞防衛戰</h3>
+                <p class="card-desc">答對題目賺陽光部署胞器植物！巨型觸控按鈕免拖曳、讀題10%龜速緩速防焦慮，12分鐘波次防衛與美式卡通防偽證書！</p>
+                <div class="card-tags">
+                  <span>🌱 5路細胞防線</span>
+                  <span>🐢 讀題10%龜速緩速</span>
+                  <span>📜 PVZ-7712防偽證書</span>
+                </div>
+                <div class="card-actions">
+                  <a href="pvz/index.html" class="btn-play btn-green">🌱 直接進入防衛</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- 分類 3: 🎲 角色桌遊與策略闖關系列 -->
+        <div class="category-group" data-category="board" id="group-board">
+          <div class="category-group-header" role="button" tabindex="0" aria-expanded="true" aria-controls="content-board">
+            <div class="group-title-wrap">
+              <span class="group-icon">🎲</span>
+              <h3 class="group-title">角色桌遊與策略闖關系列</h3>
+              <span class="group-badge">4 款課堂熱門</span>
+            </div>
+            <div class="group-toggle-indicator">
+              <span class="toggle-text">收合</span>
+              <span class="toggle-arrow">🔼</span>
+            </div>
+          </div>
+          <div class="category-group-content" id="content-board">
+            <div class="game-cards-grid">
+
+              <!-- 遊戲 13: 樂透大冒險 RPG -->
+              <div class="game-card card-rpg">
+                <div class="card-badge bg-purple">重磅推薦</div>
+                <div class="card-icon">🗡️</div>
+                <h3>樂透大冒險：生物勇者傳奇</h3>
+                <p class="card-desc">勇者擊敗史萊姆與三眼大魔王 Boss！營地購買神兵利器，解救夥伴樂樂🐶與布丁🐱，含 Google Classroom 防偽認證碼與心得填寫！</p>
+                <div class="card-tags">
+                  <span>🗡️ RPG三關冒險</span>
+                  <span>🏕️ 裝備升級商店</span>
+                  <span>🐶🐱 夥伴護盾技能</span>
+                </div>
+                <div class="card-actions">
+                  <a href="rpg/index.html?v=2.7" class="btn-play btn-purple">🗡️ 直接進入冒險</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 14: 超級馬力歐生物闖關 -->
+              <div class="game-card card-mario">
+                <div class="card-badge bg-red">熱門登場</div>
+                <div class="card-icon">🍄</div>
+                <h3>超級馬力歐生物闖關</h3>
+                <p class="card-desc">冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼供截圖繳交！</p>
+                <div class="card-tags">
+                  <span>🏃 4大關卡闖關</span>
+                  <span>🪙 金幣積累</span>
+                  <span>📜 GC 截圖繳交</span>
+                </div>
+                <div class="card-actions">
+                  <a href="mario/index.html" class="btn-play btn-red">🍄 直接進入遊戲</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 15: 動物方城市大富翁 -->
+              <div class="game-card card-monopoly">
+                <div class="card-badge bg-orange">熱烈迴響</div>
+                <div class="card-icon">🐰</div>
+                <h3>動物方城市生物大富翁</h3>
+                <p class="card-desc">茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！</p>
+                <div class="card-tags">
+                  <span>🎲 隨機抽籤</span>
+                  <span>🏠 答題蓋房</span>
+                  <span>✨ 閃亮機會</span>
+                </div>
+                <div class="card-actions">
+                  <a href="monopoly/index.html?v=4.6" class="btn-play btn-orange">🎲 直接進入遊戲</a>
+                </div>
+              </div>
+
+              <!-- 遊戲 16: 侏羅紀逃生記 -->
+              <div class="game-card card-jurassic">
+                <div class="card-badge">熱門推薦</div>
+                <div class="card-icon">🦖</div>
+                <h3>侏羅紀叢林逃生記</h3>
+                <p class="card-desc">探險隊在叢林中避開暴龍爪痕、攀爬攀藤升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。</p>
+                <div class="card-tags">
+                  <span>👥 小組輪流</span>
+                  <span>🖥️ 投影主持</span>
+                  <span>📄 錯題戰報 TXT</span>
+                </div>
+                <div class="card-actions">
+                  <a href="jurassic/index.html?v=3.4" class="btn-play">🚀 直接進入遊戲</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </section>
 
@@ -323,11 +404,10 @@
                 
                   <optgroup label="🗝️ 密室逃脫探索系列">
                     <option value="escape-castle/index.html">🏰 皇家古堡：生物密室逃脫 (Escape-Castle)</option>
-                    <!-- 依序部署中：即將登場 -->
-                    <!-- <option value="escape-micro/index.html">🔬 微觀特攻隊：細胞世界大暴走</option> -->
-                    <!-- <option value="escape-alice/index.html">🐇 奇幻仙境：愛麗絲生物密室逃脫</option> -->
-                    <!-- <option value="escape-school/index.html">🏫 現代校園：生物密室逃脫</option> -->
-                    <!-- <option value="escape-farm/index.html">🐑 羊羊農場：生物大逃脫</option> -->
+                    <option value="escape-micro/index.html">🔬 微觀特攻隊：細胞世界大暴走 (Escape-Micro)</option>
+                    <option value="escape-alice/index.html">🐇 奇幻仙境：愛麗絲生物密室逃脫 (Escape-Alice)</option>
+                    <option value="escape-school/index.html">🏫 現代校園：生物密室逃脫 (Escape-School)</option>
+                    <option value="escape-farm/index.html">🐑 羊羊農場：生物大逃脫 (Escape-Farm)</option>
                   </optgroup>
                 </select>
               </div>
@@ -431,6 +511,6 @@
     </footer>
   </div>
 
-  <script src="lobby.js?v=3.1"></script>
+  <script src="lobby.js?v=3.2"></script>
 </body>
 </html>

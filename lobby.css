@@ -599,3 +599,244 @@ body {
 .btn-play.btn-red:hover {
   background: #c62828 !important;
 }
+
+
+/* ========================================================
+   🎮 遊戲大廳分類導覽 (Category Tabs) 與折疊手風琴 (Accordion)
+   ======================================================== */
+.games-section-header {
+  margin-bottom: 24px;
+}
+
+.category-tabs-wrapper {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+}
+
+.category-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  touch-action: manipulation;
+  min-height: 44px;
+}
+
+.cat-tab:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.cat-tab.active {
+  background: #1b5e20;
+  border-color: #1b5e20;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.25);
+}
+
+.cat-tab.active .cat-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.cat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.category-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.category-summary-hint {
+  font-size: 0.92rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.collapse-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-collapse-tool {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.btn-collapse-tool:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* 分類卡片群組 (Accordion Group) */
+.category-group {
+  margin-bottom: 28px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.category-group.hidden-by-filter {
+  display: none !important;
+}
+
+.category-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 22px;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: all 0.2s ease;
+  border-left: 6px solid #2e7d32;
+}
+
+.category-group[data-category="escape"] .category-group-header {
+  border-left-color: #9333ea;
+  background: linear-gradient(to right, #faf5ff, #ffffff);
+}
+
+.category-group[data-category="arcade"] .category-group-header {
+  border-left-color: #0284c7;
+  background: linear-gradient(to right, #f0f9ff, #ffffff);
+}
+
+.category-group[data-category="board"] .category-group-header {
+  border-left-color: #ea580c;
+  background: linear-gradient(to right, #fff7ed, #ffffff);
+}
+
+.category-group-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+}
+
+.group-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.group-title-wrap .group-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.group-title-wrap h3 {
+  font-size: 1.35rem;
+  color: #1e293b;
+  margin: 0;
+  font-weight: 800;
+}
+
+.group-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.category-group[data-category="escape"] .group-badge {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.category-group[data-category="arcade"] .group-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.category-group[data-category="board"] .group-badge {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.group-toggle-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.category-group-header:hover .group-toggle-indicator {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.group-toggle-indicator .toggle-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.category-group.collapsed .group-toggle-indicator .toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.category-group-content {
+  margin-top: 18px;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin 0.3s ease;
+  overflow: hidden;
+  max-height: 4000px;
+  opacity: 1;
+}
+
+.category-group.collapsed .category-group-content {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  margin-top: 0 !important;
+  pointer-events: none;
+}

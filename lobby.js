@@ -3,6 +3,7 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+  initGameCategoryAccordion();
   loadManifest();
   initDispatchEvents();
 });
@@ -496,4 +497,127 @@ function copyDispatchUrl() {
   }).catch(err => {
     alert("複製失敗，請手動選擇複製：\n" + fullUrl);
   });
+}
+
+
+/**
+ * 🎮 課堂遊戲大廳分類導覽 (Category Tabs) 與折疊手風琴 (Accordion)
+ * 支援功能：
+ * 1. 頂部分類 Tab 秒速篩選 (全部 / 密室逃脫 / 經典街機 / 角色桌遊)
+ * 2. 獨立手風琴折疊展開 + 狀態記憶 (localStorage)
+ * 3. 一鍵「全部展開 / 全部收合」
+ * 4. 點選專屬分類時自動展開該分區，平板大螢幕零滾動秒點遊戲
+ */
+function initGameCategoryAccordion() {
+  const tabs = document.querySelectorAll(".cat-tab");
+  const groups = document.querySelectorAll(".category-group");
+  const btnExpandAll = document.getElementById("btnExpandAll");
+  const btnCollapseAll = document.getElementById("btnCollapseAll");
+  const summaryHint = document.getElementById("categorySummaryHint");
+
+  if (!groups.length) return;
+
+  function updateToggleIndicator(group) {
+    const isCollapsed = group.classList.contains("collapsed");
+    const indicator = group.querySelector(".group-toggle-indicator");
+    const header = group.querySelector(".category-group-header");
+    if (indicator) {
+      const textSpan = indicator.querySelector(".toggle-text");
+      if (textSpan) textSpan.textContent = isCollapsed ? "展開" : "收合";
+    }
+    if (header) {
+      header.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+    }
+  }
+
+  // 1. 各分區點擊標題收合/展開
+  groups.forEach(group => {
+    const header = group.querySelector(".category-group-header");
+    if (!header) return;
+
+    header.addEventListener("click", () => {
+      group.classList.toggle("collapsed");
+      updateToggleIndicator(group);
+    });
+
+    header.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        group.classList.toggle("collapsed");
+        updateToggleIndicator(group);
+      }
+    });
+  });
+
+  // 2. 標籤篩選功能 (Category Tabs)
+  function setActiveCategory(cat) {
+    tabs.forEach(t => {
+      const match = t.dataset.cat === cat;
+      t.classList.toggle("active", match);
+      t.setAttribute("aria-selected", match ? "true" : "false");
+    });
+
+    let visibleGameCount = 0;
+
+    groups.forEach(group => {
+      const groupCat = group.dataset.category;
+      if (cat === "all" || groupCat === cat) {
+        group.classList.remove("hidden-by-filter");
+        // 若切換到專屬分類，預設確保該分類展開以利直接點擊遊戲
+        if (cat !== "all") {
+          group.classList.remove("collapsed");
+          updateToggleIndicator(group);
+        }
+        visibleGameCount += group.querySelectorAll(".game-card").length;
+      } else {
+        group.classList.add("hidden-by-filter");
+      }
+    });
+
+    if (summaryHint) {
+      if (cat === "all") {
+        summaryHint.textContent = `💡 目前顯示：全部遊戲（共 ${groups.length} 大系列、${visibleGameCount} 款課堂遊戲）`;
+      } else {
+        const activeTab = document.querySelector(`.cat-tab[data-cat="${cat}"]`);
+        const catName = activeTab ? activeTab.textContent.replace(/[0-9]/g, "").trim() : cat;
+        summaryHint.textContent = `🎯 篩選視圖：${catName}（共 ${visibleGameCount} 款遊戲）`;
+      }
+    }
+
+    try {
+      localStorage.setItem("bio_lobby_active_cat", cat);
+    } catch (e) {}
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      setActiveCategory(tab.dataset.cat || "all");
+    });
+  });
+
+  // 3. 一鍵全部展開 / 全部收合
+  if (btnExpandAll) {
+    btnExpandAll.addEventListener("click", () => {
+      groups.forEach(g => {
+        g.classList.remove("collapsed");
+        updateToggleIndicator(g);
+      });
+    });
+  }
+
+  if (btnCollapseAll) {
+    btnCollapseAll.addEventListener("click", () => {
+      groups.forEach(g => {
+        g.classList.add("collapsed");
+        updateToggleIndicator(g);
+      });
+    });
+  }
+
+  // 4. 讀取並恢復歷史偏好（若無或初次訪問則預設 'all'）
+  let savedCat = "all";
+  try {
+    savedCat = localStorage.getItem("bio_lobby_active_cat") || "all";
+  } catch (e) {}
+  setActiveCategory(savedCat);
 }
