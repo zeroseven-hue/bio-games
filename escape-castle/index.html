@@ -1,8 +1,8 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b31"><title>皇家古堡｜雙計時優化 V1</title><link rel="stylesheet" href="style.css?v=1.1"></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b31"><title>皇家古堡｜雙計時優化 V1</title><link rel="stylesheet" href="style.css?v=1.2"></head><body>
 <div id="app">
 <header class="hud"><div class="brand"><span>♛</span><div><strong id="stageName">皇家古堡生物密室逃脫</strong><small id="stageSub">三重封印 · 生命的奧祕</small></div></div><div class="timer" id="timer">⌛ 08:00</div><div class="hudRight"><span id="totalProgress">0 / 16</span><button id="soundBtn" class="iconBtn" title="開關音效">♫</button><button id="hintBtn" class="softBtn" title="短暫顯示尚未探索的線索">💡 探索提示</button><button id="helpBtn" class="iconBtn" title="遊戲說明">?</button></div></header>
 <main class="scene" id="scene"><div class="sceneTint"></div><div id="hotspots" class="hotspots"></div><div class="sceneCaption" id="sceneCaption">點選發光的古堡物件，探索生物謎題</div><div class="lens" id="lens" aria-hidden="true"></div></main>
-<section class="rpgBar" aria-label="皇家學者對話"><div class="rpgAvatar" aria-hidden="true">🦉</div><div class="rpgDialogue"><div class="rpgName">皇家學者・奧利</div><div id="rpgLine" class="rpgLine" aria-live="polite">仔細觀察，古堡的每一件物品都可能藏著生命的奧祕……</div></div><button class="rpgNext" id="rpgNext" type="button">下一句 ❯</button></section><footer class="bottom"><div class="stageDots" id="stageDots"></div><div class="bottomText" id="bottomText">每一個發光物件，都藏著一段生命的祕密。</div><button id="labelsBtn" class="softBtn">顯示物件名稱</button><button id="fullscreenBtn" class="softBtn">全螢幕</button><button id="mapBtn" class="softBtn">封印地圖</button></footer>
+<section class="rpgBar" aria-label="皇家學者對話"><div class="rpgAvatar" aria-hidden="true">🦉</div><div class="rpgDialogue"><div class="rpgName">皇家學者・奧利</div><div id="rpgLine" class="rpgLine" aria-live="polite">仔細觀察，古堡的每一件物品都可能藏著生命的奧祕……</div></div><button class="rpgNext" id="rpgNext" type="button">下一句 ❯</button></section><footer class="bottom"><div class="stageDots" id="stageDots"></div><div class="bottomText" id="bottomText">每一個發光物件，都藏著一段生命的祕密。</div><button id="fullscreenBtn" class="softBtn">全螢幕</button><button id="mapBtn" class="softBtn">封印地圖</button></footer>
 <aside id="teacherPanel" class="teacherPanel hidden collapsed teacherOnly" aria-label="教師快速預覽">
 <div class="teacherCompactTitle"><strong>🔎 教師快速預覽</strong><span style="color:#cfe8ea">不計時、不記成績，直接檢查三關版面與題目</span></div>
 <div class="teacherControls"><button id="teacherToggle" type="button" class="teacherToggleBtn">展開更多</button><button id="teacherExit" type="button" class="teacherSecondaryBtn">結束預覽</button></div>
@@ -49,5 +49,5 @@
     <button id="closeCopyNotice" class="goldBtn" style="width:100%; font-size:1.05rem; padding:12px;">我知道了，完成任務 ✔</button>
   </div>
 </div>
-</div><script defer src="../escape-adapter.js?v=1.1"></script>
-<script defer src="game.js?v=1.1"></script></body></html>
+</div><script defer src="../escape-adapter.js?v=1.2"></script>
+<script defer src="game.js?v=1.2"></script></body></html>
