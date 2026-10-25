@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>微觀特攻隊：細胞世界大暴走｜國中生物互動遊戲平台</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+  <script src="../qrcode.min.js?v=1.0"></script>
+  <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
+</head>
+<body>
+<div id="game">
+  <div id="bg"></div>
+  <div id="shade"></div>
+
+  <header class="ui top">
+    <div class="chip">🔬 微觀特攻隊　<span id="status">細胞世界大暴走</span></div>
+    <div class="buttons">
+      <div id="timer" class="chip">⏱ 10:00</div>
+      <button id="addTimeBtn" class="btn teacherOnly" style="background:#0284c7;border-color:#38bdf8" title="老師加時：延長 3 分鐘">➕ 延長3分鐘</button>
+      <button id="hint" class="btn hidden">💡 線索</button>
+      <button id="teacherToggle" class="btn gold teacherOnly">🔐 教師預覽</button>
+    </div>
+  </header>
+
+  <!-- 突發事件呼吸橫條（不中斷學生點擊、保留科幻沈浸感） -->
+  <div id="storyBeatBanner" class="storyBeatBanner hidden">
+    <span class="storyBeatIcon">⚡</span>
+    <span id="storyBeatText"></span>
+  </div>
+
+  <section id="home" class="ui">
+    <div class="subtitleline">MICROVERSE ESCAPE</div>
+    <h1>微觀特攻隊<br>細胞世界大暴走！</h1>
+    <div class="subtitle">三重危機・一場縮小後的科幻冒險</div>
+    <p id="intro">一場神祕的實驗，讓你縮小到細胞的尺度。微觀城市的交通陷入混亂、防衛系統誤判訪客，連生命核心也即將失控！你必須破解三道危機，找出回到原來世界的方法。<br><b id="introDuration">挑戰時間：全場 10 分鐘</b></p>
+
+    <!-- ⚙️ 教師派卷與題庫設定面板 -->
+    <details id="settings" class="teacherOnly">
+      <summary>⚙️ 教師派卷與題庫設定（點擊展開 / 即時連線題庫與派發 QR Code）</summary>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+        <div style="background:rgba(15,23,42,.65);border:1px solid #38bdf8;border-radius:10px;padding:12px">
+          <label for="unitSelect" style="display:block;font-weight:800;color:#38bdf8;margin-bottom:6px">📚 1. 選擇連線題庫單元（連線全平台共用題庫）：</label>
+          <select id="unitSelect" style="width:100%;padding:10px;border-radius:8px;border:1px solid #0284c7;background:#0f2744;color:#fff;font-size:.95rem">
+            <option value="demo">✨ 微觀細胞世界示範題庫 (16 題精選)</option>
+          </select>
+          <div id="unitLoadedBadge" style="font-size:.85rem;color:#6ee7b7;margin-top:6px;font-weight:600">✅ 當前題庫：微觀細胞世界示範題庫 (16 題)</div>
+        </div>
+
+        <div style="background:rgba(15,23,42,.65);border:1px solid #ca8a04;border-radius:10px;padding:12px">
+          <div style="font-weight:800;color:#fbbf24;margin-bottom:8px">⏱️ 2. 設定挑戰時間與載具模式：</div>
+          <div class="settingsGrid" style="margin-bottom:8px">
+            <label>計時方式
+              <select id="timeModeSelect" style="padding:6px 10px;border-radius:8px;background:#0f2744;color:#fff;border:1px solid #ca8a04">
+                <option value="total" selected>全場統一計時</option>
+                <option value="stage">各關獨立計時</option>
+              </select>
+            </label>
+            <label id="totalMinutesLabel">全場時間
+              <input id="totalMinutesInput" type="number" min="1" max="120" step="1" value="10" style="width:68px;padding:6px;border-radius:8px;border:1px solid #75cdd7;background:#eefbff;color:#152a42;text-align:center"> 分鐘
+            </label>
+          </div>
+          <div class="settingsGrid" id="stageTimesRow" style="display:none;margin-bottom:8px">
+            <label>第1關（6題）<input id="timeStage0" class="stageMinutes" type="number" min="1" max="60" step="1" value="4" style="width:58px"> 分鐘</label>
+            <label>第2關（5題）<input id="timeStage1" class="stageMinutes" type="number" min="1" max="60" step="1" value="3" style="width:58px"> 分鐘</label>
+            <label>第3關（5題）<input id="timeStage2" class="stageMinutes" type="number" min="1" max="60" step="1" value="3" style="width:58px"> 分鐘</label>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:6px">
+            <label style="cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="noTimeCheck"> 🧩 特教友善模式（不限時）
+            </label>
+            <label style="display:flex;align-items:center;gap:6px">
+              📱 載具視圖：
+              <select id="deviceMode" style="padding:5px 8px;font-size:.88rem;border-radius:8px;background:#0f2744;color:#fff;border:1px solid #38bdf8">
+                <option value="solo" selected>📱 iPad / 平板個人自主挑戰</option>
+                <option value="projector">🖥️ 60~70 吋大螢幕投影主持</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div style="background:rgba(6,78,59,.35);border:1.5px solid #10b981;border-radius:12px;padding:14px;text-align:center">
+          <button type="button" id="generateStudentQRBtn" class="goldBtn" style="width:100%;font-size:1.05rem;padding:12px 18px;margin:0 0 10px 0">
+            📱 產生本次設定之學生派卷 QR Code 與網址
+          </button>
+          <div id="studentQRArea" class="hidden" style="margin-top:12px;background:#fff;border-radius:12px;padding:16px;color:#1e293b;box-shadow:0 8px 24px rgba(0,0,0,.3)">
+            <div style="font-size:1.05rem;font-weight:800;color:#065f46;margin-bottom:6px">
+              📲 學生派卷 QR Code (請學生開啟相機掃描)
+            </div>
+            <div id="studentQRCode" style="display:flex;justify-content:center;align-items:center;min-height:160px;margin:10px auto"></div>
+            <p style="font-size:.85rem;color:#475569;margin:6px 0 10px 0;line-height:1.5">
+              🔒 此 QR Code 自動設定為<strong>學生作答專用版</strong>（已鎖定並隱藏教師跳關、瀏覽與後台設定）。
+            </p>
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <input type="text" id="studentUrlInput" readonly style="flex:1;padding:8px 10px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.88rem;background:#f8fafc;color:#1e293b">
+              <button type="button" id="copyStudentUrlBtn" class="goldBtn" style="padding:8px 16px;font-size:.9rem;white-space:nowrap">📋 複製網址</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              <small id="copyUrlFeedback" style="color:#059669;font-weight:700"></small>
+              <a id="testStudentLaunchLink" href="#" target="_blank" style="color:#0284c7;font-size:.88rem;font-weight:700;text-decoration:underline">🚀 在新分頁測試學生畫面</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="buttons" style="margin-top:12px">
+      <button id="start" class="btn primary">▶ 開始冒險</button>
+      <button id="story" class="btn">📖 故事說明</button>
+      <button id="teacherPreviewBtn" class="btn gold teacherOnly" type="button">👩‍🏫 教師快速瀏覽三關（免作答）</button>
+    </div>
+
+    <!-- 教師快速跳關按鈕列 -->
+    <div id="quickStageChoices" class="teacherOnly" style="margin:14px 0 8px;padding:12px;border:1px solid #4fadaf;border-radius:12px;background:rgba(4,31,45,.85)">
+      <div style="color:#b8fcf5;font-weight:800;margin-bottom:8px">老師直接查看指定關卡（不倒數、免作答）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" data-jump="0" class="btn" style="flex:1;min-width:110px">① 交通城市</button>
+        <button type="button" data-jump="1" class="btn" style="flex:1;min-width:110px">② 防衛基地</button>
+        <button type="button" data-jump="2" class="btn" style="flex:1;min-width:110px">③ 生命核心</button>
+      </div>
+      <small style="display:block;color:#c9dadd;margin-top:8px">進入後可點各節點查看題目與解析，也可隨時切換三關。</small>
+    </div>
+
+    <small id="loadInfo">正在準備題庫……</small>
+  </section>
+
+  <!-- 進度狀態列 -->
+  <section id="progress" class="ui hidden">
+    <h2 id="stageTitle"></h2>
+    <p id="stageDescription"></p>
+    <p id="count"></p>
+    <div class="progressRail" aria-label="本關修復進度"><div id="progressFill"></div></div>
+    <p id="badges">🏅 尚未取得徽章</p>
+  </section>
+
+  <!-- 熱點按鈕容器 -->
+  <div id="spots"></div>
+
+  <!-- 底部嚮導與動態語音 -->
+  <div id="bottom" class="ui">
+    <div id="guide">
+      <div class="speech" id="speech">嗨！我是葉可。這次我負責帶路，迷路的話……可能是地圖的問題！</div>
+      <img id="yeko" src="assets/yeko.webp" alt="葉可：動態嚮導">
+    </div>
+    <div class="stagehint teacherOnly" id="stageHint">教師專用預覽｜完成確認後再製作學生版</div>
+  </div>
+
+  <!-- 教師預覽懸浮側邊欄 -->
+  <aside id="teacher" class="ui hidden teacherOnly">
+    <h3>🔐 教師專用快速預覽</h3>
+    <div class="note">快速查看場景、題目與結局；跳關不計時、不列入學生通關紀錄。這份是教師預覽版。</div>
+    <div class="buttons" style="margin-top:8px">
+      <button class="btn" data-jump="-1">🏠 首頁</button>
+      <button class="btn" data-jump="0">① 交通城市</button>
+      <button class="btn" data-jump="1">② 防衛基地</button>
+      <button class="btn" data-jump="2">③ 生命核心</button>
+      <button class="btn" data-jump="3">🏆 結局</button>
+    </div>
+    <div class="buttons" style="margin-top:8px">
+      <button class="btn" data-award="0">🏅 第一關獎狀</button>
+      <button class="btn" data-award="1">🏅 第二關獎狀</button>
+      <button class="btn" data-award="2">🏅 第三關獎狀</button>
+    </div>
+    <div style="margin-top:10px">
+      <button id="restart" class="btn" style="width:100%">↻ 重新計時</button>
+    </div>
+    <div style="margin-top:8px">
+      <button id="closeTeacher" class="btn" style="width:100%">收起面板</button>
+    </div>
+  </aside>
+
+  <!-- 倒數時間到超時彈窗 (支援加時) -->
+  <div id="timeoutOverlay" class="hidden">
+    <div class="modal" style="text-align:center;max-width:520px;border-color:#f59e0b">
+      <div style="font-size:3.2rem;margin-bottom:6px">⏰</div>
+      <h2 style="color:#fbbf24">本次冒險時間到</h2>
+      <p style="color:#cbd5e1;line-height:1.6">
+        每一次探索都累積了珍貴的科學經驗！<br>
+        已修復的節點與榮譽徽章均已保留。<br>
+        若課堂活動需要更多時間，可向老師確認後延長。
+      </p>
+      <div id="timeoutBadgesArea" style="margin:12px 0;font-weight:700;color:#6ee7b7"></div>
+      <div class="buttons" style="justify-content:center;gap:10px;margin-top:16px">
+        <button id="extend3MinBtn" class="btn gold" style="padding:11px 18px">⌛ 經老師同意，延長 3 分鐘</button>
+        <button id="extend5MinBtn" class="btn gold" style="padding:11px 18px">⌛ 延長 5 分鐘</button>
+        <button id="finishNowBtn" class="btn primary" style="padding:11px 18px">🏆 查看通關成果</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 複製戰報成功提示視窗 -->
+  <div id="copyNoticeOverlay" class="hidden">
+    <div class="modal" style="border:2px solid #10b981;max-width:440px;text-align:center;padding:26px 20px">
+      <div style="font-size:3.2rem;line-height:1;margin-bottom:10px">🎉</div>
+      <h2 style="color:#34d399;margin:0 0 10px 0;font-size:1.45rem;font-weight:800">恭喜你！守護成功！</h2>
+      <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.4);border-radius:10px;padding:10px 14px;margin-bottom:14px;color:#a7f3d0;font-size:0.95rem;font-weight:700">
+        📋 探險戰報已成功複製至剪貼簿！
+      </div>
+      <p style="color:#cbd5e1;font-size:0.92rem;line-height:1.6;margin:0 0 18px 0;text-align:left">
+        你已完成微觀世界的細胞解謎考驗。<br>
+        請確認已完成<strong>「螢幕截圖」</strong>，並前往 <strong>Google Classroom</strong> 貼上複製的文字戰報進行繳交！
+      </p>
+      <button id="closeCopyNotice" class="goldBtn" style="width:100%;font-size:1.05rem;padding:12px">我知道了，完成任務 ✔</button>
+    </div>
+  </div>
+
+  <!-- 通用互動彈窗 -->
+  <div id="overlay" class="hidden">
+    <div id="modal" class="modal"></div>
+  </div>
+</div>
+
+<script defer src="../escape-adapter.js?v=1.0"></script>
+<script defer src="game.js?v=1.0"></script>
+</body>
+</html>
