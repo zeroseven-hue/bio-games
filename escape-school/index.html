@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>現代校園：生物密室逃脫｜生物互動遊戲平台</title>
-  <link rel="stylesheet" href="style.css?v=1.1">
+  <link rel="stylesheet" href="style.css?v=1.2">
   <script src="../qrcode.min.js?v=1.0"></script>
   <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
 </head>
 <body>
 <div id="app">
+  <!-- 教師收起後重新展開面板之浮動按鈕 (僅教師端可見) -->
+  <button type="button" id="expandHomePanelBtn" class="pill gold teacherOnly hidden">⚙️ 展開教師設定面板</button>
+
   <!-- 頂部 HUD -->
   <header class="hud">
     <div class="topname">🏫 現代校園・生物密室逃脫 <span id="stageLabel"></span></div>
@@ -45,12 +48,13 @@
     </div>
   </main>
 
-  <!-- 首頁說明與教師設定卡片 (z-index: 20 確保點擊無阻礙) -->
-  <div id="home" class="glass">
+  <!-- 首頁教師派卷與預覽設定卡片 (僅教師端顯示，學生端全面隱藏展示純淨封面) -->
+  <div id="home" class="glass teacherOnly">
+    <button type="button" id="toggleHomePanelBtn" class="pill" style="float:right;font-size:12px;padding:4px 10px;margin-bottom:8px">👁️ 縮小面板預覽封面</button>
     <div class="homeBadge">CAMPUS MYSTERY · BIOLOGY ESCAPE</div>
     <h1>現代校園的<br>生物異常事件</h1>
     <p>放學後的教室黑板在講話，實驗室培養皿發出螢光！跟隨校園守護 AI「阿歪」，解開 16 道生物謎題，找回遺失的記憶核心，解除校園神秘危機！</p>
-    <p id="introDuration"><b>⏱️ 預設時間：全場 10 分鐘（可由老師自由調配）</b></p>
+    <p id="introDuration"><b>⏱️ 本次挑戰時間：全場 10 分鐘</b></p>
 
     <!-- 🔐 教師派卷與題庫設定面板 -->
     <details id="settings" class="teacherOnly">
@@ -277,6 +281,6 @@
 </div>
 
 <script defer src="../escape-adapter.js?v=1.1"></script>
-<script defer src="game.js?v=1.1"></script>
+<script defer src="game.js?v=1.2"></script>
 </body>
 </html>

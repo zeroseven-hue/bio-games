@@ -1055,6 +1055,89 @@
     }
   }
 
+  // 17. 說明彈窗、成就總覽與學生版派發
+  function getFormattedTimeDescription() {
+    if (noTimer) return '⏱️ 本次挑戰時間：無時間限制（自主探索）';
+    if (timeMode === 'stage') {
+      return `⏱️ 本次挑戰時間：各關獨立倒數（第 1 關 ${stageMinutes[0]} 分／第 2 關 ${stageMinutes[1]} 分／第 3 關 ${stageMinutes[2]} 分）`;
+    }
+    return `⏱️ 本次挑戰時間：全場 ${totalMinutes} 分鐘`;
+  }
+
+  function updateIntroDurationText() {
+    const el = $('introDuration');
+    if (el) {
+      el.innerHTML = `<b>${getFormattedTimeDescription()}</b>`;
+    }
+  }
+
+  function showGameInstructionsModal() {
+    $('modalMeta').textContent = '🏫 現代校園・生物密室逃脫';
+    $('modalTitle').textContent = '校園調查任務指引';
+
+    $('modalText').innerHTML = `
+      <div style="background:rgba(22,28,70,0.88);border:1px solid #7dd3fc;border-radius:14px;padding:14px 18px;margin-bottom:14px;line-height:1.7">
+        <div style="font-weight:800;color:#fde047;margin-bottom:6px;font-size:16px">📖 冒險故事背景</div>
+        放學後的校園突然被神秘生物異象籠罩！黑板在講話、實驗室培養皿發出螢光！跟隨校園守護 AI「阿歪」，解開 16 道生物謎題，找回遺失的記憶核心，解除校園神秘危機！
+      </div>
+      <div style="background:rgba(22,28,70,0.88);border:1px solid #c084fc;border-radius:14px;padding:14px 18px;line-height:1.7">
+        <div style="font-weight:800;color:#c084fc;margin-bottom:6px;font-size:16px">🎯 調查規則與指引</div>
+        • <b>${getFormattedTimeDescription()}</b><br>
+        • 🔍 探索異常教室、生物實驗室與地下中心，點擊可疑物件答題。<br>
+        • 💡 遇卡關可向阿歪索取線索提示（每關 3 次）。<br>
+        • 🧫 破解每關所有試題後，挑戰終極機關，取得階段認證徽章！
+      </div>
+    `;
+
+    const ansContainer = $('answers');
+    ansContainer.replaceChildren();
+    $('feedback').classList.add('hidden');
+    $('next').classList.add('hidden');
+    $('back').textContent = '返回封面';
+
+    const startBtn = document.createElement('button');
+    startBtn.className = 'primary';
+    startBtn.textContent = '✦ 立即開始調查 ▶';
+    startBtn.style.fontSize = '16px';
+    startBtn.style.padding = '10px 22px';
+    startBtn.onclick = () => {
+      $('modal').classList.add('hidden');
+      gotoScene(1, false);
+    };
+    ansContainer.appendChild(startBtn);
+
+    $('modal').classList.remove('hidden');
+  }
+
+  function showAwardsModal() {
+    $('modalMeta').textContent = '🏆 調查成就認證';
+    $('modalTitle').textContent = '生物認證徽章總覽';
+    const total = solvedClues.reduce((sum, s) => sum + s.size, 0);
+
+    $('modalText').innerHTML = `
+      <div style="margin-bottom:12px;font-size:16px;font-weight:700;color:#7dd3fc">
+        📊 目前進度：已破解 ${total} / 16 道生物謎題
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${CERTIFICATES.map((c, i) => `
+          <div style="background:rgba(22,28,70,0.88);border:1px solid ${earnedCertificates[i] ? '#4ade80' : '#475569'};border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:32px">${earnedCertificates[i] ? c.icon : '🔒'}</span>
+            <div>
+              <div style="font-weight:800;color:${earnedCertificates[i] ? '#fde047' : '#94a3b8'};font-size:15px">第 ${i + 1} 關：${c.name}</div>
+              <div style="font-size:13px;color:#cbd5e1">${earnedCertificates[i] ? '✅ 已通過審核認證' : '尚未解鎖（完成該關全數謎題與機關後頒發）'}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    $('answers').replaceChildren();
+    $('feedback').classList.add('hidden');
+    $('next').classList.add('hidden');
+    $('back').textContent = '知道了';
+    $('modal').classList.remove('hidden');
+  }
+
   // 17. 學生版派發與 QR Code 生成
   function generateStudentUrl() {
     const base = window.location.origin + window.location.pathname;
@@ -1123,19 +1206,27 @@
     $('startBtn').onclick = () => gotoScene(1, false);
     $('coverStart').onclick = () => gotoScene(1, false);
 
-    // 封面遊戲說明與成就
-    $('coverHow').onclick = () => {
-      alert('【🏫 校園生物調查任務】\n\n1. 點擊畫面中的可疑線索並回答生物謎題。\n2. 共有三關 16 道謎題，阿歪會逐句提示。\n3. 完成每關謎題後挑戰解鎖機關，取得關卡認證徽章！');
-    };
-    $('storyBtn').onclick = $('coverHow').onclick;
+    // 整合遊戲說明與成就指引彈窗（取代陽春 alert，無縫銜接開始遊戲）
+    $('coverHow').onclick = showGameInstructionsModal;
+    $('storyBtn').onclick = showGameInstructionsModal;
 
-    $('coverAwards').onclick = () => {
-      const total = solvedClues.reduce((sum, s) => sum + s.size, 0);
-      alert(`【🏆 當前調查進度】\n已破解：${total} / 16 道謎題\n` +
-        CERTIFICATES.map((c, i) => `${earnedCertificates[i] ? '🏅 已解鎖' : '🔒 尚未取得'}｜第 ${i + 1} 關：${c.name}`).join('\n')
-      );
-    };
-    $('endingAwards').onclick = $('coverAwards').onclick;
+    $('coverAwards').onclick = showAwardsModal;
+    $('endingAwards').onclick = showAwardsModal;
+
+    // 教師設定面板縮小/展開切換
+    const toggleHomeBtn = $('toggleHomePanelBtn');
+    const expandHomeBtn = $('expandHomePanelBtn');
+    const homeEl = $('home');
+    if (toggleHomeBtn && expandHomeBtn && homeEl) {
+      toggleHomeBtn.onclick = () => {
+        homeEl.classList.add('is-collapsed');
+        expandHomeBtn.classList.remove('hidden');
+      };
+      expandHomeBtn.onclick = () => {
+        homeEl.classList.remove('is-collapsed');
+        expandHomeBtn.classList.add('hidden');
+      };
+    }
 
     // 教師相關按鈕
     $('teacherToggle').onclick = () => $('teacher').classList.toggle('hidden');
@@ -1160,11 +1251,34 @@
       $('stageTimesRow').classList.toggle('hidden', !isStage);
       $('totalMinutesLabel').classList.toggle('hidden', isStage);
       timeMode = isStage ? 'stage' : 'total';
+      updateIntroDurationText();
     };
+
+    $('totalMinutesInput').oninput = e => {
+      const v = Number(e.target.value);
+      if (Number.isInteger(v) && v >= 1 && v <= 120) {
+        totalMinutes = v;
+        updateIntroDurationText();
+      }
+    };
+
+    ['timeStage0', 'timeStage1', 'timeStage2'].forEach((id, idx) => {
+      const input = $(id);
+      if (input) {
+        input.oninput = () => {
+          const v = Number(input.value);
+          if (Number.isInteger(v) && v >= 1 && v <= 60) {
+            stageMinutes[idx] = v;
+            updateIntroDurationText();
+          }
+        };
+      }
+    });
 
     $('noTimeCheck').onchange = e => {
       noTimer = e.target.checked;
       $('timer').textContent = `⏳ ${formatTime(secondsRemaining)}`;
+      updateIntroDurationText();
     };
 
     // QR 派卷按鈕
@@ -1302,6 +1416,7 @@
 
     initAywaiDragging();
     bindUIEvents();
+    updateIntroDurationText();
     loadManifestAndPopulateSelect();
     startTimerLoop();
 
