@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>微觀特攻隊：細胞世界大暴走｜國中生物互動遊戲平台</title>
-  <link rel="stylesheet" href="style.css?v=1.0">
+  <link rel="stylesheet" href="style.css?v=1.1">
   <script src="../qrcode.min.js?v=1.0"></script>
   <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
 </head>
@@ -138,7 +138,8 @@
 
   <!-- 底部嚮導與動態語音 -->
   <div id="bottom" class="ui">
-    <div id="guide">
+    <div id="guide" title="按住小葉可隨意拖曳移動至任意位置">
+      <div class="dragHint">⠿ 可拖曳小葉</div>
       <div class="speech" id="speech">嗨！我是葉可。這次我負責帶路，迷路的話……可能是地圖的問題！</div>
       <img id="yeko" src="assets/yeko.webp" alt="葉可：動態嚮導">
     </div>
@@ -210,7 +211,7 @@
   </div>
 </div>
 
-<script defer src="../escape-adapter.js?v=1.0"></script>
-<script defer src="game.js?v=1.0"></script>
+<script defer src="../escape-adapter.js?v=1.1"></script>
+<script defer src="game.js?v=1.1"></script>
 </body>
 </html>

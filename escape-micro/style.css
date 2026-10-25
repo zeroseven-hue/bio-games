@@ -116,11 +116,12 @@ button {
 /* 首頁畫面與設定面板 */
 #home {
   left: 6%;
-  top: 13%;
+  top: 12%;
   width: min(760px, 85vw);
-  max-height: 85vh;
+  max-height: 86vh;
   overflow-y: auto;
   padding-right: 8px;
+  padding-bottom: 180px; /* 預留底部安全高度，確保按鈕永不被遮擋 */
 }
 #home h1 {
   font-size: clamp(34px, 4.8vw, 68px);
@@ -184,12 +185,38 @@ button {
   pointer-events: auto;
 }
 #guide {
-  width: 230px;
+  width: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
   animation: bob 3s ease-in-out infinite;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  z-index: 25;
+}
+#guide.dragging {
+  cursor: grabbing;
+  animation: none !important;
+}
+#guide.dragging img {
+  animation: none !important;
+}
+#guide .dragHint {
+  font-size: 11px;
+  color: #a5f3fc;
+  background: rgba(3, 105, 161, 0.8);
+  border: 1px solid #38bdf8;
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-bottom: 4px;
+  pointer-events: none;
+  opacity: 0.85;
+  letter-spacing: 1px;
+}
+#guide .speech.collapsed {
+  display: none;
 }
 #guide img {
   width: 120px;

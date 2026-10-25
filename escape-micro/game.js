@@ -615,17 +615,19 @@ async function loadManifestAndPopulateSelect() {
 
     if (Array.isArray(manifest.publishers)) {
       manifest.publishers.forEach(pub => {
-        const og = document.createElement('optgroup');
-        og.label = `📘 ${pub.name} (${pub.books?.length || 0} 冊)`;
-        (pub.books || []).forEach(bk => {
-          (bk.units || []).forEach(un => {
+        if (pub.status === 'placeholder' || !Array.isArray(pub.semesters)) return;
+        pub.semesters.forEach(sem => {
+          if (!Array.isArray(sem.units) || sem.units.length === 0) return;
+          const grp = document.createElement('optgroup');
+          grp.label = `📘 ${pub.name} - ${sem.name}`;
+          sem.units.forEach(un => {
             const opt = document.createElement('option');
             opt.value = un.file;
-            opt.textContent = `${pub.name} - ${un.unitName} (${un.count} 題)`;
-            og.appendChild(opt);
+            opt.textContent = `${un.title} (${un.count} 題)`;
+            grp.appendChild(opt);
           });
+          select.appendChild(grp);
         });
-        select.appendChild(og);
       });
     }
 
@@ -885,10 +887,84 @@ function init() {
     if (remaining <= 0) finishTime();
   }, 250);
 
+  // 啟用小葉自由拖曳功能
+  initDraggableGuide();
+
   // 初始化題庫清單與首頁狀態
   syncTimerUI();
   loadManifestAndPopulateSelect();
   changeStage(-1);
+}
+
+// 拖曳小葉 (嚮導) 功能：滑鼠與觸控通用
+function initDraggableGuide() {
+  const guide = $('guide');
+  if (!guide) return;
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let startLeft = 0, startTop = 0;
+
+  guide.addEventListener('pointerdown', (e) => {
+    if (e.target.tagName === 'BUTTON') return;
+    if (e.button && e.button !== 0) return;
+
+    isDragging = true;
+    guide.classList.add('dragging');
+    try { guide.setPointerCapture(e.pointerId); } catch (_) {}
+
+    const rect = guide.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = rect.left;
+    startTop = rect.top;
+
+    guide.style.position = 'fixed';
+    guide.style.bottom = 'auto';
+    guide.style.right = 'auto';
+    guide.style.left = startLeft + 'px';
+    guide.style.top = startTop + 'px';
+  });
+
+  guide.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    let newLeft = startLeft + dx;
+    let newTop = startTop + dy;
+
+    const pad = 10;
+    const maxLeft = window.innerWidth - guide.offsetWidth - pad;
+    const maxTop = window.innerHeight - guide.offsetHeight - pad;
+
+    newLeft = Math.max(pad, Math.min(maxLeft, newLeft));
+    newTop = Math.max(pad, Math.min(maxTop, newTop));
+
+    guide.style.left = newLeft + 'px';
+    guide.style.top = newTop + 'px';
+  });
+
+  const stopDrag = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    guide.classList.remove('dragging');
+    try { guide.releasePointerCapture(e.pointerId); } catch (_) {}
+  };
+
+  guide.addEventListener('pointerup', stopDrag);
+  guide.addEventListener('pointercancel', stopDrag);
+
+  // 點擊說話泡泡可縮小/展開
+  const speech = $('speech');
+  if (speech) {
+    speech.title = '點擊可暫時收合/展開對話泡泡';
+    speech.style.cursor = 'pointer';
+    speech.addEventListener('click', (e) => {
+      if (Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6) return;
+      speech.classList.toggle('collapsed');
+    });
+  }
 }
 
 // 啟動
