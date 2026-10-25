@@ -412,6 +412,7 @@ function buildDispatchUrl() {
   if (selectMode) baseUrl.searchParams.set("mode", selectMode);
   if (checkTimerOff) baseUrl.searchParams.set("timer", "off");
   if (qcount) baseUrl.searchParams.set("qcount", qcount);
+  if (selectMode !== "projector") baseUrl.searchParams.set("student", "1");
 
   return baseUrl.toString();
 }

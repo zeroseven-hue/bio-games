@@ -1,0 +1,176 @@
+:root{font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;color:#fff4dc;background:#080f1e}*{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #f8d28c;outline-offset:3px}.hidden{display:none!important}#app{min-height:100dvh;display:flex;flex-direction:column;background:radial-gradient(circle at center,#26314c,#090e19)}.hud{height:88px;display:flex;align-items:center;justify-content:space-between;padding:10px clamp(12px,2vw,32px);gap:14px;background:linear-gradient(#111e34,#091326);border-bottom:2px solid #b78b4b;z-index:2}.brand{display:flex;align-items:center;gap:13px;min-width:0}.brand>span{font-size:40px;color:#e7bd73}.brand strong{font-family:Georgia,serif;font-size:clamp(17px,2vw,27px);display:block;color:#f4d49a}.brand small{font-size:13px;color:#d0bd9e}.timer{border:2px solid #b99253;border-radius:50px;padding:8px 18px;color:#ffe0a3;font-size:clamp(20px,2.8vw,35px);font-weight:800;font-variant-numeric:tabular-nums;background:#07101f;white-space:nowrap}.hudRight{display:flex;align-items:center;gap:9px}.hudRight>span{white-space:nowrap;color:#ebd5a5;font-weight:700}.iconBtn,.softBtn,.xBtn{color:#f5dbab;background:#172741;border:1px solid #bd965b;border-radius:11px;padding:10px 15px}.iconBtn{font-size:20px}.scene{position:relative;flex:1;min-height:430px;background:var(--home-image) center center/cover no-repeat;overflow:hidden;touch-action:pan-y}.sceneTint{position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,9,18,.45),transparent 28%,rgba(5,8,20,.10));pointer-events:none}.hotspots{position:absolute;inset:0}.hotspot{position:absolute;transform:translate(-50%,-50%);border:2px solid #ffe2a3;border-radius:50%;width:clamp(48px,5vw,70px);height:clamp(48px,5vw,70px);background:radial-gradient(circle,rgba(15,23,39,.94),rgba(14,21,36,.66));box-shadow:0 0 0 7px #e5b96a22,0 0 25px #f6c86d;color:#ffe2a3;font-size:34px;transition:transform .2s,filter .2s;animation:pulse 2.4s infinite}.hotspot:hover,.hotspot:focus-visible{transform:translate(-50%,-50%) scale(1.18);filter:brightness(1.25)}.hotspot.done{background:#0f4d39;color:#bbffce;box-shadow:0 0 22px #68f4a0}.hotspot span{position:absolute;top:110%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#101b31e8;border:1px solid #c6a36a;padding:4px 8px;border-radius:8px;font-size:14px;display:none}.showLabels .hotspot span{display:block}@keyframes pulse{50%{box-shadow:0 0 0 12px #e5b96a10,0 0 35px #f6c86d}}.sceneCaption{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 20px;background:#081327dd;border:1px solid #c9a363;border-radius:40px;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis;text-align:center}.lens{position:absolute;left:50%;top:50%;pointer-events:none;width:120px;height:120px;border:3px solid #ffe2a0;border-radius:50%;box-shadow:0 0 0 9999px #04091413,0 0 24px #f8dba2;transform:translate(-50%,-50%);opacity:0;transition:left .35s,top .35s,opacity .2s}.lens:after{content:"";position:absolute;width:35px;height:7px;background:#f4cf8c;right:-27px;bottom:-10px;transform:rotate(45deg);border-radius:8px}.scene.scanning .lens{opacity:1}.bottom{display:flex;align-items:center;gap:14px;min-height:80px;padding:12px 20px;background:#0b172b;border-top:2px solid #b78b4b}.stageDots{display:flex;gap:7px;flex-shrink:0}.dot{width:20px;height:20px;border:1px solid #c49d66;border-radius:50%;background:#182a42}.dot.on{background:radial-gradient(circle,#fff0a5,#d69a31);box-shadow:0 0 12px #e9c16b}.bottomText{flex:1;color:#e2cfa9;font-size:14px}.overlay{position:fixed;inset:0;background:#050b17dd;z-index:10;display:grid;place-items:center;padding:16px;overflow:auto}.introCard,.questionCard,.modalCard{background:linear-gradient(135deg,#172741,#0b1628);border:2px solid #c99d57;border-radius:20px;box-shadow:0 22px 90px #000a;max-height:95dvh;overflow:auto}.introCard{display:grid;grid-template-columns:minmax(250px,45%) 1fr;max-width:1050px;width:100%;min-height:530px}.introImage{min-height:440px;background-image:var(--home-image);background-size:cover;background-position:center;border-radius:20px 0 0 20px}.introCopy{padding:clamp(24px,4vw,55px);align-self:center}.eyebrow{letter-spacing:3px;color:#e9bb74;font-size:12px;font-weight:800}.introCopy h1,.resultCard h1{font-family:Georgia,serif;font-size:clamp(32px,4.5vw,59px);color:#ffe0a3;line-height:1.22;margin:20px 0}.introCopy h1 em{font-size:.72em;font-style:normal}.introCopy p{font-size:clamp(16px,1.5vw,19px);line-height:1.9;color:#f3e6cf}.introActions,.resultActions{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.goldBtn{border:1px solid #ffe1a1;background:linear-gradient(135deg,#f1c77a,#ac712c);color:#1a1720;border-radius:12px;padding:13px 26px;font-size:18px;font-weight:900;box-shadow:0 4px 0 #70431d}.goldBtn:disabled{opacity:.5;cursor:not-allowed}.introCopy small,.resultCard small{color:#d3b98d}.questionCard{width:min(760px,100%);background:linear-gradient(#f8edcf,#ead6a9);color:#2e2119;border:5px ridge #c79d54}.questionTop{background:#142540;color:#f4d49a;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;font-weight:800}.xBtn{padding:3px 12px;font-size:25px}.questionBody{padding:clamp(20px,3vw,36px)}.questionCount{color:#81571d;font-weight:800}.questionBody h2{font-size:clamp(20px,2.7vw,28px);line-height:1.55}.options{display:grid;gap:12px;margin:22px 0}.answerBtn{width:100%;border:2px solid #c9ac7c;border-radius:11px;padding:15px;text-align:left;background:#fff9e9;color:#332619;font-size:clamp(16px,2vw,20px);display:flex;gap:16px;align-items:center}.answerBtn b{background:#20364e;color:#fff2c9;border-radius:9px;min-width:38px;text-align:center;padding:7px}.answerBtn:hover{background:#e5f1e8}.answerBtn:disabled{cursor:default}.answerBtn.correct{background:#c7ecd4;border-color:#2c915e}.answerBtn.wrong{background:#f6c7bd;border-color:#c45b48}.feedback{border-left:5px solid #5a895f;background:#fff8df;padding:15px;border-radius:7px;line-height:1.65;margin:16px 0;white-space:pre-wrap}.modalCard{width:min(650px,100%);padding:clamp(20px,4vw,42px);position:relative;text-align:center}.modalCard h2{font-family:Georgia,serif;color:#f5d18d;font-size:30px}.modalCard p{line-height:1.7}.right{position:absolute;right:12px;top:12px}.mapStage{border:1px solid #a47f50;border-radius:13px;padding:15px;margin:12px 0;text-align:left;background:#0c182b}.mapStage strong{display:block;color:#ffdf9d}.mapStage small{color:#d2c1a5}.resultSeal{font-size:78px;color:#eec16d;text-shadow:0 0 30px #f0bd58}.resultCard #resultStats{padding:14px;background:#101c31;border:1px solid #a68b5f;border-radius:12px;line-height:2;font-size:18px}.resultCard .resultActions{justify-content:center}@media(max-width:760px){.hud{height:auto;min-height:72px;gap:7px;padding:8px}.brand>span{font-size:27px}.brand strong{font-size:14px}.brand small{display:none}.timer{font-size:20px;padding:7px}.hudRight>span{display:none}.iconBtn{padding:7px}.bottom{flex-wrap:wrap;gap:7px;padding:9px}.bottomText{order:3;flex-basis:100%;font-size:12px}.softBtn{padding:8px;font-size:13px}.scene{min-height:60dvh;background-position:center}.introCard{grid-template-columns:1fr;max-height:96dvh}.introImage{height:170px}.introCopy{padding:20px}.introCopy p{font-size:15px;line-height:1.6}.introCopy h1{margin:10px 0}.sceneCaption{font-size:12px}.hotspot{width:46px;height:46px;font-size:26px}.lens{width:90px;height:90px}}
+
+/* V2 自由探索鏡：手指拖曳 / 滑鼠跟隨，鏡內真實放大 */
+.scene{touch-action:none;cursor:none}
+.scene .hotspots{pointer-events:none}
+.scene .hotspot{width:clamp(44px,4vw,58px);height:clamp(44px,4vw,58px);border:1px solid rgba(255,225,160,.32);background:radial-gradient(circle,rgba(255,213,116,.16),rgba(255,213,116,.025) 60%,transparent 72%);box-shadow:0 0 18px 4px rgba(255,210,112,.12);font-size:0;opacity:.34;animation:none;pointer-events:none}
+.scene .hotspot.done{opacity:.72;background:radial-gradient(circle,#7ee3a7aa,#13523c88);box-shadow:0 0 18px #77ecaa}
+.scene .hotspot.nearby{opacity:1;transform:translate(-50%,-50%) scale(1.35);box-shadow:0 0 36px 12px #f8ce76a8;border-color:#ffde93}
+.scene .hotspot span{font-size:14px}
+.scene .lens{opacity:1;z-index:4;width:clamp(126px,16vw,174px);height:clamp(126px,16vw,174px);border:7px solid #d7a75c;outline:2px solid #fff0b7;box-shadow:inset 0 0 14px #fff6c0a8,0 0 0 3px #543716,0 10px 35px #0009,0 0 30px #f3c67a77;transition:opacity .2s;overflow:visible;will-change:left,top}
+.scene .lens::before{content:"";position:absolute;inset:0;border-radius:50%;background-image:var(--lens-image);background-size:var(--lens-bg-size);background-position:var(--lens-bg-position);background-repeat:no-repeat;box-shadow:inset 0 0 24px #090e1a99;overflow:hidden}
+.scene .lens::after{content:"";position:absolute;width:64px;height:15px;right:-55px;bottom:-24px;transform:rotate(43deg);background:linear-gradient(#ffe6a0,#a36d2f,#563614);border:2px solid #f6d38a;box-shadow:0 3px 8px #0008;border-radius:10px}
+.scene .lens.found{border-color:#fff1ad;box-shadow:0 0 0 4px #fff4ba99,0 0 45px 16px #ffd16b99}
+.scene .lens.found::before{box-shadow:inset 0 0 28px #ffe19b9c}
+.scene .sceneCaption{z-index:6;pointer-events:none;white-space:normal;line-height:1.45}
+.scene .lens{pointer-events:none}
+@media (hover:none){.scene{cursor:default}}
+
+/* V3：A+C 隱藏探索提示，不再有固定放大鏡圖示 */
+.scene .hotspot{opacity:0!important;border:0;background:none;box-shadow:none;animation:none;pointer-events:none}
+.scene .hotspot.done{opacity:1!important;width:22px;height:22px;background:radial-gradient(circle,#e4ffc9,#24865e);box-shadow:0 0 12px #b6ffca;font-size:13px;color:#fff;line-height:18px}
+.scene .hotspot.nearby:not(.done){opacity:1!important;background:radial-gradient(circle,#ffdb8a44,transparent 70%);box-shadow:0 0 28px 9px #ffd47980;border:1px solid #ffdf9b88}
+.scene .hotspot.hint:not(.done){opacity:1!important;background:radial-gradient(circle,#f5b94f,#6d3d16);border:2px solid #fff2bd;box-shadow:0 0 30px 9px #ffd47a;color:#241509;font-size:26px;font-weight:900;width:42px;height:42px}
+.scene .hotspot.hint:not(.done)::before{content:'!'}
+.scene .lens{opacity:0;transform:translate(-50%,-50%) scale(.85);transition:opacity .18s,transform .18s}
+.scene .lens.visible{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.scene .lens::before{background-size:var(--lens-bg-size);background-position:var(--lens-bg-position)}
+.scene .hotspot.spark:not(.done){opacity:.7!important;background:radial-gradient(circle,#fff7d3 0 3%,#ffcc6b77 12%,transparent 65%);box-shadow:0 0 20px 4px #ffd37a44;animation:twinkle 2.7s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.1;transform:translate(-50%,-50%) scale(.75)}50%{opacity:.7;transform:translate(-50%,-50%) scale(1.05)}}
+.tutorialCard{max-width:680px}.tutorialCard p{text-align:left;line-height:1.9}.tutorialDemo{height:115px;display:flex;justify-content:center;align-items:center;gap:34px;font-size:48px;background:#101a2b;border-radius:14px;overflow:hidden}.tutorialFinger{animation:teachMove 3s infinite}.tutorialSpark{color:#ffe08c;animation:twinkle 2s infinite}.tutorialBook{filter:drop-shadow(0 0 14px #ffdc8c)}@keyframes teachMove{50%{transform:translateX(38px)}}.tutorialActions{justify-content:center}.sealCard{max-width:620px}.royalSeals{display:flex;justify-content:center;gap:15px;margin:22px 0}.royalSeals span{display:grid;place-items:center;width:64px;height:64px;border:3px solid #ffdf8b;border-radius:50%;background:#805016;box-shadow:0 0 24px #ffd069;animation:sealGlow .6s backwards}.royalSeals span:nth-child(2){animation-delay:.25s}.royalSeals span:nth-child(3){animation-delay:.5s}.royalSeals span:nth-child(4){animation-delay:.75s}@keyframes sealGlow{from{transform:scale(.25);opacity:0}to{transform:scale(1);opacity:1}}.goldenKey{font-size:75px;color:#ffdb83;filter:drop-shadow(0 0 18px #ffd37a);animation:keyFloat 2s infinite alternate}@keyframes keyFloat{to{transform:translateY(-10px)}}
+@media(max-width:650px){#hintBtn{font-size:12px;padding:8px}.royalSeals span{width:49px;height:49px}.tutorialDemo{height:85px}}
+@media(prefers-reduced-motion:reduce){.hotspot,.tutorialFinger,.tutorialSpark,.royalSeals span,.goldenKey{animation:none!important}}
+
+/* V3.1: No permanent icons. Hint marks appear only on manual request. */
+.scene .hotspot:not(.done):not(.nearby):not(.hint):not(.spark){opacity:0!important}
+.scene .hotspot.spark:not(.done){width:38px;height:38px;border:0;box-shadow:0 0 16px 4px #ffd37a33!important}
+.scene .hotspot.nearby:not(.done){width:36px;height:36px;border:0!important;box-shadow:0 0 26px 7px #ffd47966!important}
+.scene .hotspot.hint:not(.done){width:40px;height:40px}
+.scene .lens{width:clamp(72px,9vw,105px)!important;height:clamp(72px,9vw,105px)!important;border-width:4px!important;outline-width:1px!important;box-shadow:inset 0 0 9px #fff6c077,0 0 15px #f3c67a55!important}
+.scene .lens::after{width:35px!important;height:9px!important;right:-29px!important;bottom:-12px!important;border-width:1px!important}
+.scene .lens:not(.visible){opacity:0!important;visibility:hidden}
+.scene{cursor:crosshair}
+@media(hover:none){.scene{cursor:default}}
+
+/* V4: clean image; teal (#32e7dc) interactive light, no permanent icons */
+.scene .hotspot,.scene .hotspot.spark,.scene .hotspot.nearby{border:0!important;background:none!important;box-shadow:none!important;opacity:0!important;color:transparent!important;pointer-events:none!important}
+.scene .hotspot.spark:not(.done){opacity:1!important;background:radial-gradient(circle,rgba(226,255,255,.95) 0 2px,rgba(65,239,223,.55) 4px,rgba(23,204,209,.12) 13px,transparent 23px)!important;filter:drop-shadow(0 0 12px #20dcd4);animation:tealTwinkle 2.8s ease-in-out infinite!important}
+.scene .hotspot.nearby:not(.done){opacity:1!important;background:radial-gradient(circle,rgba(77,244,225,.48),transparent 70%)!important;filter:drop-shadow(0 0 18px #1af4e5)}
+.scene .hotspot.hint:not(.done){opacity:1!important;background:radial-gradient(circle,#ffe7a0,#ac7b35)!important;color:#241509!important;filter:none;box-shadow:0 0 22px #ffd88d!important}
+.scene .hotspot.done{opacity:1!important;background:radial-gradient(circle,#baffec,#157f78)!important;color:#fff!important;box-shadow:0 0 14px #35e5d6!important}
+@keyframes tealTwinkle{0%,100%{opacity:.18;transform:translate(-50%,-50%) scale(.7)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+.scene .lens{z-index:5}.scene .lens:not(.visible){display:none!important}
+.rpgBar{position:relative;z-index:2;display:flex;align-items:center;gap:13px;padding:9px clamp(12px,2vw,32px);background:linear-gradient(110deg,#101b30,#091323);border-top:2px solid #b68a4b;min-height:84px}
+.rpgAvatar{font-size:42px;flex:0 0 auto;filter:drop-shadow(0 0 7px #e0b96b)}
+.rpgDialogue{flex:1;min-width:0}.rpgName{font-weight:900;font-size:13px;color:#edc57f;letter-spacing:2px}.rpgLine{font-size:clamp(14px,1.6vw,19px);line-height:1.55;min-height:28px;color:#f7e9ce}
+.rpgNext{color:#f7d58e;background:#1a2b43;border:1px solid #a88653;border-radius:8px;padding:9px 12px;white-space:nowrap}
+
+
+
+@media(prefers-reduced-motion:reduce){}
+@media(max-width:760px){.rpgBar{min-height:76px;padding:6px 10px;gap:8px}.rpgAvatar{font-size:31px}.rpgNext{padding:7px;font-size:12px}.rpgLine{font-size:13px}.bottom{min-height:56px}}
+
+/* V4.1 precise distinction: gold is ORIGINAL AMBIENT ARTWORK; teal is ONLY on linked question hotspots.
+   Six/five/five buttons remain in the DOM with the exact original coordinates and scene event handlers. */
+.scene .hotspot:not(.done):not(.hint) {
+  opacity:.50!important;
+  width:38px!important;height:38px!important;
+  border:0!important;color:transparent!important;
+  background:radial-gradient(circle,rgba(224,255,255,.88) 0 1.5px,rgba(79,241,232,.53) 3px,rgba(23,207,205,.18) 9px,transparent 21px)!important;
+  box-shadow:none!important;filter:drop-shadow(0 0 7px rgba(24,221,222,.53));
+  animation:castleTealBreath 4.1s ease-in-out infinite!important;
+  pointer-events:none!important;
+}
+.scene .hotspot.spark:not(.done):not(.hint){
+  opacity:.88!important;
+  background:radial-gradient(circle,#f1ffff 0 2px,rgba(73,255,241,.78) 5px,rgba(10,219,220,.32) 11px,transparent 22px)!important;
+  filter:drop-shadow(0 0 13px rgba(15,241,231,.8));
+  animation:castleTealActive 2.8s ease-in-out infinite!important;
+}
+.scene .hotspot.nearby:not(.done):not(.hint){
+  opacity:1!important;
+  background:radial-gradient(circle,#e4ffff 0 3px,rgba(79,244,232,.7) 7px,rgba(16,195,201,.26) 15px,transparent 24px)!important;
+  filter:drop-shadow(0 0 16px rgba(45,242,235,.82));
+}
+.scene .hotspot.hint:not(.done){
+  opacity:1!important;width:40px!important;height:40px!important;
+  background:radial-gradient(circle,#ffe7a0,#ac7b35)!important;
+  color:#241509!important;filter:none!important;
+  box-shadow:0 0 22px #ffd88d!important;
+  animation:none!important;
+}
+.scene .hotspot.done {opacity:1!important;animation:none!important;filter:none!important}
+@keyframes castleTealBreath{
+  0%,100%{opacity:.26;transform:translate(-50%,-50%) scale(.80)}
+  50%{opacity:.55;transform:translate(-50%,-50%) scale(1.04)}
+}
+@keyframes castleTealActive{
+  0%,100%{opacity:.42;transform:translate(-50%,-50%) scale(.80)}
+  45%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+}
+@media(prefers-reduced-motion:reduce){
+  .scene .hotspot:not(.done):not(.hint){animation:none!important;opacity:.58!important}
+}
+
+/* V5 STRICT three individual painted environments. The room imagery is drawn into the full scene coordinate plane,
+   keeping scripted hotspots in registration, instead of background-size:cover cropping unpredictably on iPad. */
+.scene{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
+/* Completion markers remain visible; hidden hit region remains pointer-controlled by the existing pointer handlers. */
+
+/* V5.2 teacher inspection: overlay, not part of the student experience. */
+.teacherPanel{position:absolute;z-index:8;top:100px;left:12px;right:12px;width:auto;padding:10px 12px;background:rgba(7,18,34,.92);border:2px solid #d3aa65;border-radius:14px;box-shadow:0 10px 25px #0009;display:grid;gap:8px;color:#ffe5ae;max-width:980px}
+.teacherBtns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.teacherBtns button{background:#192a45;border:1px solid #aa884b;border-radius:8px;color:#ffe3a5;padding:10px 12px}
+.teacherBtns button.selected{background:#286d70;border-color:#55e5df;color:#fff}
+.teacherPanel small{color:#f1debb}.teacherMeta{display:grid;gap:6px}.teacherControls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.teacherCompactTitle{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.teacherCompactTitle strong{font-size:18px}.teacherPanel.collapsed .teacherMeta,.teacherPanel.collapsed #teacherObjects,.teacherPanel.collapsed .teacherHelp{display:none}.teacherPanel.collapsed{max-width:860px;padding-bottom:8px}
+.scene.teacherInspect{cursor:pointer}
+.scene.teacherInspect .hotspot:not(.done){pointer-events:auto!important}
+.scene.teacherInspect .hotspot{width:54px!important;height:54px!important}
+.scene.teacherInspect .hotspot:hover{opacity:1!important;outline:2px dashed #73f9f2}
+@media(max-width:760px){.teacherPanel{top:76px;max-height:33vh;overflow:auto}.teacherBtns button{font-size:12px;padding:6px}.scene.teacherInspect{min-height:65dvh}}
+
+/* V5.4: three room backgrounds retain image aspect ratio, never stretch narrow assets. */
+.scene{background-size:cover!important;background-position:center!important}
+/* Teal light is produced ONLY by unsolved .hotspot regions; decorative firelight stays warm gold. */
+.hotspot:not(.done)::before{filter:hue-rotate(0deg)}
+/* Read-only teacher toolbar lets the teacher inspect rooms + badges immediately. */
+.teacherPanel{max-width:1100px}
+.teacherBtns{align-items:center}
+.teacherBtns [data-preview-award]{border-color:#c7a46a;color:#ffe9ba}
+.teacherBtns [data-preview-award]:hover{background:#65522e}
+#teacherAwardClose{margin-top:10px}
+@media(max-width:850px){.teacherPanel{max-height:44dvh;overflow-y:auto}}
+ .teacherObjects{display:flex;flex-wrap:wrap;gap:6px}.teacherObjects button{background:#102d36;color:#bbf9f3;border:1px solid #338e91;border-radius:7px;padding:5px 10px;font-size:12px}
+.teacherToggleBtn{background:#16385b;border:1px solid #79d8d8;border-radius:8px;color:#dffefe;padding:8px 10px;font-weight:700}.teacherSecondaryBtn{background:#3d3220;border:1px solid #b99253;color:#ffe3a5;border-radius:8px;padding:8px 10px}.teacherPanel .teacherBtns button{padding:8px 10px}.scene.teacherInspect .hotspot{width:52px!important;height:52px!important}
+/* V5.5 Teacher inspection: compact fixed dock that never covers the playfield when closed. */
+.teacherPanel{position:fixed!important;left:auto!important;right:16px!important;top:auto!important;bottom:126px!important;transform:none!important;width:min(720px,calc(100vw - 32px))!important;max-width:720px!important;max-height:65dvh!important;overflow:auto!important;z-index:90!important;background:rgba(6,15,30,.97)!important;box-shadow:0 18px 45px rgba(0,0,0,.6)!important}
+.teacherPanel.collapsed{width:auto!important;max-width:fit-content!important;display:flex!important;padding:6px 8px!important;gap:0!important;overflow:visible!important}
+.teacherPanel.collapsed .teacherCompactTitle,.teacherPanel.collapsed .teacherBtns,.teacherPanel.collapsed .teacherMeta,.teacherPanel.collapsed #teacherExit{display:none!important}
+.teacherPanel.collapsed .teacherControls{gap:0}
+.teacherPanel.collapsed #teacherToggle{padding:10px 13px;border:1px solid #67cfc9;border-radius:30px;background:#123d4d;color:#fff9e9}
+.teacherPanel:not(.collapsed) .teacherControls{justify-content:flex-end}
+@media(max-width:780px){.teacherPanel{right:8px!important;bottom:90px!important;max-height:64dvh!important}.teacherPanel.collapsed{max-height:none!important}}
+/* Equal-height responsive scene with no black matte exposed. */
+.scene{background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
+
+.introImage{background-image:var(--home-image)!important;background-position:center center!important;background-size:cover!important;}
+.scene{background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;}
+
+.teacherPanel{position:fixed!important;left:8px!important;top:auto!important;right:auto!important;bottom:8px!important;transform:none!important;width:min(780px,calc(100vw - 16px))!important;max-width:none!important;max-height:55dvh;overflow:auto;z-index:90!important;box-shadow:0 8px 24px #000b;}
+.teacherPanel.collapsed{width:auto!important;max-width:220px!important;overflow:hidden!important;padding:6px 8px!important;}
+.teacherPanel.collapsed .teacherCompactTitle,.teacherPanel.collapsed .teacherBtns,.teacherPanel.collapsed .teacherMeta,.teacherPanel.collapsed .teacherHelp,.teacherPanel.collapsed .teacherControls #teacherExit{display:none!important;}
+.teacherPanel.collapsed .teacherControls{display:flex!important;margin:0!important;}
+.teacherPanel.collapsed #teacherToggle{white-space:nowrap!important;font-size:15px!important;background:#0c4454!important;color:#fff!important;}
+.teacherPanel:not(.collapsed) #teacherToggle{font-size:15px} 
+
+.teacherAssetAudit{font-size:12px;color:#e7dac4;line-height:1.5;padding:8px;border-top:1px solid #9d8457;}
+.teacherAssetAudit strong{color:#e5cc86;}
+
+.teacherPanel.collapsed{width:min(510px,calc(100vw - 14px))!important;max-width:510px!important;display:flex!important;flex-wrap:wrap;align-items:center;gap:5px!important;padding:6px!important;}
+.teacherPanel.collapsed .teacherBtns{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:nowrap!important;}
+.teacherPanel.collapsed .teacherBtns button[data-preview-stage]{display:inline-block!important;padding:6px 9px!important;font-size:13px!important;}
+.teacherPanel.collapsed .teacherBtns button[data-preview-award],.teacherPanel.collapsed .teacherBtns #teacherExit{display:none!important;}
+.teacherPanel.collapsed .teacherControls{display:flex!important;order:2;}
+.teacherPanel.collapsed .teacherBtns{order:1;}
+.teacherPanel.collapsed #teacherToggle{font-size:13px!important;padding:6px 9px!important;}
+
+#app{min-height:100dvh}.scene{flex:none!important;width:100%;aspect-ratio:1672/941;min-height:0!important;background-size:100% 100%!important;background-position:center!important}.sceneCaption{bottom:5px;font-size:12px;padding:4px 10px}.introCard{display:block;position:relative;max-width:1200px;background:linear-gradient(90deg,#071326ed,#07132670);isolation:isolate}.introImage{position:absolute;inset:0;z-index:-1;min-height:100%;border-radius:18px;background-size:cover;background-position:center;opacity:.6}.introCopy{max-width:760px;padding:28px;background:linear-gradient(90deg,#071326f5,#071326b0,transparent)}.introCopy h1{font-size:42px;margin:10px 0}.introCopy p{font-size:16px;line-height:1.65}.introActions{margin:14px 0}summary{cursor:pointer;color:#ffe0a3;font-weight:800;padding:8px}details{padding:8px;border:1px solid #776441;border-radius:10px;background:#0c182bd9}.settingsGrid{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.settingsGrid label{flex:1;min-width:140px}.settingsGrid input{display:block;width:95px}input,select{font:inherit;padding:8px;border-radius:7px;border:1px solid #d6ba78;background:#14243b;color:#fff3cf}input[type=checkbox]{width:20px;height:20px;vertical-align:middle}input[type=file]{display:block;font-size:12px;max-width:230px;margin-top:6px}.settingNote{font-size:13px!important;color:#ddcfb8}.hud{height:auto;min-height:70px}.hudRight{flex-wrap:wrap;justify-content:flex-end}.rpgBar{min-height:64px}.bottom{min-height:60px}.teacherPanel{bottom:12px!important}.teacherPanel.collapsed .teacherBtns{display:flex!important}.teacherPanel.collapsed [data-preview-award]{display:none}.teacherPanel.collapsed #teacherExit{display:block!important}.teacherPanel.collapsed{max-width:94vw!important}.teacherPanel.collapsed .teacherControls{display:flex}.teacherPanel.collapsed .teacherBtns button{font-size:12px!important;padding:7px!important}.scene .hotspot{min-width:44px!important;min-height:44px!important}.scene .hotspot span{z-index:7}.overlay{z-index:100}.questionBody h2{font-size:24px}.answerBtn{min-height:56px}#settingStatus{font-size:14px!important;color:#a2f5ed}.hidden{display:none!important}@media(max-width:600px){.introCopy{padding:16px}.introCopy h1{font-size:32px}.brand strong{font-size:12px}.hudRight{gap:4px}.hud{gap:4px}.timer{font-size:18px}.rpgLine{font-size:14px}.sceneCaption{display:none}.scene .lens{width:65px!important;height:65px!important}.teacherPanel.collapsed{flex-wrap:wrap}.questionBody h2{font-size:21px}.answerBtn{font-size:18px}.bottomText{font-size:14px}.introImage{background-position:70% center}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.teacherPanel.hidden{display:none!important}#teacherPanel.collapsed #teacherExit{display:inline-block!important}.scene{width:min(100%,calc((100dvh - 270px)*1672/941))!important;margin:0 auto}.scene .hotspot.hint:not(.done){background:radial-gradient(circle,#ddfffb,#169c98)!important;color:#042827!important;box-shadow:0 0 22px #3ff9ed!important}.scene .hotspot span{display:none}.scene.showLabels .hotspot span{display:block!important;color:#dffcf8!important}.introImage{background-position:center!important;opacity:1}.introCard{background:#0b1628}.introCopy{background:linear-gradient(90deg,#071326f5,#071326d0,transparent)}
+
+.scene{touch-action:pan-y!important}
+/* V7: full-width image plane; keep original aspect and object coordinates. */
+.scene{width:100%!important;margin:0!important;flex:none!important;aspect-ratio:1672/941!important;min-height:0!important;height:auto!important;max-height:none!important;background-size:100% 100%!important}
+.hud{position:sticky;top:0;z-index:9}
+.bottom{position:sticky;bottom:0;z-index:8;background:#0b172bf5}
+#app{overflow:visible}
