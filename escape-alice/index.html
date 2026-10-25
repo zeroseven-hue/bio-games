@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>奇幻仙境・愛麗絲的生物密室逃脫｜生物互動遊戲平台</title>
+  <link rel="stylesheet" href="style.css?v=1.1">
+  <script src="../qrcode.min.js?v=1.0"></script>
+  <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
+</head>
+<body>
+<div id="app">
+  <div id="scene"></div>
+  <div id="veil"></div>
+
+  <header>
+    <div class="glass topname">♠ 奇幻仙境・愛麗絲的生物密室逃脫 <span id="stageLabel"></span></div>
+    <div class="controls">
+      <span id="timer" class="pill">⏳ 10:00</span>
+      <button class="pill gold teacherOnly" id="addTimeBtn" title="教師加時：增加 3 分鐘">➕ 延長3分鐘</button>
+      <button class="pill hidden" id="hintBtn">💡 提示</button>
+      <button class="pill gold teacherOnly" id="teacherToggle">🔐 教師預覽</button>
+    </div>
+  </header>
+
+  <!-- 突發事件廣播條（不中斷學生操作） -->
+  <div id="storyBeatBanner" class="storyBeatBanner hidden">
+    <span class="storyBeatIcon">🐇</span>
+    <span id="storyBeatText"></span>
+  </div>
+
+  <div id="home" class="glass">
+    <div style="font-weight:900;letter-spacing:3px;color:#ffcf9b">WONDERLAND · BIOLOGY ESCAPE</div>
+    <h1>愛麗絲的<br>奇幻生物密室</h1>
+    <p>追逐匆忙的白兔，穿過魔法森林，破解瘋帽子的尺度茶杯排序，最後挑戰紅心皇后的撲克牌封印！唯有觀察與生物知識，才能帶你回到現實世界。</p>
+    <p id="introDuration"><b>⏱️ 預設時間：全場 10 分鐘</b></p>
+
+    <!-- 🔐 教師派卷與題庫設定面板 -->
+    <details id="settings" class="teacherOnly">
+      <summary>⚙️ 教師派卷與題庫設定（點擊展開 / 單元選擇・時間・派發 QR Code）</summary>
+      <div class="settingsBox">
+        <div class="settingGroup">
+          <label for="unitSelect" class="settingLabel">📚 1. 選擇測驗題庫單元（連線全平台題庫）：</label>
+          <select id="unitSelect" class="unitSelect">
+            <option value="demo">✨ 仙境愛麗絲示範題庫 (16 題原生試題)</option>
+          </select>
+          <div id="unitLoadedBadge" class="unitBadge">✅ 當前題庫：仙境愛麗絲示範題庫 (16 題)</div>
+        </div>
+
+        <div class="settingGroup">
+          <div class="settingLabel">⏱️ 2. 設定倒數時間與計時模式：</div>
+          <div class="settingsGrid">
+            <label>計時模式
+              <select id="timeModeSelect">
+                <option value="total" selected>全場統一計時</option>
+                <option value="stage">各關獨立計時</option>
+              </select>
+            </label>
+            <label id="totalMinutesLabel">全場時間
+              <input id="totalMinutesInput" type="number" min="1" max="120" value="10" style="width:60px"> 分鐘
+            </label>
+            <label>
+              <input type="checkbox" id="noTimeCheck"> 無時間壓力（不倒數）
+            </label>
+          </div>
+          <div id="stageTimesRow" class="hidden settingsGrid" style="margin-top:8px">
+            <label>第 1 關 <input id="timeStage0" type="number" min="1" max="60" value="4" style="width:50px"> 分</label>
+            <label>第 2 關 <input id="timeStage1" type="number" min="1" max="60" value="3" style="width:50px"> 分</label>
+            <label>第 3 關 <input id="timeStage2" type="number" min="1" max="60" value="3" style="width:50px"> 分</label>
+          </div>
+        </div>
+
+        <div class="settingGroup" style="border-color:#38bdf8">
+          <div class="settingLabel" style="color:#7dd3fc">📱 3. 課堂學生派發專區（自動生成免登入學生端）：</div>
+          <button type="button" id="genQRBtn" class="primary" style="font-size:15px;padding:8px 18px">📱 產生學生端 QR Code 與派發網址</button>
+          <div id="studentQRArea" class="hidden" style="margin-top:10px;text-align:center">
+            <div id="studentQRCode"></div>
+            <div style="margin:8px 0;display:flex;gap:6px">
+              <input id="studentUrlInput" readonly style="flex:1;padding:8px 10px;border-radius:8px;background:#16092d;color:#fff;border:1px solid #c084fc;font-size:13px">
+              <button type="button" id="copyUrlBtn" class="pill gold">複製網址</button>
+            </div>
+            <div id="copyUrlFeedback" style="font-size:12px;color:#a7f3d0;min-height:18px"></div>
+            <a id="testStudentLaunchLink" href="#" target="_blank" class="small" style="color:#93c5fd;text-decoration:underline">在新分頁試開學生版 ↗</a>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="buttons" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="primary" id="start">✦ 開始仙境冒險</button>
+      <button class="pill" id="storyBtn">📜 仙境背景故事</button>
+      <button class="pill gold teacherOnly" id="teacherPreviewBtn">🔐 教師快速預覽</button>
+    </div>
+
+    <!-- 教師快速跳關選項 -->
+    <div id="quickStageChoices" class="teacherOnly">
+      <div class="quickStageTitle">⚡ 教師直接跳關巡檢（不計分・免操作）：</div>
+      <div class="quickStageButtons">
+        <button type="button" data-jump="0" class="pill">① 魔法蘑菇森林</button>
+        <button type="button" data-jump="1" class="pill">② 瘋帽子茶會</button>
+        <button type="button" data-jump="2" class="pill">③ 皇后城堡</button>
+      </div>
+    </div>
+
+    <small id="loadInfo" style="display:block;margin-top:10px;color:#cbd5e1">正在連線題庫清單……</small>
+  </div>
+
+  <!-- 關卡資訊與進度軌 -->
+  <div id="stageInfo" class="glass stageTitle hidden">
+    <h2 id="levelName"></h2>
+    <p id="levelStory"></p>
+    <p id="progress"></p>
+    <div class="progressRail" aria-label="關卡進度"><div id="progressFill"></div></div>
+  </div>
+
+  <!-- 互動探索節點 -->
+  <div id="hotspots"></div>
+
+  <!-- 可拖曳愛麗絲吉祥物 -->
+  <div id="alice">
+    <div class="dragHint">⠿ 可拖曳愛麗絲</div>
+    <svg viewBox="0 0 210 300" role="img" aria-label="3D 潮玩風獨立動態愛麗絲" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hairGold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff6ae"/><stop offset=".45" stop-color="#efb850"/><stop offset="1" stop-color="#9b6137"/></linearGradient>
+        <radialGradient id="skin" cx=".35" cy=".24" r=".85"><stop stop-color="#fff8e9"/><stop offset=".65" stop-color="#ffe1d1"/><stop offset="1" stop-color="#d89f9e"/></radialGradient>
+        <linearGradient id="dress" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a6f4ff"/><stop offset=".45" stop-color="#4da9d7"/><stop offset="1" stop-color="#285b9e"/></linearGradient>
+        <linearGradient id="apron" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffefb"/><stop offset="1" stop-color="#d6dcf7"/></linearGradient>
+        <radialGradient id="irises"><stop stop-color="#95f1fb"/><stop offset=".55" stop-color="#5682a9"/><stop offset="1" stop-color="#263e72"/></radialGradient>
+        <filter id="softShadow"><feGaussianBlur stdDeviation="4"/></filter>
+      </defs>
+      <ellipse cx="104" cy="287" rx="67" ry="9" fill="#14092b" opacity=".5" filter="url(#softShadow)"/>
+      <g class="alice-body">
+        <path d="M79 247L70 278 91 282 101 251M122 249L134 278 156 277 139 242" fill="#fbf8f6" stroke="#624a73" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M70 275 Q63 291 93 290 Q106 285 93 279Z M131 275 Q128 291 155 287 Q166 278 148 277Z" fill="#222a49" stroke="#14162c" stroke-width="3"/>
+        <path d="M67 176Q38 211 39 249Q102 269 168 248Q170 209 144 177Z" fill="url(#dress)" stroke="#405085" stroke-width="5"/>
+        <path d="M47 242 Q104 274 161 242" fill="none" stroke="#e7f8ff" stroke-width="8"/>
+        <path d="M85 172Q105 167 126 174L143 244Q104 261 65 244Z" fill="url(#apron)" stroke="#fdfcfa" stroke-width="3"/>
+        <path d="M84 175Q104 190 126 175" fill="none" stroke="#80d4e9" stroke-width="4"/>
+        <path d="M56 187Q36 196 27 219L37 230Q57 219 74 205M147 187Q169 188 185 211L178 225Q156 222 139 203" fill="url(#skin)" stroke="#956c8b" stroke-width="4"/>
+        <circle cx="33" cy="225" r="11" fill="#fff0e8"/><circle cx="179" cy="224" r="11" fill="#fff0e8"/>
+        <ellipse cx="68" cy="186" rx="22" ry="21" fill="url(#dress)" stroke="#658ac2" stroke-width="3"/><ellipse cx="146" cy="184" rx="22" ry="21" fill="url(#dress)" stroke="#658ac2" stroke-width="3"/>
+      </g>
+      <g class="alice-head">
+        <path d="M46 91Q18 98 31 143Q20 164 43 184Q34 206 55 207Q82 203 78 157M157 84Q192 107 178 147Q192 176 169 191Q176 208 149 205L139 157" fill="url(#hairGold)" stroke="#bd7d49" stroke-width="4"/>
+        <ellipse cx="105" cy="111" rx="76" ry="84" fill="url(#hairGold)" stroke="#ae753e" stroke-width="4"/>
+        <ellipse cx="106" cy="121" rx="68" ry="71" fill="url(#skin)" stroke="#c58d88" stroke-width="3"/>
+        <path d="M40 100Q38 40 91 34Q143 18 173 85Q151 87 141 68Q130 88 112 77Q94 107 74 79Q65 99 40 100Z" fill="url(#hairGold)" stroke="#bd8148" stroke-width="3"/>
+        <path d="M56 72Q83 31 117 48M125 48Q148 54 157 75" fill="none" stroke="#fff3bc" stroke-width="8" stroke-linecap="round" opacity=".7"/>
+        <path d="M49 59Q106 9 164 60" fill="none" stroke="#24203a" stroke-width="13" stroke-linecap="round"/>
+        <path d="M93 32Q63 3 61 30Q62 50 100 41Q133 8 141 25Q150 50 104 43Z" fill="#26223d" stroke="#424262" stroke-width="3"/><circle cx="103" cy="39" r="11" fill="#161a32"/>
+        <g class="eyes">
+          <path d="M58 117Q77 101 95 115M116 115Q138 102 155 119" fill="none" stroke="#6a4c65" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="77" cy="135" rx="19" ry="24" fill="#fffdfb"/><ellipse cx="135" cy="135" rx="19" ry="24" fill="#fffdfb"/>
+          <ellipse cx="79" cy="137" rx="13" ry="18" fill="url(#irises)"/><ellipse cx="133" cy="137" rx="13" ry="18" fill="url(#irises)"/>
+          <ellipse cx="79" cy="140" rx="7" ry="12" fill="#1f2546"/><ellipse cx="133" cy="140" rx="7" ry="12" fill="#1f2546"/>
+          <circle cx="74" cy="130" r="6" fill="white"/><circle cx="128" cy="130" r="6" fill="white"/><circle cx="84" cy="146" r="2" fill="white"/><circle cx="138" cy="146" r="2" fill="white"/>
+          <path d="M57 122l-7 -7M60 116l-4 -9M155 119l7 -8M152 113l4 -9" stroke="#362a4b" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <ellipse cx="57" cy="159" rx="14" ry="7" fill="#ff96b5" opacity=".65"/><ellipse cx="156" cy="159" rx="14" ry="7" fill="#ff96b5" opacity=".65"/>
+        <path d="M104 154l-2 5 6 0" fill="none" stroke="#d69e9b" stroke-width="2" stroke-linecap="round"/>
+        <path d="M95 170Q106 179 118 169" fill="none" stroke="#c75178" stroke-width="3.5" stroke-linecap="round"/>
+      </g>
+      <path d="M102 187L89 193 105 207 118 194Z" fill="#242442" stroke="#525073" stroke-width="2"/>
+    </svg>
+    <div id="speech" class="glass" title="點擊收起/展開對話">咦？白兔又跑哪裡去了？快來幫我找線索！</div>
+  </div>
+
+  <!-- 教師快速預覽抽屜面板 -->
+  <aside id="teacher" class="glass hidden teacherOnly">
+    <h3>🔐 教師快速預覽（跳關、測試機關與獎狀）</h3>
+    <div class="toolbar">
+      <button class="pill" data-stage="-1">🏠 首頁</button>
+      <button class="pill" data-stage="0">① 蘑菇森林</button>
+      <button class="pill" data-stage="1">② 尺度茶會</button>
+      <button class="pill" data-stage="2">③ 皇后城堡</button>
+      <button class="pill" data-stage="3">🏆 結局</button>
+    </div>
+    <div class="toolbar" style="margin-top:10px">
+      <button class="pill" data-cert="0">🏅 第一關獎狀</button>
+      <button class="pill" data-cert="1">🏅 第二關獎狀</button>
+      <button class="pill" data-cert="2">🏅 第三關獎狀</button>
+      <button class="pill" data-puzzle="1">🫖 測試尺度茶杯</button>
+      <button class="pill" data-puzzle="2">🃏 測試撲克牌機關</button>
+      <button class="pill" id="closeTeacher">收起</button>
+    </div>
+  </aside>
+
+  <!-- 通用彈窗 Modal -->
+  <div id="overlay" class="hidden">
+    <div id="modal"></div>
+  </div>
+
+  <!-- 倒數超時彈窗（支援老師加時） -->
+  <div id="timeoutOverlay" class="hidden">
+    <div class="modal" style="text-align:center;max-width:520px;border-color:#f59e0b">
+      <div style="font-size:3.2rem;margin-bottom:6px">⏰</div>
+      <h2 style="color:#fbbf24">本次冒險時間到了！</h2>
+      <p style="color:#cbd5e1;line-height:1.6">
+        白兔的懷錶鈴聲響起，魔法時間暫時耗盡！<br>
+        已解開的謎題與獲得的關卡認證均已完整保留。<br>
+        若課堂活動需要更多時間，可請老師同意後加時繼續！
+      </p>
+      <div id="timeoutBadgesArea" style="margin:12px 0;font-weight:700;color:#6ee7b7"></div>
+      <div class="buttons" style="display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button id="extend3MinBtn" class="pill gold" style="padding:11px 18px">⌛ 經老師同意，延長 3 分鐘</button>
+        <button id="extend5MinBtn" class="pill gold" style="padding:11px 18px">⌛ 延長 5 分鐘</button>
+        <button id="finishNowBtn" class="primary" style="padding:11px 18px">🏁 前往成績結算</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 複製成績提示彈窗 -->
+  <div id="copyNoticeOverlay" class="hidden">
+    <div class="modal" style="max-width:440px;text-align:center;border-color:#38bdf8">
+      <div style="font-size:2.8rem;margin-bottom:6px">📋</div>
+      <h3 style="color:#38bdf8;margin:0 0 10px">已複製探險戰報！</h3>
+      <p style="font-size:0.95rem;color:#cbd5e1;line-height:1.6">
+        成績資料已成功存入剪貼簿。<br>
+        請前往 <strong>Google Classroom</strong> 作業區直接貼上（Ctrl+V），並附上螢幕截圖即可繳交！
+      </p>
+      <button id="closeCopyNotice" class="primary" style="margin-top:12px">知道了</button>
+    </div>
+  </div>
+</div>
+
+<script defer src="../escape-adapter.js?v=1.1"></script>
+<script defer src="game.js?v=1.1"></script>
+</body>
+</html>
