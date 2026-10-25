@@ -12,8 +12,6 @@
   const params = new URLSearchParams(window.location.search);
   const unitParam = params.get('unit') || params.get('file');
   const modeParam = params.get('mode'); // 'projector' | 'solo' | 'group-tablet'
-  const timerParam = params.get('timer'); // 'off'
-  const qcountParam = parseInt(params.get('qcount'), 10) || 16;
 
   // 1. 樣式注入：大螢幕 (60~70 吋) 強化與 iPad 最佳化
   function injectResponsiveStyles() {
@@ -63,74 +61,19 @@
         min-height: 44px;
         min-width: 44px;
       }
-
-      /* 頂部狀態列浮動指示標籤 */
-      .escape-hud-banner {
-        position: fixed;
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(15, 23, 42, 0.88);
-        color: #38bdf8;
-        border: 1px solid rgba(56, 189, 248, 0.5);
-        backdrop-filter: blur(8px);
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 0.82rem;
-        font-weight: 800;
-        z-index: 99999;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-        pointer-events: none;
-        transition: opacity 0.4s ease;
-      }
-      .escape-hud-banner .badge {
-        background: #0284c7;
-        color: #fff;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.75rem;
-      }
-      .escape-hud-banner.loaded-ok {
-        border-color: rgba(16, 185, 129, 0.7);
-        color: #34d399;
-      }
-      .escape-hud-banner.loaded-ok .badge {
-        background: #059669;
-      }
     `;
     document.head.appendChild(style);
   }
 
-  // 2. 模式狀態標籤渲染
+  // 2. 模式套用
   function applyMode() {
-    let modeText = '🖥️ 課堂互動模式';
     if (modeParam === 'projector') {
       document.body.classList.add('mode-projector');
-      modeText = '🖥️ 全班大螢幕投影主持 (60~70 吋)';
     } else if (modeParam === 'solo') {
       document.body.classList.add('mode-solo');
-      modeText = '🧑‍🚀 個人自主模式 (iPad)';
     } else if (modeParam === 'group-tablet') {
       document.body.classList.add('mode-group');
-      modeText = '👥 小組平板輪流模式';
     }
-
-    let banner = document.getElementById('escapeHudBanner');
-    if (!banner) {
-      banner = document.createElement('div');
-      banner.id = 'escapeHudBanner';
-      banner.className = 'escape-hud-banner';
-      document.body.appendChild(banner);
-    }
-    banner.innerHTML = `<span class="badge">${modeText}</span>`;
-
-    // 5 秒後自動縮小或隱入背景，不干擾畫面探索
-    setTimeout(() => {
-      if (banner) banner.style.opacity = '0.75';
-    }, 5000);
   }
 
   // 3. 洗牌演算法
@@ -172,7 +115,6 @@
   // 5. 載入並注入試題
   async function loadSharedQuestions() {
     if (!unitParam) return;
-    const banner = document.getElementById('escapeHudBanner');
     try {
       const candidates = [
         `../questions/${unitParam}`,
@@ -201,11 +143,6 @@
           clearInterval(interval);
           if (hook) {
             injectQuestionsToGame(hook, questions);
-            const unitName = decodeURIComponent(unitParam.split('/').pop().replace('.json', ''));
-            if (banner) {
-              banner.classList.add('loaded-ok');
-              banner.innerHTML = `<span class="badge">已連線題庫</span> <span>${unitName}（${questions.length} 題）</span>`;
-            }
           }
         }
       }, 100);
