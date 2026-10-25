@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b31"><title>皇家古堡｜雙計時優化 V1</title><link rel="stylesheet" href="style.css?v=1.3"></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b31"><title>皇家古堡生物密室逃脫｜國中生物互動遊戲平台</title><link rel="stylesheet" href="style.css?v=1.4"><script src="../qrcode.min.js?v=1.0"></script><script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script></head><body>
 <div id="app">
 <header class="hud"><div class="brand"><span>♛</span><div><strong id="stageName">皇家古堡生物密室逃脫</strong><small id="stageSub">三重封印 · 生命的奧祕</small></div></div><div class="timer" id="timer">⌛ 08:00</div><div class="hudRight"><span id="totalProgress">0 / 16</span><button id="soundBtn" class="iconBtn" title="開關音效">♫</button><button id="hintBtn" class="softBtn" title="短暫顯示尚未探索的線索">💡 探索提示</button><button id="helpBtn" class="iconBtn" title="遊戲說明">?</button></div></header>
 <main class="scene" id="scene"><div class="sceneTint"></div><div id="hotspots" class="hotspots"></div><div class="sceneCaption" id="sceneCaption">點選發光的古堡物件，探索生物謎題</div><div class="lens" id="lens" aria-hidden="true"></div></main>
@@ -8,7 +8,69 @@
 <div class="teacherControls"><button id="teacherToggle" type="button" class="teacherToggleBtn">展開更多</button><button id="teacherExit" type="button" class="teacherSecondaryBtn">結束預覽</button></div>
 <div class="teacherBtns"><button type="button" data-preview-stage="0">第一重｜6題</button><button type="button" data-preview-stage="1">第二重｜5題</button><button type="button" data-preview-stage="2">第三重｜5題</button><button type="button" data-preview-award="0">🏅 第一關獎勵</button><button type="button" data-preview-award="1">🏅 第二關獎勵</button><button type="button" data-preview-award="2">🏆 最終認證</button></div>
 <div class="teacherMeta"><small id="teacherCurrent"></small><div id="teacherObjects" class="teacherObjects" aria-label="本關題目物件快速查看"></div><small class="teacherHelp">提示：想看完整畫面時，可先保持收合；需要查物件題目時再展開。</small></div></aside>
-<div class="overlay" id="intro"><div class="introCard"><div class="introImage"></div><div class="introCopy"><div class="eyebrow">THE ROYAL BIOLOGY ESCAPE</div><h1>皇家古堡<br><em>生物密室逃脫</em></h1><p id="story">一封沒有署名的邀請函，將你帶進一座沉睡的皇家古堡。傳說中，失蹤的皇家生物學家將生命的奧祕封存在三重密室裡……</p><p>城門在身後轟然關閉。挑戰時間為 <b id="introDuration">全場 10 分鐘</b>，必須探索物件、解開生物謎題，才能找到離開古堡的鑰匙。</p><details id="settings" class="teacherOnly"><summary>教師設定・計時模式與題庫</summary><div class="settingsGrid"><label>計時方式<select id="clockMode"><option value="total">全場統一計時</option><option value="stage">各關獨立計時</option></select></label><label>全場時間<input id="totalMinutes" type="number" min="1" max="120" step="1" value="10">分鐘</label></div><div class="settingsGrid"><label>第一關（6題）<input id="time0" type="number" min="1" max="60" step="1" value="6">分鐘</label><label>第二關（5題）<input id="time1" type="number" min="1" max="60" step="1" value="4">分鐘</label><label>第三關（5題）<input id="time2" type="number" min="1" max="60" step="1" value="4">分鐘</label></div><label><input type="checkbox" id="noTime"> 不限時練習</label><p class="settingNote">可選全場統一 10 分鐘，或各關獨立 6／4／4 分鐘。閱讀題目與解析會計時；晉級獎勵不計時，換分頁仍依經過時間計算。</p><label>單元 <select id="unitSelect"><option>生物綜合示範題庫</option></select></label><div class="introActions"><label class="softBtn">匯入 JSON 題庫<input id="bankFile" type="file" accept=".json,application/json"></label><button class="softBtn" id="exportGame">下載本次學生版</button><button class="softBtn" id="configLink">複製時間設定連結</button></div><small>匯入題庫後請下載學生版再部署，學生掃碼才會取得相同題庫。各平板進度獨立，不同步教師端。</small><p id="settingStatus" role="status"></p></details><select id="durationSelect" hidden><option value="8">8</option><option value="off">off</option></select><div class="introActions"><button id="resumeBtn" class="softBtn hidden">繼續上次探險</button><button id="startBtn" class="goldBtn">✦ 開始探險</button><button id="teacherPreviewBtn" class="softBtn teacherOnly" type="button" style="background:#256a70;color:#fff;border:2px solid #81e8e5;font-weight:800;box-shadow:0 0 0 3px #56d4d522">👩‍🏫 教師快速瀏覽三關（免作答）</button><button id="narrateBtn" class="softBtn">朗讀故事</button></div><div id="quickStageChoices" class="teacherOnly" style="margin:13px 0 8px;padding:12px;border:1px solid #4fadaf;border-radius:12px;background:rgba(4,31,45,.83)"><div style="color:#b8fcf5;font-weight:800;margin-bottom:9px">老師直接查看指定關卡（不倒數、不用破關）</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-open-stage="0" class="softBtn" style="flex:1;min-width:110px">① 起居室</button><button type="button" data-open-stage="1" class="softBtn" style="flex:1;min-width:110px">② 秘典室</button><button type="button" data-open-stage="2" class="softBtn" style="flex:1;min-width:110px">③ 禁閣</button></div><small style="display:block;color:#c9dadd;margin-top:8px">進入後可點青色線索查看題目及解析，也可隨時切換三關。</small></div><small id="loadInfo">正在準備題庫……</small></div></div></div>
+<div class="overlay" id="intro"><div class="introCard"><div class="introImage"></div><div class="introCopy"><div class="eyebrow">THE ROYAL BIOLOGY ESCAPE</div><h1>皇家古堡<br><em>生物密室逃脫</em></h1><p id="story">一封沒有署名的邀請函，將你帶進一座沉睡的皇家古堡。傳說中，失蹤的皇家生物學家將生命的奧祕封存在三重密室裡……</p><p>城門在身後轟然關閉。挑戰時間為 <b id="introDuration">全場 10 分鐘</b>，必須探索物件、解開生物謎題，才能找到離開古堡的鑰匙。</p><details id="settings" class="teacherOnly"><summary style="font-size:1.02rem;font-weight:800;color:#ffe0a3;cursor:pointer">⚙️ 教師派卷與題庫設定（點擊展開 / 即時連線題庫與派發 QR Code）</summary>
+<div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+<div style="background:rgba(15,23,42,.65);border:1px solid #38bdf8;border-radius:10px;padding:12px">
+<label for="unitSelect" style="display:block;font-weight:800;color:#38bdf8;margin-bottom:6px">📚 1. 選擇連線題庫單元（連線全平台共用題庫）：</label>
+<select id="unitSelect" style="width:100%;padding:10px;border-radius:8px;border:1px solid #0284c7;background:#0f2744;color:#fff;font-size:.95rem">
+<option value="demo">✨ 生物綜合示範題庫 (16 題精選)</option>
+</select>
+<div id="unitLoadedBadge" style="font-size:.85rem;color:#6ee7b7;margin-top:6px;font-weight:600">✅ 當前題庫：生物綜合示範題庫 (16 題)</div>
+</div>
+<div style="background:rgba(15,23,42,.65);border:1px solid #ca8a04;border-radius:10px;padding:12px">
+<div style="font-weight:800;color:#fbbf24;margin-bottom:8px">⏱️ 2. 設定挑戰時間與載具模式：</div>
+<div class="settingsGrid" style="margin-bottom:8px">
+<label>計時方式
+<select id="clockMode">
+<option value="total" selected>全場統一計時</option>
+<option value="stage">各關獨立計時</option>
+</select>
+</label>
+<label id="totalMinutesLabel">全場時間
+<input id="totalMinutes" type="number" min="1" max="120" step="1" value="10"> 分鐘
+</label>
+</div>
+<div class="settingsGrid" id="stageTimesRow" style="display:none;margin-bottom:8px">
+<label>第一關（6題）<input id="time0" type="number" min="1" max="60" step="1" value="6"> 分鐘</label>
+<label>第二關（5題）<input id="time1" type="number" min="1" max="60" step="1" value="4"> 分鐘</label>
+<label>第三關（5題）<input id="time2" type="number" min="1" max="60" step="1" value="4"> 分鐘</label>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:6px">
+<label style="cursor:pointer;display:flex;align-items:center;gap:6px">
+<input type="checkbox" id="noTime"> 🧩 特教友善模式（不限時）
+</label>
+<label style="display:flex;align-items:center;gap:6px">
+📱 載具視圖：
+<select id="deviceMode" style="padding:4px 8px;font-size:.88rem">
+<option value="solo" selected>📱 iPad / 平板個人自主挑戰</option>
+<option value="projector">🖥️ 60~70 吋大螢幕投影主持</option>
+</select>
+</label>
+</div>
+</div>
+<div style="background:rgba(6,78,59,.35);border:1.5px solid #10b981;border-radius:12px;padding:14px;text-align:center">
+<button type="button" id="generateStudentQRBtn" class="goldBtn" style="width:100%;font-size:1.05rem;padding:12px 18px;margin:0 0 10px 0">
+📱 產生本次設定之學生派卷 QR Code 與網址
+</button>
+<div id="studentQRArea" class="hidden" style="margin-top:12px;background:#fff;border-radius:12px;padding:16px;color:#1e293b;box-shadow:0 8px 24px rgba(0,0,0,.3)">
+<div style="font-size:1.05rem;font-weight:800;color:#065f46;margin-bottom:6px">
+📲 學生派卷 QR Code (請學生開啟相機掃描)
+</div>
+<div id="studentQRCode" style="display:flex;justify-content:center;align-items:center;min-height:160px;margin:10px auto"></div>
+<p style="font-size:.85rem;color:#475569;margin:6px 0 10px 0;line-height:1.5">
+🔒 此 QR Code 自動設定為<strong>學生作答專用版</strong>（已鎖定並隱藏教師跳關、瀏覽與後台設定）。
+</p>
+<div style="display:flex;gap:8px;margin-bottom:10px">
+<input type="text" id="studentUrlInput" readonly style="flex:1;padding:8px 10px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.88rem;background:#f8fafc;color:#1e293b">
+<button type="button" id="copyStudentUrlBtn" class="goldBtn" style="padding:8px 16px;font-size:.9rem;white-space:nowrap">📋 複製網址</button>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+<small id="copyUrlFeedback" style="color:#059669;font-weight:700"></small>
+<a id="testStudentLaunchLink" href="#" target="_blank" style="color:#0284c7;font-size:.88rem;font-weight:700;text-decoration:underline">🚀 在新分頁測試學生畫面</a>
+</div>
+</div>
+</div>
+</div></details><select id="durationSelect" hidden><option value="8">8</option><option value="off">off</option></select><div class="introActions"><button id="resumeBtn" class="softBtn hidden">繼續上次探險</button><button id="startBtn" class="goldBtn">✦ 開始探險</button><button id="teacherPreviewBtn" class="softBtn teacherOnly" type="button" style="background:#256a70;color:#fff;border:2px solid #81e8e5;font-weight:800;box-shadow:0 0 0 3px #56d4d522">👩‍🏫 教師快速瀏覽三關（免作答）</button><button id="narrateBtn" class="softBtn">朗讀故事</button></div><div id="quickStageChoices" class="teacherOnly" style="margin:13px 0 8px;padding:12px;border:1px solid #4fadaf;border-radius:12px;background:rgba(4,31,45,.83)"><div style="color:#b8fcf5;font-weight:800;margin-bottom:9px">老師直接查看指定關卡（不倒數、不用破關）</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-open-stage="0" class="softBtn" style="flex:1;min-width:110px">① 起居室</button><button type="button" data-open-stage="1" class="softBtn" style="flex:1;min-width:110px">② 秘典室</button><button type="button" data-open-stage="2" class="softBtn" style="flex:1;min-width:110px">③ 禁閣</button></div><small style="display:block;color:#c9dadd;margin-top:8px">進入後可點青色線索查看題目及解析，也可隨時切換三關。</small></div><small id="loadInfo">正在準備題庫……</small></div></div></div>
 <div class="overlay hidden" id="tutorialOverlay"><div class="modalCard tutorialCard"><div class="eyebrow">ROYAL EXPLORER GUIDE</div><h2>探索操作小教學</h2><div class="tutorialDemo"><span class="tutorialFinger">☝</span><span class="tutorialSpark">✦</span><span class="tutorialBook">📖</span></div><p>① 移動滑鼠或在畫面拖曳手指，尋找微弱青色光點。<br>② 移動或拖曳時才出現小型探索鏡片，靠近線索會有青色微光。<br>③ 點一下或放開手指，解開生物謎題。</p><p>找不到線索？按右上角「💡 探索提示」，驚嘆號只會短暫出現。</p><div class="introActions tutorialActions"><button id="tutorialStart" class="goldBtn">我會了，開始探險</button><button id="tutorialSkip" class="softBtn">跳過教學</button></div><small>正式倒數將在開始探險後才啟動。平板建議橫放。金色為場景燈光，青色才是題目線索。</small></div></div><div class="overlay hidden" id="questionOverlay"><div class="questionCard"><div class="questionTop"><span id="objectTitle">皇家線索</span><button id="closeQuestion" class="xBtn" aria-label="關閉題目">×</button></div><div class="questionBody"><div class="questionCount" id="questionCount">第 1 題</div><h2 id="questionText"></h2><div class="options" id="options"></div><div id="feedback" class="feedback hidden"></div><button id="continueBtn" class="goldBtn hidden">繼續探索 →</button></div></div></div>
 <div class="overlay hidden" id="sealOverlay"><div class="modalCard sealCard"><div class="eyebrow">ROYAL SEAL UNLOCKED</div><h2 id="awardTitle">皇家見習探險家</h2><div id="awardStage" style="color:#bcefe9;font-weight:800">第一重封印 6 / 6</div><div class="royalSeals"><span>♛</span><span>❧</span><span>✦</span><span>▣</span></div><div class="goldenKey" id="awardEmblem">♛</div><p id="awardDesc">你已解開皇家封印。</p><button id="sealContinue" class="goldBtn">繼續下一重挑戰 →</button><button id="teacherAwardClose" type="button" class="softBtn" style="display:none">返回教師預覽</button></div></div><div class="overlay hidden" id="mapOverlay"><div class="modalCard"><button id="closeMap" class="xBtn right">×</button><h2>♛ 皇家封印地圖</h2><p>每一重封印都藏有不同的生命奧祕。</p><div id="mapStages"></div><button id="mapContinue" class="goldBtn">返回探索</button></div></div>
 <div class="overlay hidden" id="resultOverlay">
@@ -49,5 +111,5 @@
     <button id="closeCopyNotice" class="goldBtn" style="width:100%; font-size:1.05rem; padding:12px;">我知道了，完成任務 ✔</button>
   </div>
 </div>
-</div><script defer src="../escape-adapter.js?v=1.3"></script>
-<script defer src="game.js?v=1.3"></script></body></html>
+</div><script defer src="../escape-adapter.js?v=1.4"></script>
+<script defer src="game.js?v=1.4"></script></body></html>

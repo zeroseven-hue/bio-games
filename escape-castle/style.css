@@ -183,3 +183,10 @@ body.is-student-mode #settings,
 body.is-student-mode #teacherPanel {
   display: none !important;
 }
+
+#studentQRCode img, #studentQRCode canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  border-radius: 8px;
+}

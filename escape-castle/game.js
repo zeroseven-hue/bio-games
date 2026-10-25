@@ -250,47 +250,211 @@ function timeUp(){
  state.timedOut=true;clearInterval(state.interval);hide('questionOverlay');hide('mapOverlay');saveProgress();
  $('timeoutTitle').textContent=state.clockMode==='total'?'全場挑戰時間到了':'第 '+(state.stage+1)+' 關時間到了';show('timeoutOverlay');
 }
-function installBank(raw){
- const units=Array.isArray(raw)?[{unitTitle:'匯入題庫',questions:raw}]:Array.isArray(raw.units)?raw.units:[raw];
- if(!units.length)throw Error('題庫沒有任何單元');
- const verified=units.map((u,ui)=>{
-  const arr=u.questions||u.items;if(!Array.isArray(arr))throw Error('第 '+(ui+1)+' 單元缺少 questions 陣列');
-  const seen=new Set();const qs=arr.map((q,i)=>{const n=normalize(q);if(!n)throw Error('第 '+(i+1)+' 題格式不正確：需題幹、四個選項及答案 0～3／A～D');const key=n.question.trim();if(seen.has(key))throw Error('題幹重複：第 '+(i+1)+' 題');seen.add(key);return n;});
-  if(qs.length<16)throw Error('每個單元至少需要 16 題不重複的有效題目');
-  return {unitId:String(u.unitId||ui),unitTitle:u.unitTitle||'單元 '+(ui+1),questions:qs};
- });
- banks=verified;$('unitSelect').replaceChildren();banks.forEach((u,i)=>{const o=document.createElement('option');o.value=i;o.textContent=u.unitTitle+'（'+u.questions.length+' 題）';$('unitSelect').append(o);});selectBank();
+// --- 題庫載入與 QR Code 派卷功能 ---
+let manifestData = null;
+
+async function loadManifestAndPopulateSelect() {
+  const select = $('unitSelect');
+  if (!select) return;
+  select.innerHTML = '<option value="demo">✨ 生物綜合示範題庫 (16 題精選)</option>';
+  try {
+    const res = await fetch('../questions/manifest.json');
+    if (!res.ok) throw new Error('無法載入題庫清單');
+    manifestData = await res.json();
+    if (manifestData.publishers && Array.isArray(manifestData.publishers)) {
+      manifestData.publishers.forEach(pub => {
+        if (pub.status === 'placeholder') return;
+        pub.semesters.forEach(sem => {
+          if (!sem.units || sem.units.length === 0) return;
+          const grp = document.createElement('optgroup');
+          grp.label = `${pub.name} - ${sem.name}`;
+          sem.units.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.file;
+            opt.textContent = `${u.title} (${u.count} 題)`;
+            grp.appendChild(opt);
+          });
+          select.appendChild(grp);
+        });
+      });
+    }
+  } catch (err) {
+    console.warn('載入 manifest.json 失敗:', err);
+  }
+
+  const unitInUrl = params.get('unit') || params.get('file');
+  if (unitInUrl) {
+    select.value = unitInUrl;
+    await switchUnit(unitInUrl);
+  } else {
+    await switchUnit('demo');
+  }
 }
-function selectBank(){const u=banks[Number($('unitSelect').value)||0];if(!u)return;state.questions=u.questions;state.assignments=assignQuestions(state.questions);bankTitle=u.unitTitle;$('loadInfo').textContent=bankTitle+'｜'+u.questions.length+' 題；每場抽取 16 題，依難度分配，選項隨機。';}
+
+async function switchUnit(unitVal) {
+  const badge = $('unitLoadedBadge');
+  const info = $('loadInfo');
+  if (!unitVal || unitVal === 'demo') {
+    state.questions = DEMO_QUESTIONS;
+    state.assignments = assignQuestions(DEMO_QUESTIONS);
+    bankTitle = '生物綜合示範題庫';
+    if (badge) badge.textContent = '✅ 當前題庫：生物綜合示範題庫 (16 題)';
+    if (info) info.textContent = '生物綜合示範題庫｜16 題；依 6/5/5 難度分關派發 16 題！';
+    return;
+  }
+
+  if (badge) badge.textContent = '⏳ 正在連線題庫載入試題...';
+  try {
+    const candidates = [
+      `../questions/${unitVal}`,
+      `questions/${unitVal}`
+    ];
+    let res = null;
+    for (const u of candidates) {
+      try {
+        const r = await fetch(u);
+        if (r.ok) { res = r; break; }
+      } catch (_) {}
+    }
+    if (!res) throw new Error('題庫檔案無法讀取');
+    const data = await res.json();
+    const rawList = data.questions || (Array.isArray(data) ? data : []);
+    const valid = rawList.map(normalize).filter(Boolean);
+    if (!valid.length) throw new Error('題庫中無符合格式之有效題目');
+
+    state.questions = valid;
+    state.assignments = assignQuestions(valid);
+    const optText = $('unitSelect')?.selectedOptions?.[0]?.textContent || unitVal;
+    bankTitle = optText;
+    if (badge) badge.textContent = `✅ 當前題庫：${optText} (全卷共 ${valid.length} 題，每場自動依 6/5/5 抽取 16 題)`;
+    if (info) info.textContent = `${optText}｜共 ${valid.length} 題；依 6/5/5 難度分關派發 16 題！`;
+    if (typeof renderStage === 'function' && state.started) renderStage();
+  } catch (err) {
+    console.error('切換題庫失敗:', err);
+    if (badge) badge.textContent = `⚠️ 載入失敗：${err.message}，已保留示範題庫`;
+  }
+}
+
+function updateClockModeUI() {
+  const mode = $('clockMode')?.value || 'total';
+  const stageRow = $('stageTimesRow');
+  const totalLabel = $('totalMinutesLabel');
+  if (mode === 'stage') {
+    if (stageRow) stageRow.style.display = 'flex';
+    if (totalLabel) totalLabel.style.display = 'none';
+  } else {
+    if (stageRow) stageRow.style.display = 'none';
+    if (totalLabel) totalLabel.style.display = 'block';
+  }
+}
+
+function generateStudentQR() {
+  if (!readTimes()) return;
+  const base = new URL(location.href.split('?')[0]);
+  base.searchParams.set('v', '1.4');
+  base.searchParams.set('student', '1'); // 鎖定學生模式：隱藏教師功能
+
+  const selUnit = $('unitSelect')?.value;
+  if (selUnit && selUnit !== 'demo') {
+    base.searchParams.set('unit', selUnit);
+  }
+  const clockMode = $('clockMode')?.value || 'total';
+  base.searchParams.set('clock', clockMode);
+  if (clockMode === 'total') {
+    base.searchParams.set('total', $('totalMinutes')?.value || '10');
+  } else {
+    base.searchParams.set('times', [$('time0')?.value || '6', $('time1')?.value || '4', $('time2')?.value || '4'].join(','));
+  }
+  if ($('noTime')?.checked) {
+    base.searchParams.set('timer', 'off');
+  }
+  const devMode = $('deviceMode')?.value || 'solo';
+  if (devMode) {
+    base.searchParams.set('mode', devMode);
+  }
+
+  const finalUrl = base.toString();
+  const qrArea = $('studentQRArea');
+  const qrBox = $('studentQRCode');
+  const urlInput = $('studentUrlInput');
+  const testLink = $('testStudentLaunchLink');
+  const copyFeedback = $('copyUrlFeedback');
+
+  if (qrArea) qrArea.classList.remove('hidden');
+  if (urlInput) urlInput.value = finalUrl;
+  if (testLink) testLink.href = finalUrl;
+  if (copyFeedback) copyFeedback.textContent = '';
+
+  if (qrBox) {
+    qrBox.innerHTML = '';
+    let rendered = false;
+    try {
+      if (window.QRCode) {
+        new QRCode(qrBox, {
+          text: finalUrl,
+          width: 180,
+          height: 180,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: (window.QRCode.CorrectLevel && window.QRCode.CorrectLevel.H) ? window.QRCode.CorrectLevel.H : 2
+        });
+        rendered = true;
+      }
+    } catch (e) {
+      console.warn('QRCode.js render error:', e);
+    }
+    if (!rendered) {
+      qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(finalUrl)}" alt="派發 QR Code" style="width:180px;height:180px;border-radius:8px;">`;
+    }
+  }
+  qrArea?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyStudentUrl() {
+  const input = $('studentUrlInput');
+  const feedback = $('copyUrlFeedback');
+  if (!input || !input.value) {
+    generateStudentQR();
+  }
+  const url = input ? input.value : '';
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    if (feedback) feedback.textContent = '✅ 已成功複製學生派發網址至剪貼簿！';
+    setTimeout(() => { if (feedback) feedback.textContent = ''; }, 3000);
+  }).catch(() => {
+    prompt('請手動複製學生派發網址：', url);
+  });
+}
+
 function initV6(){
  let settings={};try{settings=JSON.parse(localStorage.getItem('royal-v6-settings')||'{}');}catch(e){}
- let embedded=null;try{embedded=JSON.parse($('portableConfig')?.textContent||'null');}catch(e){}
- const times=embedded?.times||settings.times||[6,4,4];const mode=params.get('clock')||params.get('clockMode')||embedded?.clockMode||settings.clockMode||'total';$('clockMode').value=mode==='stage'?'stage':'total';const whole=Number(params.get('total')||embedded?.totalMinutes||settings.totalMinutes||10);$('totalMinutes').value=Number.isInteger(whole)&&whole>=1&&whole<=120?whole:10;
+ const times=settings.times||[6,4,4];
+ const mode=params.get('clock')||params.get('clockMode')||settings.clockMode||'total';
+ $('clockMode').value=mode==='stage'?'stage':'total';
+ updateClockModeUI();
+ const whole=Number(params.get('total')||settings.totalMinutes||10);
+ $('totalMinutes').value=Number.isInteger(whole)&&whole>=1&&whole<=120?whole:10;
  const urlTimes=params.get('times')?.split(',').map(Number);
  const scalar=Number(params.get('timer')||params.get('duration'));
  const chosen=urlTimes?.length===3?urlTimes:(scalar>=1&&scalar<=60?[scalar,scalar,scalar]:times);
  chosen.forEach((v,i)=>$('time'+i).value=Number.isInteger(v)&&v>=1&&v<=60?v:[6,4,4][i]);
- $('noTime').checked=params.has('timer')?params.get('timer')==='off':!!(embedded?.off??settings.off);
- if(embedded?.banks)installBank({units:embedded.banks});else installBank({unitId:'demo',unitTitle:'生物綜合示範題庫',questions:DEMO_QUESTIONS});
- if(params.has('unit')){const ix=banks.findIndex(u=>u.unitId===params.get('unit'));if(ix>=0){$('unitSelect').value=ix;selectBank();}}
- readTimes();state.durationSec=(state.clockMode==='total'?state.totalMinutes:stageMinutes[0])*60;state.remaining=state.durationSec;timerRender();
+ $('noTime').checked=params.has('timer')?params.get('timer')==='off':!!settings.off;
+ if(params.has('mode')&&$('deviceMode'))$('deviceMode').value=params.get('mode');
+ loadManifestAndPopulateSelect();
+ readTimes();
+ state.durationSec=(state.clockMode==='total'?state.totalMinutes:stageMinutes[0])*60;
+ state.remaining=state.durationSec;
+ timerRender();
  try{const p=JSON.parse(sessionStorage.getItem(progressKey)||'null');if(p?.version===6)$('resumeBtn').classList.remove('hidden');}catch(e){}
 }
-$('unitSelect').addEventListener('change',selectBank);
-for(let i=0;i<3;i++)$('time'+i).addEventListener('change',readTimes);
-$('noTime').addEventListener('change',readTimes);$('clockMode').addEventListener('change',readTimes);$('totalMinutes').addEventListener('change',readTimes);
-$('bankFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const raw=JSON.parse(await f.text());installBank(raw);$('settingStatus').textContent='題庫匯入成功。部署前請下載本次學生版。';}catch(err){$('settingStatus').textContent='匯入未完成：'+err.message;}e.target.value='';});
-$('configLink').addEventListener('click',async()=>{if(!readTimes())return;const u=new URL(location.href);if(u.protocol==='file:'){alert('上傳 GitHub Pages 後再複製連結；離線請用「下載本次學生版」。');return;}u.searchParams.set('times',stageMinutes.join(','));u.searchParams.set('clock',state.clockMode);u.searchParams.set('total',state.totalMinutes);u.searchParams.set('student','1');u.searchParams.set('timer',state.timerOff?'off':'on');u.searchParams.set('unit',banks[Number($('unitSelect').value)||0].unitId);try{await navigator.clipboard.writeText(u.href);$('settingStatus').textContent='已複製，可將此網址製作成 QR Code；連結只傳設定，題庫需包含在部署的 HTML。';}catch(e){prompt('複製設定網址',u.href);}});
-$('exportGame').addEventListener('click',()=>{
- if(!readTimes())return;
- const payload=JSON.stringify({times:stageMinutes,off:state.timerOff,clockMode:state.clockMode,totalMinutes:state.totalMinutes,banks:[banks[Number($('unitSelect').value)||0]]}).replace(/</g,'\\u003c');
- const tag='<script type="application/json" id="portableConfig">'+payload+'<\/script>';
- const encode=v=>JSON.stringify(v).replace(/</g,'\\u003c');
- const runtime='const SCENE_ASSETS='+encode(SCENE_ASSETS)+';const PORTABLE_CSS='+encode(PORTABLE_CSS)+';const PORTABLE_LOGIC='+encode(PORTABLE_LOGIC)+';'+PORTABLE_LOGIC;
- let html=pristineHTML.replace(/<script type="application\/json" id="portableConfig">[\s\S]*?<\/script>/,'').replace('<body>','<body>'+tag+'<script>window.__ROYAL_STUDENT_EXPORT__=true;<\/script>');
- html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+PORTABLE_CSS+'</style>').replace('<script src="game.js"><\/script>',()=>'<script>'+runtime.replace(/<\/script/gi,'<\\/script')+'<\/script>');
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));a.download='royal_castle_students.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('settingStatus').textContent='已下載含本次題庫與時間的學生版，可命名為 index.html 部署。';
-});
+
+$('unitSelect')?.addEventListener('change', e => switchUnit(e.target.value));
+for(let i=0;i<3;i++)$('time'+i)?.addEventListener('change',readTimes);
+$('noTime')?.addEventListener('change',readTimes);
+$('clockMode')?.addEventListener('change',()=>{updateClockModeUI();readTimes();});
+$('totalMinutes')?.addEventListener('change',readTimes);
+$('generateStudentQRBtn')?.addEventListener('click', generateStudentQR);
+$('copyStudentUrlBtn')?.addEventListener('click', copyStudentUrl);
 $('resumeBtn').addEventListener('click',()=>{try{
  const p=JSON.parse(sessionStorage.getItem(progressKey));if(!p||p.version!==6||!Array.isArray(p.assignments)||p.assignments.length!==3)throw Error('紀錄不完整');
  Object.assign(state,{stage:p.stage,solved:new Set(p.solved),assignments:p.assignments,questions:p.questions,timerOff:p.timerOff,clockMode:p.clockMode||'stage',totalMinutes:p.totalMinutes||10,awardPauseAt:p.awardPauseAt||0,startedAt:p.startedAt,remaining:p.remaining,durationSec:p.durationSec,wrong:p.wrong,wrongByKey:p.wrongByKey,elapsed:p.elapsed,awarding:p.awarding,timedOut:p.timedOut,teacherPreview:false,started:true,ended:false});stageMinutes=p.times;bankTitle=p.title;
