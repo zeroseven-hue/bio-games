@@ -425,7 +425,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 /* Draggable Companion Mascot 阿歪 (Aywai) */
 #aywaiWidget {
   position: fixed;
-  z-index: 8;
+  z-index: 15;
   bottom: 80px;
   right: 25px;
   display: flex;
@@ -434,37 +434,40 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  pointer-events: none;
+  cursor: grab;
+  pointer-events: auto;
+}
+#aywaiWidget:active, #aywaiWidget.is-dragging {
+  cursor: grabbing !important;
 }
 .dragHint {
   position: absolute;
   top: -24px;
   right: 15px;
   font-size: 11px;
-  background: rgba(17, 24, 61, 0.9);
+  background: rgba(17, 24, 61, 0.92);
   color: #7dd3fc;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid #38bdf8;
-  opacity: .85;
+  opacity: .9;
   pointer-events: none;
   white-space: nowrap;
 }
 #aywaiWidget .avatar {
   width: clamp(75px, 9vw, 130px);
   height: auto;
-  pointer-events: auto;
-  cursor: grab;
+  pointer-events: none;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.65));
   animation: floatBob 3.5s ease-in-out infinite;
   transform-origin: bottom center;
 }
-#aywaiWidget:active .avatar, #aywaiWidget.is-dragging .avatar {
-  cursor: grabbing;
-}
 #aywaiWidget .avatar img {
   width: 100%;
   display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 @keyframes floatBob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -818,7 +821,6 @@ body:not(.home) .homeActions {
 body.home .hud,
 body.home .dialogue,
 body.home .foot,
-body.home #aywaiWidget,
 body.home #stageInfo {
   display: none !important;
 }

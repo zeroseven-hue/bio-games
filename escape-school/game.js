@@ -994,64 +994,73 @@
   // 16. 阿歪吉祥物拖曳 (PointerEvents)
   function initAywaiDragging() {
     const widget = $('aywaiWidget');
-    const avatar = $('avatar');
-    if (!widget || !avatar) return;
+    if (!widget) return;
 
     let isDragging = false;
     let startX = 0, startY = 0;
-    let initialLeft = 0, initialTop = 0;
+    let startLeft = 0, startTop = 0;
 
-    avatar.addEventListener('pointerdown', e => {
+    widget.addEventListener('pointerdown', e => {
+      // 點擊對話氣泡時不觸發拖曳
+      if (e.target && (e.target.id === 'aywaiSpeech' || e.target.closest('#aywaiSpeech'))) {
+        return;
+      }
+      if (e.button && e.button !== 0) return;
+
       isDragging = true;
       widget.classList.add('is-dragging');
-      avatar.setPointerCapture(e.pointerId);
-
-      startX = e.clientX;
-      startY = e.clientY;
+      try { widget.setPointerCapture(e.pointerId); } catch (_) {}
 
       const rect = widget.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = rect.left;
+      startTop = rect.top;
 
-      widget.style.right = 'auto';
+      widget.style.position = 'fixed';
       widget.style.bottom = 'auto';
-      widget.style.left = `${initialLeft}px`;
-      widget.style.top = `${initialTop}px`;
-      e.stopPropagation();
+      widget.style.right = 'auto';
+      widget.style.left = `${startLeft}px`;
+      widget.style.top = `${startTop}px`;
+      e.preventDefault();
     });
 
-    avatar.addEventListener('pointermove', e => {
+    widget.addEventListener('pointermove', e => {
       if (!isDragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
 
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
+      let nextLeft = startLeft + dx;
+      let nextTop = startTop + dy;
 
-      const maxLeft = window.innerWidth - widget.offsetWidth - 10;
-      const maxTop = window.innerHeight - widget.offsetHeight - 10;
+      const pad = 8;
+      const maxLeft = window.innerWidth - widget.offsetWidth - pad;
+      const maxTop = window.innerHeight - widget.offsetHeight - pad;
 
-      newLeft = Math.max(10, Math.min(newLeft, maxLeft));
-      newTop = Math.max(10, Math.min(newTop, maxTop));
+      nextLeft = Math.max(pad, Math.min(maxLeft, nextLeft));
+      nextTop = Math.max(pad, Math.min(maxTop, nextTop));
 
-      widget.style.left = `${newLeft}px`;
-      widget.style.top = `${newTop}px`;
+      widget.style.left = `${nextLeft}px`;
+      widget.style.top = `${nextTop}px`;
     });
 
     const stopDrag = e => {
       if (!isDragging) return;
       isDragging = false;
       widget.classList.remove('is-dragging');
-      try { avatar.releasePointerCapture(e.pointerId); } catch (_) {}
+      try { widget.releasePointerCapture(e.pointerId); } catch (_) {}
     };
 
-    avatar.addEventListener('pointerup', stopDrag);
-    avatar.addEventListener('pointercancel', stopDrag);
+    widget.addEventListener('pointerup', stopDrag);
+    widget.addEventListener('pointercancel', stopDrag);
 
     // 點擊氣泡收起/展開
     const speech = $('aywaiSpeech');
     if (speech) {
-      speech.onclick = () => speech.classList.toggle('collapsed');
+      speech.onclick = e => {
+        e.stopPropagation();
+        speech.classList.toggle('collapsed');
+      };
     }
   }
 

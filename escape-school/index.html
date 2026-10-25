@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>現代校園：生物密室逃脫｜生物互動遊戲平台</title>
-  <link rel="stylesheet" href="style.css?v=1.2">
+  <link rel="stylesheet" href="style.css?v=1.3">
   <script src="../qrcode.min.js?v=1.0"></script>
   <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
 </head>
@@ -143,9 +143,9 @@
   </div>
 
   <!-- 可拖曳阿歪 AI 吉祥物與對話氣泡 -->
-  <div id="aywaiWidget">
+  <div id="aywaiWidget" class="aywai-widget" role="region" aria-label="可拖曳阿歪 AI 吉祥物">
     <div class="dragHint">⠿ 可拖曳阿歪</div>
-    <div class="avatar" id="avatar"><img id="mascot" src="assets/aywai.png" alt="阿歪 AI"></div>
+    <div class="avatar" id="avatar"><img id="mascot" src="assets/aywai.png" alt="阿歪 AI" draggable="false"></div>
     <div id="aywaiSpeech" class="speech" title="點擊收起/展開對話">
       準備好展開校園生物調查了嗎？快點擊畫面中的可疑線索！
     </div>
@@ -281,6 +281,6 @@
 </div>
 
 <script defer src="../escape-adapter.js?v=1.1"></script>
-<script defer src="game.js?v=1.2"></script>
+<script defer src="game.js?v=1.3"></script>
 </body>
 </html>
