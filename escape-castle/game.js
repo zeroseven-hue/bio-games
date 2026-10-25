@@ -13,8 +13,14 @@ const DEMO_QUESTIONS=[{"id": 1, "question": "細胞是生物體構造與功能�
 'use strict';
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
-const isTeacher=params.get('teacher')==='1'||params.get('admin')==='1';
-if(isTeacher){document.body.classList.add('is-teacher-admin');}
+const isStudent=params.get('student')==='1'||window.__ROYAL_STUDENT_EXPORT__===true;
+if(isStudent){
+  document.body.classList.add('is-student-mode');
+  ['teacherPreviewBtn','quickStageChoices','settings','teacherPanel'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.setProperty('display','none','important');
+  });
+}
 const initialDuration=['6','8','10','off'].includes(params.get('duration'))?params.get('duration'):(params.get('timer')==='off'?'off':'8');
 const stages=[
 {name:'第一重封印｜皇家起居室',sub:'探索古堡起居室 · 解開六道生物謎題',image:SCENE_ASSETS[1],quota:{'易':4,'中':2,'難':0},objects:[["皇家玫瑰畫作", 90, 10], ["古老望遠鏡", 14, 40], ["皇家地球儀", 7, 75], ["白貓與天鵝絨沙發", 43, 65], ["百合花瓶", 35, 42], ["茶桌秘典", 68, 80]]},

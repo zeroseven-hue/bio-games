@@ -175,19 +175,11 @@
 .bottom{position:sticky;bottom:0;z-index:8;background:#0b172bf5}
 #app{overflow:visible}
 
-/* 🔒 教師專用控制面板預設完全鎖定/隱藏（防作弊） */
-.teacherOnly {
+/* 🔒 學生模式（掃描 QR Code 進入，網址含 student=1）強制隱藏所有教師預覽與跳關工具 */
+body.is-student-mode .teacherOnly,
+body.is-student-mode #teacherPreviewBtn,
+body.is-student-mode #quickStageChoices,
+body.is-student-mode #settings,
+body.is-student-mode #teacherPanel {
   display: none !important;
-}
-body.is-teacher-admin .teacherOnly {
-  display: block !important;
-}
-body.is-teacher-admin button.teacherOnly {
-  display: inline-flex !important;
-}
-body.is-teacher-admin details.teacherOnly {
-  display: block !important;
-}
-body.is-teacher-admin aside.teacherOnly {
-  display: block !important;
 }

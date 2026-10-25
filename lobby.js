@@ -412,7 +412,7 @@ function buildDispatchUrl() {
   if (selectMode) baseUrl.searchParams.set("mode", selectMode);
   if (checkTimerOff) baseUrl.searchParams.set("timer", "off");
   if (qcount) baseUrl.searchParams.set("qcount", qcount);
-  if (selectMode !== "projector") baseUrl.searchParams.set("student", "1");
+  baseUrl.searchParams.set("student", "1"); // ⭐ 課堂派發二維碼一律為學生版本，隱藏教師跳關設定
 
   return baseUrl.toString();
 }
