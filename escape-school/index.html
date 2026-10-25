@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>現代校園：生物密室逃脫｜生物互動遊戲平台</title>
-  <link rel="stylesheet" href="style.css?v=1.4">
+  <link rel="stylesheet" href="style.css?v=1.5">
   <script src="../qrcode.min.js?v=1.0"></script>
   <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
 </head>
 <body>
 <div id="app">
-  <!-- 封面教師專用快捷鈕 (僅教師端可見，學生端全無阻礙) -->
-  <button type="button" id="teacherCoverBtn" class="pill gold teacherOnly" style="position:fixed;top:16px;left:16px;z-index:20;font-size:14px;padding:9px 18px;box-shadow:0 6px 20px rgba(0,0,0,0.6)">⚙️ 開啟教師派卷與設定控制台</button>
+  <!-- 左側教師設定視窗收合後的小標籤 (僅教師端可見) -->
+  <button type="button" id="expandHomeBtn" class="pill gold teacherOnly hidden" title="展開教師派卷與設定視窗">⚙️ 展開教師設定 ▶</button>
 
   <!-- 頂部 HUD -->
   <header class="hud">
@@ -22,7 +22,7 @@
       <button class="pill gold teacherOnly" id="addTimeBtn" title="教師加時：增加 3 分鐘">➕ 延長3分鐘</button>
       <button class="pill" id="hintBtn">💡 提示 (<span id="hintsLeft">3</span>)</button>
       <button class="pill" id="pauseBtn">⏸️ 暫停</button>
-      <button class="pill gold teacherOnly" id="teacherToggle">🔐 教師控制台</button>
+      <button class="pill gold teacherOnly" id="teacherToggle" title="開啟右上角快速預覽抽屜">🔐 教師預覽</button>
     </div>
   </header>
 
@@ -47,6 +47,81 @@
       </div>
     </div>
   </main>
+
+  <!-- 左側教師修改視窗 (維持原樣在左邊，支援自由縮放/收合，移除下方重複跳關) -->
+  <div id="home" class="glass teacherOnly">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="homeBadge">CAMPUS MYSTERY · BIOLOGY ESCAPE</div>
+      <button type="button" id="collapseHomeBtn" class="pill" style="font-size:12px;padding:4px 10px;background:rgba(255,255,255,0.12)" title="收合左側視窗，全景瀏覽畫面">◀ 收合面板</button>
+    </div>
+    <h1 style="margin:4px 0 10px">現代校園的<br>生物異常事件</h1>
+    <p style="margin:4px 0 8px;line-height:1.6">放學後的教室黑板在講話，實驗室培養皿發出螢光！跟隨校園守護 AI「阿歪」，解開 16 道生物謎題，找回遺失的記憶核心，解除校園神秘危機！</p>
+    <p id="introDuration"><b>⏱️ 本次挑戰時間：全場 10 分鐘</b></p>
+
+    <!-- 🔐 教師派卷與題庫設定面板 -->
+    <details id="settings" class="teacherOnly" open>
+      <summary style="cursor:pointer;font-weight:800;color:#f5d0fe;outline:none">⚙️ 教師派卷與題庫設定（點擊展開 / 單元選擇・時間・派發 QR Code）</summary>
+      <div class="settingsBox" style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
+        <div class="settingGroup">
+          <label for="unitSelect" class="settingLabel">📚 1. 選擇測驗題庫單元（連線全平台 94 單元 5,269+ 題）：</label>
+          <select id="unitSelect" class="unitSelect">
+            <option value="demo">✨ 現代校園示範題庫 (16 題原生試題)</option>
+          </select>
+          <div id="unitLoadedBadge" class="unitBadge">✅ 當前題庫：現代校園示範題庫 (16 題)</div>
+          <small id="loadInfo" style="display:block;margin-top:4px;color:#94a3b8">正在連線題庫清單……</small>
+        </div>
+
+        <div class="settingGroup">
+          <div class="settingLabel">⏱️ 2. 設定倒數時間與計時模式：</div>
+          <div class="settingsGrid">
+            <label>計時模式
+              <select id="timeModeSelect">
+                <option value="total" selected>全場統一計時</option>
+                <option value="stage">各關獨立計時</option>
+              </select>
+            </label>
+            <label id="totalMinutesLabel">全場時間
+              <input id="totalMinutesInput" type="number" min="1" max="120" value="10" style="width:60px"> 分鐘
+            </label>
+            <label>
+              <input type="checkbox" id="noTimeCheck"> 無時間壓力（不倒數）
+            </label>
+          </div>
+          <div id="stageTimesRow" class="hidden settingsGrid" style="margin-top:8px">
+            <label>第 1 關 <input id="timeStage0" type="number" min="1" max="60" value="6" style="width:50px"> 分</label>
+            <label>第 2 關 <input id="timeStage1" type="number" min="1" max="60" value="4" style="width:50px"> 分</label>
+            <label>第 3 關 <input id="timeStage2" type="number" min="1" max="60" value="4" style="width:50px"> 分</label>
+          </div>
+        </div>
+
+        <div class="settingGroup" style="border-color:#38bdf8">
+          <div class="settingLabel" style="color:#7dd3fc">📱 3. 課堂學生派發專區（自動生成免登入學生端）：</div>
+          <button type="button" id="genQRBtn" class="primary" style="font-size:14px;padding:7px 16px">📱 產生學生端 QR Code 與派發網址</button>
+          <div id="studentQRArea" class="hidden" style="margin-top:10px;text-align:center">
+            <div id="studentQRCode"></div>
+            <div style="margin:8px 0;display:flex;gap:6px">
+              <input id="studentUrlInput" readonly style="flex:1;padding:8px 10px;border-radius:8px;background:#16193b;color:#fff;border:1px solid #c084fc;font-size:13px">
+              <button type="button" id="copyUrlBtn" class="pill gold">複製網址</button>
+            </div>
+            <div id="copyUrlFeedback" style="font-size:12px;color:#a7f3d0;min-height:18px"></div>
+            <div style="margin-top:8px;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap">
+              <button type="button" id="testStudentLaunchBtn" class="goldBtn" style="font-size:13px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+                🚀 在新分頁試開學生版 ↗
+              </button>
+              <a id="testStudentLaunchLink" href="#" target="_blank" rel="noopener noreferrer" class="small" style="color:#93c5fd;text-decoration:underline;display:inline-flex;align-items:center;padding:5px 8px">
+                （備用直接點擊連結 ↗）
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="buttons" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+      <button class="primary" id="startBtn">✦ 開始校園調查</button>
+      <button class="pill" id="storyBtn">📜 校園背景檔案</button>
+    </div>
+  </div>
 
   <!-- 關卡資訊與進度軌 -->
   <div id="stageInfo" class="glass stageTitle hidden">
@@ -82,95 +157,27 @@
     <span>找線索 → 答題 → 獲得認證 → 解鎖下一關</span>
   </footer>
 
-  <!-- 🔐 單一整合式教師派卷・設定與巡檢控制台 (完全可收起，絕不遮擋遊戲畫面) -->
-  <div id="teacher" class="modal hidden teacherOnly" role="dialog" aria-modal="true" aria-labelledby="teacherConsoleTitle">
-    <div class="panel" style="max-width:820px;max-height:92vh;overflow-y:auto;border-color:#a855f7">
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #4a3b7d;padding-bottom:10px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:24px">🔐</span>
-          <h2 id="teacherConsoleTitle" style="margin:0;font-size:20px;color:#fde047">教師派卷・設定與巡檢控制台</h2>
-        </div>
-        <button type="button" id="closeTeacherTop" class="pill" style="padding:6px 14px;font-size:14px">✖ 關閉收起</button>
-      </div>
-
-      <!-- 1. 快速跳關與機關巡檢專區 (單一整合按鈕，免解謎全覽驗證) -->
-      <div class="settingGroup" style="border-color:#a855f7;background:rgba(26,20,64,0.85);margin-bottom:14px">
-        <div class="settingLabel" style="color:#f5d0fe">⚡ 1. 快速跳關與機關巡檢（點選立即切換並自動收起控制台）：</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" data-jump="0" class="pill">🏠 首頁封面</button>
-          <button type="button" data-jump="1" class="pill">① 異常教室 (6題)</button>
-          <button type="button" data-jump="2" class="pill">② 生物實驗室 (5題)</button>
-          <button type="button" data-jump="3" class="pill">③ 地下中心 (5題)</button>
-          <button type="button" data-jump="4" class="pill">🏆 終極結局展示</button>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-          <button type="button" id="testPuzzle2Btn" class="pill">🧫 測試第 2 關滲透機關</button>
-          <button type="button" id="testPuzzle3Btn" class="pill">🤖 測試第 3 關探究歷程機關</button>
-          <button type="button" id="resetProgressBtn" class="pill">🔄 重設全部進度</button>
-        </div>
-      </div>
-
-      <!-- 2. 全平台動態題庫選擇 -->
-      <div class="settingGroup" style="margin-bottom:14px">
-        <label for="unitSelect" class="settingLabel">📚 2. 選擇測驗題庫單元（連線全平台 94 單元 5,269+ 題）：</label>
-        <select id="unitSelect" class="unitSelect">
-          <option value="demo">✨ 現代校園示範題庫 (16 題原生試題)</option>
-        </select>
-        <div id="unitLoadedBadge" class="unitBadge">✅ 當前題庫：現代校園示範題庫 (16 題)</div>
-        <small id="loadInfo" style="display:block;margin-top:4px;color:#94a3b8">正在連線題庫清單……</small>
-      </div>
-
-      <!-- 3. 倒數時間與計時模式 -->
-      <div class="settingGroup" style="margin-bottom:14px">
-        <div class="settingLabel">⏱️ 3. 設定倒數時間與計時模式：</div>
-        <div class="settingsGrid">
-          <label>計時模式
-            <select id="timeModeSelect">
-              <option value="total" selected>全場統一計時</option>
-              <option value="stage">各關獨立計時</option>
-            </select>
-          </label>
-          <label id="totalMinutesLabel">全場時間
-            <input id="totalMinutesInput" type="number" min="1" max="120" value="10" style="width:60px"> 分鐘
-          </label>
-          <label>
-            <input type="checkbox" id="noTimeCheck"> 無時間壓力（不倒數）
-          </label>
-        </div>
-        <div id="stageTimesRow" class="hidden settingsGrid" style="margin-top:8px">
-          <label>第 1 關 <input id="timeStage0" type="number" min="1" max="60" value="6" style="width:50px"> 分</label>
-          <label>第 2 關 <input id="timeStage1" type="number" min="1" max="60" value="4" style="width:50px"> 分</label>
-          <label>第 3 關 <input id="timeStage2" type="number" min="1" max="60" value="4" style="width:50px"> 分</label>
-        </div>
-      </div>
-
-      <!-- 4. 課堂學生派發專區 -->
-      <div class="settingGroup" style="border-color:#38bdf8;margin-bottom:14px">
-        <div class="settingLabel" style="color:#7dd3fc">📱 4. 課堂學生派發專區（自動生成免登入學生端）：</div>
-        <button type="button" id="genQRBtn" class="primary" style="font-size:14px;padding:8px 18px">📱 產生學生端 QR Code 與派發網址</button>
-        <div id="studentQRArea" class="hidden" style="margin-top:10px;text-align:center">
-          <div id="studentQRCode"></div>
-          <div style="margin:8px 0;display:flex;gap:6px">
-            <input id="studentUrlInput" readonly style="flex:1;padding:8px 10px;border-radius:8px;background:#16193b;color:#fff;border:1px solid #c084fc;font-size:13px">
-            <button type="button" id="copyUrlBtn" class="pill gold">複製網址</button>
-          </div>
-          <div id="copyUrlFeedback" style="font-size:12px;color:#a7f3d0;min-height:18px"></div>
-          <div style="margin-top:10px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap">
-            <button type="button" id="testStudentLaunchBtn" class="goldBtn" style="font-size:14px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;cursor:pointer">
-              🚀 在新分頁試開學生版 ↗
-            </button>
-            <a id="testStudentLaunchLink" href="#" target="_blank" rel="noopener noreferrer" class="small" style="color:#93c5fd;text-decoration:underline;display:inline-flex;align-items:center;padding:6px 10px">
-              （備用直接點擊連結 ↗）
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px">
-        <button type="button" id="closeTeacherBottom" class="primary" style="padding:10px 24px">關閉控制台・返回畫面</button>
-      </div>
+  <!-- 右上角快速預覽抽屜面板 (完整保留原樣，專門負責快速跳關與機關測試) -->
+  <aside id="teacher" class="teacher hidden teacherOnly">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 style="margin:0;color:#fde047;font-size:17px">🔐 教師預覽與控制台</h3>
+      <button type="button" id="closeTeacher" class="pill" style="font-size:12px;padding:3px 9px">✖ 關閉</button>
     </div>
-  </div>
+    <p style="font-size:13px;line-height:1.5;color:#c5c8e6;margin:4px 0 10px">
+      可直接跳關檢查題庫、機關與倒數計時。
+    </p>
+    <div class="buttons" style="display:flex;gap:7px;flex-wrap:wrap">
+      <button data-jump="0" class="pill">🏠 首頁</button>
+      <button data-jump="1" class="pill">① 異常教室</button>
+      <button data-jump="2" class="pill">② 生物實驗室</button>
+      <button data-jump="3" class="pill">③ 地下中心</button>
+      <button data-jump="4" class="pill">🏆 結局展示</button>
+      <button id="testPuzzle2Btn" class="pill">🧫 測試第 2 關滲透機關</button>
+      <button id="testPuzzle3Btn" class="pill">🤖 測試第 3 關記憶重組</button>
+      <button id="resumeTimerBtn" class="pill">▶ 繼續計時</button>
+      <button id="resetProgressBtn" class="pill">🔄 重設進度</button>
+    </div>
+  </aside>
 
   <!-- 通用線索答題彈窗 Modal -->
   <div id="modal" class="modal hidden">
@@ -189,13 +196,13 @@
 
   <!-- 特殊解鎖機關彈窗 (Stage 2 滲透配對 / Stage 3 探究歷程排序) -->
   <div id="puzzleOverlay" class="modal hidden">
-    <div class="panel" style="max-width:760px">
+    <div class="panel" style="max-width:880px">
       <div class="meta" id="puzzleKicker">🔐 關卡終極核心解鎖</div>
       <h2 id="puzzleTitle">機關挑戰</h2>
       <p id="puzzlePrompt" style="white-space:pre-line;line-height:1.6"></p>
-      <div id="puzzleContainer" class="mechanic-grid"></div>
+      <div id="puzzleContainer"></div>
       <div id="puzzleStatus" class="mechanic-progress"></div>
-      <div class="actions" style="justify-content:center;gap:12px">
+      <div class="actions" style="justify-content:center;gap:12px;margin-top:14px">
         <button id="puzzleResetBtn" class="pill">🔄 重新排序</button>
         <button id="puzzleSubmitBtn" class="primary">🔓 驗證並解鎖</button>
       </div>
@@ -265,6 +272,6 @@
 </div>
 
 <script defer src="../escape-adapter.js?v=1.1"></script>
-<script defer src="game.js?v=1.4"></script>
+<script defer src="game.js?v=1.5"></script>
 </body>
 </html>

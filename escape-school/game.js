@@ -462,6 +462,21 @@
     }
   }
 
+  // 教師修改視窗縮放/收合控制
+  function collapseTeacherHome() {
+    const home = $('home');
+    const expandBtn = $('expandHomeBtn');
+    if (home) home.classList.add('is-collapsed');
+    if (expandBtn && isTeacher) expandBtn.classList.remove('hidden');
+  }
+
+  function expandTeacherHome() {
+    const home = $('home');
+    const expandBtn = $('expandHomeBtn');
+    if (home) home.classList.remove('is-collapsed');
+    if (expandBtn) expandBtn.classList.add('hidden');
+  }
+
   // 9. 跳關與狀態切換
   function gotoScene(sceneNum, asPreview = false) {
     if (gameFinished && sceneNum >= 1 && sceneNum <= 3 && !asPreview) return;
@@ -490,6 +505,12 @@
     $('dialogue').classList.add('hidden');
     $('timeoutOverlay').classList.add('hidden');
     $('teacher').classList.add('hidden');
+
+    if (sceneNum >= 1) {
+      collapseTeacherHome();
+    } else if (sceneNum === 0 && isTeacher) {
+      expandTeacherHome();
+    }
 
     renderScene();
 
@@ -610,52 +631,147 @@
   }
 
   // 11. 特殊機關挑戰 (Stage 2 滲透配對 & Stage 3 探究歷程排序)
-  // Stage 2: 滲透作用與紅血球狀態 (3張卡片點擊互換配對)
-  const PUZZLE_STAGE2_DATA = [
-    { id: 'hypo', figure: '💧', name: '低張溶液（純水）', sub: '紅血球吸水膨脹破裂' },
-    { id: 'iso', figure: '⚖️', name: '等張溶液（生理食鹽水 0.9%）', sub: '水分子進出平衡維持正常' },
-    { id: 'hyper', figure: '🧂', name: '高張溶液（濃食鹽水）', sub: '水分滲透流出萎縮皺縮' }
+  // Stage 2: 滲透作用與紅血球生理型態配對機關 (4 個溶液燒杯 vs 4 種紅血球生理變化觀察卡)
+  const PUZZLE_STAGE2_BEAKERS = [
+    {
+      slotId: 0,
+      badge: '燒杯 A',
+      icon: '🧪',
+      name: '濃食鹽水',
+      sub: '高張溶液（濃度高於細胞質）',
+      targetRbcId: 'shrink'
+    },
+    {
+      slotId: 1,
+      badge: '燒杯 B',
+      icon: '⚖️',
+      name: '0.9% 生理食鹽水',
+      sub: '等張溶液（濃度與細胞質相當）',
+      targetRbcId: 'normal'
+    },
+    {
+      slotId: 2,
+      badge: '燒杯 C',
+      icon: '💧',
+      name: '微淡鹽水',
+      sub: '低張溶液（濃度略低於細胞質）',
+      targetRbcId: 'swell'
+    },
+    {
+      slotId: 3,
+      badge: '燒杯 D',
+      icon: '🌊',
+      name: '純水／蒸餾水',
+      sub: '極低張溶液（外液滲透壓極低）',
+      targetRbcId: 'burst'
+    }
   ];
+
+  const PUZZLE_STAGE2_RBC_CARDS = [
+    {
+      id: 'shrink',
+      icon: '🧫',
+      title: '【細胞萎縮（皺縮）】',
+      desc: '水分淨流出細胞，體積縮小起皺'
+    },
+    {
+      id: 'normal',
+      icon: '🩸',
+      title: '【維持原狀（不變）】',
+      desc: '水分子進出維持平衡，維持正常雙凹圓盤狀'
+    },
+    {
+      id: 'swell',
+      icon: '🫧',
+      title: '【吸水膨脹】',
+      desc: '水分子淨滲入細胞，細胞吸水體積脹大'
+    },
+    {
+      id: 'burst',
+      icon: '💥',
+      title: '【過度膨脹破裂】',
+      desc: '無細胞壁保護，水分過度湧入脹破溶血'
+    }
+  ];
+
   let puzzleStage2State = [];
   let puzzleSelectedIdx = -1;
 
   function openStage2Puzzle() {
-    puzzleStage2State = shuffleArray([...PUZZLE_STAGE2_DATA]);
+    puzzleStage2State = shuffleArray([...PUZZLE_STAGE2_RBC_CARDS]);
     // 確保初始不直接等於正確順序
     while (isStage2PuzzleCorrect()) {
-      puzzleStage2State = shuffleArray([...PUZZLE_STAGE2_DATA]);
+      puzzleStage2State = shuffleArray([...PUZZLE_STAGE2_RBC_CARDS]);
     }
     puzzleSelectedIdx = -1;
     $('puzzleKicker').textContent = '🧫 第 2 關實驗室封印機關';
     $('puzzleTitle').textContent = '滲透作用與紅血球型態匹配';
-    $('puzzlePrompt').textContent = '請點選兩張卡片互換位置，依「低張液（純水）➔ 等張液（生理食鹽水）➔ 高張液（濃食鹽水）」依序排列：';
+    $('puzzlePrompt').textContent = '顯微鏡觀察記錄被打亂了！\n請觀察上方 4 個燒杯中的不同溶液，點選下方兩張紅血球型態卡進行位置對調，將「紅血球在不同環境下的生理變化」正確配對到對應的燒杯下方：';
     renderStage2Puzzle();
     $('puzzleOverlay').classList.remove('hidden');
   }
 
   function isStage2PuzzleCorrect() {
-    return puzzleStage2State[0].id === 'hypo' &&
-      puzzleStage2State[1].id === 'iso' &&
-      puzzleStage2State[2].id === 'hyper';
+    return puzzleStage2State.length === 4 &&
+      puzzleStage2State[0].id === 'shrink' &&
+      puzzleStage2State[1].id === 'normal' &&
+      puzzleStage2State[2].id === 'swell' &&
+      puzzleStage2State[3].id === 'burst';
   }
 
   function renderStage2Puzzle() {
     const container = $('puzzleContainer');
     container.replaceChildren();
-    puzzleStage2State.forEach((item, idx) => {
-      const btn = document.createElement('div');
-      btn.className = 'mechanic-item' + (puzzleSelectedIdx === idx ? ' selected' : '');
-      btn.innerHTML = `
-        <span class="figure">${item.figure}</span>
-        <div class="item-name">
-          <strong style="display:block">${item.name}</strong>
-          <span style="font-size:11px;color:#fde047">${item.sub}</span>
-        </div>
+
+    const grid = document.createElement('div');
+    grid.className = 'osmosis-container';
+
+    PUZZLE_STAGE2_BEAKERS.forEach((beaker, idx) => {
+      const col = document.createElement('div');
+      col.className = 'osmosis-column';
+
+      // 上方燒杯容器資訊
+      const beakerBox = document.createElement('div');
+      beakerBox.className = 'beaker-target';
+      beakerBox.innerHTML = `
+        <div class="beaker-badge">${beaker.badge}</div>
+        <div class="beaker-icon">${beaker.icon}</div>
+        <div class="beaker-name">${beaker.name}</div>
+        <div class="beaker-sub">${beaker.sub}</div>
       `;
-      btn.onclick = () => handlePuzzleClick(idx, 2);
-      container.appendChild(btn);
+      col.appendChild(beakerBox);
+
+      // 中間指示箭頭
+      const divider = document.createElement('div');
+      divider.className = 'osmosis-divider';
+      divider.textContent = '▼ 放置紅血球觀察卡 ▼';
+      col.appendChild(divider);
+
+      // 下方目前配對的紅血球卡片
+      const rbc = puzzleStage2State[idx];
+      const rbcCard = document.createElement('div');
+      const isSelected = puzzleSelectedIdx === idx;
+      rbcCard.className = 'rbc-card' + (isSelected ? ' selected' : '');
+      rbcCard.innerHTML = `
+        <div class="rbc-icon">${rbc.icon}</div>
+        <div class="rbc-title">${rbc.title}</div>
+        <div class="rbc-desc">${rbc.desc}</div>
+        <div class="rbc-swap-hint">${isSelected ? '⚡ 目前已選取（點另一張對調）' : '⇄ 點擊選取進行對調'}</div>
+      `;
+      rbcCard.onclick = () => handlePuzzleClick(idx, 2);
+      col.appendChild(rbcCard);
+
+      grid.appendChild(col);
     });
-    $('puzzleStatus').textContent = puzzleSelectedIdx >= 0 ? `已選擇第 ${puzzleSelectedIdx + 1} 張卡片，請點選另一張進行對調` : '點選任意卡片進行對調排序';
+
+    container.appendChild(grid);
+
+    if (puzzleSelectedIdx >= 0) {
+      const selName = puzzleStage2State[puzzleSelectedIdx].title;
+      $('puzzleStatus').textContent = `已選取「${selName}」，請點選另一張卡片進行位置互換`;
+    } else {
+      $('puzzleStatus').textContent = '點選任意兩張卡片互換位置，配對完成後請點擊下方「🔓 驗證並解鎖」';
+    }
   }
 
   // Stage 3: 科學探究五大歷程排序
@@ -730,10 +846,11 @@
     if (currentScene === 2) {
       if (isStage2PuzzleCorrect()) {
         $('puzzleOverlay').classList.add('hidden');
-        broadcastStoryBeat('🔓 生化安全鎖解鎖成功！地下研究中心通道開啟！');
+        broadcastStoryBeat('🔓 滲透配對成功！生化安全鎖解除！地下研究中心通道開啟！');
+        quip('太棒了！高張萎縮、等張不變、低張膨脹、純水脹破，你完全掌握了滲透作用！', '得意');
         talk(ENDINGS[2], () => showStageCertificate(2));
       } else {
-        $('puzzleStatus').textContent = '❌ 排序尚未完全吻合！請想想：純水（低張）→ 生理食鹽水（等張）→ 濃食鹽水（高張）。';
+        $('puzzleStatus').textContent = '❌ 配對尚未完全吻合！提示：動物細胞（紅血球）無細胞壁：純水脹破、微淡鹽水膨脹、生理食鹽水不變、濃鹽水萎縮皺縮。請點選卡片調換位置！';
         updateAywaiMood('驚嚇');
       }
     } else if (currentScene === 3) {
@@ -1220,12 +1337,22 @@
     $('coverAwards').onclick = showAwardsModal;
     $('endingAwards').onclick = showAwardsModal;
 
-    // 單一整合式教師控制台按鈕 (開啟/關閉)
+    // 左側教師修改視窗按鈕 (收合/展開/開始/故事)
+    if ($('collapseHomeBtn')) $('collapseHomeBtn').onclick = collapseTeacherHome;
+    if ($('expandHomeBtn')) $('expandHomeBtn').onclick = expandTeacherHome;
+    if ($('startBtn')) $('startBtn').onclick = () => gotoScene(1, false);
+    if ($('storyBtn')) $('storyBtn').onclick = showGameInstructionsModal;
+
+    // 右上角快速預覽抽屜面板按鈕 (開啟/關閉)
     $('teacherToggle').onclick = () => $('teacher').classList.toggle('hidden');
-    if ($('teacherCoverBtn')) $('teacherCoverBtn').onclick = () => $('teacher').classList.remove('hidden');
     if ($('coverTeacher')) $('coverTeacher').onclick = () => $('teacher').classList.remove('hidden');
-    if ($('closeTeacherTop')) $('closeTeacherTop').onclick = () => $('teacher').classList.add('hidden');
-    if ($('closeTeacherBottom')) $('closeTeacherBottom').onclick = () => $('teacher').classList.add('hidden');
+    if ($('closeTeacher')) $('closeTeacher').onclick = () => $('teacher').classList.add('hidden');
+    if ($('resumeTimerBtn')) $('resumeTimerBtn').onclick = () => {
+      gamePaused = false;
+      updatePauseButton();
+      $('teacher').classList.add('hidden');
+      quip('計時器繼續運行！快專注調查校園異常吧！', '得意');
+    };
 
     // 快捷跳關按鈕 (點選後自動收起教師控制台，提供 100% 無遮擋視野)
     document.querySelectorAll('[data-jump]').forEach(btn => {
