@@ -23,7 +23,7 @@ header{position:absolute;z-index:10;top:12px;left:14px;right:14px;display:flex;a
 @keyframes fadeInDown{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translate(-50%,0)}}
 
 /* Home / Start Screen */
-#home{position:absolute;z-index:4;top:14%;left:6%;width:min(680px,88vw);max-height:calc(100dvh - 120px);overflow-y:auto;padding:24px 28px;padding-bottom:120px}
+#home{position:absolute;z-index:20;top:14%;left:6%;width:min(680px,88vw);max-height:calc(100dvh - 120px);overflow-y:auto;padding:24px 28px;padding-bottom:140px}
 h1{font-size:clamp(30px,4.1vw,60px);line-height:1.15;color:#ffe2f6;text-shadow:0 3px 22px #160e40;margin:8px 0 12px}
 #home p{font-size:clamp(15px,1.5vw,19px);line-height:1.75;margin:8px 0}
 button.primary{background:linear-gradient(115deg,#ad3588,#7948d8);color:white;border:2px solid #ffd7eb;border-radius:14px;padding:12px 22px;font-weight:900;font-size:17px;cursor:pointer}
@@ -68,7 +68,7 @@ button.primary:hover{filter:brightness(1.15)}
 .hotspot:hover em,.hotspot:focus-visible em{display:block}
 
 /* Draggable Mascot Alice */
-#alice{position:absolute;z-index:7;bottom:5%;left:2%;display:flex;align-items:flex-end;gap:9px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+#alice{position:absolute;z-index:8;bottom:5%;left:2%;display:flex;align-items:flex-end;gap:9px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
 #alice:active,#alice.is-dragging{cursor:grabbing}
 .dragHint{position:absolute;top:-22px;left:10px;font-size:11px;background:rgba(22,12,43,.88);color:#f5d0fe;padding:2px 8px;border-radius:6px;border:1px solid #d946ef;opacity:.85;pointer-events:none;white-space:nowrap}
 #alice svg{width:clamp(94px,11vw,170px);height:auto;filter:drop-shadow(0 10px 14px #14062cbf);animation:bob 3s ease-in-out infinite;transform-origin:bottom center;pointer-events:none}

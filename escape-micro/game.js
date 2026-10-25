@@ -877,6 +877,17 @@ function init() {
 
   $('generateStudentQRBtn')?.addEventListener('click', generateStudentQR);
   $('copyStudentUrlBtn')?.addEventListener('click', copyStudentUrl);
+  $('testStudentLaunchLink')?.addEventListener('click', e => {
+    e.preventDefault();
+    generateStudentQR();
+    const url = $('studentUrlInput')?.value;
+    if (!url) return;
+    const win = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      const go = confirm('偵測到瀏覽器攔截了自動彈出分頁！\n\n是否直接在當前視窗開啟學生版挑戰？\n（按「確定」前往學生版，按「取消」手動複製網址）');
+      if (go) window.location.href = url;
+    }
+  });
   $('unitSelect')?.addEventListener('change', e => switchUnit(e.target.value));
 
   // 計時主迴圈 (每 250ms 更新)

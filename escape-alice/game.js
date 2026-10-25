@@ -852,6 +852,23 @@ function copyStudentUrl() {
   });
 }
 
+// 學生端視窗啟動器（具備彈出視窗防封鎖備援）
+function launchStudentView(e) {
+  if (e) e.preventDefault();
+  generateStudentQR();
+  const url = $('studentUrlInput')?.value;
+  if (!url) return;
+
+  const win = window.open(url, '_blank', 'noopener,noreferrer');
+  if (!win || win.closed || typeof win.closed === 'undefined') {
+    // 瀏覽器攔截彈出視窗時的防呆備援
+    const go = confirm('偵測到瀏覽器攔截了自動彈出分頁！\n\n是否直接在當前視窗開啟學生版挑戰？\n（按「確定」前往學生版，按「取消」手動複製網址）');
+    if (go) {
+      window.location.href = url;
+    }
+  }
+}
+
 // 14. 可拖曳愛麗絲吉祥物
 function initDraggableAlice() {
   const alice = $('alice');
@@ -863,6 +880,7 @@ function initDraggableAlice() {
 
   alice.addEventListener('pointerdown', e => {
     if (e.target && (e.target.id === 'speech' || e.target.closest('#speech'))) return;
+    if (!e.target.closest('svg') && !e.target.classList.contains('dragHint') && e.target !== alice) return;
     isDragging = true;
     alice.classList.add('is-dragging');
     startX = e.clientX;
@@ -933,9 +951,21 @@ function init() {
     switchUnit(e.target.value);
   });
 
-  // 學生派發 QR Code
+  // 學生派發 QR Code 與分頁開啟
   $('genQRBtn')?.addEventListener('click', generateStudentQR);
   $('copyUrlBtn')?.addEventListener('click', copyStudentUrl);
+  $('testStudentLaunchBtn')?.addEventListener('click', launchStudentView);
+  $('testStudentLaunchLink')?.addEventListener('click', launchStudentView);
+
+  // 設定面板即時聯動生成派發網址
+  $('settings')?.addEventListener('toggle', () => {
+    if ($('settings').open) generateStudentQR();
+  });
+  $('timeModeSelect')?.addEventListener('change', generateStudentQR);
+  $('totalMinutesInput')?.addEventListener('input', generateStudentQR);
+  ['timeStage0', 'timeStage1', 'timeStage2'].forEach(id => {
+    $(id)?.addEventListener('input', generateStudentQR);
+  });
 
   // 開始遊戲
   $('start')?.addEventListener('click', () => {
@@ -1044,6 +1074,9 @@ function init() {
 
   // 載入題庫清單
   loadManifestAndPopulateSelect();
+
+  // 預先生成學生派發網址與按鈕狀態
+  generateStudentQR();
 
   // 初始進入首頁
   goto(-1);

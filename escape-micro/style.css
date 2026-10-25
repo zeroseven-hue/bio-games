@@ -115,6 +115,7 @@ button {
 
 /* 首頁畫面與設定面板 */
 #home {
+  z-index: 20;
   left: 6%;
   top: 12%;
   width: min(760px, 85vw);
