@@ -759,44 +759,22 @@ body {
 }
 
 /* 懸浮錘子游標 (桌機專用) */
+/* 懸浮錘子游標 (全新高解析日系卡通充氣玩具大槌) */
 .hammer-cursor {
   position: fixed;
-  z-index: 200;
+  z-index: 999;
   pointer-events: none;
-  width: 75px;
-  height: 75px;
+  width: 84px;
+  height: 84px;
   display: none;
-  transform: translate(-20px, -58px) rotate(-25deg) scale(var(--hammer-scale));
-  transform-origin: 50% 85%;
-  transition: transform .12s ease;
-}
-
-.hammer-head {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 48px;
-  height: 29px;
-  background: #8c6848;
-  border: 4px solid #49382c;
-  border-radius: 10px;
-}
-
-.hammer-handle {
-  position: absolute;
-  left: 40px;
-  top: 28px;
-  width: 12px;
-  height: 49px;
-  background: #d8a35f;
-  border: 3px solid #49382c;
-  border-radius: 8px;
-  transform: rotate(-35deg);
-  transform-origin: top;
+  transform: translate(-30px, -65px) rotate(-15deg) scale(var(--hammer-scale));
+  transform-origin: 75% 75%;
+  transition: transform .06s ease;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
 }
 
 .hammer-cursor.swing {
-  transform: translate(-20px, -58px) rotate(18deg) scale(var(--hammer-scale));
+  transform: translate(-30px, -65px) rotate(28deg) scale(var(--hammer-scale));
 }
 
 .hammer-cursor.lv4 .hammer-head { box-shadow: 0 0 15px #ffe66d; }

@@ -9,8 +9,38 @@
 <body>
   <!-- 大錘子懸浮游標 (電腦桌機專用) -->
   <div id="hammerCursor" class="hammer-cursor" aria-hidden="true">
-    <span class="hammer-head"></span>
-    <span class="hammer-handle"></span>
+    <svg class="hammer-svg" viewBox="0 0 100 100" width="84" height="84">
+      <defs>
+        <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f87171"/>
+          <stop offset="50%" stop-color="#ef4444"/>
+          <stop offset="100%" stop-color="#b91c1c"/>
+        </linearGradient>
+        <linearGradient id="cushionGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
+        </linearGradient>
+        <linearGradient id="handleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#fed7aa"/>
+          <stop offset="50%" stop-color="#fb923c"/>
+          <stop offset="100%" stop-color="#ea580c"/>
+        </linearGradient>
+        <filter id="hammerDropShadow" x="-10%" y="-10%" width="130%" height="130%">
+          <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+      <g filter="url(#hammerDropShadow)">
+        <rect x="52" y="38" width="12" height="52" rx="6" transform="rotate(-38 52 38)" fill="url(#handleGrad)" stroke="#7c2d12" stroke-width="2.5"/>
+        <line x1="61" y1="58" x2="68" y2="67" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="68" y1="68" x2="75" y2="77" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <circle cx="88" cy="85" r="7" fill="#ea580c" stroke="#7c2d12" stroke-width="2.5"/>
+        <rect x="6" y="16" width="10" height="34" rx="4" transform="rotate(-38 25 33)" fill="url(#cushionGrad)" stroke="#78350f" stroke-width="2"/>
+        <rect x="42" y="16" width="10" height="34" rx="4" transform="rotate(-38 25 33)" fill="url(#cushionGrad)" stroke="#78350f" stroke-width="2"/>
+        <rect x="14" y="12" width="30" height="42" rx="8" transform="rotate(-38 25 33)" fill="url(#headGrad)" stroke="#7f1d1d" stroke-width="3"/>
+        <polygon points="27,24 29,29 34,29 30,32 32,37 27,34 22,37 24,32 20,29 25,29" fill="#fef08a" stroke="#d97706" stroke-width="1.2" transform="rotate(-38 27 30)"/>
+        <ellipse cx="23" cy="20" rx="3" ry="8" transform="rotate(-38 23 20)" fill="#ffffff" opacity="0.65"/>
+      </g>
+    </svg>
   </div>
 
   <!-- 開始畫面：學生登入、單元與題數選擇 -->

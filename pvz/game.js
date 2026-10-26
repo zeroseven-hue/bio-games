@@ -127,7 +127,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   initEventListeners();
   await loadManifestAndUnits();
   initLawnGrid();
-  resetGameState();
+  // ⭐ 安全凍結守門員：頁面加載時僅初始化草地，嚴禁計時器與殭屍生成！
+  resetGameState(false);
 });
 
 function initEventListeners() {
@@ -348,7 +349,7 @@ function initLawnGrid() {
 }
 
 // 重置遊戲狀態
-function resetGameState() {
+function resetGameState(autoStart = true) {
   sunEnergy = 150;
   selectedPlantKey = "pea";
   waveTimerSeconds = isFlashMode ? 300 : 720;
@@ -376,8 +377,19 @@ function resetGameState() {
   document.querySelectorAll(".zombie-sprite, .pea-bullet, .plant-sprite").forEach(el => el.remove());
 
   updateUI();
-  startTimers();
+  if (autoStart) {
+    startTimers();
+  } else {
+    clearInterval(gameLoopTimer);
+    clearInterval(waveCountdownTimer);
+    clearInterval(sunGenTimer);
+  }
 }
+
+// ⭐ 對外暴露標準開局進入點 (供 BioGameSuite 身分確認後喚醒殭屍進攻)
+window.startGame = function() {
+  startTimers();
+};
 
 function updateUI() {
   sunDisplay.textContent = sunEnergy;

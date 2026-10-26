@@ -659,35 +659,34 @@ function spawnCharacter() {
   currentQuestionSpawns++;
 
   let type = 'target';
-  let hole = correct;
+  let hole = Math.floor(Math.random() * 4); // ⭐ 四個洞口絕對公平 25% 機率探頭！
 
   const r = Math.random();
 
-  // 若前兩次探頭都還沒出現正確答案，第 3 次之後提高至 85% 機率登場，防止學生久等；
-  // 平常情況下，第 1、2 次探頭動態隨機：目標豆 (46%)、巡邏員 😠 (22%)、奶嘴豆 😭 (22%)、金豆 ✨ (10%)
-  if (!targetSpawnedInCurrentQuestion && currentQuestionSpawns >= 3) {
-    if (r < 0.85) {
-      type = 'target';
-      hole = correct;
-      targetSpawnedInCurrentQuestion = true;
-    } else {
-      type = Math.random() < 0.5 ? 'baby' : 'guard';
-      hole = Math.floor(Math.random() * 4);
-    }
+  // 若經過 3 次探頭仍未出現正解洞口，第 4 次提高正解出現機率，避免學生無聊空等；
+  // 但在第 1~3 次，嚴格遵守四個洞口均勻隨機 (正解首次出現率嚴格為 25%，絕非80%！)
+  if (!targetSpawnedInCurrentQuestion && currentQuestionSpawns >= 4) {
+    hole = correct;
+    type = 'target';
+    targetSpawnedInCurrentQuestion = true;
   } else {
-    if (r < 0.10) {
-      type = 'gold';
-      hole = Math.floor(Math.random() * 4);
-    } else if (r < 0.32) {
-      type = 'baby';
-      hole = Math.floor(Math.random() * 4);
-    } else if (r < 0.54) {
-      type = 'guard';
-      hole = Math.floor(Math.random() * 4);
+    if (hole === correct) {
+      // 冒在正確洞口
+      if (r < 0.12) {
+        type = 'gold'; // 稀有金豆
+      } else {
+        type = 'target'; // 正確答案淘氣豆
+        targetSpawnedInCurrentQuestion = true;
+      }
     } else {
-      type = 'target';
-      hole = correct;
-      targetSpawnedInCurrentQuestion = true;
+      // 冒在錯誤洞口 (干擾豆，學生敲到會扣分/連擊中斷)
+      if (r < 0.25) {
+        type = 'guard'; // 巡邏員 😠
+      } else if (r < 0.50) {
+        type = 'baby'; // 哭哭奶嘴豆 😭
+      } else {
+        type = 'distractor'; // 干擾選項淘氣豆
+      }
     }
   }
 
@@ -737,6 +736,16 @@ function characterHTML(type) {
       <span class="eye-star e1">✨</span>
       <span class="eye-star e2">✨</span>
       <span class="mouth mouth-joy"></span>
+      <span class="body"></span>
+    </div>`;
+  }
+  if (type === 'distractor') {
+    // 干擾淘氣豆：俏皮吐舌眨眼表情 😜 (敲錯會扣分)
+    return `<div class="mascot distractor wiggle">
+      <span class="tuft"></span>
+      <span class="eye eye-wink e1"></span>
+      <span class="eye e2"></span>
+      <span class="mouth mouth-tongue">👅</span>
       <span class="body"></span>
     </div>`;
   }

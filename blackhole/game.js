@@ -315,7 +315,9 @@ async function loadManifestAndUnits() {
       if (selectUnit) selectUnit.appendChild(opt);
     });
 
-    for (const u of allManifestUnits) {
+    // ⭐ 極速秒開：嚴禁循序抓取 94 個單元！僅隨機並行取樣 3 個單元或按需加載
+    const sampleUnits = shuffleArray(allManifestUnits).slice(0, 3);
+    for (const u of sampleUnits) {
       const paths = [`../questions/${u.file}`, `questions/${u.file}`, u.file];
       for (const p of paths) {
         try {
