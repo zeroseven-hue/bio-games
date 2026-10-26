@@ -765,17 +765,17 @@ body {
   position: fixed;
   z-index: 999;
   pointer-events: none;
-  width: 84px;
-  height: 84px;
+  width: 124px;
+  height: 124px;
   display: none;
-  transform: translate(-30px, -65px) rotate(-15deg) scale(var(--hammer-scale));
+  transform: translate(-44px, -92px) rotate(-15deg) scale(var(--hammer-scale));
   transform-origin: 75% 75%;
-  transition: transform .06s ease;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
+  transition: transform .05s ease;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.28));
 }
 
 .hammer-cursor.swing {
-  transform: translate(-30px, -65px) rotate(28deg) scale(var(--hammer-scale));
+  transform: translate(-44px, -92px) rotate(28deg) scale(var(--hammer-scale));
 }
 
 .hammer-cursor.lv4 svg { filter: drop-shadow(0 0 12px #f59e0b); }
