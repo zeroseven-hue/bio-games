@@ -777,8 +777,8 @@ body {
   transform: translate(-30px, -65px) rotate(28deg) scale(var(--hammer-scale));
 }
 
-.hammer-cursor.lv4 .hammer-head { box-shadow: 0 0 15px #ffe66d; }
-.hammer-cursor.lv5 .hammer-head { box-shadow: 0 0 18px #fff, 0 0 28px #ffd166; }
+.hammer-cursor.lv4 svg { filter: drop-shadow(0 0 12px #f59e0b); }
+.hammer-cursor.lv5 svg { filter: drop-shadow(0 0 16px #ffffff) drop-shadow(0 0 22px #fbbf24); }
 
 .screen-shake { animation: shake .18s linear; }
 
