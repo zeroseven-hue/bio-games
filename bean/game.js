@@ -1,3 +1,23 @@
+
+function cleanUnitTitle(raw) {
+  if (!raw) return '精選題庫';
+  let str = decodeURIComponent(String(raw)).trim();
+  str = str.replace(/[\(（]\s*派卷鎖定\s*[\)）]/g, '').trim();
+  str = str.replace(/^課堂指定單元\s*[:：]?\s*/, '').trim();
+  if (str.startsWith('(') && str.endsWith(')')) str = str.slice(1, -1).trim();
+  if (str.startsWith('（') && str.endsWith('）')) str = str.slice(1, -1).trim();
+  if (str.includes(' - ')) {
+    const parts = str.split(' - ');
+    str = parts[parts.length - 1].trim();
+  }
+  str = str.replace(/^.*[\\\/]/, '');
+  str = str.replace(/\.json$/i, '').trim();
+  str = str.replace(/^[\(（]/, '').replace(/[\)）]$/, '').trim();
+  str = str.replace(/^(翰林版|康軒版|南一版|翰林|康軒|南一)[_\s-]*/i, '');
+  str = str.replace(/^[a-zA-Z]+[0-9]*[_\s-]+/, '');
+  return str || raw;
+}
+
 'use strict';
 const $ = id => document.getElementById(id);
 const TAGS = ['A', 'B', 'C', 'D'];
@@ -340,7 +360,7 @@ function checkUrlParams() {
     } else {
       const customOpt = document.createElement('option');
       customOpt.value = selectedUnitId;
-      customOpt.textContent = selectedUnitId;
+      customOpt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(selectedUnitId) : selectedUnitId);
       $('unitSelect').appendChild(customOpt);
       $('unitSelect').value = selectedUnitId;
     }

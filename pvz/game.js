@@ -1,3 +1,23 @@
+
+function cleanUnitTitle(raw) {
+  if (!raw) return '精選題庫';
+  let str = decodeURIComponent(String(raw)).trim();
+  str = str.replace(/[\(（]\s*派卷鎖定\s*[\)）]/g, '').trim();
+  str = str.replace(/^課堂指定單元\s*[:：]?\s*/, '').trim();
+  if (str.startsWith('(') && str.endsWith(')')) str = str.slice(1, -1).trim();
+  if (str.startsWith('（') && str.endsWith('）')) str = str.slice(1, -1).trim();
+  if (str.includes(' - ')) {
+    const parts = str.split(' - ');
+    str = parts[parts.length - 1].trim();
+  }
+  str = str.replace(/^.*[\\\/]/, '');
+  str = str.replace(/\.json$/i, '').trim();
+  str = str.replace(/^[\(（]/, '').replace(/[\)）]$/, '').trim();
+  str = str.replace(/^(翰林版|康軒版|南一版|翰林|康軒|南一)[_\s-]*/i, '');
+  str = str.replace(/^[a-zA-Z]+[0-9]*[_\s-]+/, '');
+  return str || raw;
+}
+
 /**
  * 植物大戰殭屍：細胞防衛戰 (PVZ Cell Defense) - 遊戲引擎 V2.3 旗艦極致版
  * 1. 5 路草地戰場 (5 行 x 10 列)，縮窄植物間距、呈現精緻傳統 PVZ 戰場體驗。
@@ -260,7 +280,7 @@ async function loadManifestAndUnits() {
     allManifestUnits.forEach((u) => {
       const opt = document.createElement("option");
       opt.value = u.file;
-      opt.textContent = `${u.id.toUpperCase()} - ${u.title}`;
+      opt.textContent = u.title;
       selectUnit.appendChild(opt);
     });
 
@@ -283,7 +303,7 @@ async function loadManifestAndUnits() {
       } else {
         const customOpt = document.createElement("option");
         customOpt.value = decoded;
-        customOpt.textContent = decoded;
+        customOpt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
         selectUnit.appendChild(customOpt);
         selectUnit.value = decoded;
         const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;

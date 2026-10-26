@@ -47,7 +47,7 @@ async function loadManifest() {
       data.units.forEach(unit => {
         const opt = document.createElement("option");
         opt.value = unit.file;
-        opt.textContent = `${unit.id.toUpperCase()} ‧ ${unit.title}`;
+        opt.textContent = unit.title;
         selectUnit.appendChild(opt);
       });
     }

@@ -1,3 +1,23 @@
+
+function cleanUnitTitle(raw) {
+  if (!raw) return '精選題庫';
+  let str = decodeURIComponent(String(raw)).trim();
+  str = str.replace(/[\(（]\s*派卷鎖定\s*[\)）]/g, '').trim();
+  str = str.replace(/^課堂指定單元\s*[:：]?\s*/, '').trim();
+  if (str.startsWith('(') && str.endsWith(')')) str = str.slice(1, -1).trim();
+  if (str.startsWith('（') && str.endsWith('）')) str = str.slice(1, -1).trim();
+  if (str.includes(' - ')) {
+    const parts = str.split(' - ');
+    str = parts[parts.length - 1].trim();
+  }
+  str = str.replace(/^.*[\\\/]/, '');
+  str = str.replace(/\.json$/i, '').trim();
+  str = str.replace(/^[\(（]/, '').replace(/[\)）]$/, '').trim();
+  str = str.replace(/^(翰林版|康軒版|南一版|翰林|康軒|南一)[_\s-]*/i, '');
+  str = str.replace(/^[a-zA-Z]+[0-9]*[_\s-]+/, '');
+  return str || raw;
+}
+
 /**
  * 侏羅紀叢林逃生記 - 專業教學強固版核心引擎 V3.2 (嚴格審核版)
  * 1. 修正選隊 Bug：精準讀取選單人數 (支援 2~12 隊)。
@@ -363,7 +383,7 @@ async function loadManifestAndInitBank() {
     manifest.units.forEach((u) => {
       const opt = document.createElement("option");
       opt.value = u.file;
-      opt.textContent = `${u.id.toUpperCase()} - ${u.title}`;
+      opt.textContent = u.title;
       unitSelect.appendChild(opt);
     });
 
@@ -379,7 +399,7 @@ async function loadManifestAndInitBank() {
       } else {
         const opt = document.createElement("option");
         opt.value = decoded;
-        opt.textContent = decoded;
+        opt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
         unitSelect.appendChild(opt);
         unitSelect.value = decoded;
         loadSingleUnit(decoded);

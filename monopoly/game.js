@@ -1,3 +1,23 @@
+
+function cleanUnitTitle(raw) {
+  if (!raw) return '精選題庫';
+  let str = decodeURIComponent(String(raw)).trim();
+  str = str.replace(/[\(（]\s*派卷鎖定\s*[\)）]/g, '').trim();
+  str = str.replace(/^課堂指定單元\s*[:：]?\s*/, '').trim();
+  if (str.startsWith('(') && str.endsWith(')')) str = str.slice(1, -1).trim();
+  if (str.startsWith('（') && str.endsWith('）')) str = str.slice(1, -1).trim();
+  if (str.includes(' - ')) {
+    const parts = str.split(' - ');
+    str = parts[parts.length - 1].trim();
+  }
+  str = str.replace(/^.*[\\\/]/, '');
+  str = str.replace(/\.json$/i, '').trim();
+  str = str.replace(/^[\(（]/, '').replace(/[\)）]$/, '').trim();
+  str = str.replace(/^(翰林版|康軒版|南一版|翰林|康軒|南一)[_\s-]*/i, '');
+  str = str.replace(/^[a-zA-Z]+[0-9]*[_\s-]+/, '');
+  return str || raw;
+}
+
 /**
  * 動物方城市生物大富翁 (Zootopia Bio Monopoly) - 專業教學強固版引擎 V3.8
  * 1. 嚴格鎖死答錯蓋房漏洞：答錯 100% 隱藏蓋房按鈕，只顯示「❌ 答錯扣分關閉」，絕無法進入蓋房流程。
@@ -350,7 +370,7 @@ async function loadManifestAndUnits() {
     allManifestUnits.forEach((u) => {
       const opt = document.createElement("option");
       opt.value = u.file;
-      opt.textContent = `${u.id.toUpperCase()} - ${u.title}`;
+      opt.textContent = u.title;
       selectUnit.appendChild(opt);
     });
 
@@ -373,7 +393,7 @@ async function loadManifestAndUnits() {
       } else {
         const customOpt = document.createElement("option");
         customOpt.value = decoded;
-        customOpt.textContent = decoded;
+        customOpt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
         selectUnit.appendChild(customOpt);
         selectUnit.value = decoded;
         const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;

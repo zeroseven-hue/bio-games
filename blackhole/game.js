@@ -1,3 +1,23 @@
+
+function cleanUnitTitle(raw) {
+  if (!raw) return '精選題庫';
+  let str = decodeURIComponent(String(raw)).trim();
+  str = str.replace(/[\(（]\s*派卷鎖定\s*[\)）]/g, '').trim();
+  str = str.replace(/^課堂指定單元\s*[:：]?\s*/, '').trim();
+  if (str.startsWith('(') && str.endsWith(')')) str = str.slice(1, -1).trim();
+  if (str.startsWith('（') && str.endsWith('）')) str = str.slice(1, -1).trim();
+  if (str.includes(' - ')) {
+    const parts = str.split(' - ');
+    str = parts[parts.length - 1].trim();
+  }
+  str = str.replace(/^.*[\\\/]/, '');
+  str = str.replace(/\.json$/i, '').trim();
+  str = str.replace(/^[\(（]/, '').replace(/[\)）]$/, '').trim();
+  str = str.replace(/^(翰林版|康軒版|南一版|翰林|康軒|南一)[_\s-]*/i, '');
+  str = str.replace(/^[a-zA-Z]+[0-9]*[_\s-]+/, '');
+  return str || raw;
+}
+
 /**
  * 🧬 《生物星際大逃亡：逃離黑洞》核心邏輯控制器 V3.0
  * 包含：動態黑洞心跳加速度音效 (開局慢 60 BPM -> 逼近 115 BPM -> 臨界 230 BPM)、Synthwave BGM、防偽認證碼與全單元題庫選擇
@@ -347,7 +367,7 @@ async function loadManifestAndUnits() {
     } else if (decoded !== "ALL") {
       const opt = document.createElement("option");
       opt.value = decoded;
-      opt.textContent = decoded;
+      opt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
       selectUnit.appendChild(opt);
       selectUnit.value = decoded;
       const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;

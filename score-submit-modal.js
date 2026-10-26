@@ -1,6 +1,6 @@
 /**
  * 🏆 BioGameSuite / ScoreSubmitModal (國中生物遊戲平台終極標準中介層模組)
- * 版本: v4.3 (真實題庫動態聯動 · 精選快問快答秒開 · 開局安全凍結守門員) (五大情境沉浸主題 · 全自動開局守門員 · 純數字選單 · 中途防手滑護城河 · 三階段動態結算 · 4大交機檢核)
+ * 版本: v4.4 (真實題庫動態聯動 · 精選快問快答秒開 · 開局安全凍結守門員) (五大情境沉浸主題 · 全自動開局守門員 · 純數字選單 · 中途防手滑護城河 · 三階段動態結算 · 4大交機檢核)
  * 
  * 🎨 五大情境主題（外觀自動隨遊戲調配，底層標準 100% 嚴格統一）：
  * 1. 🕹️ 復古像素街機風 (Pixel) - 瑪利歐 (mario)、小精靈 (pacman)、下樓梯 (shaft)
@@ -985,7 +985,7 @@
       for (let i = 0; i < existingUnitSelect.options.length; i++) {
         const opt = existingUnitSelect.options[i];
         if (opt.value && opt.value !== 'FAST_DEFAULT') {
-          unitOptionsHtml += `<option value="${opt.value}">${opt.text}</option>`;
+          unitOptionsHtml += `<option value="${opt.value}">${cleanUnitTitle(opt.text)}</option>`;
         }
       }
     } else {
@@ -1031,7 +1031,8 @@
       }
     }
 
-    const unitTitle = isStandalone ? standaloneUnitName : (options.unitTitle || (isDispatch ? `課堂指定單元 (${urlUnit})` : '[7上] 1-1 生命現象'));
+    const cleanDispatched = isDispatch ? cleanUnitTitle(urlUnit) : '';
+    const unitTitle = isStandalone ? standaloneUnitName : (options.unitTitle ? cleanUnitTitle(options.unitTitle) : (isDispatch ? cleanDispatched : '[7上] 1-1 生命現象'));
 
     // 10 分鐘中斷暫存恢復
     const savedSessionRaw = sessionStorage.getItem('bgs_active_session');
@@ -1110,7 +1111,7 @@
             <label class="bgs-label">挑戰單元 (老師派卷指定)</label>
             <div class="bgs-unit-badge">
               <span>🎯</span>
-              <span>${unitTitle} (派卷鎖定)</span>
+              <span>${cleanUnitTitle(unitTitle)} (派卷鎖定)</span>
             </div>
           </div>
         ` : `
@@ -1195,7 +1196,7 @@
           </div>
           ${options.hideUnit ? '' : `
             <div style="font-size:0.82rem; color:${theme.accentColor}; margin-top:4px;">
-              📚 挑戰主題：${currentStudent.unitTitle || '專屬任務'}
+              📚 挑戰主題：${cleanUnitTitle(currentStudent.unitTitle) || '專屬任務'}
             </div>
           `}
         </div>
@@ -1453,7 +1454,7 @@
       duration: duration,
       accuracy: options.accuracy || '--',
       unit: currentStudent.unit || 'general',
-      unitTitle: currentStudent.unitTitle || '',
+      unitTitle: cleanUnitTitle(currentStudent.unitTitle || ''),
       timestamp: new Date().toISOString()
     };
 
