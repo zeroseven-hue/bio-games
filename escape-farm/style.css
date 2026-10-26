@@ -670,14 +670,31 @@ body.is-student-mode .home {
 }
 
 .slot {
-  height: 64px;
-  border-radius: 11px;
+  height: clamp(52px, 7vh, 66px);
+  border-radius: 12px;
   border: 3px solid #bc9b6a;
   background: #d6bd8a;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: clamp(22px, 2.8vw, 40px);
+  font-size: clamp(20px, 2.6vw, 36px);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 3px;
+}
+
+.slot img,
+.slot .stage3Art,
+.slot .bioIcon,
+.slot svg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
 }
 
 /* ==================== 側邊資訊與救援欄 ==================== */
@@ -953,6 +970,16 @@ body.is-student-mode .home {
   width: clamp(36px, 4.5vw, 62px);
   display: block;
   overflow: visible;
+}
+
+.stage3Art {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
 }
 
 .tile:has(.stage3Art) {
