@@ -1,3 +1,6 @@
+/* 杜絕舊版開局卡片閃爍干擾 */
+#startScreen { display: none !important; }
+
 :root {
   --ink: #263238;
   --paper: #fffdf5;
