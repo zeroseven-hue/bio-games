@@ -1000,3 +1000,14 @@ window.addEventListener('pagehide', () => {
   clearTimers();
   try { speechSynthesis.cancel(); } catch (e) {}
 });
+
+function triggerBeanGasSubmit() {
+  if (typeof showScoreSubmitModal === "function") {
+    showScoreSubmitModal({
+      gameTitle: "淘氣豆：生物敲敲研究所",
+      score: score,
+      scoreDisplay: score + " 分",
+      duration: totalTimeSec + " 秒"
+    });
+  }
+}

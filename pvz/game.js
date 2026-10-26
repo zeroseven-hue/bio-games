@@ -181,6 +181,17 @@ function initEventListeners() {
     updateUI();
   });
 
+  
+  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
+    if (typeof showScoreSubmitModal === "function") {
+      showScoreSubmitModal({
+        gameTitle: "植物大戰殭屍：生物防衛戰",
+        score: score,
+        scoreDisplay: score + " 分 (擊退 " + wave + " 波殭屍)",
+        duration: "生存守護"
+      });
+    }
+  });
   btnCopyCert.addEventListener("click", copyCertificationData);
   btnRestartGame.addEventListener("click", () => {
     closeModal(victoryModal);
@@ -802,7 +813,7 @@ function openVictoryModal() {
 }
 
 function updateCertCode() {
-  const seat = inputSeatNo.value.trim() || "70105號";
+  const seat = inputSeatNo.value.trim() || "05";
   const name = inputStudentName.value.trim() || "召喚師同學";
   const str = `${seat}-${name}-${sunEnergy}-${currentWave}`;
   let hash = 0;

@@ -273,6 +273,18 @@ function initEventListeners() {
 
   btnSaveToLeaderboard.addEventListener("click", saveScoreToLeaderboard);
   btnNewGamePlus.addEventListener("click", startNewGamePlus);
+  
+  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
+    if (typeof showScoreSubmitModal === "function") {
+      const s = parseInt(document.getElementById("certHighScore")?.textContent || "100", 10);
+      showScoreSubmitModal({
+        gameTitle: "勇者傳奇：生物知識冒險",
+        score: s,
+        scoreDisplay: s + " 總積分",
+        duration: "地下城通關"
+      });
+    }
+  });
   btnCopyCert.addEventListener("click", copyCertificationData);
   btnRestartGame.addEventListener("click", () => {
     closeModal(victoryModal);
@@ -867,7 +879,7 @@ function getRankTitle(score) {
 }
 
 function updateCertCode() {
-  const seat = inputSeatNo.value.trim() || "70101號";
+  const seat = inputSeatNo.value.trim() || "01";
   const name = inputStudentName.value.trim() || "生物勇者";
   const score = calculateScore();
 
@@ -920,7 +932,7 @@ function getLeaderboardData() {
 }
 
 function saveScoreToLeaderboard() {
-  const seat = inputSeatNo.value.trim() || "70101號";
+  const seat = inputSeatNo.value.trim() || "01";
   const name = inputStudentName.value.trim() || "生物勇者";
   const score = calculateScore();
   const title = getRankTitle(score);

@@ -399,6 +399,13 @@ async function startMission() {
     return;
   }
 
+  // 🎯 身分二次核對 ＋ 課堂載具使用誠信公約 (若 BioGameSuite 已驗證則不重複彈窗)
+  const alreadyAuthed = window.BioGameSuite && window.BioGameSuite.getStudent && window.BioGameSuite.getStudent().name;
+  if (!alreadyAuthed) {
+    const confirmText = `🎯 請核對您的挑戰身分：\n\n【${c} 班級　${s} 座號】${n}\n\n📱【課堂載具使用誠信公約】\n⚠️ 挑戰全程請專注作答！\n👉 嚴禁跳出畫面看 YouTube、拍照自拍、或開啟非課堂 App。\n👉 若發現違規使用載具，本次作答成績將直接不予計分！\n\n您已確認身分無誤，並保證遵守公約嗎？`;
+    if (!confirm(confirmText)) return;
+  }
+
   playerProfile = { cls: c, seat: s, name: n };
   initAudio();
 
@@ -1028,3 +1035,14 @@ window.addEventListener("DOMContentLoaded", () => {
   resizeCanvas();
   initManifestAndUnits();
 });
+
+function triggerDefenderGasSubmit() {
+  if (typeof showScoreSubmitModal === "function") {
+    showScoreSubmitModal({
+      gameTitle: "生物小精靈：器官塔防戰",
+      score: score,
+      scoreDisplay: score + " 分",
+      duration: "防衛成功"
+    });
+  }
+}

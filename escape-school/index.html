@@ -263,7 +263,8 @@
       </p>
       <div id="endingStats" class="endingStats"></div>
       <div class="endingActions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
-        <button id="copyReportBtn" class="goldBtn">📋 複製探險戰報 (繳交作業)</button>
+        <button id="submitGasScoreBtn" class="primary" style="background:linear-gradient(135deg, #16a34a, #15803d);font-size:1.05rem;padding:12px 22px;color:white;font-weight:800;border:none;border-radius:12px;cursor:pointer;">🚀 送出成績至試算表 (優先推薦)</button>
+        <button id="copyReportBtn" class="goldBtn">📋 複製探險戰報 (斷網備用)</button>
         <button id="endingAwards" class="pill">🏅 查看所有認證</button>
         <button id="again" class="primary">🔄 重新挑戰</button>
       </div>
@@ -271,6 +272,7 @@
   </div>
 </div>
 
+<script defer src="../score-submit-modal.js"></script>
 <script defer src="../escape-adapter.js?v=1.1"></script>
 <script defer src="game.js?v=1.5"></script>
 </body>

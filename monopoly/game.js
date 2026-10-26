@@ -115,7 +115,9 @@ const btnRules = document.getElementById("btnRules");
 const btnFreeze = document.getElementById("btnFreeze");
 const btnSound = document.getElementById("btnSound");
 const btnTimer = document.getElementById("btnTimer");
-const btnHistory = document.getElementById("btnHistory");
+const btnHistory = document.getElementById("btnSubmitScore")?.addEventListener("click", triggerMonopolyScoreSubmit);
+  document.getElementById("btnSubmitFromHistory")?.addEventListener("click", triggerMonopolyScoreSubmit);
+  document.getElementById("btnHistory");
 const btnSettings = document.getElementById("btnSettings");
 
 // Modals
@@ -1001,3 +1003,16 @@ function restoreSnapshot() {
 
 function openModal(el) { el.classList.remove("hidden"); }
 function closeModal(el) { el.classList.add("hidden"); }
+function triggerMonopolyScoreSubmit() {
+  if (typeof showScoreSubmitModal === "function") {
+    const sorted = [...teams].sort((a, b) => (b.funds + b.houses * 200) - (a.funds + a.houses * 200));
+    const top = sorted[0] || teams[0];
+    const topVal = top ? (top.funds + top.houses * 200) : 600;
+    showScoreSubmitModal({
+      gameTitle: "動物城生物大富翁",
+      score: topVal,
+      scoreDisplay: (top ? top.name : "隊伍") + "：" + topVal + " 分 (" + (top ? top.houses : 0) + " 棟生態建築)",
+      duration: "小組競賽領地戰"
+    });
+  }
+}

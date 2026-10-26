@@ -563,7 +563,7 @@ function updateCertCode() {
 
   if (!certCodeValue) return;
 
-  const seat = (seatInput && seatInput.value.trim()) || "70105號";
+  const seat = (seatInput && seatInput.value.trim()) || "05";
   const name = (nameInput && nameInput.value.trim()) || "黑洞逃亡領航員";
   const str = `${seat}-${name}-${shipProgress}-${blackholeProgress}-${oxygen}`;
   let hash = 0;
@@ -578,7 +578,7 @@ function copyCertificationData() {
   const reflectionInput = document.getElementById("inputReflection");
   const certCodeValue = document.getElementById("certCodeValue");
 
-  const seat = (seatInput && seatInput.value.trim()) || "70105號";
+  const seat = (seatInput && seatInput.value.trim()) || "05";
   const name = (nameInput && nameInput.value.trim()) || "黑洞逃亡領航員";
   const reflection = (reflectionInput && reflectionInput.value.trim()) || "今天黑洞逃亡中複習了酵素專一性與細胞膜運輸作用。";
   const certCode = (certCodeValue && certCodeValue.textContent) || "BLACKHOLE-0000-70105";
@@ -770,3 +770,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadManifestAndUnits();
 });
+
+function triggerBlackholeGasSubmit() {
+  if (typeof showScoreSubmitModal === "function") {
+    showScoreSubmitModal({
+      gameTitle: "星際大逃亡：生物重力危機",
+      score: score,
+      scoreDisplay: score + " 分",
+      duration: "星際逃脫"
+    });
+  }
+}

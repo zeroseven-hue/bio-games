@@ -917,6 +917,18 @@
     quip('太精彩了！校園危機徹底解除，我把這段記憶永久保存在中央核心！', '得意');
   }
 
+  // 送出成績至 GAS 試算表
+  $('submitGasScoreBtn').onclick = () => {
+    if (typeof showScoreSubmitModal === 'function') {
+      showScoreSubmitModal({
+        gameTitle: '校園驚魂・密室逃脫',
+        score: 100,
+        scoreDisplay: '16 / 16 謎題全破',
+        duration: timeStr
+      });
+    }
+  };
+
   // 複製探險成果到剪貼簿 (供 Google Classroom 繳交)
   $('copyReportBtn').onclick = async () => {
     const text = $('endingStats').textContent;

@@ -1259,11 +1259,23 @@ function finishWin() {
   modal(`
     ${window.lastCert}
     <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button type="button" class="btn" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800;" onclick="submitFarmScore(${stage}, '${lev.award}')">🚀 送出成績至試算表 (優先推薦)</button>
       <button type="button" class="btn alt" onclick="printCert()">🖨️ 列印／儲存獎狀</button>
       ${next}
       <button type="button" class="btn dark" onclick="closeModal()">留在本關</button>
     </div>
   `);
+}
+
+function submitFarmScore(stg, award) {
+  if (typeof showScoreSubmitModal === 'function') {
+    showScoreSubmitModal({
+      gameTitle: '羊羊農場・生物大逃脫',
+      score: stg * 33 + (stg === 3 ? 1 : 0),
+      scoreDisplay: `第 ${stg} 關通關 (${award})`,
+      duration: '羊羊安全逃脫'
+    });
+  }
 }
 
 function printCert() {

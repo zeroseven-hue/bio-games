@@ -466,12 +466,24 @@ function showEnding() {
       </div>
     </div>
 
-    <div class="buttons" style="justify-content:center;gap:12px;margin-top:16px">
-      <button id="copyResultBtn" class="goldBtn" style="font-size:1.05rem;padding:12px 24px">📋 複製探險紀錄</button>
+    <div class="buttons" style="justify-content:center;gap:12px;margin-top:16px;flex-wrap:wrap">
+      <button id="submitGasScoreBtn" class="primary" style="background:linear-gradient(135deg, #16a34a, #15803d);font-size:1.05rem;padding:12px 24px;color:white;font-weight:bold;cursor:pointer;">🚀 送出成績至試算表 (優先推薦)</button>
+      <button id="copyResultBtn" class="goldBtn" style="font-size:1.05rem;padding:12px 24px">📋 複製探險紀錄 (斷網備用)</button>
       <button id="again" class="btn">↻ 返回首頁</button>
     </div>
   `;
   showModal(html);
+
+  $('submitGasScoreBtn').onclick = () => {
+    if (typeof showScoreSubmitModal === 'function') {
+      showScoreSubmitModal({
+        gameTitle: '微觀科幻探秘・密室逃脫',
+        score: Math.round((totalSolved / 16) * 100),
+        scoreDisplay: `${totalSolved} / 16 節點修復`,
+        duration: timeStr
+      });
+    }
+  };
 
   $('again').onclick = () => {
     solved = [new Set(), new Set(), new Set()];

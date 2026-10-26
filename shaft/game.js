@@ -183,6 +183,17 @@ function initEventListeners() {
   btnUnfreeze.addEventListener("click", toggleTeacherFreeze);
   btnSound.addEventListener("click", toggleSound);
 
+  
+  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
+    if (typeof showScoreSubmitModal === "function") {
+      showScoreSubmitModal({
+        gameTitle: "生物大墜落：細胞深淵探險",
+        score: Math.round(depth || 100),
+        scoreDisplay: "抵達 " + Math.round(depth || 100) + " 公尺深淵",
+        duration: "深淵挑戰"
+      });
+    }
+  });
   btnCopyCert.addEventListener("click", copyCertificationData);
   btnRestartGame.addEventListener("click", () => {
     closeModal(victoryModal);
@@ -1407,7 +1418,7 @@ function gameOver() {
 }
 
 function updateCertCode() {
-  const seat = inputSeatNo.value.trim() || "70105號";
+  const seat = inputSeatNo.value.trim() || "05";
   const name = inputStudentName.value.trim() || "下樓梯探險家";
   const str = `${seat}-${name}-${maxDepth}-${gameTimeSeconds}`;
   let hash = 0;

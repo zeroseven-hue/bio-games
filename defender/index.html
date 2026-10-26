@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
@@ -67,20 +67,20 @@
         </p>
         <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
           <select id="user-class" class="styled-select" style="flex: 1; min-width: 100px;">
-            <option value="701">701 班</option><option value="702">702 班</option>
-            <option value="703">703 班</option><option value="704">704 班</option>
-            <option value="705">705 班</option><option value="706">706 班</option>
-            <option value="707">707 班</option><option value="708">708 班</option>
-            <option value="709">709 班</option><option value="710">710 班</option>
+            <option value="701">701</option><option value="702">702</option>
+            <option value="703">703</option><option value="704">704</option>
+            <option value="705">705</option><option value="706">706</option>
+            <option value="707">707</option><option value="708">708</option>
+            <option value="709">709</option><option value="710">710</option>
           </select>
 
           <select id="user-seat" class="styled-select" style="flex: 1; min-width: 90px;">
-            <option value="01">01 號</option><option value="02">02 號</option><option value="03">03 號</option><option value="04">04 號</option><option value="05">05 號</option>
-            <option value="06">06 號</option><option value="07">07 號</option><option value="08">08 號</option><option value="09">09 號</option><option value="10">10 號</option>
-            <option value="11">11 號</option><option value="12">12 號</option><option value="13">13 號</option><option value="14">14 號</option><option value="15">15 號</option>
-            <option value="16">16 號</option><option value="17">17 號</option><option value="18">18 號</option><option value="19">19 號</option><option value="20">20 號</option>
-            <option value="21">21 號</option><option value="22">22 號</option><option value="23">23 號</option><option value="24">24 號</option><option value="25">25 號</option>
-            <option value="26">26 號</option><option value="27">27 號</option><option value="28">28 號</option><option value="29">29 號</option><option value="30">30 號</option>
+            <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option>
+            <option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
+            <option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>
+            <option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option>
+            <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option>
           </select>
 
           <input type="text" id="user-name" placeholder="真實姓名 (勿填暱稱)" style="flex: 1.5; min-width: 130px;" required />
@@ -127,7 +127,8 @@
         <button class="primary-btn" id="btnDirectSubmitGAS" onclick="directSubmitToGAS()" style="margin-top: 14px; font-size: 1.15rem; padding: 14px; background: linear-gradient(135deg, #0284c7, #0369a1); box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">🚀 一鍵送出成績至老師試算表</button>
 
         <!-- 備用按鈕：複製文字 (小黃鈕) -->
-        <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 8px; font-size: 0.88rem; opacity: 0.85; padding: 8px;">📋 複製成績文字檔 (Classroom 備用)</button>
+        <button class="primary-btn" id="btnSubmitScoreGas" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800; margin-top:8px;" onclick="triggerDefenderGasSubmit()">🚀 送出成績至試算表 (優先推薦)</button>
+          <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 8px; font-size: 0.88rem; opacity: 0.85; padding: 8px;">📋 複製成績文字檔 (斷網備用)</button>
 
         <div style="margin-top: 12px; font-size: 12px; color: #94a3b8; text-align: left;">錯題回顧清單：</div>
         <div class="review-box" id="review-list"></div>
@@ -138,7 +139,6 @@
   </div>
 
   <!-- 引入通用成績上傳模組與遊戲邏輯 -->
-  <script src="score-submit-modal.js?v=2.0"></script>
   <script src="../score-submit-modal.js?v=2.0"></script>
   <script src="game.js?v=2.1"></script>
 </body>

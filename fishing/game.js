@@ -1009,3 +1009,13 @@ function handleGenerateCert() {
 
   certModal.classList.remove("hidden");
 }
+function triggerFishingGasSubmit() {
+  if (typeof showScoreSubmitModal === "function") {
+    showScoreSubmitModal({
+      gameTitle: "生物大釣手：海洋生態捕撈",
+      score: score,
+      scoreDisplay: score + " 分",
+      duration: "捕撈結算"
+    });
+  }
+}

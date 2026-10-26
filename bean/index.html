@@ -36,51 +36,51 @@
           <div class="input-field compact-class">
             <label for="inputClass">班級：</label>
             <select id="inputClass" class="styled-select" style="padding: 6px;">
-              <option value="701">701 班</option>
-              <option value="702">702 班</option>
-              <option value="703">703 班</option>
-              <option value="704">704 班</option>
-              <option value="705">705 班</option>
-              <option value="706">706 班</option>
-              <option value="707">707 班</option>
-              <option value="708">708 班</option>
-              <option value="709">709 班</option>
-              <option value="710">710 班</option>
+              <option value="701">701</option>
+              <option value="702">702</option>
+              <option value="703">703</option>
+              <option value="704">704</option>
+              <option value="705">705</option>
+              <option value="706">706</option>
+              <option value="707">707</option>
+              <option value="708">708</option>
+              <option value="709">709</option>
+              <option value="710">710</option>
             </select>
           </div>
           <div class="input-field compact-seat">
             <label for="inputSeat">座號：</label>
             <select id="inputSeat" class="styled-select" style="padding: 6px;">
-              <option value="01">01 號</option>
-              <option value="02">02 號</option>
-              <option value="03">03 號</option>
-              <option value="04">04 號</option>
-              <option value="05">05 號</option>
-              <option value="06">06 號</option>
-              <option value="07">07 號</option>
-              <option value="08">08 號</option>
-              <option value="09">09 號</option>
-              <option value="10">10 號</option>
-              <option value="11">11 號</option>
-              <option value="12">12 號</option>
-              <option value="13">13 號</option>
-              <option value="14">14 號</option>
-              <option value="15">15 號</option>
-              <option value="16">16 號</option>
-              <option value="17">17 號</option>
-              <option value="18">18 號</option>
-              <option value="19">19 號</option>
-              <option value="20">20 號</option>
-              <option value="21">21 號</option>
-              <option value="22">22 號</option>
-              <option value="23">23 號</option>
-              <option value="24">24 號</option>
-              <option value="25">25 號</option>
-              <option value="26">26 號</option>
-              <option value="27">27 號</option>
-              <option value="28">28 號</option>
-              <option value="29">29 號</option>
-              <option value="30">30 號</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+              <option value="06">06</option>
+              <option value="07">07</option>
+              <option value="08">08</option>
+              <option value="09">09</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
             </select>
           </div>
           <div class="input-field flex-name">
@@ -237,7 +237,8 @@
       </div>
 
       <div class="cert-actions">
-        <button type="button" class="btn-copy-cert" id="btnCopyCert" onclick="copyCertToClipboard()">📋 複製成績單驗證碼 (Google Classroom 繳交)</button>
+        <button type="button" id="btnSubmitScoreGas" class="btn-action" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800; margin-bottom:8px; width:100%; border-radius:12px; padding:12px; font-size:1.05rem; cursor:pointer;" onclick="triggerBeanGasSubmit()">🚀 送出成績至試算表 (優先推薦)</button>
+        <button type="button" class="btn-copy-cert" id="btnCopyCert" onclick="copyCertToClipboard()">📋 複製成績單驗證碼 (斷網備用)</button>
         <div class="cert-btn-group">
           <button type="button" class="btn-restart" onclick="resetToStart()">再戰一局 🔄</button>
         </div>

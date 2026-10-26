@@ -161,6 +161,18 @@ function initEventListeners() {
   });
 
   btnGenerateCert.addEventListener("click", generateCertificate);
+  
+  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
+    if (typeof showScoreSubmitModal === "function") {
+      const c = parseInt(document.getElementById("certCoins")?.textContent || "0", 10);
+      showScoreSubmitModal({
+        gameTitle: "瑪利歐生物冒險世界",
+        score: score,
+        scoreDisplay: score + " 分 (" + c + " 🪙)",
+        duration: "通關挑戰"
+      });
+    }
+  });
   btnCloseCert.addEventListener("click", () => {
     closeModal(certModal);
     startNewGame();

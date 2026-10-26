@@ -317,6 +317,17 @@ function initEventListeners() {
     closeModal(summaryModal);
     startGame();
   });
+    document.getElementById("btnSubmitScoreModal")?.addEventListener("click", () => {
+    if (typeof showScoreSubmitModal === "function") {
+      const w = [...players].sort((a,b) => b.pos - a.pos)[0];
+      showScoreSubmitModal({
+        gameTitle: "侏羅紀公園 (逃生挑戰)",
+        score: w ? w.pos : 36,
+        scoreDisplay: (w ? w.name : "小組") + "：第 " + (w ? w.pos : 36) + " 格",
+        duration: "叢林生存"
+      });
+    }
+  });
   document.getElementById("btnDownloadLogModal")?.addEventListener("click", downloadGameLog);
 }
 

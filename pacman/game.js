@@ -1044,3 +1044,14 @@ function openLeaderboard() {
 function closeLeaderboard() {
   document.getElementById('leaderboard-modal').classList.add('hidden');
 }
+
+  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
+    if (typeof showScoreSubmitModal === "function") {
+      showScoreSubmitModal({
+        gameTitle: "人體免疫小精靈",
+        score: score,
+        scoreDisplay: score + " 分 (擊殺 " + kills + " 隻病原體)",
+        duration: "Stage " + stage
+      });
+    }
+  });
