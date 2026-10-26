@@ -1,6 +1,6 @@
 /**
  * 🏆 BioGameSuite / ScoreSubmitModal (國中生物遊戲平台終極標準中介層模組)
- * 版本: v4.1 (五大情境沉浸主題 · 全自動開局守門員 · 純數字選單 · 中途防手滑護城河 · 三階段動態結算 · 4大交機檢核)
+ * 版本: v4.2 (五大情境沉浸主題 · 全自動開局守門員 · 純數字選單 · 中途防手滑護城河 · 三階段動態結算 · 4大交機檢核)
  * 
  * 🎨 五大情境主題（外觀自動隨遊戲調配，底層標準 100% 嚴格統一）：
  * 1. 🕹️ 復古像素街機風 (Pixel) - 瑪利歐 (mario)、小精靈 (pacman)、下樓梯 (shaft)
@@ -175,6 +175,7 @@
          BGS BASE RESET & OVERLAY
          ========================================================================== */
       .bgs-overlay {
+        background: rgba(248, 250, 252, 0.88);
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
         backdrop-filter: blur(14px);
@@ -353,6 +354,12 @@
       /* ==========================================================================
          🎨 1. NATURE 主題 (清新明亮森林白) 🌿
          ========================================================================== */
+      
+      .bgs-overlay-nature { background: rgba(236, 253, 245, 0.88) !important; }
+      .bgs-overlay-pixel { background: rgba(254, 243, 199, 0.88) !important; }
+      .bgs-overlay-warm { background: rgba(255, 247, 237, 0.88) !important; }
+      .bgs-overlay-fantasy { background: rgba(254, 252, 232, 0.88) !important; }
+      .bgs-overlay-scifi { background: rgba(15, 23, 42, 0.92) !important; }
       .bgs-overlay:has(.bgs-theme-nature) {
         background: rgba(236, 253, 245, 0.85);
       }
@@ -985,7 +992,7 @@
     if (existing) existing.remove();
 
     const overlay = document.createElement('div');
-    overlay.className = 'bgs-overlay';
+    overlay.className = 'bgs-overlay bgs-overlay-' + theme.id;
     overlay.id = 'bgsLoginOverlay';
 
     const savedClass = localStorage.getItem('bgs_last_class') || '701';
@@ -1106,7 +1113,7 @@
   function showConfirmModal(options) {
     const theme = resolveTheme(options);
     const overlay = document.createElement('div');
-    overlay.className = 'bgs-overlay';
+    overlay.className = 'bgs-overlay bgs-overlay-' + theme.id;
     overlay.id = 'bgsConfirmOverlay';
 
     overlay.innerHTML = `
@@ -1199,7 +1206,7 @@
   function promptIdentityBeforeResult(options) {
     const theme = resolveTheme(options);
     const overlay = document.createElement('div');
-    overlay.className = 'bgs-overlay';
+    overlay.className = 'bgs-overlay bgs-overlay-' + theme.id;
     overlay.id = 'bgsPromptIdOverlay';
 
     const classOpts = Array.from({ length: 10 }, (_, i) => {
@@ -1274,7 +1281,7 @@
   function renderThreeStageResult(options) {
     const theme = resolveTheme(options);
     const overlay = document.createElement('div');
-    overlay.className = 'bgs-overlay';
+    overlay.className = 'bgs-overlay bgs-overlay-' + theme.id;
     overlay.id = 'bgsResultOverlay';
 
     const score = options.score !== undefined ? options.score : 100;
