@@ -546,7 +546,7 @@ body.is-student-mode .home {
 .board {
   position: relative;
   flex: 1;
-  min-height: clamp(340px, 48vh, 520px);
+  min-height: clamp(360px, 50vh, 520px);
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-template-rows: repeat(4, minmax(0, 1fr));
@@ -988,31 +988,30 @@ body.is-student-mode .home {
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  padding: 2px 3px 4px !important;
+  padding: 2px 4px 6px !important;
   overflow: hidden;
   max-height: 100%;
   height: 100%;
 }
 
-/* 將分類標籤改為頂部微型徽章，不再霸佔整行高度，大幅釋放垂直空間！ */
+/* 分類標籤：自然透明微型徽章，不吃卡片高度與版面 */
 .tile:has(.stage3Art) .tileCategory {
   position: absolute;
   top: 3px;
-  left: 4px;
+  left: 5px;
   z-index: 2;
-  background: rgba(249, 211, 194, 0.95);
-  color: #493729;
-  border: 1px solid #e2a890;
-  border-radius: 999px;
-  padding: 1px 7px;
+  background: rgba(120, 83, 46, 0.14);
+  color: #5d3815;
+  border: 1px solid rgba(120, 83, 46, 0.25);
+  border-radius: 6px;
+  padding: 1px 6px;
   font-weight: 900;
-  font-size: clamp(10px, 1vw, 13px);
+  font-size: 10px;
   line-height: 1.1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   pointer-events: none;
 }
 
-/* 中間圖片容器：填滿剩餘高度，min-height: 0 確保可任意縮小，絕不撐開卡片！ */
+/* 中間圖片容器：填滿剩餘高度，全面展開 */
 .tile:has(.stage3Art) .emo {
   order: 1;
   flex: 1 1 0;
@@ -1024,33 +1023,34 @@ body.is-student-mode .home {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 2px 0;
+  padding: 4px 2px 2px;
 }
 
-/* 圖片本身嚴格以 contain 縮放，以卡片格子空間為限，絕不出格！ */
+/* 圖片本身：去除白色外框，融入卡片材質，大圖居中 */
 .tile:has(.stage3Art) .stage3Art {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 95%;
+  max-height: 95%;
   width: auto;
   height: auto;
   object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: contrast(1.06) drop-shadow(0 2px 3px rgba(80, 50, 20, 0.22));
   pointer-events: none;
 }
 
-/* 底部圖卡名稱 */
+/* 底部圖卡名稱：取消框框與白底，對齊第 1、2 關自然純粹的風格！ */
 .tile:has(.stage3Art) .tileName {
   order: 2;
   flex: 0 0 auto;
-  background: #fff8e8;
-  border: 1px solid #f1d6a8;
-  border-radius: 8px;
-  padding: 2px 3px;
-  margin: 1px auto 0;
-  width: 96%;
-  font-size: clamp(9px, 1vw, 13px) !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  margin: 1px 0 2px;
+  width: 100%;
+  font-size: clamp(11px, 1.15vw, 15px) !important;
   line-height: 1.15;
-  color: #422a1d;
-  font-weight: 900;
+  color: #4c4435;
+  font-weight: 850;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
