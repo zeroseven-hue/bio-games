@@ -760,6 +760,7 @@ body {
 
 /* 懸浮錘子游標 (桌機專用) */
 /* 懸浮錘子游標 (全新高解析日系卡通充氣玩具大槌) */
+.hammer-svg { overflow: visible !important; width: 100%; height: 100%; }
 .hammer-cursor {
   position: fixed;
   z-index: 999;
