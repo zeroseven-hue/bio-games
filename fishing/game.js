@@ -154,7 +154,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   initControls();
 
   await prepareQuestionPool();
+  // ⭐ 安全凍結守門員：先建立釣場畫面，計時器保持暫停！
   startNewFishingSession();
+  isPaused = true;
   requestAnimationFrame(gameMainLoop);
 });
 
@@ -1019,3 +1021,9 @@ function triggerFishingGasSubmit() {
     });
   }
 }
+
+window.startGame = function() {
+  isPaused = false;
+  const isTimerOff = new URLSearchParams(window.location.search).get("timer") === "off";
+  if (!isTimerOff) startTimer();
+};

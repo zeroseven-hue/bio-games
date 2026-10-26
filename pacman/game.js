@@ -191,7 +191,7 @@ let dotsEatenCount = 0;
 let wrongList = [];
 let animFrame = 0;
 
-let isTimeFrozen = false;
+let isTimeFrozen = true; // ⭐ 安全凍結守門員：開局前幽靈嚴格靜止
 let isCountingDown = false;
 let invulnerableTimer = 0;
 let powerModeTimer = 0;
@@ -1055,3 +1055,5 @@ function closeLeaderboard() {
       });
     }
   });
+
+window.startGame = function() { isTimeFrozen = false; };

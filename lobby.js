@@ -423,11 +423,20 @@ function generateDispatchUrlAndQR() {
   const selectUnit = selectUnitElem ? selectUnitElem.value : "";
   if (!selectUnit) {
     if (selectUnitElem) {
-      selectUnitElem.style.border = "2px solid #ef4444";
+      selectUnitElem.style.border = "3px solid #ef4444";
       selectUnitElem.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => { selectUnitElem.style.border = ""; }, 3000);
+      setTimeout(() => { selectUnitElem.style.border = ""; }, 4000);
     }
-    alert("請先於步驟 2 選擇生物題庫單元！");
+    const autoPick = confirm("⚠️ 老師您好：您尚未於【步驟 2】選取派卷題庫單元！\n\n💡 是否要為您【一鍵自動選取：7上 1-1 生命現象】並立即生成派卷二維碼？\n\n（點擊「確定」自動選取並派卷；點擊「取消」回到步驟 2 自行挑選）");
+    if (autoPick && selectUnitElem && selectUnitElem.options.length > 0) {
+      for (let i = 0; i < selectUnitElem.options.length; i++) {
+        if (selectUnitElem.options[i].value) {
+          selectUnitElem.selectedIndex = i;
+          break;
+        }
+      }
+      return generateDispatchUrlAndQR();
+    }
     return;
   }
 

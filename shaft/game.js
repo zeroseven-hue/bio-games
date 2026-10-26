@@ -114,7 +114,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   setupCanvasDPI();
   initEventListeners();
   await loadManifestAndUnits();
-  resetGame();
+  // ⭐ 安全凍結守門員：加載時僅繪製初生平台，嚴禁物理下墜與計時器偷跑！
+  resetGame(false);
 });
 
 function setupCanvasDPI() {
@@ -572,7 +573,7 @@ function getFallbackQuestions() {
 }
 
 // 重置遊戲與建立高密度安全巨型階梯
-function resetGame() {
+function resetGame(autoStart = true) {
   hearts = 7;
   maxHearts = 7;
   depth = 0;
@@ -580,7 +581,7 @@ function resetGame() {
   correctAnswersCount = 0; // 精準重置答對題數為 0
   totalDistanceDescended = 0;
   gameTimeSeconds = 0;
-  isGameRunning = true;
+  isGameRunning = autoStart;
   isBulletTime = false;
   speedMultiplier = 1.0;
   slowdownBoostTimer = 0;
@@ -636,15 +637,26 @@ function resetGame() {
   clearInterval(gameLoopTimer);
   clearInterval(secondsTimer);
 
-  lastFrameTime = Date.now();
-  gameLoopTimer = requestAnimationFrame(gameLoop);
+  if (autoStart) {
+    isGameRunning = true;
+    lastFrameTime = Date.now();
+    gameLoopTimer = requestAnimationFrame(gameLoop);
 
-  secondsTimer = setInterval(() => {
-    if (isTeacherFrozen || !isGameRunning) return;
-    gameTimeSeconds++;
-    updateUI();
-  }, 1000);
+    secondsTimer = setInterval(() => {
+      if (isTeacherFrozen || !isGameRunning) return;
+      gameTimeSeconds++;
+      updateUI();
+    }, 1000);
+  } else {
+    isGameRunning = false;
+    renderCanvas();
+  }
 }
+
+// ⭐ 對外暴露標準開局進入點 (供 BioGameSuite 身分確認後喚醒物理戰鬥)
+window.startGame = function() {
+  resetGame(true);
+};
 
 function spawnBottomStair(spawnY) {
   stairCountCounter++;

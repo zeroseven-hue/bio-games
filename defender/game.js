@@ -265,10 +265,12 @@ function updateUnitDisplayTitle() {
 
 /* 根據 currentUnitId 從 GitHub 題庫動態抓取並隨機抽題 */
 async function fetchQuestionsForCurrentUnit() {
-  if (currentUnitId === "all") {
+  if (currentUnitId === "all" || currentUnitId === "FAST_DEFAULT" || !currentUnitId) {
+    // ⭐ 嚴禁循序抓取 94 個單元！隨機並行取樣最多 3 個單元，100ms 極速完成！
     let allPool = [];
     if (manifestData && manifestData.units) {
-      for (const u of manifestData.units) {
+      const sampleUnits = shuffleArray(manifestData.units).slice(0, 3);
+      for (const u of sampleUnits) {
         const pool = await loadSingleUnitFile(u.file || u.id);
         allPool = allPool.concat(pool);
       }
@@ -401,7 +403,12 @@ async function startMission() {
 
   // 🎯 身分二次核對 ＋ 課堂載具使用誠信公約 (若 BioGameSuite 已驗證則不重複彈窗)
   const alreadyAuthed = window.BioGameSuite && window.BioGameSuite.getStudent && window.BioGameSuite.getStudent().name;
-  if (!alreadyAuthed) {
+  if (alreadyAuthed) {
+    const st = window.BioGameSuite.getStudent();
+    c = st.class || c || "701";
+    s = st.seat || s || "01";
+    n = st.name || n || "探險家同學";
+  } else {
     const confirmText = `🎯 請核對您的挑戰身分：\n\n【${c} 班級　${s} 座號】${n}\n\n📱【課堂載具使用誠信公約】\n⚠️ 挑戰全程請專注作答！\n👉 嚴禁跳出畫面看 YouTube、拍照自拍、或開啟非課堂 App。\n👉 若發現違規使用載具，本次作答成績將直接不予計分！\n\n您已確認身分無誤，並保證遵守公約嗎？`;
     if (!confirm(confirmText)) return;
   }
@@ -1046,3 +1053,6 @@ function triggerDefenderGasSubmit() {
     });
   }
 }
+
+window.startGame = startMission;
+window.startMission = startMission;

@@ -360,7 +360,8 @@ async function loadManifestAndUnits() {
   }
 
   if (lblUnit) lblUnit.innerText = "生物星際逃亡";
-  initGame();
+  // ⭐ 安全凍結守門員：打字看說明時黑洞計時器與心跳聲完全靜止
+  initGame(false);
 }
 
 function getQuestionsForSelectedUnit() {
@@ -387,7 +388,7 @@ function getQuestionsForSelectedUnit() {
 }
 
 // 初始化遊戲狀態
-function initGame() {
+function initGame(autoStart = true) {
   if (blackholeTimer) clearInterval(blackholeTimer);
   if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
   if (bgmTimer) clearTimeout(bgmTimer);
@@ -407,10 +408,17 @@ function initGame() {
 
   updateUI();
   renderQuestion();
-  startBlackholeTensionTimer();
-  updateDynamicHeartbeatSound();
-  if (musicEnabled) playBGMStep();
+  if (autoStart) {
+    startBlackholeTensionTimer();
+    updateDynamicHeartbeatSound();
+    if (musicEnabled) playBGMStep();
+  }
 }
+
+// ⭐ 對外暴露標準開局進入點
+window.startGame = function() {
+  initGame(true);
+};
 
 // 動態黑洞逼近計時器（每 3 秒逼近 1.2%）
 function startBlackholeTensionTimer() {

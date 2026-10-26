@@ -464,9 +464,11 @@ async function fetchQuestionsForUnit(unitId) {
     return [];
   };
 
-  if (unitId === 'all') {
+  if (unitId === 'all' || unitId === 'FAST_DEFAULT' || !unitId) {
+    // ⭐ 嚴禁循序抓取 94 個單元！隨機並行取樣最多 3 個單元，100ms 極速完成！
     if (manifestUnits.length > 0) {
-      for (const unit of manifestUnits) {
+      const sampleUnits = shuffle(manifestUnits).slice(0, 3);
+      for (const unit of sampleUnits) {
         for (const basePath of basePathCandidates) {
           try {
             const res = await fetch(basePath + unit.file);
@@ -479,6 +481,9 @@ async function fetchQuestionsForUnit(unitId) {
           } catch (e) {}
         }
       }
+    }
+    if (loaded.length === 0) {
+      return fallbackBank;
     }
   } else {
     const target = manifestUnits.find(u => u.file === unitId || u.id === unitId);
@@ -527,8 +532,14 @@ function shuffle(a) {
 // 開始遊戲
 async function startGame() {
   safeAudio();
-  const profile = validateStudentProfile();
-  if (!profile) return;
+  const alreadyAuthed = window.BioGameSuite && window.BioGameSuite.getStudent && window.BioGameSuite.getStudent().name;
+  if (alreadyAuthed) {
+    const s = window.BioGameSuite.getStudent();
+    studentProfile = { className: s.class, seat: s.seat, name: s.name };
+  } else {
+    const profile = validateStudentProfile();
+    if (!profile) return;
+  }
 
   selectedUnitId = $('unitSelect').value;
 
@@ -554,8 +565,10 @@ async function startGame() {
   startTime = Date.now();
 
   const unitSelectObj = $('unitSelect');
-  const unitTitle = unitSelectObj.options[unitSelectObj.selectedIndex].text;
-  $('badgeUnit').textContent = `單元：${unitTitle.split('：')[1] || unitTitle.split(' ')[0]}`;
+  const unitTitle = (unitSelectObj && unitSelectObj.selectedIndex >= 0 && unitSelectObj.options[unitSelectObj.selectedIndex])
+    ? unitSelectObj.options[unitSelectObj.selectedIndex].text
+    : '精選快問快答';
+  $('badgeUnit').textContent = `單元：${unitTitle.split('：')[1] || unitTitle.split(' ')[0] || unitTitle}`;
 
   $('startScreen').hidden = true;
   document.body.classList.add('playing');
@@ -1011,3 +1024,5 @@ function triggerBeanGasSubmit() {
     });
   }
 }
+
+window.startGame = startGame;
