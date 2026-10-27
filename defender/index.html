@@ -1,22 +1,33 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>生物小蜜蜂：星際防衛隊 V2.0 (Bio Defender)</title>
-  <link rel="stylesheet" href="style.css?v=2.0" />
+  <title>生物小蜜蜂：星際防衛隊 V5.0 (Bio Defender)</title>
+  <link rel="stylesheet" href="style.css?v=5.0" />
 </head>
 <body>
 
   <div id="game-container">
+    <div class="masthead">
+      <div class="brand">
+        <span class="brand-symbol" aria-hidden="true">🛸</span>
+        <div>
+          <p class="eyebrow">BIO DEFENDER · SCIENCE MISSION</p>
+          <h1>生物星際防衛隊</h1>
+        </div>
+      </div>
+      <span class="live-tag">星艦通訊 · 已連線</span>
+    </div>
+
     <!-- 頂部 HUD 資訊列 -->
     <header>
-      <div class="hud-item">❤️ <span id="lives-val">3</span></div>
-      <div class="hud-item">🏆 <span id="score-val">0</span></div>
-      <div class="hud-item">🔥 <span id="combo-val">0</span> 連擊</div>
+      <div class="hud-item">🛡️ 護盾 <span id="lives-val">3</span></div>
+      <div class="hud-item">🏆 戰分 <span id="score-val">0</span></div>
+      <div class="hud-item">🔥 連擊 <span id="combo-val">0</span></div>
       <div class="hud-item">
         <button class="btn-sound" id="sound-btn" onclick="toggleSound()">🔊 音效</button>
       </div>
@@ -24,30 +35,38 @@
 
     <!-- 📚 單元切換列 (動態載入中央題庫) -->
     <div class="unit-bar">
-      <span class="unit-title" id="unit-display-name">📚 載入題庫單元...</span>
-      <select id="unit-select" class="styled-select" onchange="onUnitChange(this.value)">
-        <option value="">載入單元中...</option>
+      <span class="unit-title" id="unit-display-name">📚 載入題庫單元中...</span>
+      <select aria-label="挑戰單元" id="unit-select" class="styled-select" onchange="onUnitChange(this.value)">
+        <option value="">載入單元清單中...</option>
       </select>
     </div>
 
-    <!-- 上方生物題目閱讀板 -->
+    <!-- 上方生物題目閱讀板 (教室抗眩光護眼明亮版) -->
     <div id="question-panel">
+      <div class="question-meta">
+        <span id="question-progress">MISSION / 1 · 10</span>
+        <strong id="timer-label">25 秒</strong>
+      </div>
       <div class="time-bar-bg">
         <div class="time-bar-fill" id="time-fill"></div>
       </div>
       <div id="q-text">戰機通訊系統連線中...</div>
       <div class="options-grid">
-        <div class="opt-card A" id="opt-A">A. --</div>
-        <div class="opt-card B" id="opt-B">B. --</div>
-        <div class="opt-card C" id="opt-C">C. --</div>
-        <div class="opt-card D" id="opt-D">D. --</div>
+        <button type="button" class="opt-card A" id="opt-A" onclick="directShoot('A')" disabled>A. --</button>
+        <button type="button" class="opt-card B" id="opt-B" onclick="directShoot('B')" disabled>B. --</button>
+        <button type="button" class="opt-card C" id="opt-C" onclick="directShoot('C')" disabled>C. --</button>
+        <button type="button" class="opt-card D" id="opt-D" onclick="directShoot('D')" disabled>D. --</button>
       </div>
+      <div class="question-note">💡 提示：點按選項直接精準鎖定發射，亦可滑動戰機觸控射擊。</div>
     </div>
 
     <!-- 戰鬥主畫布 -->
     <div id="canvas-wrap">
-      <canvas id="gameCanvas"></canvas>
-      <div id="hint-banner"></div>
+      <span class="arena-label">SECTOR 07 / 生物觀測星域</span>
+      <canvas id="gameCanvas" aria-label="戰機射擊區：點按發射，拖曳移動。亦可使用答案卡或鍵盤。"></canvas>
+      <div id="combat-feedback" role="status" aria-live="polite"></div>
+      <span class="arena-status">守住好奇心 · 用知識突破星際</span>
+      <div id="hint-banner" role="status" aria-live="polite"></div>
     </div>
 
     <!-- 教室大黑板大觸屏專用：拍打發射按鈕 -->
@@ -58,15 +77,40 @@
       <button class="touch-btn btn-D" onclick="directShoot('D')">[D] 鎖定發射</button>
     </div>
 
-    <!-- 彈窗 1：開局身分登錄與單元模式選擇 (防偽機制) -->
-    <div class="modal-overlay" id="start-modal">
+    <div class="mission-progress" aria-hidden="true"><span id="mission-fill"></span></div>
+    <footer class="control-guide">
+      <span><strong>快捷鎖定</strong> <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd>　<strong>移動</strong> ← → 或拖曳　<strong>發射</strong> 空白鍵</span>
+      <span>載具觸控：點按發射 · 拖曳巡航</span>
+    </footer>
+
+    <!-- 彈窗 1：降級身分備查（主要由通用 score-submit-modal.js 接管開局） -->
+    <div class="modal-overlay" id="start-modal" style="display: none;">
       <div class="modal-card">
-        <h2 style="color: var(--accent-blue); margin-bottom: 8px;">🚀 生物星際防衛隊 V2.0</h2>
-        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 10px;">
-          請輸入真實身分（座號需為 2 碼如 <code style="color:var(--accent-yellow);">05</code>，姓名請填寫真實姓名，不可使用暱稱或藝名）。
+        <div class="launch-art">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#0284c7" opacity=".35"/>
+            <ellipse cx="50" cy="50" rx="48" ry="17" fill="none" stroke="#0284c7" opacity=".4" transform="rotate(-35 50 50)"/>
+            <path d="M50 17 64 59 79 73 56 68 50 82 44 68 21 73 36 59Z" fill="#38bdf8"/>
+            <path d="M50 26 56 57 50 63 44 57Z" fill="#0369a1"/>
+            <path d="m44 73 6 20 6-20" fill="#f59e0b"/>
+            <circle cx="83" cy="23" r="4" fill="#f59e0b"/>
+          </svg>
+          <div>
+            <p class="eyebrow">MISSION BRIEFING</p>
+            <h2 style="color:#0369a1">知識，就是你的火力。</h2>
+            <p>加入生物星際防衛隊，守護探索的前線。</p>
+          </div>
+        </div>
+        <div class="mission-rules">
+          <div><strong>3 格</strong>護盾防護</div>
+          <div><strong>25 秒</strong>每題挑戰</div>
+          <div><strong>連擊</strong>答對累積加分</div>
+        </div>
+        <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
+          請核對您的學生身分（班級純數字 701~710，座號 01~35，真實中文姓名）：
         </p>
         <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-          <select id="user-class" class="styled-select" style="flex: 1; min-width: 100px;">
+          <select aria-label="班級" id="user-class" class="styled-select" style="flex: 1; min-width: 100px;">
             <option value="701">701</option><option value="702">702</option>
             <option value="703">703</option><option value="704">704</option>
             <option value="705">705</option><option value="706">706</option>
@@ -74,75 +118,71 @@
             <option value="709">709</option><option value="710">710</option>
           </select>
 
-          <select id="user-seat" class="styled-select" style="flex: 1; min-width: 90px;">
+          <select aria-label="座號" id="user-seat" class="styled-select" style="flex: 1; min-width: 90px;">
             <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option>
             <option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option>
             <option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
             <option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>
             <option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option>
-            <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option>
+            <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option>
+            <option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option>
           </select>
 
-          <input type="text" id="user-name" placeholder="真實姓名 (勿填暱稱)" style="flex: 1.5; min-width: 130px;" required />
-        </div>
-        <div style="font-size: 11px; color: #fbbf24; text-align: left; margin-bottom: 12px; line-height: 1.4;">
-          ⚠️ 提醒：成績將自動登錄至老師雲端試算表！
+          <input type="text" aria-label="真實姓名" autocomplete="name" id="user-name" placeholder="真實姓名 (勿填暱稱)" style="flex: 1.5; min-width: 130px;" required />
         </div>
 
         <div style="text-align: left; margin-bottom: 12px;">
-          <label style="font-size: 12px; color: #94a3b8;">選擇生物挑戰單元 (中央動態題庫)：</label>
-          <select id="modal-unit-select" class="styled-select" onchange="onUnitChange(this.value)">
+          <label style="font-size: 12px; color: #64748b; font-weight:700;">選擇生物挑戰單元 (中央動態題庫)：</label>
+          <select aria-label="教師指定題庫" id="modal-unit-select" class="styled-select" onchange="onUnitChange(this.value)">
             <option value="">載入單元清單中...</option>
           </select>
         </div>
 
         <div style="text-align: left; margin-bottom: 12px;">
-          <label style="font-size: 12px; color: #94a3b8;">操作模式：</label>
-          <select id="mode-select">
+          <label style="font-size: 12px; color: #64748b; font-weight:700;">操作模式：</label>
+          <select aria-label="操作模式" id="mode-select">
             <option value="standard">學生載具（觸控拖曳 / 鍵盤 A/B/C/D 鍵與空白鍵）</option>
             <option value="bigscreen">教室大黑板觸控螢幕（下方直覺大按鈕）</option>
           </select>
         </div>
         <div id="load-error" role="alert"></div>
-      <button id="load-retry" style="display:none" onclick="initializeDefender()">重新載入題庫清單</button>
-      <button class="primary-btn" onclick="startMission()">啟動戰機出擊！</button>
+        <button id="load-retry" style="display:none" onclick="initializeDefender()">重新載入題庫清單</button>
+        <button class="primary-btn" id="launch-button" onclick="startMission()">啟動戰機 · 進入任務 →</button>
       </div>
     </div>
 
-    <!-- 彈窗 2：結算防偽證書卡 -->
+    <!-- 彈窗 2：結算防偽證書備查卡片 (三階段結算彈窗底層同步備查) -->
     <div class="modal-overlay" id="end-modal" style="display: none;">
       <div class="modal-card">
-        <h2 style="color: var(--accent-yellow);">🎖️ 任務結算報告</h2>
-        <div style="font-size: 15px; font-weight: bold; margin: 6px 0; color: #38bdf8;" id="end-rank">評級：達爾文特派員</div>
+        <h2 style="color: #0369a1;">🎖️ 星際任務結算報告</h2>
+        <div style="font-size: 16px; font-weight: 800; margin: 8px 0; color: #0284c7;" id="end-rank">評級：達爾文特派員</div>
 
         <!-- 防偽卡片 (供學生核對) -->
         <div class="cert-card" id="cert-card">
-          <div class="watermark" id="cert-watermark">701 15號 王小明</div>
-          <div>👤 防衛隊員：<strong id="cert-user" style="color: var(--accent-blue);">--</strong></div>
-          <div>🏆 最終戰分：<strong id="cert-score" style="color: var(--accent-green); font-size: 16px;">0</strong></div>
-          <div>🎯 答對題數：<span id="cert-stats" style="color: #f8fafc;">0 / 10</span></div>
-          <div>📅 完成時間：<span id="cert-time" style="color: #94a3b8;">--</span></div>
-          <div>🔒 防偽序號：<code id="cert-hash" style="color: var(--accent-yellow); font-family: monospace;">--</code></div>
+          <div class="watermark" id="cert-watermark">701 15 王小明</div>
+          <div>👤 防衛隊員：<strong id="cert-user" style="color: #0369a1;">--</strong></div>
+          <div>🏆 最終戰分：<strong id="cert-score" style="color: #16a34a; font-size: 18px;">0</strong></div>
+          <div>🎯 答對題數：<span id="cert-stats" style="color: #0f172a; font-weight:700;">0 / 10</span></div>
+          <div>📅 完成時間：<span id="cert-time" style="color: #64748b;">--</span></div>
+          <div>🔒 防偽序號：<code id="cert-hash" style="color: #d97706; font-family: monospace; font-weight:800;">--</code></div>
         </div>
 
-        <!-- 主按鈕：一鍵傳送至試算表 (大按鈕) -->
-        <button class="primary-btn" id="btnDirectSubmitGAS" onclick="directSubmitToGAS()" style="margin-top: 14px; font-size: 1.15rem; padding: 14px; background: linear-gradient(135deg, #0284c7, #0369a1); box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">🚀 一鍵送出成績至老師試算表</button>
+        <!-- 主按鈕：叫起通用三階段結算與交卷檢核 -->
+        <button class="primary-btn" id="btnSubmitScoreGas" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:white; font-weight:800; margin-top:14px;" onclick="triggerDefenderGasSubmit()">🚀 查看結算與交卷檢核</button>
+        <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 8px; font-size: 0.92rem; padding: 10px;">📋 複製學習紀錄 (斷網備用)</button>
+        <p id="copyStatus" style="font-size: 12px; color: #0284c7; min-height: 18px; margin-top: 4px;"></p>
+        <textarea id="copyResult" style="display: none;" readonly aria-label="學習紀錄內容"></textarea>
 
-        <!-- 備用按鈕：複製文字 (小黃鈕) -->
-        <button class="primary-btn" id="btnSubmitScoreGas" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800; margin-top:8px;" onclick="triggerDefenderGasSubmit()">🚀 送出成績至試算表 (優先推薦)</button>
-          <button class="primary-btn btn-gold" id="btnCopyCert" onclick="copyCertText()" style="margin-top: 8px; font-size: 0.88rem; opacity: 0.85; padding: 8px;">📋 複製成績文字檔 (斷網備用)</button>
-
-        <div style="margin-top: 12px; font-size: 12px; color: #94a3b8; text-align: left;">錯題回顧清單：</div>
+        <div style="margin-top: 14px; font-size: 13px; color: #334155; font-weight: 700; text-align: left;">錯題觀念回顧清單：</div>
         <div class="review-box" id="review-list"></div>
 
-        <button class="primary-btn" onclick="startMission()" style="margin-top: 10px;">重新挑戰</button>
+        <button class="primary-btn" onclick="startMission()" style="margin-top: 12px; background: linear-gradient(135deg, #10b981, #059669); color: white;">🔄 再次出擊</button>
       </div>
     </div>
   </div>
 
   <!-- 引入通用成績上傳模組與遊戲邏輯 -->
-  <script>window.__DISABLE_BGS_AUTO_LOGIN__ = true;</script>
   <script src="../score-submit-modal.js?v=4.5"></script>
-  <script src="game.js?v=4.5"></script>
+  <script src="game.js?v=5.0"></script>
 </body>
 </html>

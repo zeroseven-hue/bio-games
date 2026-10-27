@@ -138,7 +138,7 @@ let manifestData = null;
 let currentUnitId = "";
 let dispatchedUnit = "";
 let isStarting = false;
-const GAME_TITLE = "生物小蜜蜂：星際防衛隊 V2.0";
+const GAME_TITLE = "生物星際防衛隊 (Bio Defender)";
 
 function showLoadError(error) {
   console.error(error);
@@ -195,6 +195,35 @@ let particles = [];
 let stars = [];
 let keys = {};
 let gameTick = 0;
+let feedbackTimer = null;
+const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
+function updateMissionUI() {
+  const progress = document.getElementById("question-progress");
+  if (progress) progress.textContent = isRunning ? "MISSION / " + Math.min(currentQIndex + 1, gameQuestions.length) + " · " + gameQuestions.length : "任務待命";
+  const fill = document.getElementById("mission-fill");
+  if (fill) fill.style.width = (gameQuestions.length ? logs.length / gameQuestions.length * 100 : 0) + "%";
+  for (const letter of "ABCD") {
+    const card = document.getElementById("opt-" + letter);
+    if (card) card.disabled = !isRunning || questionSettled;
+  }
+}
+function combatFeedback(text) {
+  const el = document.getElementById("combat-feedback");
+  if (!el) return;
+  clearTimeout(feedbackTimer);
+  el.textContent = text;
+  el.className = "";
+  void el.offsetWidth;
+  el.className = "show";
+  feedbackTimer = setTimeout(() => { el.className = ""; }, 1400);
+}
+function revealAnswer(wrongLetter) {
+  const q = gameQuestions[currentQIndex];
+  for (const letter of "ABCD") {
+    const el = document.getElementById("opt-" + letter);
+    if (el) el.className = "opt-card " + letter + (letter === q.ans ? " is-correct" : letter === wrongLetter ? " is-wrong" : "");
+  }
+}
 
 /* 洗牌演算法 (用於隨機抽題) */
 function shuffleArray(arr) {
@@ -273,9 +302,22 @@ function updateUnitDisplayTitle() {
 
 /* 根據 currentUnitId 從 GitHub 題庫動態抓取並隨機抽題 */
 async function fetchQuestionsForCurrentUnit() {
-  if (!manifestData) throw new Error("題庫清單尚未載入，請重試。");
-  if (!currentUnitId) throw new Error("請先選擇教師指定的題庫。");
-  return loadSingleUnitFile(resolveUnit(currentUnitId).file);
+  if (currentUnitId === "FAST_DEFAULT" || !currentUnitId) {
+    return DEFAULT_QUESTION_BANK;
+  }
+  try {
+    if (!manifestData) {
+      await initManifestAndUnits();
+    }
+    const resolved = resolveUnit(currentUnitId);
+    if (!resolved || !resolved.file) {
+      return DEFAULT_QUESTION_BANK;
+    }
+    return await loadSingleUnitFile(resolved.file);
+  } catch (err) {
+    console.warn("無法取得指定題庫，降級使用內建快問快答題庫:", err);
+    return DEFAULT_QUESTION_BANK;
+  }
 }
 
 async function loadSingleUnitFile(file) {
@@ -302,10 +344,19 @@ async function loadSingleUnitFile(file) {
    ======================================================== */
 function resizeCanvas() {
   const wrap = document.getElementById("canvas-wrap");
-  cw = canvas.width = wrap.clientWidth || 360;
-  ch = canvas.height = wrap.clientHeight || 500;
-  player.y = ch - 55;
-  if (!player.x || player.x === 200) player.x = cw / 2;
+  const oldWidth = cw, oldHeight = ch;
+  cw = wrap.clientWidth || 360;
+  ch = wrap.clientHeight || 500;
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(cw * ratio);
+  canvas.height = Math.round(ch * ratio);
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  player.y = ch - 65;
+  player.x = Math.max(player.w / 2, Math.min(cw - player.w / 2, player.x * cw / oldWidth));
+  enemies.forEach((e, i) => { e.baseX = cw / 4 * (i + .5); e.x = e.baseX; });
+  bullets.forEach(b => { b.x *= cw / oldWidth; b.y *= ch / oldHeight; });
+  stars.forEach(star => { star.x *= cw / oldWidth; star.y *= ch / oldHeight; });
+  if (!isRunning) { ctx.clearRect(0, 0, cw, ch); drawArena(); drawPlayer(player.x, player.y); }
 }
 window.addEventListener("resize", resizeCanvas);
 
@@ -323,107 +374,84 @@ function initStars() {
 }
 
 /* ========================================================
-   4. 啟動與載入題目關卡 (包含座號2碼與真實姓名嚴格驗證)
+   4. 啟動與載入題目關卡 (銜接 BioGameSuite 終極模組)
    ======================================================== */
 async function startMission(bonusCount) {
   if (isStarting || isRunning) return;
   isStarting = true;
+  const launch = document.getElementById("launch-button");
+  if (launch) { launch.disabled = true; launch.textContent = "正在連接指定題庫…"; }
   try {
-  const cEl = document.getElementById("user-class");
-  const sEl = document.getElementById("user-seat");
-  const nEl = document.getElementById("user-name");
+    const student = (window.BioGameSuite && typeof window.BioGameSuite.getStudent === 'function')
+      ? window.BioGameSuite.getStudent() : {};
+    const cEl = document.getElementById("user-class");
+    const sEl = document.getElementById("user-seat");
+    const nEl = document.getElementById("user-name");
 
-  let c = cEl ? cEl.value.trim() : "";
-  let s = sEl ? sEl.value.trim() : "";
-  let n = nEl ? nEl.value.trim() : "";
+    let c = student.class || (cEl ? cEl.value.trim() : "") || "701";
+    let s = student.seat || (sEl ? sEl.value.trim() : "") || "01";
+    let n = student.name || (nEl ? nEl.value.trim() : "") || "防衛隊員";
 
-  if (!c || !s || !n) {
-    alert("⚠️ 請務必完整填寫班級、座號與真實姓名！");
-    return;
+    if (s.length === 1 && !isNaN(s)) s = "0" + s;
+
+    playerProfile = { cls: c, seat: s, name: n };
+
+    if (window.BioGameSuite && window.BioGameSuite.getStudent) {
+      const st = window.BioGameSuite.getStudent();
+      Object.assign(st, { class: c, seat: s, name: n });
+    }
+
+    initAudio();
+
+    const modeEl = document.getElementById("mode-select");
+    if (modeEl && modeEl.value === "bigscreen") {
+      document.getElementById("bigscreen-pad").style.display = "flex";
+    } else {
+      document.getElementById("bigscreen-pad").style.display = "none";
+    }
+
+    if (student.unit && student.unit !== "FAST_DEFAULT") {
+      currentUnitId = student.unit;
+    } else if (!currentUnitId) {
+      currentUnitId = dispatchedUnit || "FAST_DEFAULT";
+    }
+
+    // 取得題庫資料並隨機抽取題目 (依 URL ?qcount=N 或預設 10 題)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetQCount = bonusCount === 10 ? 10 : Math.max(1, parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10);
+    const pool = await fetchQuestionsForCurrentUnit();
+    gameQuestions = shuffleArray(pool).slice(0, targetQCount);
+
+    document.getElementById("end-modal").style.display = "none";
+    document.getElementById("start-modal").style.display = "none";
+    document.getElementById("load-retry").style.display = "none";
+    isOverheated = false;
+
+    const unitSel = document.getElementById("unit-select");
+    if (unitSel) unitSel.disabled = true;
+
+    resizeCanvas();
+    initStars();
+
+    score = 0;
+    lives = 3;
+    combo = 0;
+    currentQIndex = 0;
+    logs = [];
+    particles = [];
+    bullets = [];
+    isRunning = true;
+
+    updateHUD();
+    initEnemies();
+    loadQuestion(0);
+    requestAnimationFrame(gameLoop);
+  } catch (error) {
+    showLoadError(error);
+  } finally {
+    isStarting = false;
+    if (launch) { launch.disabled = false; launch.textContent = "啟動戰機 · 進入任務 →"; }
   }
-
-  // 自動格式化單碼座號 (如 5 -> 05)
-  if (s.length === 1 && !isNaN(s)) {
-    s = "0" + s;
-    if (sEl) sEl.value = s;
-  }
-
-  // 驗證座號：必須為 2 碼數字
-  if (!/^\d{2}$/.test(s)) {
-    alert("⚠️ 座號請填寫 2 位數號碼（例如：05、12、35）！");
-    if (sEl) sEl.focus();
-    return;
-  }
-
-  // 驗證真實姓名：不可使用單字、藝名或暱稱
-  if (n.length < 2) {
-    alert("⚠️ 請填寫真實全姓名（不可使用暱稱、單字或藝名），以利教師核對成績！");
-    if (nEl) nEl.focus();
-    return;
-  }
-
-  // 🎯 身分二次核對 ＋ 課堂載具使用誠信公約 (若 BioGameSuite 已驗證則不重複彈窗)
-  const alreadyAuthed = window.BioGameSuite && window.BioGameSuite.getStudent && window.BioGameSuite.getStudent().name;
-  if (alreadyAuthed) {
-    const st = window.BioGameSuite.getStudent();
-    c = st.class || c || "701";
-    s = st.seat || s || "01";
-    n = st.name || n || "探險家同學";
-  } else {
-    const confirmText = `🎯 請核對您的挑戰身分：\n\n【${c} 班級　${s} 座號】${n}\n\n📱【課堂載具使用誠信公約】\n⚠️ 挑戰全程請專注作答！\n👉 嚴禁跳出畫面看 YouTube、拍照自拍、或開啟非課堂 App。\n👉 若發現違規使用載具，本次作答成績將直接不予計分！\n\n您已確認身分無誤，並保證遵守公約嗎？`;
-    if (!confirm(confirmText)) return;
-  }
-
-  playerProfile = { cls: c, seat: s, name: n };
-  if (window.BioGameSuite) {
-    const student = window.BioGameSuite.getStudent();
-    Object.assign(student, { class: c, seat: s, name: n, unit: currentUnitId, unitTitle: manifestData?.units.find(u => u.file === currentUnitId)?.title || "" });
-    sessionStorage.setItem("bgs_authed_student", JSON.stringify(student));
-  }
-  initAudio();
-
-  const modeEl = document.getElementById("mode-select");
-  if (modeEl && modeEl.value === "bigscreen") {
-    document.getElementById("bigscreen-pad").style.display = "flex";
-  } else {
-    document.getElementById("bigscreen-pad").style.display = "none";
-  }
-
-  // 取得題庫資料並隨機抽取題目 (依 URL ?qcount=N 或預設 10 題)
-  const urlParams = new URLSearchParams(window.location.search);
-  const targetQCount = bonusCount === 10 ? 10 : Math.max(1, parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10);
-  const pool = await fetchQuestionsForCurrentUnit();
-  gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, targetQCount);
-
-  document.getElementById("end-modal").style.display = "none";
-  document.getElementById("load-retry").style.display = "none";
-  isOverheated = false;
-  const submitButton = document.getElementById("btnDirectSubmitGAS");
-  submitButton.disabled = false;
-  submitButton.innerText = "🚀 一鍵送出成績至老師試算表";
-  submitButton.style.background = "linear-gradient(135deg, #0284c7, #0369a1)";
-  document.getElementById("unit-select").disabled = true;
-
-  // 關閉開始選單
-  document.getElementById("start-modal").style.display = "none";
-
-  resizeCanvas();
-  initStars();
-
-  score = 0;
-  lives = 3;
-  combo = 0;
-  currentQIndex = 0;
-  logs = [];
-  particles = [];
-  bullets = [];
-  isRunning = true;
-
-  updateHUD();
-  loadQuestion(0);
-  requestAnimationFrame(gameLoop);
-  } catch (error) { showLoadError(error); }
-  finally { isStarting = false; }
 }
 
 function loadQuestion(idx) {
@@ -439,6 +467,7 @@ function loadQuestion(idx) {
     return;
   }
 
+  for (const letter of "ABCD") document.getElementById("opt-" + letter).className = "opt-card " + letter;
   const q = gameQuestions[idx];
   if (!q.shuffled) {
     const origCorrectText = q.options[q.ans];
@@ -495,6 +524,11 @@ function loadQuestion(idx) {
   bullets = [];
   qTimeRemaining = 25;
   questionSettled = false;
+  document.getElementById("time-fill").style.width = "100%";
+  document.getElementById("time-fill").className = "time-bar-fill";
+  const timerLabel = document.getElementById("timer-label");
+  if (timerLabel) timerLabel.textContent = "25 秒";
+  updateMissionUI();
   startTimer();
 }
 
@@ -504,6 +538,9 @@ function startTimer() {
   qTimer = setInterval(() => {
     if (!isRunning || questionSettled || version !== questionVersion) return;
     qTimeRemaining -= 0.1;
+    const label = document.getElementById("timer-label");
+    if (label) label.textContent = Math.max(0, Math.ceil(qTimeRemaining)) + " 秒";
+    document.getElementById("time-fill").className = "time-bar-fill" + (qTimeRemaining <= 5 ? " urgent" : "");
     const pct = Math.max(0, (qTimeRemaining / 25) * 100);
     document.getElementById("time-fill").style.width = pct + "%";
 
@@ -520,6 +557,7 @@ function settleQuestion() {
   questionSettled = true;
   clearInterval(qTimer);
   bullets = [];
+  updateMissionUI();
   return true;
 }
 
@@ -529,6 +567,7 @@ function handleTimeout() {
   combo = 0;
   updateHUD();
   soundExplode();
+  revealAnswer();
   const current = gameQuestions[currentQIndex];
   logs.push({ q: current.q, correct: false, ans: current.ans, reason: "思考逾時" });
   showHint(`⏰ 時間到！正確答案是 [${current.ans}]。<br>${current.hint}`);
@@ -538,6 +577,9 @@ function handleTimeout() {
    5. 操控與鎖定雷射發射邏輯 (無連發限制)
    ======================================================== */
 window.addEventListener("keydown", (e) => {
+  if (!isRunning || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target?.tagName || "") || e.target?.isContentEditable) return;
+  if (e.code === "Space" && e.target?.tagName === "BUTTON") return;
+  if (["Space", "ArrowLeft", "ArrowRight", "KeyA", "KeyB", "KeyC", "KeyD"].includes(e.code)) e.preventDefault();
   keys[e.code] = true;
   if (e.code === "Space") {
     fireBullet();
@@ -554,19 +596,24 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => { keys[e.code] = false; });
 
-canvas.addEventListener("touchmove", (e) => {
+window.addEventListener("blur", () => { keys = {}; });
+let pointerId = null;
+function positionPointer(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  player.x = Math.max(player.w / 2, Math.min(cw - player.w / 2, (clientX - rect.left) * cw / rect.width));
+}
+canvas.addEventListener("pointerdown", (e) => {
+  if (!isRunning || questionSettled || pointerId !== null || (e.pointerType === "mouse" && e.button !== 0)) return;
   e.preventDefault();
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  player.x = touch.clientX - rect.left;
-}, { passive: false });
-
-canvas.addEventListener("touchstart", (e) => {
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  player.x = touch.clientX - rect.left;
+  pointerId = e.pointerId;
+  canvas.setPointerCapture?.(e.pointerId);
+  positionPointer(e.clientX);
   fireBullet();
 });
+canvas.addEventListener("pointermove", (e) => { if (pointerId === e.pointerId) positionPointer(e.clientX); });
+for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+  canvas.addEventListener(type, (e) => { if (pointerId === e.pointerId) pointerId = null; });
+}
 
 /* 直覺鎖定發射：大黑板觸控或按 A/B/C/D 鍵 */
 function directShoot(letter) {
@@ -595,6 +642,7 @@ function hitTarget(enemy) {
     combo++;
     const speedBonus = Math.floor(qTimeRemaining * 10);
     score += 100 + combo * 25 + speedBonus;
+    combatFeedback("命中正解 +" + (100 + combo * 25 + speedBonus) + (combo > 1 ? " · " + combo + " 連擊" : ""));
     logs.push({ q: q.q, correct: true, ans: q.ans });
     updateHUD();
     currentQIndex++;
@@ -605,6 +653,7 @@ function hitTarget(enemy) {
     combo = 0;
     updateHUD();
     logs.push({ q: q.q, correct: false, ans: q.ans, myAns: enemy.letter });
+    revealAnswer(enemy.letter);
     triggerOverheat();
     showHint(`❌ 擊中 [${enemy.letter}] 錯囉！正確答案是 [${q.ans}]。<br>${q.hint}`);
   }
@@ -635,6 +684,7 @@ function updateHUD() {
   document.getElementById("lives-val").textContent = lives;
   document.getElementById("score-val").textContent = score;
   document.getElementById("combo-val").textContent = combo;
+  updateMissionUI();
 }
 
 function createBurstParticles(x, y, color) {
@@ -656,9 +706,21 @@ function createBurstParticles(x, y, color) {
 /* ========================================================
    6. 繪製引擎 (全原生畫布繪製)
    ======================================================== */
+function drawArena() {
+  ctx.save();
+  ctx.strokeStyle = "rgba(101,225,242,.065)";
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(cw * i / 4, 40); ctx.lineTo(cw * i / 4, ch - 35); ctx.stroke(); }
+  ctx.strokeStyle = "rgba(101,225,242,.12)";
+  ctx.beginPath(); ctx.ellipse(cw / 2, ch - 60, cw * .43, 25, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cw / 2, ch - 60, cw * .43, 35, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
 function drawPlayer(x, y) {
   ctx.save();
   ctx.translate(x, y);
+  ctx.shadowColor = "#65e1f2";
+  ctx.shadowBlur = 14;
 
   const flameHeight = Math.sin(gameTick * 0.4) * 4 + 14;
   ctx.fillStyle = isOverheated ? "#475569" : (combo >= 2 ? "#fbbf24" : "#38bdf8");
@@ -712,6 +774,8 @@ function drawPlayer(x, y) {
 function drawMonster(e) {
   ctx.save();
   ctx.translate(e.x, e.y);
+  ctx.shadowColor = e.theme;
+  ctx.shadowBlur = 12;
 
   const bubbleY = -24 + Math.sin(gameTick * 0.1) * 2;
   ctx.fillStyle = "#ffffff";
@@ -812,9 +876,10 @@ function gameLoop() {
   gameTick++;
 
   ctx.clearRect(0, 0, cw, ch);
+  drawArena();
 
   stars.forEach(s => {
-    s.y += s.vy;
+    s.y += reducedMotion ? 0 : s.vy;
     if (s.y > ch) s.y = 0;
     ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
     ctx.beginPath();
@@ -839,6 +904,9 @@ function gameLoop() {
 
     ctx.save();
     ctx.fillStyle = combo >= 2 ? "#fbbf24" : "#00e5ff";
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.shadowBlur = 12;
+    ctx.fillRect(b.x - 2, b.y, 4, 15);
     ctx.beginPath();
     ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
     ctx.fill();
@@ -891,6 +959,7 @@ function endMission() {
   bullets = [];
   clearInterval(qTimer);
 
+  updateMissionUI();
   document.getElementById("end-modal").style.display = "flex";
 
   const correctCount = logs.filter(l => l.correct).length;
@@ -898,7 +967,7 @@ function endMission() {
   if (score >= 1000 && correctCount >= 9) {
     rank = "👑 傳奇達爾文星艦艦長";
     soundVictory();
-  } else if (score >= 600) {
+  } else if (score >= 600 || correctCount >= 7) {
     rank = "🧬 細胞防衛隊長";
     soundVictory();
   } else {
@@ -932,15 +1001,12 @@ function endMission() {
     const div = document.createElement("div");
     div.className = `review-item ${l.correct ? 'correct' : 'wrong'}`;
     div.innerHTML = `<strong>第 ${idx + 1} 題：</strong>${l.q}<br>` +
-      (l.correct ? `✅ 正確` : `❌ 你的選擇: [${l.myAns || l.reason}]（正解: [${l.ans}]）`);
+      (l.correct ? `✅ 正確` : `❌ 你的選擇: [${l.myAns || l.reason || '超時'}]（正解: [${l.ans}]）`);
     listEl.appendChild(div);
   });
 
-  const finishedVersion = questionVersion;
-  setTimeout(() => {
-    if (isRunning || finishedVersion !== questionVersion) return;
-    triggerSubmitModal();
-  }, 1000);
+  // 自動叫起終極三階段標準結算彈窗 (GAS 自動提交 + 雙軌分支 + 4大自我檢核)
+  triggerDefenderGasSubmit();
 }
 
 /* 一鍵複製防偽文字報告 */
@@ -952,18 +1018,25 @@ function copyCertText() {
   const hashVal = document.getElementById("cert-hash").textContent;
   const rankVal = document.getElementById("end-rank").textContent;
 
-  const textToCopy = `【生物小蜜蜂：星際防衛隊 防偽認證戰報】\n` +
+  const textToCopy = `【生物星際防衛隊 防偽認證戰報】\n` +
     `👤 隊員身分：${userTag}\n` +
     `🎖️ 任務評級：${rankVal}\n` +
-    `🏆 最終分數：${scoreVal} 分\n` +
+    `🏆 最終戰分：${scoreVal} 分\n` +
     `🎯 答對題數：${statsVal}\n` +
     `📅 完成時間：${timeVal}\n` +
     `🔒 防偽驗證碼：${hashVal}\n` +
     `🌱 驗證平台：bio-games (GitHub Pages)`;
 
+  const statusEl = document.getElementById("copyStatus");
+  const copyRes = document.getElementById("copyResult");
+  if (copyRes) {
+    copyRes.value = textToCopy;
+    copyRes.style.display = "block";
+  }
+
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(textToCopy).then(() => {
-      alert("✅ 已成功複製完整防偽成績單！可以直接貼上至 Google Classroom 繳交作業。");
+      if (statusEl) statusEl.textContent = "✅ 已成功複製完整防偽學習紀錄至剪貼簿！";
     }).catch(() => {
       fallbackCopy(textToCopy);
     });
@@ -977,108 +1050,73 @@ function fallbackCopy(text) {
   textArea.value = text;
   document.body.appendChild(textArea);
   textArea.select();
+  const statusEl = document.getElementById("copyStatus");
   try {
     document.execCommand('copy');
-    alert("✅ 已成功複製完整防偽成績單！可以直接貼上至 Google Classroom 繳交作業。");
+    if (statusEl) statusEl.textContent = "✅ 已成功複製完整防偽學習紀錄至剪貼簿！";
   } catch (err) {
-    alert("複製失敗，請直接螢幕截圖上傳。");
+    if (statusEl) statusEl.textContent = "⚠️ 請手動複製下方文字框或截圖保存。";
   }
   document.body.removeChild(textArea);
 }
 
-/* 🚀 直接一鍵發送成績至老師 GAS 試算表 */
-async function directSubmitToGAS() {
-  const btn = document.getElementById("btnDirectSubmitGAS");
-  if (!btn) return;
-
-  btn.disabled = true;
-  btn.innerText = "⏳ 正在傳送成績中...";
-
-  const gasUrl = "https://script.google.com/macros/s/AKfycbzDHUfJKbGtgfYM5a1PHpQzbW2JGZL3zFTh582r95vcOKupGRfZVa0ToHbbfX1MirzbbQ/exec";
-
-  const payload = {
-    gameTitle: "生物小蜜蜂：星際防衛隊 V2.0",
-    class: playerProfile.cls || "701",
-    seatOrGroup: `${playerProfile.seat || "01"}號`,
-    nameOrMembers: playerProfile.name || "學生",
-    score: score,
-    duration: lives <= 0 ? "生命耗盡，挑戰結束" : "完成全部題目",
-    mode: "individual",
-    timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })
-  };
-
-  try {
-    await fetch(gasUrl, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    btn.innerText = "✅ 成績已成功傳送至老師試算表！";
-    btn.style.background = "linear-gradient(135deg, #16a34a, #15803d)";
-    alert(`🎉 傳送成功！\n\n【${payload.class}班 ${payload.seatOrGroup} ${payload.nameOrMembers}】\n得分：${score} 分，已自動登記至老師的 Google 試算表！`);
-  } catch (err) {
-    console.error("Submit error:", err);
-    btn.disabled = false;
-    btn.innerText = "❌ 傳送失敗，請點擊重試";
-    alert("網路傳送稍慢，請再按一次重試，或使用下方備用按鈕複製文字檔。");
-  }
-}
-
-function triggerSubmitModal() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const isDispatchMode = urlParams.has("unit") || urlParams.has("file") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
-
-  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
+// 叫起通用三階段結算彈窗
+function triggerDefenderGasSubmit() {
+  if (typeof showScoreSubmitModal === "function") {
+    const student = (window.BioGameSuite && typeof window.BioGameSuite.getStudent === 'function')
+      ? window.BioGameSuite.getStudent() : {};
+    const correctCount = logs.filter(l => l.correct).length;
     showScoreSubmitModal({
-      gameTitle: '生物小蜜蜂：星際防衛隊 V2.0',
+      gameTitle: GAME_TITLE,
+      gameId: "defender",
       score: score,
-      duration: lives <= 0 ? "生命耗盡，挑戰結束" : "完成全部題目",
-      initialClass: playerProfile.cls || '701',
-      initialSeat: playerProfile.seat || '01',
-      initialName: playerProfile.name || '',
+      scoreDisplay: `${score} 分 (答對 ${correctCount}/${gameQuestions.length} 題)`,
+      duration: lives <= 0 ? "護盾耗盡，任務結算" : "任務圓滿通關",
+      initialClass: student.class || playerProfile.cls || "701",
+      initialSeat: student.seat || playerProfile.seat || "01",
+      initialName: student.name || playerProfile.name || "防衛隊員",
       onBonusChallenge: () => {
-        // 🔥 挑戰加碼 10 題：關閉視窗並重新載入 10 題！
         startMission(10);
+      },
+      onRetry: () => {
+        startMission();
       }
     });
   }
 }
 
-// 此頁自行等待題庫並銜接登入；共用模組僅提供既有結算介面。
+// 初始化題庫清單與畫布
 async function initializeDefender() {
-  document.getElementById("bgsAntiFlash")?.remove();
   resizeCanvas();
   try {
     await initManifestAndUnits();
-    document.getElementById("load-error").textContent = "";
-    document.getElementById("load-retry").style.display = "none";
+    const errEl = document.getElementById("load-error");
+    if (errEl) errEl.textContent = "";
+    const retryEl = document.getElementById("load-retry");
+    if (retryEl) retryEl.style.display = "none";
+
     const raw = sessionStorage.getItem("bgs_authed_student");
     let student;
     try { student = raw ? JSON.parse(raw) : null; } catch (_) {}
     if (student?.name && student.class && student.seat && dispatchedUnit) {
       for (const [id, value] of [["user-class", student.class], ["user-seat", student.seat], ["user-name", student.name]]) {
-        document.getElementById(id).value = value;
+        const el = document.getElementById(id);
+        if (el) el.value = value;
       }
       if (window.BioGameSuite) Object.assign(window.BioGameSuite.getStudent(), student);
       await startMission();
     }
-  } catch (error) { showLoadError(error); }
-}
-window.addEventListener("DOMContentLoaded", initializeDefender);
-
-function triggerDefenderGasSubmit() {
-  if (typeof showScoreSubmitModal === "function") {
-    showScoreSubmitModal({
-      gameTitle: GAME_TITLE,
-      score: score,
-      scoreDisplay: score + " 分",
-      duration: lives <= 0 ? "生命耗盡，挑戰結束" : "完成全部題目",
-      onBonusChallenge: () => startMission(10)
-    });
+  } catch (error) {
+    showLoadError(error);
   }
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+  initializeDefender();
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(resizeCanvas).observe(document.getElementById("canvas-wrap"));
+  }
+});
 
 window.startGame = startMission;
 window.startMission = startMission;
