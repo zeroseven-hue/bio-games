@@ -1,3 +1,27 @@
+/**
+ * 🧬 《生物星際大逃亡：逃離黑洞》核心控制器 V5.1 (三明治終極標準模組版)
+ * 1. 課堂派卷守門員 + 純數字 701~710 / 01~35 + 誠信公約開局
+ * 2. 街機高速流暢手感：答錯秒記黑盒子觀念日誌，不中斷航行節奏
+ * 3. 緊急防護罩保底：100% 保證全員完成 12 題，弱勢生絕不半途出局
+ * 4. 三階段自動結算：完賽瞬間背景自動 POST 至 GAS，杜絕漏交成績
+ * 5. 離線無延遲保底題庫：學校 Wi-Fi 抖動時 3.5 秒自動無縫切換
+ */
+
+// 📚 離線保底精選題庫（涵蓋國中七年級生物核心常考觀念）
+const FALLBACK_QUESTION_BANK = [
+  { id: 1, question: "關於酵素（催化劑）特性的敘述，下列何者正確？", options: ["酵素主要成分是蛋白質，具有專一性", "酵素高溫煮沸後冷卻，活性即可恢復", "酵素在反應過程中會被大量消耗", "強酸強鹼環境下所有酵素活性最高"], answer: 0, explanation: "💡 觀念解析：酵素的主成分是蛋白質，專一性高。高溫或強酸強鹼會使蛋白質變性破壞活性，冷卻後無法恢復！" },
+  { id: 2, question: "將新鮮豬肝切片放入雙氧水中會產生大量氣泡，氣泡成分為何？", options: ["二氧化碳", "氧氣", "氮氣", "氫氣"], answer: 1, explanation: "💡 觀念解析：豬肝含有過氧化氫酵素，能催化雙氧水分解產生「氧氣」與水！" },
+  { id: 3, question: "植物進行光合作用時，水分子被光能分解會釋放何種物質？", options: ["二氧化碳", "葡萄糖", "氧氣", "澱粉"], answer: 2, explanation: "💡 觀念解析：光合作用第一階段（光反應），葉綠素吸收光能將水分解，釋放出「氧氣」。" },
+  { id: 4, question: "探究植物葉片光合作用實驗中，用酒精加熱處理葉片的目的為何？", options: ["軟化葉片細胞壁", "溶解葉綠素以便觀察顏色變化", "測試葉片是否含有葡萄糖", "增加葉片吸收碘液的能力"], answer: 1, explanation: "💡 觀念解析：葉綠素溶於酒精，隔水加熱可去除葉綠素，避免影響後續碘液顯色觀察。" },
+  { id: 5, question: "人體唾液澱粉酵素在下列哪一種溫度環境下，催化活性最高？", options: ["0°C (冰塊中)", "37°C (體溫環境)", "70°C (溫水中)", "100°C (沸水中)"], answer: 1, explanation: "💡 觀念解析：人體內酵素最適溫度約在體溫 37°C 左右。0°C 活性暫時抑制，100°C 永久變性失效。" },
+  { id: 6, question: "有關細胞膜性質與功能的敘述，下列何者正確？", options: ["可控制物質進出細胞，具有選擇透性", "主要成分為纖維素，能支撐細胞形狀", "所有物質皆可自由通過細胞膜", "植物細胞只有細胞壁而沒有細胞膜"], answer: 0, explanation: "💡 觀念解析：細胞膜主要由脂質與蛋白質組成具選擇透性；細胞壁成分為纖維素。" },
+  { id: 7, question: "擴散作用是指物質分子如何運動的現象？", options: ["由高濃度區域往低濃度區域運動", "由低濃度區域往高濃度區域運動", "必須消耗細胞 ATP 能量才能運動", "只有水分子才能進行的運動"], answer: 0, explanation: "💡 觀念解析：擴散作用是物質由高濃度往低濃度自然分布的物理現象，不需消耗能量。" },
+  { id: 8, question: "將紅血球放入純水中，會發生何種現象？", options: ["細胞萎縮變小", "水份大量滲入導致細胞膨脹破裂", "細胞大小形狀保持不變", "細胞壁破裂水份流出"], answer: 1, explanation: "💡 觀念解析：純水為低滲透壓環境，水大量經滲透作用進入細胞，紅血球缺乏細胞壁保護而破裂。" },
+  { id: 9, question: "植物葉片氣孔主要分佈與開閉控制，是由何種細胞負責？", options: ["表皮細胞", "葉肉細胞", "保衛細胞", "導管細胞"], answer: 2, explanation: "💡 觀念解析：保衛細胞成對存在含有葉綠體，能控制氣孔開閉與蒸散作用。" },
+  { id: 10, question: "下列哪一種器官或構造，是植物進行光合作用的主要場所？", options: ["根部細胞", "莖部維管束", "葉片的葉綠體", "花瓣細胞"], answer: 2, explanation: "💡 觀念解析：葉綠體含有葉綠素，是植物吸收光能進行光合作用的主要胞器。" },
+  { id: 11, question: "胃液中的胃蛋白酵素，在下列哪種 pH 值環境中活性最佳？", options: ["pH = 2 (強酸性)", "pH = 7 (中性)", "pH = 9 (弱鹼性)", "pH = 14 (強鹼性)"], answer: 0, explanation: "💡 觀念解析：胃液含有鹽酸，胃蛋白酵素適應強酸環境（pH 1.5~2.0）。" },
+  { id: 12, question: "植物進行光合作用產生的葡萄糖，常轉化為何種形式儲藏？", options: ["纖維素", "蛋白質", "澱粉", "脂肪"], answer: 2, explanation: "💡 觀念解析：植物將光合作用製造的葡萄糖轉化為難溶於水的「澱粉」形式儲藏於根、莖、種子中。" }
+];
 
 function cleanUnitTitle(raw) {
   if (!raw) return '精選題庫';
@@ -18,74 +42,67 @@ function cleanUnitTitle(raw) {
   return str || raw;
 }
 
-/**
- * 🧬 《生物星際大逃亡：逃離黑洞》核心邏輯控制器 V3.0
- * 包含：動態黑洞心跳加速度音效 (開局慢 60 BPM -> 逼近 115 BPM -> 臨界 230 BPM)、Synthwave BGM、防偽認證碼與全單元題庫選擇
- */
-
-const FALLBACK_QUESTION_BANK = [
-  { id: 1, question: "關於酵素（催化劑）特性的敘述，下列何者正確？", options: ["酵素主要成分是蛋白質，具有專一性", "酵素高溫煮沸後冷卻，活性即可恢復", "酵素在反應過程中會被大量消耗", "強酸強鹼環境下所有酵素活性最高"], answer: 0, explanation: "💡 觀念解析：酵素的主成分是蛋白質，專一性高。高溫或強酸強鹼會使蛋白質變性破壞活性，冷卻後無法恢復！" },
-  { id: 2, question: "將新鮮豬肝切片放入雙氧水中會產生大量氣泡，氣泡成分為何？", options: ["二氧化碳", "氧氣", "氮氣", "氫氣"], answer: 1, explanation: "💡 觀念解析：豬肝含有過氧化氫酵素，能催化雙氧水分解產生「氧氣」與水！" },
-  { id: 3, question: "植物進行光合作用時，水分子被光能分解會釋放何種物質？", options: ["二氧化碳", "葡萄糖", "氧氣", "澱粉"], answer: 2, explanation: "💡 觀念解析：光合作用第一階段（光反應），葉綠素吸收光能將水分解，釋露出「氧氣」。" },
-  { id: 4, question: "探究植物葉片光合作用實驗中，用酒精加熱處理葉片的目的為何？", options: ["軟化葉片細胞壁", "溶解葉綠素以便觀察顏色變化", "測試葉片是否含有葡萄糖", "增加葉片吸收碘液的能力"], answer: 1, explanation: "💡 觀念解析：葉綠素溶於酒精，隔水加熱可去除葉綠素，避免影響後續碘液顯色觀察。" },
-  { id: 5, question: "人體唾液澱粉酵素在下列哪一種溫度環境下，催化活性最高？", options: ["0°C (冰塊中)", "37°C (體溫環境)", "70°C (溫水中)", "100°C (沸水中)"], answer: 1, explanation: "💡 觀念解析：人體內酵素最適溫度約在體溫 37°C 左右。0°C 活性暫時抑制，100°C 永久變性失效。" },
-  { id: 6, question: "有關細胞膜性質與功能的敘述，下列何者正確？", options: ["可控制物質進出細胞，具有選擇透性", "主要成分為纖維素，能支撐細胞形狀", "所有物質皆可自由通過細胞膜", "植物細胞只有細胞壁而沒有細胞膜"], answer: 0, explanation: "💡 觀念解析：細胞膜主要由脂質與蛋白質組成具選擇透性；細胞壁成分為纖維素。" },
-  { id: 7, question: "擴散作用是指物質分子如何運動的現象？", options: ["由高濃度區域往低濃度區域運動", "由低濃度區域往高濃度區域運動", "必須消耗細胞 ATP 能量才能運動", "只有水分子才能進行的運動"], answer: 0, explanation: "💡 觀念解析：擴散作用是物質由高濃度往低濃度自然分布的物理現象，不需消耗能量。" },
-  { id: 8, question: "將紅血球放入純水中，會發生何種現象？", options: ["細胞萎縮變小", "水份大量滲入導致細胞膨脹破裂", "細胞大小形狀保持不變", "細胞壁破裂水份流出"], answer: 1, explanation: "💡 觀念解析：純水為低滲透壓環境，水大量經滲透作用進入細胞，紅血球缺乏細胞壁保護而破裂。" },
-  { id: 9, question: "植物葉片氣孔主要分佈與開閉控制，是由何種細胞負責？", options: ["表皮細胞", "葉肉細胞", "保衛細胞", "導管細胞"], answer: 2, explanation: "💡 觀念解析：保衛細胞成對存在含有葉綠體，能控制氣孔開閉與蒸散作用。" },
-  { id: 10, question: "下列哪一種器官或構造，是植物進行光合作用的主要場所？", options: ["根部細胞", "莖部維管束", "葉片的葉綠體", "花瓣細胞"], answer: 2, explanation: "💡 觀念解析：葉綠體含有葉綠素，是植物吸收光能進行光合作用的主要胞器。" },
-  { id: 11, question: "胃液中的胃蛋白酵素，在下列哪種 pH 值環境中活性最佳？", options: ["pH = 2 (強酸性)", "pH = 7 (中性)", "pH = 9 (弱鹼性)", "pH = 14 (強鹼性)"], answer: 0, explanation: "💡 觀念解析：胃液含有鹽酸，胃蛋白酵素適應強酸環境（pH 1.5~2.0）。" },
-  { id: 12, question: "植物進行光合作用產生的葡萄糖，常轉化為何種形式儲藏？", options: ["纖維素", "澱粉", "蛋白質", "脂肪"], answer: 1, explanation: "💡 觀念解析：光合作用產生的葡萄糖會暫時轉變成不溶於水的「澱粉」儲存。" }
-];
-
+// 狀態與計時變數
 const TOTAL_QUESTIONS_PER_ROUND = 12;
-
-// 單元題庫管理變數
 let allManifestUnits = [];
 let rawQuestionsByUnit = {};
 let roundQuestions = [];
 let currentIndex = 0;
 let wrongLogs = [];
-let isLocked = false;
+let answeredWrong = new Set();
+let firstCorrect = 0;
+let attempts = 0;
+let streak = 0;
+let shields = 0;
 let oxygen = 100;
+let emergencyTriggered = false;
 
-// 動態黑洞逼近與航行變數
-let shipProgress = 0;      // 0% ~ 100%
-let blackholeProgress = 0; // 0% ~ 100%
+// 動態航行與黑洞變數
+let shipProgress = 15;      // 15% ~ 100%
+let blackholeProgress = 0;  // 0% ~ 100%
 let blackholeTimer = null;
+let activeSeconds = 0;
+let phase = 'ready'; // ready | playing | ended
+let paused = false;
+let isLocked = false;
+let lastAnswerTime = -Infinity;
+let finalScore = 0;
+let submitted = false;
 
-// 音效與音樂控制
+// 音效控制 (適配教室輕柔音量)
 let soundEnabled = true;
 let musicEnabled = true;
 let heartbeatLoopTimer = null;
 let bgmTimer = null;
-
-// Web Audio API 聲效
 let audioCtx = null;
 
-// Canvas 星空與黑洞視效變數
+// Canvas 星空與黑洞視效
 let canvas = null;
 let ctx = null;
 let stars = [];
 let blackholeParticles = [];
 let animFrameId = null;
+let lastVisualTime = 0;
+
+const $ = id => document.getElementById(id);
+const urlParams = new URLSearchParams(window.location.search);
+const dispatchedUnit = urlParams.get('unit') || urlParams.get('file');
 
 function unlockAudioContext() {
+  if (paused) return;
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume().catch(e => {});
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
   }
 }
 
-// 綁定全域點擊/按鍵事件，確保瀏覽器在任何使用者互動時即刻解鎖 AudioContext
 ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(evt => {
-  window.addEventListener(evt, () => {
-    unlockAudioContext();
-  }, { passive: true });
+  window.addEventListener(evt, () => unlockAudioContext(), { passive: true });
 });
 
-function playTone(freq, type, duration, delay = 0, vol = 0.15) {
-  if (!soundEnabled) return;
+// 教室輕柔音量振盪器 (vol 降至 0.08~0.12，避免 35 台平板刺耳噪音)
+function playTone(freq, type, duration, delay = 0, vol = 0.08) {
+  if (!soundEnabled || paused) return;
   unlockAudioContext();
   try {
     const osc = audioCtx.createOscillator();
@@ -98,196 +115,96 @@ function playTone(freq, type, duration, delay = 0, vol = 0.15) {
     gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + duration);
     osc.stop(audioCtx.currentTime + delay + duration);
-  } catch (e) {}
+  } catch (_) {}
 }
 
 function playBoostSound() {
-  playTone(400, "triangle", 0.08, 0, 0.18);
-  playTone(600, "sine", 0.12, 0.06, 0.22);
-  playTone(880, "sine", 0.18, 0.14, 0.28);
+  playTone(440, 'triangle', 0.06, 0, 0.09);
+  playTone(660, 'sine', 0.08, 0.05, 0.1);
+  playTone(880, 'sine', 0.12, 0.1, 0.12);
 }
 
 function playAlarmSound() {
-  playTone(220, "sawtooth", 0.25, 0, 0.35);
-  playTone(160, "sawtooth", 0.35, 0.2, 0.4);
+  playTone(220, 'sawtooth', 0.15, 0, 0.08);
+  playTone(180, 'sine', 0.18, 0.1, 0.08);
 }
 
-function playTickSound() {
-  playTone(1000, "sine", 0.05, 0, 0.15);
-}
-
-function playGameOverSound() {
-  if (!soundEnabled) return;
-  unlockAudioContext();
-  try {
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(550, now);
-    osc.frequency.exponentialRampToValueAtTime(70, now + 0.9);
-    gain.gain.setValueAtTime(0.45, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.9);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-    osc.stop(now + 0.9);
-  } catch (e) {}
+function playShieldSound() {
+  playTone(330, 'sine', 0.1, 0, 0.08);
+  playTone(550, 'triangle', 0.15, 0.08, 0.1);
 }
 
 function playVictorySound() {
-  [523, 659, 784, 1046].forEach((freq, idx) => {
-    playTone(freq, "square", 0.12, idx * 0.08, 0.2);
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  notes.forEach((f, idx) => {
+    playTone(f, 'sine', 0.18, idx * 0.1, 0.12);
   });
 }
 
-// 💓 雙擊心跳聲 ("Lub-Dub" 咚-咚) 專用諧波合成器
-function playHeartbeatDoublePulse(baseFreq = 140, isPanic = false) {
-  if (!soundEnabled) return;
-  unlockAudioContext();
-  try {
-    const now = audioCtx.currentTime;
-    
-    // 第一重音 Lub (咚)
-    const osc1 = audioCtx.createOscillator();
-    const gain1 = audioCtx.createGain();
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(baseFreq, now);
-    osc1.frequency.exponentialRampToValueAtTime(60, now + 0.12);
-    gain1.gain.setValueAtTime(0.4, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-    osc1.connect(gain1);
-    gain1.connect(audioCtx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.12);
-
-    // 加上中頻 Click 聲讓喇叭清脆聽到「答！」
-    const oscClick1 = audioCtx.createOscillator();
-    const gainClick1 = audioCtx.createGain();
-    oscClick1.type = "triangle";
-    oscClick1.frequency.setValueAtTime(750, now);
-    oscClick1.frequency.exponentialRampToValueAtTime(200, now + 0.03);
-    gainClick1.gain.setValueAtTime(0.16, now);
-    gainClick1.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-    oscClick1.connect(gainClick1);
-    gainClick1.connect(audioCtx.destination);
-    oscClick1.start(now);
-    oscClick1.stop(now + 0.03);
-
-    // 第二重音 Dub (咚) - 90ms 後
-    const delay2 = 0.09;
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(baseFreq * 1.2, now + delay2);
-    osc2.frequency.exponentialRampToValueAtTime(70, now + delay2 + 0.1);
-    gain2.gain.setValueAtTime(0.32, now + delay2);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + delay2 + 0.1);
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
-    osc2.start(now + delay2);
-    osc2.stop(now + delay2 + 0.1);
-
-    // 若處於極度危險 (gap <= 5%)，加疊 880Hz 蜂鳴警報聲
-    if (isPanic) {
-      playTone(880, "sawtooth", 0.06, 0.02, 0.22);
-    }
-  } catch (e) {}
-}
-
-// 💓 動態三階段加速度心跳/滴答聲音效系統 (開局慢 60 BPM -> 逼近 115 BPM -> 臨界 230 BPM)
+// 動態黑洞心跳加速度 (平穩 60 BPM -> 接近 115 BPM -> 臨界 200 BPM)
 function updateDynamicHeartbeatSound() {
   if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
-  if (!soundEnabled || currentIndex >= roundQuestions.length) return;
+  if (!soundEnabled || phase !== 'playing' || paused) return;
 
   const gap = shipProgress - blackholeProgress;
   let intervalMs = 1000;
-  let basePitch = 140;
-  let isPanic = false;
-  let stageText = "🟢 悠緩平穩 (60 BPM)";
+  let basePitch = 120;
 
-  // 三階段精確計算：開局 (currentIndex===0) 必定為第一階段 slow beat
-  if (currentIndex > 0 && (gap <= 5 || blackholeProgress >= shipProgress || oxygen <= 25)) {
-    // 🔴 階段 3：黑洞極度逼近或低氧 (極速狂跳 230 BPM)
-    intervalMs = 260;
-    basePitch = 220;
-    isPanic = true;
-    stageText = "🔴 臨界狂跳 (230 BPM)";
-  } else if (currentIndex > 0 && (gap <= 20 || oxygen <= 45)) {
-    // 🟡 階段 2：黑洞中度接近 (加速心跳 115 BPM)
-    intervalMs = 520;
+  if (gap <= 15 || oxygen <= 30) {
+    intervalMs = 300; // 200 BPM
     basePitch = 180;
-    isPanic = false;
-    stageText = "🟡 黑洞接近 (115 BPM)";
+  } else if (gap <= 30 || oxygen <= 60) {
+    intervalMs = 520; // 115 BPM
+    basePitch = 150;
   } else {
-    // 🟢 階段 1：開局與安全距離 (悠緩沉穩心跳 60 BPM, 間隔 1000ms 咚......咚......咚)
-    intervalMs = 1000;
-    basePitch = 140;
-    isPanic = false;
-    stageText = "🟢 悠緩平穩 (60 BPM)";
+    intervalMs = 1000; // 60 BPM
+    basePitch = 120;
   }
 
-  // 更新 HUD 上的心跳狀態提示
-  const heartbeatStatus = document.getElementById("heartbeatStatus");
-  if (heartbeatStatus) heartbeatStatus.innerText = stageText;
-
-  // 只要音效開啟，播放雙重打擊聲
-  if (!isLocked) {
-    playHeartbeatDoublePulse(basePitch, isPanic);
-  }
+  playTone(basePitch, 'sine', 0.08, 0, 0.06);
+  playTone(basePitch * 0.8, 'sine', 0.1, 0.08, 0.05);
 
   heartbeatLoopTimer = setTimeout(updateDynamicHeartbeatSound, intervalMs);
 }
 
-// 🎵 Synthwave 背景音樂 (BGM) 悠緩電晶體風格 (600ms / step)
+// 悠緩星際 Synthwave 背景步進音
 function playBGMStep() {
   if (bgmTimer) clearTimeout(bgmTimer);
-  if (!musicEnabled || currentIndex >= roundQuestions.length) return;
-  const notes = [130, 164, 196, 261, 220, 196];
-  const step = Math.floor(Date.now() / 600) % notes.length;
-  if (!isLocked) {
-    playTone(notes[step], "sine", 0.22, 0, 0.06);
-  }
-  bgmTimer = setTimeout(playBGMStep, 600);
+  if (!musicEnabled || phase !== 'playing' || paused) return;
+  const notes = [130.81, 164.81, 196.00, 220.00];
+  const step = Math.floor(Date.now() / 800) % notes.length;
+  playTone(notes[step], 'sine', 0.25, 0, 0.03);
+  bgmTimer = setTimeout(playBGMStep, 800);
 }
 
 function toggleSound() {
   unlockAudioContext();
   soundEnabled = !soundEnabled;
-  const btn = document.getElementById("btnSound");
-  if (btn) btn.innerText = soundEnabled ? "🔊 音效 (開啟)" : "🔇 音效關";
-  if (soundEnabled) {
-    updateDynamicHeartbeatSound();
-  } else {
-    if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
-  }
+  $('btnSound').textContent = soundEnabled ? '🔊 音效' : '🔇 靜音';
+  if (soundEnabled) updateDynamicHeartbeatSound();
+  else if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
 }
 
 function toggleMusic() {
   unlockAudioContext();
   musicEnabled = !musicEnabled;
-  const btn = document.getElementById("btnMusic");
-  if (btn) btn.innerText = musicEnabled ? "🎵 音樂 (開啟)" : "🔇 音樂關";
-  if (musicEnabled) {
-    playBGMStep();
-  } else {
-    if (bgmTimer) clearTimeout(bgmTimer);
-  }
+  $('btnMusic').textContent = musicEnabled ? '🎵 音樂' : '🔇 無聲';
+  if (musicEnabled) playBGMStep();
+  else if (bgmTimer) clearTimeout(bgmTimer);
 }
 
 function triggerScreenShake() {
-  const body = document.getElementById("gameBody");
+  const body = document.getElementById('gameBody');
   if (body) {
-    body.classList.remove("shake");
+    body.classList.remove('shake');
     void body.offsetWidth;
-    body.classList.add("shake");
-    setTimeout(() => body.classList.remove("shake"), 450);
+    body.classList.add('shake');
+    setTimeout(() => body.classList.remove('shake'), 400);
   }
 }
 
-// 陣列洗牌演算法
 function shuffleArray(arr) {
-  let pool = [...arr];
+  const pool = [...arr];
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -295,473 +212,100 @@ function shuffleArray(arr) {
   return pool;
 }
 
-// 📚 載入清單 (Manifest) 並支援多單元切換
-async function loadManifestAndUnits() {
-  const selectUnit = document.getElementById("selectUnit");
-  const unitInfoText = document.getElementById("unitInfoText");
-  const lblUnit = document.getElementById("lblUnit");
-
-  const manifestPaths = [
-    "../questions/manifest.json",
-    "questions/manifest.json",
-    "manifest.json"
-  ];
-
-  let manifest = null;
-  for (const p of manifestPaths) {
-    try {
-      const res = await fetch(p);
-      if (res.ok) {
-        manifest = await res.json();
-        break;
-      }
-    } catch (e) {}
-  }
-
-  if (selectUnit) selectUnit.innerHTML = "";
-
-  if (manifest && manifest.units) {
-    allManifestUnits = manifest.units;
-
-    const allOpt = document.createElement("option");
-    allOpt.value = "ALL";
-    allOpt.textContent = "🌱 全單元綜合大亂鬥 (1~10單元混合)";
-    if (selectUnit) selectUnit.appendChild(allOpt);
-
-    allManifestUnits.forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u.file;
-      opt.textContent = u.title;
-      if (selectUnit) selectUnit.appendChild(opt);
-    });
-
-    // ⭐ 極速秒開：嚴禁循序抓取 94 個單元！僅隨機並行取樣 3 個單元或按需加載
-    const sampleUnits = shuffleArray(allManifestUnits).slice(0, 3);
-    for (const u of sampleUnits) {
-      const paths = [`../questions/${u.file}`, `questions/${u.file}`, u.file];
-      for (const p of paths) {
-        try {
-          const res = await fetch(p);
-          if (res.ok) {
-            const data = await res.json();
-            rawQuestionsByUnit[u.file] = data.questions || [];
-            break;
-          }
-        } catch (e) {}
-      }
-    }
-  } else {
-    const opt = document.createElement("option");
-    opt.value = "unit10_enzymes.json";
-    opt.textContent = "國中生物：酵素、細胞與能量作用評量";
-    if (selectUnit) selectUnit.appendChild(opt);
-    rawQuestionsByUnit["unit10_enzymes.json"] = FALLBACK_QUESTION_BANK;
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const targetUnit = urlParams.get("unit") || urlParams.get("file") || "ALL";
-  if (selectUnit) {
-    const decoded = decodeURIComponent(targetUnit).trim();
-    if (Array.from(selectUnit.options).some(opt => opt.value === decoded)) {
-      selectUnit.value = decoded;
-    } else if (decoded !== "ALL") {
-      const opt = document.createElement("option");
-      opt.value = decoded;
-      opt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
-      selectUnit.appendChild(opt);
-      selectUnit.value = decoded;
-      const fetchPath = decoded.endsWith(".json") ? `../questions/${decoded}` : `../questions/${decoded}.json`;
-      fetch(fetchPath).then(r => r.json()).then(d => {
-        rawQuestionsByUnit[decoded] = d.questions || (Array.isArray(d) ? d : []);
-        initGame();
-      }).catch(e => {});
-    }
-    selectUnit.addEventListener("change", () => {
-      initGame();
-    });
-  }
-
-  if (lblUnit) lblUnit.innerText = "生物星際逃亡";
-  // ⭐ 安全凍結守門員：打字看說明時黑洞計時器與心跳聲完全靜止
-  initGame(false);
-}
-
-function getQuestionsForSelectedUnit() {
-  const selectUnit = document.getElementById("selectUnit");
-  const selectedValue = selectUnit ? selectUnit.value : "ALL";
-  const unitInfoText = document.getElementById("unitInfoText");
-
-  let sourcePool = [];
-
-  if (selectedValue === "ALL") {
-    Object.values(rawQuestionsByUnit).forEach(list => sourcePool.push(...list));
-    if (sourcePool.length === 0) sourcePool = FALLBACK_QUESTION_BANK;
-    if (unitInfoText) unitInfoText.innerText = "🌱 當前關卡：全單元綜合大亂鬥 (1~10單元混合)";
-  } else {
-    sourcePool = rawQuestionsByUnit[selectedValue] || FALLBACK_QUESTION_BANK;
-    const selectedOpt = selectUnit.options[selectUnit.selectedIndex];
-    if (unitInfoText && selectedOpt) unitInfoText.innerText = `🌱 當前關卡：${selectedOpt.textContent}`;
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const qcountParam = parseInt(urlParams.get("qcount") || urlParams.get("count"));
-  const targetCount = (qcountParam && qcountParam > 0) ? qcountParam : TOTAL_QUESTIONS_PER_ROUND;
-  return shuffleArray(sourcePool).slice(0, targetCount);
-}
-
-// 初始化遊戲狀態
-function initGame(autoStart = true) {
-  if (blackholeTimer) clearInterval(blackholeTimer);
-  if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
-  if (bgmTimer) clearTimeout(bgmTimer);
-  
-  roundQuestions = getQuestionsForSelectedUnit();
-  currentIndex = 0;
-  wrongLogs = [];
-  oxygen = 100;
-  shipProgress = 0;
-  blackholeProgress = 0;
-  isLocked = false;
-
-  document.getElementById("endScreen").style.display = "none";
-  document.getElementById("cooldownModal").classList.remove("active");
-  document.getElementById("gameHeader").style.display = "flex";
-  document.getElementById("gameMain").style.display = "flex";
-
-  updateUI();
-  renderQuestion();
-  if (autoStart) {
-    startBlackholeTensionTimer();
-    updateDynamicHeartbeatSound();
-    if (musicEnabled) playBGMStep();
-  }
-}
-
-// ⭐ 對外暴露標準開局進入點
-window.startGame = function() {
-  initGame(true);
-};
-
-// 動態黑洞逼近計時器（每 3 秒逼近 1.2%）
-function startBlackholeTensionTimer() {
-  if (blackholeTimer) clearInterval(blackholeTimer);
-  blackholeTimer = setInterval(() => {
-    if (isLocked || currentIndex >= roundQuestions.length) return;
-    blackholeProgress = Math.min(100, blackholeProgress + 1.2);
-    updateUI();
-    checkFailState();
-  }, 3000);
-}
-
-// 渲染當前題目
-function renderQuestion() {
-  if (currentIndex >= roundQuestions.length) {
-    finishGame(true);
-    return;
-  }
-  const q = roundQuestions[currentIndex];
-  if (!q.shuffled) {
-    const origCorrectText = (q.options && q.answer !== undefined) ? q.options[q.answer] : (q.options ? q.options[0] : '');
-    const rawOptions = [...(q.options || [])];
-    for (let i = rawOptions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [rawOptions[i], rawOptions[j]] = [rawOptions[j], rawOptions[i]];
-    }
-    q.options = rawOptions;
-    q.answer = rawOptions.indexOf(origCorrectText);
-    if (q.answer === -1) q.answer = 0;
-    q.shuffled = true;
-  }
-
-  document.getElementById("qText").innerText = `${currentIndex + 1}. ${q.question}`;
-  
-  for (let i = 0; i < 4; i++) {
-    const btn = document.getElementById(`btn${i}`);
-    const textSpan = btn.querySelector(".opt-text");
-    if (textSpan) textSpan.innerText = q.options[i] || "-";
-    else btn.innerText = q.options[i] || "-";
-    btn.disabled = false;
-  }
-  isLocked = false;
-}
-
-// 作答判定
-function handleSelect(selectedIndex) {
-  unlockAudioContext();
-  if (isLocked) return;
-  isLocked = true;
-
-  const q = roundQuestions[currentIndex];
-  if (selectedIndex === q.answer) {
-    playBoostSound();
-    currentIndex++;
-    shipProgress = Math.min(100, Math.round((currentIndex / TOTAL_QUESTIONS_PER_ROUND) * 100));
-    updateUI();
-    
-    if (currentIndex >= TOTAL_QUESTIONS_PER_ROUND) {
-      setTimeout(() => finishGame(true), 300);
-    } else {
-      setTimeout(renderQuestion, 250);
-    }
-  } else {
-    triggerScreenShake();
-    playAlarmSound();
-    oxygen = Math.max(0, oxygen - 15);
-    shipProgress = Math.max(0, shipProgress - 5);
-    blackholeProgress = Math.min(100, blackholeProgress + 3);
-
-    if (!wrongLogs.some(item => item.id === q.id)) {
-      wrongLogs.push({
-        question: q.question,
-        userAnswer: q.options[selectedIndex] || "未選擇",
-        correctAnswer: q.options[q.answer] || "",
-        explanation: q.explanation
-      });
-    }
-
-    updateUI();
-    if (!checkFailState()) {
-      triggerCooldown(q.explanation);
-    }
-  }
-}
-
-// 檢查被黑洞吞噬或氧氣歸零 Failure 狀態
-function checkFailState() {
-  if (oxygen <= 0 || (currentIndex > 0 && blackholeProgress >= shipProgress + 5)) {
-    finishGame(false);
-    return true;
-  }
-  return false;
-}
-
-// 冷卻鎖定倒數
-function triggerCooldown(explanation) {
-  const modal = document.getElementById("cooldownModal");
-  const cdTimer = document.getElementById("cdTimer");
-  document.getElementById("cdExplanation").innerText = explanation;
-  modal.classList.add("active");
-
-  let count = 5;
-  cdTimer.innerText = count;
-  playTickSound();
-
-  const interval = setInterval(() => {
-    count--;
-    if (count > 0) {
-      cdTimer.innerText = count;
-      playTickSound();
-    } else {
-      clearInterval(interval);
-      modal.classList.remove("active");
-      isLocked = false;
-    }
-  }, 1000);
-}
-
-// 更新頂部儀表板與黑洞警報邊框
-function updateUI() {
-  document.getElementById("progressBar").style.width = `${shipProgress}%`;
-  document.getElementById("shipIcon").style.left = `${shipProgress}%`;
-  
-  document.getElementById("blackholeBar").style.width = `${blackholeProgress}%`;
-  document.getElementById("blackholeIcon").style.left = `${blackholeProgress}%`;
-
-  document.getElementById("lblOxygen").innerText = `維生氧氣：${oxygen}%`;
-  document.getElementById("lblDistance").innerText = `🚀 躍遷進度: ${shipProgress}% / ⚫ 黑洞逼近: ${blackholeProgress}%`;
-
-  const criticalAlert = document.getElementById("criticalAlert");
-  const warningBanner = document.getElementById("warningBanner");
-  const gap = shipProgress - blackholeProgress;
-
-  if (gap <= 20 && currentIndex > 0) {
-    if (criticalAlert) criticalAlert.classList.add("danger-flash");
-    if (warningBanner) warningBanner.classList.remove("hidden");
-  } else {
-    if (criticalAlert) criticalAlert.classList.remove("danger-flash");
-    if (warningBanner) warningBanner.classList.add("hidden");
-  }
-
-  updateCertCode();
-}
-
-// 🛡️ 官方防偽認證碼與證書產生器
-function updateCertCode() {
-  const seatInput = document.getElementById("inputSeatNo");
-  const nameInput = document.getElementById("inputStudentName");
-  const certCodeValue = document.getElementById("certCodeValue");
-
-  if (!certCodeValue) return;
-
-  const seat = (seatInput && seatInput.value.trim()) || "05";
-  const name = (nameInput && nameInput.value.trim()) || "黑洞逃亡領航員";
-  const str = `${seat}-${name}-${shipProgress}-${blackholeProgress}-${oxygen}`;
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = (hash << 5) - hash + str.charCodeAt(i);
-  const code = Math.abs(hash).toString(16).toUpperCase().padStart(4, "0");
-  certCodeValue.textContent = `BLACKHOLE-${code}-${seat}`;
-}
-
-function copyCertificationData() {
-  const seatInput = document.getElementById("inputSeatNo");
-  const nameInput = document.getElementById("inputStudentName");
-  const reflectionInput = document.getElementById("inputReflection");
-  const certCodeValue = document.getElementById("certCodeValue");
-
-  const seat = (seatInput && seatInput.value.trim()) || "05";
-  const name = (nameInput && nameInput.value.trim()) || "黑洞逃亡領航員";
-  const reflection = (reflectionInput && reflectionInput.value.trim()) || "今天黑洞逃亡中複習了酵素專一性與細胞膜運輸作用。";
-  const certCode = (certCodeValue && certCodeValue.textContent) || "BLACKHOLE-0000-70105";
-
-  const text = `【生物星際大逃亡：逃離黑洞 - 課堂通關證書】\n` +
-    `👤 領航員：${seat} ${name}\n` +
-    `🚀 躍遷進度：${shipProgress}%\n` +
-    `⚫ 黑洞威脅：${blackholeProgress}%\n` +
-    `💖 維生氧氣：${oxygen}%\n` +
-    `📝 課堂心得與檢討：${reflection}\n` +
-    `🛡️ Google Classroom 官方防偽認證碼：${certCode}`;
-
-  navigator.clipboard.writeText(text).then(() => {
-    alert("✅ 防偽認證證書與心得文字已成功複製！可直接上傳繳交至 Google Classroom！");
-  }).catch(() => {
-    alert("複製失敗，請手動複製以下內容：\n\n" + text);
-  });
-}
-
-// 結算畫面 (Success vs Failure)
-function finishGame(isSuccess) {
-  if (blackholeTimer) clearInterval(blackholeTimer);
-  if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
-  if (bgmTimer) clearTimeout(bgmTimer);
-  isLocked = true;
-
-  const criticalAlert = document.getElementById("criticalAlert");
-  if (criticalAlert) criticalAlert.classList.remove("danger-flash");
-
-  document.getElementById("gameHeader").style.display = "none";
-  document.getElementById("gameMain").style.display = "none";
-  document.getElementById("cooldownModal").classList.remove("active");
-  document.getElementById("endScreen").style.display = "flex";
-
-  const endTitle = document.getElementById("endTitle");
-  const endSubtitle = document.getElementById("endSubtitle");
-  const reviewBody = document.getElementById("reviewBody");
-
-  reviewBody.innerHTML = "";
-
-  if (isSuccess) {
-    playVictorySound();
-    endTitle.className = "end-title-success";
-    endTitle.innerText = "🎉 躍遷成功！成功逃離黑洞引力圈！";
-    endSubtitle.innerText = `方舟號順利抵達安全星系，累積解開 ${currentIndex} 題觀念。黑盒子紀錄如下：`;
-  } else {
-    playGameOverSound();
-    endTitle.className = "end-title-fail";
-    endTitle.innerText = "💥 引擎過載！方舟號被黑洞引力吞噬！";
-    endSubtitle.innerText = `維生氧氣竭盡或黑洞引力吞噬失聯。以下為失誤黑盒子修正紀錄：`;
-  }
-
-  if (wrongLogs.length === 0) {
-    reviewBody.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#2ed573; padding:20px; font-weight:bold;'>🎖️ 完美星際領航員！本次任務零失誤通關，獲得 S 級認證！</td></tr>";
-  } else {
-    wrongLogs.forEach(item => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td style="vertical-align:top; font-weight:bold;">${item.question}<br><span style="color:#ff4757; font-size:0.85rem;">您的回答：${item.userAnswer}</span></td><td style="color:#7bed9f; line-height:1.5;">${item.explanation}</td>`;
-      reviewBody.appendChild(tr);
-    });
-  }
-
-  updateCertCode();
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
-
-  if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
-    const finalScore = isSuccess ? (100 + currentIndex * 10) : (currentIndex * 10);
-    const seatInput = document.getElementById("inputSeatNo");
-    const nameInput = document.getElementById("inputStudentName");
-    const seatVal = (seatInput && seatInput.value.trim()) || "01";
-    const nameVal = (nameInput && nameInput.value.trim()) || "";
-
-    showScoreSubmitModal({
-      gameTitle: '生物星際大逃亡：逃離黑洞',
-      score: finalScore,
-      scoreDisplay: `${finalScore} 分 (完成 ${currentIndex} 題)`,
-      duration: '黑洞躍遷挑戰',
-      initialClass: '701',
-      initialSeat: seatVal,
-      initialName: nameVal,
-      onBonusChallenge: () => {
-        // 🔥 挑戰加碼 10 題：再重新玩一次！
-        initGame();
-      }
-    });
-  }
-}
-
-// 🌌 Canvas 太空星空與黑洞漩渦動態渲染
+// 🌌 動態太空 Canvas 背景 (星空速流與黑洞吸積盤)
 function initSpaceCanvas() {
-  canvas = document.getElementById("spaceCanvas");
+  canvas = $('spaceCanvas');
   if (!canvas) return;
-  ctx = canvas.getContext("2d");
+  ctx = canvas.getContext('2d');
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
   resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener('resize', resizeCanvas);
 
   stars = [];
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 90; i++) {
     stars.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       size: Math.random() * 2 + 0.5,
-      speed: Math.random() * 2 + 0.5
+      speed: Math.random() * 1.8 + 0.4
     });
   }
 
   blackholeParticles = [];
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 35; i++) {
     blackholeParticles.push({
       angle: Math.random() * Math.PI * 2,
-      radius: Math.random() * 120 + 20,
+      radius: Math.random() * 110 + 20,
       speed: Math.random() * 0.03 + 0.01,
-      size: Math.random() * 3 + 1
+      size: Math.random() * 2.5 + 1
     });
   }
 
-  function loop() {
+  function loop(timestamp = 0) {
+    if (timestamp - lastVisualTime < 33) {
+      animFrameId = requestAnimationFrame(loop);
+      return;
+    }
+    lastVisualTime = timestamp;
+
+    if (paused || document.hidden || phase === 'ended') {
+      animFrameId = requestAnimationFrame(loop);
+      return;
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    // 繁星速流
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
     stars.forEach(s => {
-      s.x -= s.speed * 2;
+      s.x -= s.speed * (phase === 'playing' ? 2 : 0.8);
       if (s.x < 0) s.x = canvas.width;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    const bhX = (blackholeProgress / 100) * (canvas.width * 0.4) - 40;
+    // 黑洞吸積盤核心
+    const bhX = 60 + (blackholeProgress / 100) * (canvas.width * 0.25);
     const bhY = canvas.height / 2;
 
-    const grad = ctx.createRadialGradient(bhX, bhY, 10, bhX, bhY, 140);
-    grad.addColorStop(0, "rgba(0, 0, 0, 0.95)");
-    grad.addColorStop(0.5, "rgba(255, 71, 87, 0.3)");
-    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    const grad = ctx.createRadialGradient(bhX, bhY, 8, bhX, bhY, 130);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.98)');
+    grad.addColorStop(0.45, 'rgba(249, 115, 22, 0.35)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(bhX, bhY, 140, 0, Math.PI * 2);
+    ctx.arc(bhX, bhY, 130, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#ff4757";
+    ctx.save();
+    ctx.translate(bhX, bhY);
+    ctx.rotate(-0.35);
+    for (let ring = 0; ring < 4; ring++) {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 85 + ring * 12, 20 + ring * 5, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, ${120 + ring * 25}, 60, ${0.4 - ring * 0.08})`;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(bhX, bhY, 36, 0, Math.PI * 2);
+    ctx.fillStyle = '#02030a';
+    ctx.fill();
+
+    // 吸積盤旋轉粒子
+    ctx.fillStyle = '#ffedd5';
     blackholeParticles.forEach(p => {
       p.angle += p.speed;
       const px = bhX + Math.cos(p.angle) * p.radius;
-      const py = bhY + Math.sin(p.angle) * p.radius;
+      const py = bhY + Math.sin(p.angle) * (p.radius * 0.4);
       ctx.beginPath();
       ctx.arc(px, py, p.size, 0, Math.PI * 2);
       ctx.fill();
@@ -773,41 +317,453 @@ function initSpaceCanvas() {
   loop();
 }
 
-// DOM 事件監聽與初期化
-document.addEventListener("DOMContentLoaded", () => {
+// 帶超時保護的 fetch (3.5 秒超時立即回退，杜絕 35 台 iPad 網路卡死)
+async function fetchWithTimeout(url, timeoutMs = 3500) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// 題庫載入 (支援派卷鎖定與秒開保底)
+async function loadManifestAndUnits() {
+  phase = 'loading';
+  setAnswers(false);
+
+  try {
+    const manifest = await fetchWithTimeout('../questions/manifest.json', 3500);
+    allManifestUnits = manifest.units || (manifest.publishers || []).flatMap(p => (p.semesters || []).flatMap(s => s.units || []));
+  } catch (err) {
+    console.warn('遠端題庫清單讀取超時或失敗，啟用內建精選題庫保底:', err);
+    allManifestUnits = [{ id: 'unit_core', title: '7上 生物核心觀念精選', file: 'fallback' }];
+  }
+
+  let targetUnit = dispatchedUnit || 'ALL';
+  if (dispatchedUnit) {
+    const match = allManifestUnits.find(u => u.file === dispatchedUnit || u.id === dispatchedUnit || u.file === dispatchedUnit + '.json');
+    if (match) targetUnit = match.file;
+  }
+
+  const unitDisplayName = targetUnit === 'ALL' ? '全單元探索' : cleanUnitTitle(targetUnit);
+  $('lblUnit').textContent = dispatchedUnit ? `🎯 ${unitDisplayName} (派卷)` : '生物星際大逃亡';
+  $('unitInfoText').textContent = `🌱 任務單元：${unitDisplayName}`;
+
+  phase = 'ready';
+}
+
+async function loadUnitQuestions(unitFile) {
+  if (unitFile === 'fallback' || !unitFile) {
+    return FALLBACK_QUESTION_BANK;
+  }
+  if (rawQuestionsByUnit[unitFile]) {
+    return rawQuestionsByUnit[unitFile];
+  }
+
+  try {
+    const data = await fetchWithTimeout(`../questions/${unitFile}`, 3500);
+    const list = Array.isArray(data) ? data : data.questions;
+    if (Array.isArray(list) && list.length) {
+      rawQuestionsByUnit[unitFile] = list;
+      return list;
+    }
+    throw new Error('題庫格式不完整');
+  } catch (err) {
+    console.warn(`單元 ${unitFile} 載入失敗，無縫回退至精選題庫:`, err);
+    return FALLBACK_QUESTION_BANK;
+  }
+}
+
+function setAnswers(enabled) {
+  for (let i = 0; i < 4; i++) {
+    const btn = $('btn' + i);
+    if (btn) btn.disabled = !enabled;
+  }
+}
+
+function effect(kind) {
+  const fx = $('flightEffects');
+  if (!fx) return;
+  fx.className = 'flight-effects ' + kind;
+  fx.textContent = kind === 'boost' ? '✦　曲速推進　🚀　✦' :
+                   kind === 'shield' ? '🛡️ 護盾吸收衝擊' :
+                   kind === 'emergency' ? '⚠️ 應急超空間防護罩啟動！' :
+                   kind === 'victory' ? '✦　躍遷成功　✦' : '⚡ 推進器受損';
+  fx.getAnimations().forEach(a => a.cancel());
+  fx.animate([
+    { opacity: 0, transform: 'scale(0.85)' },
+    { opacity: 1, offset: 0.25 },
+    { opacity: 0, transform: 'scale(1.15)' }
+  ], { duration: 800 });
+}
+
+// 🚀 開局核心：由身分驗證公約一鍵啟動
+async function initGame(isBonus = false) {
+  stopLoops();
+  unlockAudioContext();
+
+  phase = 'playing';
+  paused = false;
+  $('pauseOverlay').hidden = true;
+  document.body.classList.remove('mission-paused');
+  $('endScreen').style.display = 'none';
+  $('gameHeader').style.display = 'flex';
+  $('gameMain').style.display = 'flex';
+
+  currentIndex = 0;
+  wrongLogs = [];
+  answeredWrong.clear();
+  firstCorrect = 0;
+  attempts = 0;
+  streak = 0;
+  shields = 0;
+  oxygen = 100;
+  emergencyTriggered = false;
+  shipProgress = 15;
+  blackholeProgress = 0;
+  activeSeconds = 0;
+  submitted = false;
+  finalScore = 0;
+
+  // 決定題庫清單
+  let pool = [];
+  const student = window.BioGameSuite?.getStudent() || {};
+  let target = dispatchedUnit || student.unit || 'ALL';
+
+  if (target === 'ALL' || target === 'FAST_DEFAULT') {
+    if (allManifestUnits.length && allManifestUnits[0].file !== 'fallback') {
+      const sample = shuffleArray(allManifestUnits).slice(0, 3);
+      const loaded = await Promise.all(sample.map(u => loadUnitQuestions(u.file)));
+      pool = loaded.flat();
+    } else {
+      pool = [...FALLBACK_QUESTION_BANK];
+    }
+  } else {
+    pool = await loadUnitQuestions(target);
+  }
+
+  if (!pool.length) pool = [...FALLBACK_QUESTION_BANK];
+
+  if (isBonus) {
+    const harder = pool.filter(q => q.difficulty === '中' || q.difficulty === '難');
+    pool = harder.length >= 10 ? harder : pool;
+  }
+
+  const roundCount = isBonus ? 10 : TOTAL_QUESTIONS_PER_ROUND;
+  roundQuestions = shuffleArray(pool).slice(0, roundCount).map(q => {
+    // 選項隨機洗牌，防止並排同學抄襲 ABCD
+    const opts = shuffleArray(q.options.map((text, idx) => ({ text, isCorrect: idx === q.answer })));
+    return {
+      ...q,
+      options: opts.map(o => o.text),
+      answer: opts.findIndex(o => o.isCorrect)
+    };
+  });
+
+  const displayUnitName = target === 'ALL' ? '全單元綜合探索' : cleanUnitTitle(student.unitTitle || target);
+  $('unitInfoText').textContent = isBonus ? `🔥 菁英加碼挑戰 10 題：${displayUnitName}` : `🌱 當前任務：${displayUnitName}`;
+
+  renderQuestion();
+  updateUI();
+  startLoops();
+  effect('boost');
+}
+
+// 暴露標準開局進入點，供 ScoreSubmitModal 在公約確認後直接喚起
+window.startGame = function () {
+  initGame(false);
+};
+
+function stopLoops() {
+  if (blackholeTimer) clearInterval(blackholeTimer);
+  if (heartbeatLoopTimer) clearTimeout(heartbeatLoopTimer);
+  if (bgmTimer) clearTimeout(bgmTimer);
+}
+
+function startLoops() {
+  stopLoops();
+
+  // 每秒推進黑洞威脅進度（保證充裕時間，不刻意刁難緩讀學生）
+  blackholeTimer = setInterval(() => {
+    if (paused || phase !== 'playing') return;
+    activeSeconds++;
+
+    // 黑洞平緩逼近 (每秒約 0.22%，全員完賽約需 6~8 分鐘)
+    blackholeProgress = Math.min(100, blackholeProgress + 0.22);
+
+    // 🛡️ 緊急防護罩保底機制：黑洞逼近到飛船前，啟動超空間緩衝，保證學生完整做完 12 題
+    if (blackholeProgress >= shipProgress - 3) {
+      if (!emergencyTriggered) {
+        emergencyTriggered = true;
+        effect('emergency');
+        playAlarmSound();
+      }
+      // 保持 4% 安全臨界緩衝，絕不強制中斷出局
+      blackholeProgress = Math.max(0, shipProgress - 4);
+    }
+
+    updateUI();
+  }, 1000);
+
+  updateDynamicHeartbeatSound();
+  if (musicEnabled) playBGMStep();
+}
+
+function renderQuestion() {
+  if (currentIndex >= roundQuestions.length) {
+    return finishGame(true);
+  }
+
+  const q = roundQuestions[currentIndex];
+  $('qText').textContent = `${currentIndex + 1} / ${roundQuestions.length}　${q.question}`;
+
+  for (let i = 0; i < 4; i++) {
+    const btn = $('btn' + i);
+    if (i < q.options.length) {
+      btn.hidden = false;
+      btn.querySelector('.opt-text').textContent = q.options[i];
+    } else {
+      btn.hidden = true;
+    }
+  }
+
+  isLocked = false;
+  setAnswers(!paused);
+}
+
+function handleSelect(choiceIdx) {
+  if (phase !== 'playing' || paused || isLocked || Date.now() - lastAnswerTime < 350) return;
+  lastAnswerTime = Date.now();
+
+  unlockAudioContext();
+  isLocked = true;
+  setAnswers(false);
+  attempts++;
+
+  const q = roundQuestions[currentIndex];
+  const qKey = q.question;
+
+  if (choiceIdx === q.answer) {
+    // 答對處理
+    if (!answeredWrong.has(qKey)) {
+      firstCorrect++;
+    }
+    streak++;
+    if (streak % 3 === 0) {
+      shields = Math.min(2, shields + 1);
+      effect('shield');
+      playShieldSound();
+    } else {
+      effect('boost');
+      playBoostSound();
+    }
+
+    // 推進飛船
+    currentIndex++;
+    shipProgress = 15 + Math.round((85 * currentIndex) / roundQuestions.length);
+    updateUI();
+
+    setTimeout(() => {
+      renderQuestion();
+    }, 450);
+
+  } else {
+    // 答錯處理：街機流暢連貫手感，秒記黑盒子觀念日誌，不以長彈窗中斷航行！
+    streak = 0;
+    answeredWrong.add(qKey);
+
+    let log = wrongLogs.find(x => x.question === q.question);
+    if (log) {
+      log.count++;
+      log.userAnswer = q.options[choiceIdx];
+    } else {
+      wrongLogs.push({
+        question: q.question,
+        userAnswer: q.options[choiceIdx],
+        correctAnswer: q.options[q.answer],
+        explanation: q.explanation || '請複習本科目關鍵定義與反應條件。',
+        count: 1
+      });
+    }
+
+    triggerScreenShake();
+
+    if (shields > 0) {
+      shields--;
+      effect('shield');
+      playShieldSound();
+    } else {
+      oxygen = Math.max(15, oxygen - 10);
+      effect('damage');
+      playAlarmSound();
+    }
+
+    // 自動前往下一題，保持作答爽快感
+    currentIndex++;
+    shipProgress = 15 + Math.round((85 * currentIndex) / roundQuestions.length);
+    updateUI();
+
+    setTimeout(() => {
+      renderQuestion();
+    }, 600);
+  }
+}
+
+function updateUI() {
+  $('progressBar').style.width = shipProgress + '%';
+  $('shipIcon').style.left = Math.min(96, Math.max(2, shipProgress)) + '%';
+
+  $('blackholeBar').style.width = blackholeProgress + '%';
+  $('blackholeIcon').style.left = Math.min(94, Math.max(2, blackholeProgress)) + '%';
+
+  $('shipIcon').classList.toggle('has-shield', shields > 0);
+  $('lblShields').textContent = `🛡️ 能量護盾：${shields}`;
+  $('lblOxygen').textContent = `維生氧氣：${oxygen}%`;
+
+  const safeDist = Math.max(0, Math.round(shipProgress - blackholeProgress));
+  $('lblDistance').textContent = `🚀 躍遷進度: ${currentIndex} / ${roundQuestions.length} 題 ｜ ⚫ 黑洞安全距離: ${safeDist}`;
+
+  const danger = phase === 'playing' && safeDist <= 15;
+  $('criticalAlert').classList.toggle('danger-flash', danger);
+  $('warningBanner').classList.toggle('hidden', !danger);
+
+  $('lblShipName').textContent = `🚀 方舟號｜${streak > 0 ? streak + ' 連擊' : '曲速巡航'}`;
+}
+
+// 教師 Space 鍵全螢幕凍結與靜音
+function togglePause(forceState) {
+  if (phase !== 'playing') return;
+  paused = typeof forceState === 'boolean' ? forceState : !paused;
+
+  $('pauseOverlay').hidden = !paused;
+  document.body.classList.toggle('mission-paused', paused);
+  setAnswers(!paused && phase === 'playing');
+
+  if (paused) {
+    stopLoops();
+    if (audioCtx) audioCtx.suspend().catch(() => {});
+  } else {
+    if (audioCtx) audioCtx.resume().catch(() => {});
+    startLoops();
+  }
+}
+
+// 完賽結算：全自動向 GAS 送出成績 ＋ 備查黑盒子觀念修復日誌
+function finishGame() {
+  if (phase === 'ended') return;
+  phase = 'ended';
+  isLocked = true;
+  stopLoops();
+  setAnswers(false);
+
+  // 計算最終得分 (扣除緊急防護罩扣分，最低 0 分)
+  let rawScore = Math.round((100 * firstCorrect) / roundQuestions.length);
+  finalScore = emergencyTriggered ? Math.max(0, rawScore - 10) : rawScore;
+
+  $('criticalAlert').classList.remove('danger-flash');
+  $('warningBanner').classList.add('hidden');
+  playVictorySound();
+  effect('victory');
+
+  // 渲染底層備查黑盒子日誌
+  $('endScreen').style.display = 'flex';
+  $('endTitle').textContent = finalScore >= 60 ? '🌌 躍遷成功！方舟號抵達安全星系' : '🛰️ 救援艦接應！完成星際觀念檢討';
+  $('missionRank').textContent = firstCorrect === roundQuestions.length ? '🏅 星際王牌｜首次作答全對' :
+                                 finalScore >= 80 ? '🥇 精英領航員｜穩定推進' :
+                                 finalScore >= 60 ? '🌟 探索先鋒｜完成觀念修復' : '🔧 救援任務｜整理觀念再次啟航';
+  $('endSubtitle').textContent = `首次答對 ${firstCorrect} / ${roundQuestions.length} 題（得分：${finalScore} 分）｜作答歷時 ${activeSeconds} 秒`;
+
+  // 錯題觀念 Top 3 列表
+  $('reviewBody').replaceChildren();
+  const sortedLogs = [...wrongLogs].sort((a, b) => b.count - a.count).slice(0, 3);
+  if (!sortedLogs.length) {
+    const tr = $('reviewBody').insertRow();
+    const td = tr.insertCell();
+    td.colSpan = 2;
+    td.textContent = '🎖️ 本次挑戰零失誤！生物觀念掌握極佳！';
+  } else {
+    sortedLogs.forEach(log => {
+      const tr = $('reviewBody').insertRow();
+      tr.insertCell().textContent = `${log.question}\n❌ 你的選擇：${log.userAnswer}`;
+      tr.insertCell().textContent = `✅ 正確答案：${log.correctAnswer}\n${log.explanation}`;
+    });
+  }
+
+  // 🏆 關鍵：完賽立即全自動喚起標準三階段結算模組 (背景自動 POST GAS)
+  setTimeout(() => {
+    triggerBlackholeGasSubmit();
+  }, 400);
+}
+
+function triggerBlackholeGasSubmit() {
+  if (submitted || typeof showScoreSubmitModal !== 'function') return;
+  submitted = true;
+
+  const student = window.BioGameSuite?.getStudent() || {};
+  showScoreSubmitModal({
+    gameTitle: '生物星際大逃亡：逃離黑洞',
+    gameId: 'blackhole',
+    score: finalScore,
+    scoreDisplay: `${finalScore} 分 (答對 ${firstCorrect}/${roundQuestions.length} 題)`,
+    accuracy: Math.round((100 * firstCorrect) / roundQuestions.length) + '%',
+    duration: `${activeSeconds} 秒`,
+    errorCount: answeredWrong.size,
+    keywords: wrongLogs.map(l => l.question).slice(0, 3).join('；') || '全對無錯題',
+    initialClass: student.class,
+    initialSeat: student.seat,
+    initialName: student.name,
+    onRetry: () => {
+      initGame(false);
+    },
+    onBonusChallenge: () => {
+      initGame(true);
+    }
+  });
+}
+
+async function copyCertificationData() {
+  const text = `【生物星際大逃亡學習紀錄】\n學生：${window.BioGameSuite?.getStudent()?.name || '探險家'}\n得分：${finalScore} 分（首次答對 ${firstCorrect}/${roundQuestions.length} 題）\n歷時：${activeSeconds} 秒\n錯題檢討：\n${wrongLogs.map(q => q.question + ' ➔ ' + q.correctAnswer).join('\n') || '無錯題'}`;
+  $('copyResult').hidden = false;
+  $('copyResult').value = text;
+  try {
+    await navigator.clipboard.writeText(text);
+    $('copyStatus').textContent = '✅ 已複製學習紀錄至剪貼簿！';
+  } catch (_) {
+    $('copyStatus').textContent = '請手動選取下方文字複製：';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
   initSpaceCanvas();
 
   for (let i = 0; i < 4; i++) {
-    const btn = document.getElementById(`btn${i}`);
-    if (btn) btn.addEventListener("click", () => handleSelect(i));
+    $('btn' + i).addEventListener('click', () => handleSelect(i));
   }
-  const btnRestart = document.getElementById("btnRestart");
-  if (btnRestart) btnRestart.addEventListener("click", initGame);
 
-  const btnSound = document.getElementById("btnSound");
-  if (btnSound) btnSound.addEventListener("click", toggleSound);
+  $('btnSound').onclick = toggleSound;
+  $('btnMusic').onclick = toggleMusic;
+  $('btnCopyCert').onclick = copyCertificationData;
+  $('btnRestart').onclick = () => initGame(false);
 
-  const btnMusic = document.getElementById("btnMusic");
-  if (btnMusic) btnMusic.addEventListener("click", toggleMusic);
+  $('btnPause').onclick = () => togglePause();
+  $('btnResume').onclick = () => togglePause(false);
 
-  const btnCopyCert = document.getElementById("btnCopyCert");
-  if (btnCopyCert) btnCopyCert.addEventListener("click", copyCertificationData);
+  // 空白鍵教師緊急凍結講解
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) {
+      e.preventDefault();
+      togglePause();
+    }
+  });
 
-  const seatInput = document.getElementById("inputSeatNo");
-  const nameInput = document.getElementById("inputStudentName");
-  if (seatInput) seatInput.addEventListener("input", updateCertCode);
-  if (nameInput) nameInput.addEventListener("input", updateCertCode);
+  // 分頁切換時自動暫停，防止背景繼續被黑洞追逐
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) togglePause(true);
+  });
 
   loadManifestAndUnits();
 });
-
-function triggerBlackholeGasSubmit() {
-  if (typeof showScoreSubmitModal === "function") {
-    showScoreSubmitModal({
-      gameTitle: "星際大逃亡：生物重力危機",
-      score: score,
-      scoreDisplay: score + " 分",
-      duration: "星際逃脫"
-    });
-  }
-}

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>生物星際大逃亡：逃離黑洞 (Bio-Blackhole Escape)</title>
-  <link rel="stylesheet" href="style.css?v=4.2">
+  <link rel="stylesheet" href="style.css?v=5.1">
 </head>
 <body id="gameBody">
 
@@ -17,28 +17,26 @@
   <!-- 頂部跑道與雙軌儀表板 -->
   <header id="gameHeader">
     <div class="status-row">
-      <span class="badge badge-info" id="lblUnit">載入中...</span>
+      <span class="badge badge-info" id="lblUnit">載入題庫中...</span>
       <span id="lblShipName">🚀 方舟號曲速逃擊中</span>
       <div class="header-tools">
+        <button id="btnPause" class="btn-tool" title="教師講解暫停 (空白鍵)">⏸ 暫停</button>
         <button id="btnSound" class="btn-tool" title="音效開關">🔊 音效</button>
         <button id="btnMusic" class="btn-tool" title="背景音樂開關">🎵 音樂</button>
         <span class="badge badge-warning" id="lblOxygen">維生氧氣：100%</span>
       </div>
     </div>
 
-    <!-- 📚 題庫單元選擇 Bar -->
+    <!-- 📚 單元與進度條 -->
     <div class="unit-bar">
-      <div class="unit-info" id="unitInfoText">🌱 當前關卡：全單元綜合大亂鬥 (1~10單元混合)</div>
-      <div class="unit-selector-box">
-        <label for="selectUnit">📚 生物題庫單元：</label>
-        <select id="selectUnit" class="styled-unit-select"></select>
-      </div>
+      <div class="unit-info" id="unitInfoText">🌱 任務單元：準備啟航</div>
+      <div class="header-shields" id="lblShields">🛡️ 能量護盾：0</div>
     </div>
     
     <div class="track-container">
       <div class="track-label-row">
         <span>⚫ 黑洞引力逼近進度</span>
-        <span id="lblDistance">🚀 躍遷距離: 0% / ⚫ 黑洞威脅: 0%</span>
+        <span id="lblDistance">🚀 躍遷進度: 0 / 12 題 ｜ ⚫ 黑洞安全距離: 100</span>
       </div>
       <div class="track">
         <!-- 飛船躍遷進度亮條 -->
@@ -46,8 +44,17 @@
         <!-- 黑洞逼近暗紅條 -->
         <div class="blackhole-bar" id="blackholeBar"></div>
         <!-- 圖示定位 -->
-        <div class="ship-icon" id="shipIcon">🛸</div>
-        <div class="blackhole-icon" id="blackholeIcon">⚫</div>
+        <div class="ship-icon" id="shipIcon" aria-label="方舟號">
+          <svg viewBox="0 0 100 60" width="66" height="40" aria-hidden="true">
+            <path d="M20 24L0 30L20 36" fill="#67e8f9"/>
+            <path d="M25 15L65 22L95 30L65 38L25 45L35 30Z" fill="#d7f5ff" stroke="#2983a3" stroke-width="2"/>
+            <path d="M40 23L55 8L62 24M40 37L55 52L62 36" fill="#38bdf8"/>
+            <ellipse cx="68" cy="30" rx="10" ry="5" fill="#155e75"/>
+          </svg>
+        </div>
+        <div class="blackhole-icon" id="blackholeIcon" aria-label="黑洞">
+          <span class="gravity-core"></span>
+        </div>
       </div>
     </div>
 
@@ -56,6 +63,16 @@
       ⚠️ 警告：黑洞引力臨近！速速答對題目發動曲速推進（Warp Drive）！
     </div>
   </header>
+
+  <!-- 飛行即時特效提示 (推進/受損/護盾) -->
+  <div id="flightEffects" class="flight-effects" aria-hidden="true"></div>
+
+  <!-- 教師空白鍵全螢幕凍結講解覆蓋層 -->
+  <div id="pauseOverlay" class="pause-overlay" hidden>
+    <h1>👨‍🏫 老師講解中，請看黑板</h1>
+    <p>星艦推進、作答計時與星際音效已全數凍結</p>
+    <button id="btnResume" class="btn-action btn-success">繼續航行 🚀</button>
+  </div>
 
   <!-- 主答題操作區 -->
   <main id="gameMain">
@@ -68,53 +85,23 @@
     </div>
   </main>
 
-  <!-- 答錯冷卻鎖定彈窗（5秒引擎過載鎖定 + 觀念修復） -->
-  <div class="overlay-cooldown" id="cooldownModal">
-    <h2 class="alert-title">⚠️ 飛船過載！系統冷卻修復中</h2>
-    <div class="cooldown-timer" id="cdTimer">5</div>
-    <div class="concept-box">
-      <div class="concept-title">【黑盒子觀念修復日誌】</div>
-      <div id="cdExplanation">觀念解析說明內容...</div>
-    </div>
-  </div>
-
-  <!-- 結算畫面與黑盒子學習檢討日誌 + 官方防偽認證碼 -->
-  <div class="screen-end" id="endScreen">
+  <!-- 完賽黑盒子觀念修復戰報底層 (在彈出三階段結算時同步備查) -->
+  <div class="screen-end" id="endScreen" style="display:none;">
     <div class="end-card">
       <h1 id="endTitle" class="end-title-success">🎉 躍遷成功！成功逃離黑洞引力圈</h1>
-      <p id="endSubtitle">小組逃亡任務完成！以下為本次星際答題黑盒子紀錄：</p>
+      <div id="missionRank" class="mission-rank"></div>
+      <p id="endSubtitle">逃亡任務完成！以下為本次星際答題黑盒子紀錄：</p>
       
-      <!-- 📜 官方防偽認證與課堂心得表單 -->
-      <div class="cert-form-wrapper">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="inputSeatNo">👤 班級與座號 (例: 70105)</label>
-            <input type="text" id="inputSeatNo" class="styled-input" placeholder="70105">
-          </div>
-          <div class="form-group">
-            <label for="inputStudentName">✍️ 探險家姓名</label>
-            <input type="text" id="inputStudentName" class="styled-input" placeholder="探險家同學">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputReflection">📝 課堂生物學習心得與檢討 (可直接複製繳交至 Google Classroom)</label>
-          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="今天黑洞逃亡中，我複習了酵素專一性與細胞膜運輸作用..."></textarea>
-        </div>
-
-        <div class="cert-code-box">
-          <div>Google Classroom 官方防偽認證碼：</div>
-          <div class="cert-code-value" id="certCodeValue">BLACKHOLE-0000-70105</div>
-          <div class="cert-subtext">包含防偽雜湊標記，請截圖上傳或點擊下方按鈕複製內文</div>
-        </div>
-      </div>
-
       <div class="modal-actions-row">
-        <button id="btnSubmitScoreGas" class="btn-action" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800; margin-bottom:8px;" onclick="triggerBlackholeGasSubmit()">🚀 送出成績至試算表 (優先推薦)</button>
-          <button id="btnCopyCert" class="btn-action btn-gold">📋 複製認證碼 (斷網備用)</button>
-        <button id="btnRestart" class="btn-action btn-success">🔄 重啟緊急推進器！再次航行</button>
+        <button id="btnSubmitScoreGas" class="btn-action" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:white; font-weight:800;" onclick="triggerBlackholeGasSubmit()">🚀 查看結算與交卷檢核</button>
+        <button id="btnCopyCert" class="btn-action btn-gold">📋 複製學習紀錄</button>
+        <button id="btnRestart" class="btn-action btn-success">🔄 再次航行</button>
       </div>
 
+      <p id="copyStatus" role="status"></p>
+      <textarea id="copyResult" class="styled-textarea" hidden readonly aria-label="學習紀錄"></textarea>
+
+      <h2>本次優先複習的錯題觀念</h2>
       <div class="table-container">
         <table class="review-table">
           <thead>
@@ -129,8 +116,8 @@
     </div>
   </div>
 
-  <!-- 核心邏輯腳本 -->
-  <script src="../score-submit-modal.js?v=4.4"></script>
-  <script src="game.js?v=4.4"></script>
+  <!-- 核心中介模組與遊戲邏輯 -->
+  <script src="../score-submit-modal.js?v=5.1"></script>
+  <script src="game.js?v=5.1"></script>
 </body>
 </html>

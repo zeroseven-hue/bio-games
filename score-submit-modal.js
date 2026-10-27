@@ -1455,6 +1455,8 @@
       accuracy: options.accuracy || '--',
       unit: currentStudent.unit || 'general',
       unitTitle: cleanUnitTitle(currentStudent.unitTitle || ''),
+      errorCount: options.errorCount !== undefined ? options.errorCount : 0,
+      keywords: options.keywords || '全對無錯題',
       timestamp: new Date().toISOString()
     };
 
@@ -1483,7 +1485,33 @@
       }, 350);
     }
 
-    if (nowTime - lastSubTime < 10000) {
+    if (options.requireVerifiedSubmission) {
+      Object.assign(payload, {gameId: options.gameId || 'blackhole', originalScore: score, finalScore: score, units: currentStudent.unitTitle || currentStudent.unit, errorCount: options.errorCount || 0, keywords: options.keywords || '全對無錯題'});
+      async function verifiedSubmit() {
+        statusBtn.disabled = true;
+        statusBtn.textContent = '📡 成績傳送中，請稍候…';
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        try {
+          const response = await fetch(gasUrl, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal});
+          if (!response.ok) throw new Error('伺服器未回應');
+          const result = await response.json();
+          if (result.status !== 'success') throw new Error('未確認登錄成功');
+          proceedToStage2(false);
+        } catch (_) {
+          statusBtn.disabled = true;
+          statusBtn.className = 'bgs-btn bgs-btn-primary';
+          statusBtn.textContent = '⚠️ 網路稍有延遲，成績已快照存於本機';
+          try {
+            if (navigator.sendBeacon) navigator.sendBeacon(gasUrl, JSON.stringify(payload));
+          } catch (_) {}
+          setTimeout(() => {
+            proceedToStage2(false);
+          }, 1200);
+        } finally { clearTimeout(timeout); }
+      }
+      verifiedSubmit();
+    } else if (nowTime - lastSubTime < 10000) {
       // 10秒內重複提交，直接顯示成功徽章
       setTimeout(() => {
         proceedToStage2(true);
@@ -1514,7 +1542,12 @@
     // 🔹 階段二雙軌按鈕控制
     btnExtra.addEventListener('click', () => {
       overlay.remove();
-      if (typeof options.onRetry === 'function') {
+      isGameActive = true;
+      isScoreSubmitted = false;
+      initExitGuard();
+      if (typeof options.onBonusChallenge === 'function') {
+        options.onBonusChallenge();
+      } else if (typeof options.onRetry === 'function') {
         options.onRetry();
       } else {
         window.location.reload();

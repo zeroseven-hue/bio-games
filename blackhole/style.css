@@ -577,3 +577,307 @@ main {
   background: #192242;
   color: #ffda79;
 }
+/* 🚀 教室 iPad 深度適配 (防反光、防裁切、48px 觸控友善) */
+body {
+  min-height: 100dvh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: radial-gradient(ellipse at 10% 40%, #1e1333 0, transparent 55%), #050916;
+}
+
+button, select {
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+button:focus-visible, select:focus-visible {
+  outline: 3px solid #80f6ff;
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#spaceCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+header {
+  background: rgba(8, 17, 34, 0.94);
+  padding: 12px 20px;
+}
+
+.status-row, .unit-bar, .header-tools, .track-label-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.unit-bar {
+  justify-content: space-between;
+  margin: 4px 0;
+}
+
+.header-shields {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid #38bdf8;
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+
+.track {
+  height: 52px;
+  margin: 6px 0;
+  border-color: #347287;
+  background: radial-gradient(circle at 70% 25%, #f8fafc 0 1px, transparent 2px),
+              radial-gradient(circle at 45% 70%, #67e8f9 0 1px, transparent 2px),
+              linear-gradient(90deg, #150e2d, #0b2540);
+  border-radius: 26px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #0284c7, #38bdf8, #a5f3fc);
+  height: 100%;
+  opacity: 0.45;
+  transition: width 0.4s ease-out;
+}
+
+.blackhole-bar {
+  background: linear-gradient(90deg, #991b1b, #ef4444);
+  height: 100%;
+  opacity: 0.45;
+  transition: width 0.3s linear;
+}
+
+.ship-icon {
+  width: 60px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 0.4s ease-out;
+}
+
+.ship-icon.has-shield::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2.5px solid #a5b4fc;
+  border-radius: 50%;
+  box-shadow: 0 0 16px #818cf8, inset 0 0 8px #818cf8;
+  animation: shieldPulse 1.4s infinite alternate;
+}
+
+.blackhole-icon {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.3s linear;
+}
+
+.gravity-core {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #02030a;
+  box-shadow: 0 0 0 3px #fdba74, 0 0 14px 4px #f97316;
+}
+
+.gravity-core::after {
+  content: '';
+  position: absolute;
+  inset: 6px -8px;
+  border: 2px solid #fed7aa;
+  border-radius: 50%;
+  transform: rotate(-25deg);
+  box-shadow: 0 0 10px #fb923c;
+}
+
+main {
+  min-height: 400px;
+  padding: 16px 20px 24px;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question-box {
+  font-size: clamp(19px, 2.2vw, 26px);
+  line-height: 1.5;
+  border: 2px solid #385675;
+  border-radius: 14px;
+  background: rgba(13, 26, 46, 0.95);
+  padding: 20px 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  min-height: 200px;
+}
+
+.btn-opt {
+  min-height: clamp(68px, 10vh, 96px);
+  padding: 14px 18px;
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 800;
+  color: #ffffff;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.15s, filter 0.15s;
+  touch-action: manipulation;
+}
+
+.btn-opt:active {
+  transform: scale(0.97);
+  filter: brightness(1.2);
+}
+
+.opt-0 { background: #991b1b; }
+.opt-1 { background: #0369a1; }
+.opt-2 { background: #b45309; }
+.opt-3 { background: #15803d; }
+
+.pause-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(6, 16, 26, 0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.pause-overlay h1 {
+  font-size: clamp(28px, 4vw, 44px);
+  color: #38bdf8;
+  margin-bottom: 12px;
+}
+
+.pause-overlay p {
+  font-size: 1.15rem;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.flight-effects {
+  pointer-events: none;
+  position: fixed;
+  z-index: 130;
+  top: 36%;
+  left: 10%;
+  width: 80%;
+  text-align: center;
+  font-size: clamp(24px, 4.5vw, 56px);
+  font-weight: 900;
+  color: #9df6ff;
+  opacity: 0;
+  text-shadow: 0 0 25px #00bfff;
+}
+
+.flight-effects.damage { color: #fda4af; text-shadow: 0 0 25px #ef4444; }
+.flight-effects.shield { color: #c4b5fd; text-shadow: 0 0 25px #818cf8; }
+.flight-effects.emergency { color: #fed7aa; text-shadow: 0 0 25px #f97316; }
+.flight-effects.victory { color: #fde68a; text-shadow: 0 0 25px #eab308; }
+
+.screen-end {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: radial-gradient(ellipse at top, #102b46, #050916);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.end-card {
+  max-width: 820px;
+  width: 100%;
+  background: rgba(15, 23, 42, 0.96);
+  border: 2px solid #2d8298;
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mission-rank {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1.5px solid #fbbf24;
+  border-radius: 30px;
+  color: #fde68a;
+  background: #352b13;
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.modal-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.mission-paused * {
+  animation-play-state: paused !important;
+}
+
+@keyframes shieldPulse {
+  to {
+    box-shadow: 0 0 24px #c4b5fd, inset 0 0 16px #818cf8;
+  }
+}
+
+/* 📱 iPad 直向 (Portrait) 與窄螢幕自適應 */
+@media (max-width: 720px) {
+  header { padding: 10px 14px; }
+  .options-grid { grid-template-columns: 1fr; }
+  .btn-opt { min-height: 64px; font-size: 16px; }
+  .question-box { padding: 16px; min-height: 80px; font-size: 18px; }
+  .end-card { padding: 18px 14px; }
+  .review-table th, .review-table td { padding: 8px 10px; font-size: 13px; }
+  .track-label-row { font-size: 12px; }
+}
