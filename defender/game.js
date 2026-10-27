@@ -146,6 +146,9 @@ let combo = 0;
 let isOverheated = false;
 let qTimeRemaining = 25;
 let qTimer = null;
+let questionSettled = true;
+let questionVersion = 0;
+let hintTimer = null;
 let isRunning = false;
 let logs = [];
 let playerProfile = { cls: "", seat: "", name: "" };
@@ -450,6 +453,13 @@ async function startMission() {
 }
 
 function loadQuestion(idx) {
+  questionVersion++;
+  questionSettled = true;
+  clearInterval(qTimer);
+  clearTimeout(hintTimer);
+  hintTimer = null;
+  document.getElementById("hint-banner").style.display = "none";
+  bullets = [];
   if (idx >= gameQuestions.length || lives <= 0) {
     endMission();
     return;
@@ -510,13 +520,15 @@ function loadQuestion(idx) {
 
   bullets = [];
   qTimeRemaining = 25;
+  questionSettled = false;
   startTimer();
 }
 
 function startTimer() {
   clearInterval(qTimer);
+  const version = questionVersion;
   qTimer = setInterval(() => {
-    if (!isRunning) return;
+    if (!isRunning || questionSettled || version !== questionVersion) return;
     qTimeRemaining -= 0.1;
     const pct = Math.max(0, (qTimeRemaining / 25) * 100);
     document.getElementById("time-fill").style.width = pct + "%";
@@ -528,7 +540,17 @@ function startTimer() {
   }, 100);
 }
 
+// 每題只允許一個事件取得結算權，並移除本題殘留子彈。
+function settleQuestion() {
+  if (!isRunning || questionSettled) return false;
+  questionSettled = true;
+  clearInterval(qTimer);
+  bullets = [];
+  return true;
+}
+
 function handleTimeout() {
+  if (!settleQuestion()) return;
   lives--;
   combo = 0;
   updateHUD();
@@ -574,7 +596,7 @@ canvas.addEventListener("touchstart", (e) => {
 
 /* 直覺鎖定發射：大黑板觸控或按 A/B/C/D 鍵 */
 function directShoot(letter) {
-  if (isOverheated || !isRunning) return;
+  if (isOverheated || !isRunning || questionSettled) return;
   const target = enemies.find(e => e.letter === letter);
   if (target) {
     player.x = target.x; // 戰機立刻移至對應怪物下方
@@ -584,13 +606,13 @@ function directShoot(letter) {
 
 /* 無限制發射（移除原本 bullets.length >= 2 的鎖死問題） */
 function fireBullet() {
-  if (isOverheated || !isRunning) return;
+  if (isOverheated || !isRunning || questionSettled) return;
   bullets.push({ x: player.x, y: player.y - 18, vy: -11, r: 6 });
   soundLaser();
 }
 
 function hitTarget(enemy) {
-  clearInterval(qTimer); // 暫停倒數計時器
+  if (!enemies.includes(enemy) || !settleQuestion()) return;
   const q = gameQuestions[currentQIndex];
   createBurstParticles(enemy.x, enemy.y, enemy.theme);
 
@@ -624,7 +646,11 @@ function showHint(html) {
   const banner = document.getElementById("hint-banner");
   banner.innerHTML = html;
   banner.style.display = "block";
-  setTimeout(() => {
+  const version = questionVersion;
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => {
+    if (!isRunning || !questionSettled || version !== questionVersion) return;
+    hintTimer = null;
     banner.style.display = "none";
     currentQIndex++;
     loadQuestion(currentQIndex);
@@ -853,7 +879,9 @@ function gameLoop() {
         break;
       }
     }
-    if (hit || b.y < 0) bullets.splice(i, 1);
+    // 命中會清空子彈或切換題目，不再遍歷原本的陣列索引。
+    if (hit) break;
+    if (b.y < 0) bullets.splice(i, 1);
   }
 
   for (let i = particles.length - 1; i >= 0; i--) {
@@ -882,6 +910,11 @@ function gameLoop() {
    ======================================================== */
 function endMission() {
   isRunning = false;
+  questionSettled = true;
+  questionVersion++;
+  clearTimeout(hintTimer);
+  hintTimer = null;
+  bullets = [];
   clearInterval(qTimer);
 
   document.getElementById("end-modal").style.display = "flex";
