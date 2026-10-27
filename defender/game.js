@@ -135,7 +135,42 @@ const ctx = canvas.getContext("2d");
 let cw = 400, ch = 500;
 
 let manifestData = null;
-let currentUnitId = "all";
+let currentUnitId = "";
+let dispatchedUnit = "";
+let isStarting = false;
+const GAME_TITLE = "生物小蜜蜂：星際防衛隊 V2.0";
+
+function showLoadError(error) {
+  console.error(error);
+  document.getElementById("start-modal").style.display = "flex";
+  document.getElementById("end-modal").style.display = "none";
+  document.getElementById("q-text").textContent = "無法開始：" + error.message;
+  document.getElementById("load-error").textContent = error.message;
+  document.getElementById("load-retry").style.display = "block";
+}
+
+async function readQuestionJSON(relativePath) {
+  const url = new URL(relativePath, window.location.href);
+  if (url.protocol === "file:") throw new Error("目前以 file:// 開啟，請使用提供此題庫的 HTTP/HTTPS 網站連結。");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url.href, { signal: controller.signal, cache: "no-store" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    return await response.json();
+  } catch (error) {
+    throw new Error(url.href + "：" + (error.name === "AbortError" ? "請求逾時" : error.message));
+  } finally { clearTimeout(timeout); }
+}
+
+function resolveUnit(value) {
+  const units = manifestData.units;
+  const exact = units.find(u => u.file === value);
+  if (exact) return exact;
+  const matches = units.filter(u => u.id === value);
+  if (matches.length === 1) return matches[0];
+  throw new Error(matches.length > 1 ? "單元代碼不唯一，請教師使用含完整題庫檔名的 QR Code。" : "指定單元不在題庫清單中，請教師重新選擇並提供連結。");
+}
 let loadedBankMap = {}; // 暫存已載入的單元題庫
 
 let gameQuestions = [];
@@ -173,50 +208,19 @@ function shuffleArray(arr) {
 
 /* 讀取 URL 參數與動態載入 GitHub 題庫 Manifest */
 async function initManifestAndUnits() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const paramUnit = urlParams.get("unit") || urlParams.get("file");
-
-  const manifestPaths = [
-    "../questions/manifest.json",
-    "questions/manifest.json",
-    "../manifest.json",
-    "manifest.json"
-  ];
-
-  for (const p of manifestPaths) {
-    try {
-      const resp = await fetch(p);
-      if (resp.ok) {
-        manifestData = await resp.json();
-        break;
-      }
-    } catch (e) {}
+  manifestData = null;
+  currentUnitId = "";
+  populateUnitSelects([]);
+  const data = await readQuestionJSON("../questions/manifest.json");
+  if (!Array.isArray(data.units) || !data.units.length || data.units.some(u => !u.file || !u.title)) {
+    throw new Error("manifest 題庫清單格式錯誤或為空。");
   }
-
-  if (manifestData && manifestData.units) {
-    populateUnitSelects(manifestData.units);
-    if (paramUnit) {
-      currentUnitId = decodeURIComponent(paramUnit).trim();
-    } else {
-      currentUnitId = manifestData.units[0].file || manifestData.units[0].id;
-    }
-  } else {
-    console.warn("無法讀取 manifest.json，使用預設 10 單元清單");
-    const fallbackUnits = Array.from({ length: 10 }, (_, i) => ({
-      id: `unit${String(i + 1).padStart(2, '0')}`,
-      title: `單元 ${String(i + 1).padStart(2, '0')}：生物主題測驗`,
-      file: `unit${String(i + 1).padStart(2, '0')}_enzymes.json`
-    }));
-    populateUnitSelects(fallbackUnits);
-    currentUnitId = paramUnit || "all";
-  }
-
-  // 設定選單預設值
-  const selTop = document.getElementById("unit-select");
-  const selModal = document.getElementById("modal-unit-select");
-  if (selTop) selTop.value = currentUnitId;
-  if (selModal) selModal.value = currentUnitId;
-  updateUnitDisplayTitle();
+  manifestData = data;
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("unit") || params.get("file");
+  dispatchedUnit = requested ? resolveUnit(requested).file : "";
+  populateUnitSelects(data.units);
+  onUnitChange(dispatchedUnit);
 }
 
 function populateUnitSelects(units) {
@@ -227,8 +231,8 @@ function populateUnitSelects(units) {
 
     // 全部綜合題庫選項
     const optAll = document.createElement("option");
-    optAll.value = "all";
-    optAll.textContent = "🌟 ALL 全單元綜合題庫 (隨機抽題)";
+    optAll.value = "";
+    optAll.textContent = "請選擇教師指定題庫";
     sel.appendChild(optAll);
 
     units.forEach(u => {
@@ -241,11 +245,12 @@ function populateUnitSelects(units) {
 }
 
 function onUnitChange(val) {
-  currentUnitId = val;
+  currentUnitId = dispatchedUnit || val;
+  val = currentUnitId;
   const selTop = document.getElementById("unit-select");
   const selModal = document.getElementById("modal-unit-select");
-  if (selTop) selTop.value = val;
-  if (selModal) selModal.value = val;
+  if (selTop) { selTop.value = val; selTop.disabled = !!dispatchedUnit || isRunning; }
+  if (selModal) { selModal.value = val; selModal.disabled = !!dispatchedUnit; }
   updateUnitDisplayTitle();
 }
 
@@ -268,78 +273,28 @@ function updateUnitDisplayTitle() {
 
 /* 根據 currentUnitId 從 GitHub 題庫動態抓取並隨機抽題 */
 async function fetchQuestionsForCurrentUnit() {
-  if (currentUnitId === "all" || currentUnitId === "FAST_DEFAULT" || !currentUnitId) {
-    // ⭐ 嚴禁循序抓取 94 個單元！隨機並行取樣最多 3 個單元，100ms 極速完成！
-    let allPool = [];
-    if (manifestData && manifestData.units) {
-      const sampleUnits = shuffleArray(manifestData.units).slice(0, 3);
-      for (const u of sampleUnits) {
-        const pool = await loadSingleUnitFile(u.file || u.id);
-        allPool = allPool.concat(pool);
-      }
-    }
-    return allPool.length > 0 ? shuffleArray(allPool) : DEFAULT_QUESTION_BANK;
-  } else {
-    const pool = await loadSingleUnitFile(currentUnitId);
-    return pool.length > 0 ? shuffleArray(pool) : DEFAULT_QUESTION_BANK;
-  }
+  if (!manifestData) throw new Error("題庫清單尚未載入，請重試。");
+  if (!currentUnitId) throw new Error("請先選擇教師指定的題庫。");
+  return loadSingleUnitFile(resolveUnit(currentUnitId).file);
 }
 
-async function loadSingleUnitFile(fileOrId) {
-  if (loadedBankMap[fileOrId]) return loadedBankMap[fileOrId];
-
-  const possiblePaths = [
-    `../questions/${fileOrId}`,
-    `questions/${fileOrId}`,
-    `../questions/unit${fileOrId.replace('ch','').replace('unit','')}_enzymes.json`,
-    `../${fileOrId}`,
-    fileOrId
-  ];
-
-  for (const path of possiblePaths) {
-    try {
-      const resp = await fetch(path);
-      if (resp.ok) {
-        const data = await resp.json();
-        const rawList = data.questions || (Array.isArray(data) ? data : []);
-        
-        // 轉譯題庫格式，相容 options 陣列/物件與 answer 數字/字母格式
-        const formatted = rawList.map(item => {
-          let opts = {};
-          if (Array.isArray(item.options)) {
-            opts = {
-              A: item.options[0] || "--",
-              B: item.options[1] || "--",
-              C: item.options[2] || "--",
-              D: item.options[3] || "--"
-            };
-          } else {
-            opts = item.options || { A: "--", B: "--", C: "--", D: "--" };
-          }
-
-          let ansKey = "A";
-          if (typeof item.answer === "number" || typeof item.ans === "number") {
-            const idx = typeof item.answer === "number" ? item.answer : item.ans;
-            ansKey = ["A", "B", "C", "D"][idx] || "A";
-          } else if (typeof item.answer === "string" || typeof item.ans === "string") {
-            ansKey = (item.answer || item.ans).toUpperCase();
-          }
-
-          return {
-            q: item.question || item.q,
-            options: opts,
-            ans: ansKey,
-            hint: item.explanation || item.hint || "請仔細審題觀念！"
-          };
-        });
-
-        loadedBankMap[fileOrId] = formatted;
-        return formatted;
-      }
-    } catch (e) {}
-  }
-
-  return [];
+async function loadSingleUnitFile(file) {
+  if (loadedBankMap[file]) return loadedBankMap[file];
+  const data = await readQuestionJSON("../questions/" + file);
+  const raw = data.questions || (Array.isArray(data) ? data : []);
+  if (!raw.length) throw new Error("指定題庫沒有題目：" + file);
+  const formatted = raw.map((item, index) => {
+    const values = Array.isArray(item.options) ? item.options : [item.options?.A, item.options?.B, item.options?.C, item.options?.D];
+    const answer = item.answer ?? item.ans;
+    const ans = typeof answer === "number" ? "ABCD"[answer] : String(answer).toUpperCase();
+    const q = item.question || item.q;
+    if (!q || values.length !== 4 || values.some(v => typeof v !== "string" || !v.trim()) || !/^[ABCD]$/.test(ans || "")) {
+      throw new Error("題庫第 " + (index + 1) + " 題格式錯誤：" + file);
+    }
+    return { q, options: Object.fromEntries(values.map((v, i) => ["ABCD"[i], v])), ans, hint: item.explanation || item.hint || "請仔細審題觀念！" };
+  });
+  loadedBankMap[file] = formatted;
+  return formatted;
 }
 
 /* ========================================================
@@ -370,7 +325,10 @@ function initStars() {
 /* ========================================================
    4. 啟動與載入題目關卡 (包含座號2碼與真實姓名嚴格驗證)
    ======================================================== */
-async function startMission() {
+async function startMission(bonusCount) {
+  if (isStarting || isRunning) return;
+  isStarting = true;
+  try {
   const cEl = document.getElementById("user-class");
   const sEl = document.getElementById("user-seat");
   const nEl = document.getElementById("user-name");
@@ -417,6 +375,11 @@ async function startMission() {
   }
 
   playerProfile = { cls: c, seat: s, name: n };
+  if (window.BioGameSuite) {
+    const student = window.BioGameSuite.getStudent();
+    Object.assign(student, { class: c, seat: s, name: n, unit: currentUnitId, unitTitle: manifestData?.units.find(u => u.file === currentUnitId)?.title || "" });
+    sessionStorage.setItem("bgs_authed_student", JSON.stringify(student));
+  }
   initAudio();
 
   const modeEl = document.getElementById("mode-select");
@@ -428,9 +391,18 @@ async function startMission() {
 
   // 取得題庫資料並隨機抽取題目 (依 URL ?qcount=N 或預設 10 題)
   const urlParams = new URLSearchParams(window.location.search);
-  const targetQCount = parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10;
+  const targetQCount = bonusCount === 10 ? 10 : Math.max(1, parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10);
   const pool = await fetchQuestionsForCurrentUnit();
   gameQuestions = [...pool].sort(() => 0.5 - Math.random()).slice(0, targetQCount);
+
+  document.getElementById("end-modal").style.display = "none";
+  document.getElementById("load-retry").style.display = "none";
+  isOverheated = false;
+  const submitButton = document.getElementById("btnDirectSubmitGAS");
+  submitButton.disabled = false;
+  submitButton.innerText = "🚀 一鍵送出成績至老師試算表";
+  submitButton.style.background = "linear-gradient(135deg, #0284c7, #0369a1)";
+  document.getElementById("unit-select").disabled = true;
 
   // 關閉開始選單
   document.getElementById("start-modal").style.display = "none";
@@ -450,6 +422,8 @@ async function startMission() {
   updateHUD();
   loadQuestion(0);
   requestAnimationFrame(gameLoop);
+  } catch (error) { showLoadError(error); }
+  finally { isStarting = false; }
 }
 
 function loadQuestion(idx) {
@@ -962,7 +936,9 @@ function endMission() {
     listEl.appendChild(div);
   });
 
+  const finishedVersion = questionVersion;
   setTimeout(() => {
+    if (isRunning || finishedVersion !== questionVersion) return;
     triggerSubmitModal();
   }, 1000);
 }
@@ -1026,7 +1002,7 @@ async function directSubmitToGAS() {
     seatOrGroup: `${playerProfile.seat || "01"}號`,
     nameOrMembers: playerProfile.name || "學生",
     score: score,
-    duration: "已完成挑戰",
+    duration: lives <= 0 ? "生命耗盡，挑戰結束" : "完成全部題目",
     mode: "individual",
     timestamp: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })
   };
@@ -1052,37 +1028,54 @@ async function directSubmitToGAS() {
 
 function triggerSubmitModal() {
   const urlParams = new URLSearchParams(window.location.search);
-  const isDispatchMode = urlParams.has("unit") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
+  const isDispatchMode = urlParams.has("unit") || urlParams.has("file") || urlParams.has("mode") || urlParams.has("qcount") || urlParams.has("dispatch");
 
   if (isDispatchMode && typeof showScoreSubmitModal === 'function') {
     showScoreSubmitModal({
       gameTitle: '生物小蜜蜂：星際防衛隊 V2.0',
       score: score,
-      duration: '已完成挑戰',
+      duration: lives <= 0 ? "生命耗盡，挑戰結束" : "完成全部題目",
       initialClass: playerProfile.cls || '701',
       initialSeat: playerProfile.seat || '01',
       initialName: playerProfile.name || '',
       onBonusChallenge: () => {
         // 🔥 挑戰加碼 10 題：關閉視窗並重新載入 10 題！
-        initGame();
+        startMission(10);
       }
     });
   }
 }
 
-// 頁面載入初始化
-window.addEventListener("DOMContentLoaded", () => {
+// 此頁自行等待題庫並銜接登入；共用模組僅提供既有結算介面。
+async function initializeDefender() {
+  document.getElementById("bgsAntiFlash")?.remove();
   resizeCanvas();
-  initManifestAndUnits();
-});
+  try {
+    await initManifestAndUnits();
+    document.getElementById("load-error").textContent = "";
+    document.getElementById("load-retry").style.display = "none";
+    const raw = sessionStorage.getItem("bgs_authed_student");
+    let student;
+    try { student = raw ? JSON.parse(raw) : null; } catch (_) {}
+    if (student?.name && student.class && student.seat && dispatchedUnit) {
+      for (const [id, value] of [["user-class", student.class], ["user-seat", student.seat], ["user-name", student.name]]) {
+        document.getElementById(id).value = value;
+      }
+      if (window.BioGameSuite) Object.assign(window.BioGameSuite.getStudent(), student);
+      await startMission();
+    }
+  } catch (error) { showLoadError(error); }
+}
+window.addEventListener("DOMContentLoaded", initializeDefender);
 
 function triggerDefenderGasSubmit() {
   if (typeof showScoreSubmitModal === "function") {
     showScoreSubmitModal({
-      gameTitle: "生物小精靈：器官塔防戰",
+      gameTitle: GAME_TITLE,
       score: score,
       scoreDisplay: score + " 分",
-      duration: "防衛成功"
+      duration: lives <= 0 ? "生命耗盡，挑戰結束" : "完成全部題目",
+      onBonusChallenge: () => startMission(10)
     });
   }
 }

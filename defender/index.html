@@ -80,7 +80,7 @@
             <option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
             <option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>
             <option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option>
-            <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option>
+            <option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option>
           </select>
 
           <input type="text" id="user-name" placeholder="真實姓名 (勿填暱稱)" style="flex: 1.5; min-width: 130px;" required />
@@ -103,7 +103,9 @@
             <option value="bigscreen">教室大黑板觸控螢幕（下方直覺大按鈕）</option>
           </select>
         </div>
-        <button class="primary-btn" onclick="startMission()">啟動戰機出擊！</button>
+        <div id="load-error" role="alert"></div>
+      <button id="load-retry" style="display:none" onclick="initializeDefender()">重新載入題庫清單</button>
+      <button class="primary-btn" onclick="startMission()">啟動戰機出擊！</button>
       </div>
     </div>
 
@@ -133,13 +135,14 @@
         <div style="margin-top: 12px; font-size: 12px; color: #94a3b8; text-align: left;">錯題回顧清單：</div>
         <div class="review-box" id="review-list"></div>
 
-        <button class="primary-btn" onclick="location.reload()" style="margin-top: 10px;">重新挑戰</button>
+        <button class="primary-btn" onclick="startMission()" style="margin-top: 10px;">重新挑戰</button>
       </div>
     </div>
   </div>
 
   <!-- 引入通用成績上傳模組與遊戲邏輯 -->
+  <script>window.__DISABLE_BGS_AUTO_LOGIN__ = true;</script>
   <script src="../score-submit-modal.js?v=4.5"></script>
-  <script src="game.js?v=4.4"></script>
+  <script src="game.js?v=4.5"></script>
 </body>
 </html>
