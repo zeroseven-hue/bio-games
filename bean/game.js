@@ -544,6 +544,41 @@ function setupKeyboardHotkeys() {
 
 // 綁定 UI 事件
 function bindUI() {
+  const nameInput = $('inputName');
+  const tip = $('profileErrorTip');
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.classList.remove('valid-input', 'invalid-input');
+        if (tip) {
+          tip.textContent = '💡 請輸入 2~5 字繁體中文真實姓名';
+          tip.style.display = 'block';
+          tip.style.color = 'var(--text-muted)';
+        }
+        return;
+      }
+      const isChinese = /^[\u4e00-\u9fa5]{2,5}$/.test(name);
+      const isRepeated = /(.)\1{2,}/.test(name);
+      if (isChinese && !isRepeated) {
+        nameInput.classList.add('valid-input');
+        nameInput.classList.remove('invalid-input');
+        if (tip) {
+          tip.textContent = '✅ 姓名格式正確！';
+          tip.style.display = 'block';
+          tip.style.color = '#15803d';
+        }
+      } else {
+        nameInput.classList.add('invalid-input');
+        nameInput.classList.remove('valid-input');
+        if (tip) {
+          tip.textContent = '⚠️ 請輸入 2~5 個繁體中文字真實姓名（請勿包含英數或連字玩笑）';
+          tip.style.display = 'block';
+          tip.style.color = '#dc2626';
+        }
+      }
+    });
+  }
   document.querySelectorAll('.btn-pill').forEach(b => {
     b.addEventListener('click', () => {
       selectedCount = b.dataset.count === 'all' ? 'all' : Number(b.dataset.count);
@@ -575,12 +610,21 @@ function validateStudentProfile() {
     $('inputSeat').value = seat;
   }
 
-  if (!className || !/^\d{2}$/.test(seat) || name.length < 2) {
-    tip.style.display = 'block';
+  const isChinese = /^[\u4e00-\u9fa5]{2,5}$/.test(name);
+  const isRepeated = /(.)\1{2,}/.test(name);
+
+  if (!className || !/^\d{2}$/.test(seat) || !isChinese || isRepeated) {
+    if (tip) {
+      tip.textContent = '⚠️ 請選擇班級、座號並填妥 2~5 字真實中文姓名！';
+      tip.style.display = 'block';
+      tip.style.color = '#dc2626';
+    }
+    const nameInput = $('inputName');
+    if (nameInput) nameInput.classList.add('invalid-input');
     return null;
   }
 
-  tip.style.display = 'none';
+  if (tip) tip.style.display = 'none';
   studentProfile = { className, seat, name };
   saveProfile(className, seat, name);
   return studentProfile;
@@ -702,7 +746,7 @@ async function startGame() {
   try { rawBank = await fetchQuestionsForUnit(selectedUnitId); }
   finally { starting = false; startBtn.disabled = false; }
 
-  startBtn.textContent = '開始挑戰 🔨';
+  startBtn.textContent = '進入觀察站 ↗';
   startBtn.disabled = false;
 
   const shuffled = shuffle(rawBank).map(q => ({ ...q, options: [...q.options], shuffled: false }));
@@ -1068,9 +1112,19 @@ function toast(msg, cls) {
 }
 
 function updateCombo() {
-  $('badgeCombo').textContent = `Combo ${combo}`;
+  const badge = $('badgeCombo');
+  if (badge) {
+    badge.textContent = `Combo ${combo}`;
+    if (combo > 0) {
+      badge.classList.remove('combo-pulse');
+      void badge.offsetWidth;
+      badge.classList.add('combo-pulse');
+    }
+  }
   const names = ['', '小木槌', '木槌', '大鐵槌', '能量槌', '終極槌'];
-  $('hammerLevel').textContent = `🔨 Lv.${hammerLevel} ${names[hammerLevel]}`;
+  const levelText = `🔨 Lv.${hammerLevel} ${names[hammerLevel] || '終極槌'}`;
+  const hl = $('hammerLevel');
+  if (hl) hl.textContent = levelText;
   const h = $('hammerCursor');
   if (h) {
     h.className = `hammer-cursor lv${hammerLevel}`;
@@ -1160,6 +1214,7 @@ function endGame() {
       onBonusChallenge: () => {
         // 🔥 挑戰加碼 10 題：再重新抓 10 題繼續挑戰！
         $('certModal').style.display = 'none';
+        setQuestionCount(10);
         startGame();
       },
       onSuccess: () => {
@@ -1228,7 +1283,11 @@ function triggerBeanGasSubmit() {
       gameTitle: "淘氣豆：生物敲敲研究所",
       score: score,
       scoreDisplay: score + " 分",
-      duration: totalTimeSec + " 秒"
+      duration: totalTimeSec + " 秒",
+      accuracy: Math.round(correctCount / Math.max(1, pool.length) * 100) + '%',
+      errorCount: pool.length - correctCount,
+      keywords: correctCount === pool.length ? '全對無錯題' : '請參考作答訂正',
+      onRetry: resetToStart
     });
   }
 }

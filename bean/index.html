@@ -1,68 +1,75 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>淘氣豆・生物研究站</title>
-  <link rel="stylesheet" href="style.css?v=8.0">
+  <title>淘氣豆・生物敲敲研究所</title>
+  <link rel="stylesheet" href="style.css?v=9.0">
 </head>
 <body>
-  <div class="scene-art" aria-hidden="true"><span class="sun-orbit"></span><span class="leaf leaf-one"></span><span class="leaf leaf-two"></span><span class="leaf leaf-three"></span><span class="horizon"></span></div>
-  <div class="site-heading"><a class="brand-mark" href="#" onclick="toggleInstructionsModal(true);return false" aria-label="淘氣豆遊戲說明"><span class="brand-icon">🫘</span><span>BEAN LAB<small>生物敲敲研究所</small></span></a><span class="station-tag"><i></i> FIELD STATION / 01</span></div>
+  <!-- 柔和環境光暈與葉片裝飾 -->
+  <div class="scene-art" aria-hidden="true">
+    <span class="sun-orbit"></span>
+    <span class="leaf leaf-one"></span>
+    <span class="leaf leaf-two"></span>
+    <span class="leaf leaf-three"></span>
+    <span class="horizon"></span>
+  </div>
+
+  <!-- 頂部品牌標題 -->
+  <div class="site-heading">
+    <a class="brand-mark" href="#" onclick="toggleInstructionsModal(true);return false" aria-label="淘氣豆遊戲說明">
+      <span class="brand-icon">🫘</span>
+      <span>BEAN LAB<small>生物敲敲研究所</small></span>
+    </a>
+    <span class="station-tag"><i></i> FIELD STATION / 01</span>
+  </div>
+
   <!-- 大錘子懸浮游標 (電腦桌機專用) -->
   <div id="hammerCursor" class="hammer-cursor" aria-hidden="true">
-    <svg class="hammer-svg" viewBox="-25 -25 150 150" width="124" height="124" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="woodHandle" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f59e0b"/>
-      <stop offset="50%" stop-color="#fde047"/>
-      <stop offset="100%" stop-color="#d97706"/>
-    </linearGradient>
-    <linearGradient id="malletHead" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#f87171"/>
-      <stop offset="40%" stop-color="#ef4444"/>
-      <stop offset="100%" stop-color="#b91c1c"/>
-    </linearGradient>
-    <linearGradient id="cushionGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fef08a"/>
-      <stop offset="100%" stop-color="#eab308"/>
-    </linearGradient>
-    <filter id="malletGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="2" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity="0.32"/>
-    </filter>
-  </defs>
-  <g transform="translate(50,50) rotate(-38) translate(-50,-50)" filter="url(#malletGlow)">
-    <!-- 握把手柄：頂端插入 y=18，牢牢固定在槌頭核心內部，100% 絕無任何脫節分離！ -->
-    <rect x="44" y="18" width="12" height="66" rx="6" fill="url(#woodHandle)" stroke="#78350f" stroke-width="2.5"/>
-    
-    <!-- 防滑握紋 -->
-    <line x1="45" y1="56" x2="55" y2="56" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
-    <line x1="45" y1="64" x2="55" y2="64" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
-    <line x1="45" y1="72" x2="55" y2="72" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
-    
-    <!-- 握把底端金屬安全圓頭 -->
-    <circle cx="50" cy="84" r="8" fill="#ea580c" stroke="#78350f" stroke-width="2.5"/>
-
-    <!-- 鋼圈加固項圈 (將槌頭與握把緊密箍合鎖死) -->
-    <rect x="38" y="27" width="24" height="11" rx="3.5" fill="url(#cushionGold)" stroke="#78350f" stroke-width="2.5"/>
-
-    <!-- 氣墊槌頭本體 -->
-    <rect x="18" y="8" width="64" height="26" rx="9" fill="url(#malletHead)" stroke="#7f1d1d" stroke-width="3"/>
-
-    <!-- 左側高彈性黃金打擊氣墊 -->
-    <rect x="8" y="4" width="13" height="34" rx="6" fill="url(#cushionGold)" stroke="#78350f" stroke-width="2.5"/>
-
-    <!-- 右側高彈性黃金打擊氣墊 -->
-    <rect x="79" y="4" width="13" height="34" rx="6" fill="url(#cushionGold)" stroke="#78350f" stroke-width="2.5"/>
-
-    <!-- 槌頭中央立體星星勳章 -->
-    <circle cx="50" cy="21" r="8" fill="#fef08a" stroke="#b45309" stroke-width="1.5"/>
-    <polygon points="50,15 52,19 56,19 53,22 54,26 50,23 46,26 47,22 44,19 48,19" fill="#d97706"/>
-
-    <!-- 槌頭高光反光光澤 -->
-    <rect x="24" y="11" width="30" height="4" rx="2" fill="#ffffff" opacity="0.7"/>
-  </g>
-</svg>
+    <svg class="hammer-svg" viewBox="-25 -25 150 150" width="120" height="120" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="woodHandle" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#f59e0b"/>
+          <stop offset="50%" stop-color="#fde047"/>
+          <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="malletHead" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f87171"/>
+          <stop offset="40%" stop-color="#ef4444"/>
+          <stop offset="100%" stop-color="#b91c1c"/>
+        </linearGradient>
+        <linearGradient id="cushionGold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="100%" stop-color="#eab308"/>
+        </linearGradient>
+        <filter id="malletGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="2" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+      <g transform="translate(50,50) rotate(-38) translate(-50,-50)" filter="url(#malletGlow)">
+        <!-- 握把手柄 -->
+        <rect x="44" y="18" width="12" height="66" rx="6" fill="url(#woodHandle)" stroke="#78350f" stroke-width="2.5"/>
+        <!-- 防滑握紋 -->
+        <line x1="45" y1="56" x2="55" y2="56" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+        <line x1="45" y1="64" x2="55" y2="64" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+        <line x1="45" y1="72" x2="55" y2="72" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+        <!-- 握把底端金屬安全圓頭 -->
+        <circle cx="50" cy="84" r="8" fill="#ea580c" stroke="#78350f" stroke-width="2.5"/>
+        <!-- 鋼圈加固項圈 -->
+        <rect x="38" y="27" width="24" height="11" rx="3.5" fill="url(#cushionGold)" stroke="#78350f" stroke-width="2.5"/>
+        <!-- 氣墊槌頭本體 -->
+        <rect x="18" y="8" width="64" height="26" rx="9" fill="url(#malletHead)" stroke="#7f1d1d" stroke-width="3"/>
+        <!-- 左右打擊氣墊 -->
+        <rect x="8" y="4" width="13" height="34" rx="6" fill="url(#cushionGold)" stroke="#78350f" stroke-width="2.5"/>
+        <rect x="79" y="4" width="13" height="34" rx="6" fill="url(#cushionGold)" stroke="#78350f" stroke-width="2.5"/>
+        <!-- 槌頭中央立體星星勳章 -->
+        <circle cx="50" cy="21" r="8" fill="#fef08a" stroke="#b45309" stroke-width="1.5"/>
+        <polygon points="50,15 52,19 56,19 53,22 54,26 50,23 46,26 47,22 44,19 48,19" fill="#d97706"/>
+        <!-- 槌頭高光反光光澤 -->
+        <rect x="24" y="11" width="30" height="4" rx="2" fill="#ffffff" opacity="0.7"/>
+      </g>
+    </svg>
   </div>
 
   <!-- 開始畫面：學生登入、單元與題數選擇 -->
@@ -77,9 +84,10 @@
           <span class="body"></span>
         </div>
       </div>
-      <p class="eyebrow">YOUR NEXT FIELD MISSION</p>
-      <h1 class="game-title">小小地洞，<br>大大生物發現。</h1><p id="launchProfile" class="launch-profile">正在準備研究站…</p>
-      <p class="dialog-sub">讀懂題目，等待淘氣豆探頭，用知識完成今天的觀察任務。</p>
+      <p class="eyebrow">FIELD OBSERVATION MISSION</p>
+      <h1 class="game-title">淘氣豆・生物敲敲研究所</h1>
+      <p id="launchProfile" class="launch-profile">正在準備研究站…</p>
+      <p class="dialog-sub">仔細讀題，等待淘氣豆探頭，用扎實觀念完成今天的觀察任務！</p>
 
       <!-- 學生身分登記區 -->
       <div class="profile-box">
@@ -87,7 +95,7 @@
         <div class="profile-inputs">
           <div class="input-field compact-class">
             <label for="inputClass">班級：</label>
-            <select id="inputClass" class="styled-select" style="padding: 6px;">
+            <select id="inputClass" class="styled-select" style="padding: 7px 8px;">
               <option value="701">701</option>
               <option value="702">702</option>
               <option value="703">703</option>
@@ -102,7 +110,7 @@
           </div>
           <div class="input-field compact-seat">
             <label for="inputSeat">座號：</label>
-            <select id="inputSeat" class="styled-select" style="padding: 6px;">
+            <select id="inputSeat" class="styled-select" style="padding: 7px 8px;">
               <option value="01">01</option>
               <option value="02">02</option>
               <option value="03">03</option>
@@ -132,15 +140,20 @@
               <option value="27">27</option>
               <option value="28">28</option>
               <option value="29">29</option>
-              <option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+              <option value="32">32</option>
+              <option value="33">33</option>
+              <option value="34">34</option>
+              <option value="35">35</option>
             </select>
           </div>
           <div class="input-field flex-name">
             <label for="inputName">真實姓名：</label>
-            <input type="text" id="inputName" placeholder="請填寫真實姓名" maxlength="10">
+            <input type="text" id="inputName" placeholder="請填寫中文全名 (2~5字)" maxlength="10">
           </div>
         </div>
-        <div class="profile-tip" id="profileErrorTip">⚠️ 請填寫完整班級、2位數字座號與真實姓名！</div>
+        <div class="profile-tip" id="profileErrorTip">💡 請輸入 2~5 字繁體中文真實姓名</div>
       </div>
 
       <!-- 動態單元選擇 -->
@@ -153,9 +166,9 @@
 
       <!-- 規則說明卡片 -->
       <div class="rules-card">
-        <span>🎯 敲中正確洞的淘氣豆 <b>+10分</b>，二連擊以上累積 <b>Combo</b> 升級大錘！</span>
-        <span>❌ 答錯 <b>扣分</b> 且連擊中斷｜🍼 誤敲奶嘴豆 <b>-1</b>｜💢 誤敲巡邏員 <b>短暫暈眩 1.2 秒</b></span>
-        <span>✨ 稀有金豆現身 <b>BONUS +3分</b></span>
+        <span>🎯 敲中正確答案淘氣豆 <b>+10 分</b>，連續答對累積 <b>Combo</b> 升級大錘！</span>
+        <span>✨ 稀有金豆現身 <b>BONUS +3 分</b> ｜ ❌ 答錯扣分連擊中斷</span>
+        <span>🍼 誤敲奶嘴豆 <b>-1</b> ｜ 💢 誤敲巡邏員 <b>短暫暈眩 1.2 秒</b></span>
       </div>
 
       <!-- 題數選擇 -->
@@ -172,7 +185,7 @@
       <div class="preset-tag" id="presetTag" hidden></div>
 
       <div class="start-actions">
-        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">進入觀察站 <span aria-hidden="true">↗</span></button>
+        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">進入觀察站 ➜</button>
       </div>
     </div>
   </section>
@@ -180,11 +193,13 @@
   <!-- 頂部 HUD 狀態列 -->
   <header class="hud" aria-label="遊戲狀態">
     <div class="hud-left">
-      <button type="button" class="btn-back-lobby btn-rule-help" onclick="toggleInstructionsModal(true)">玩法說明</button><button type="button" id="soundBtn" class="btn-tool" aria-pressed="true" onclick="toggleSound()">♪ 音效開</button><button type="button" id="pauseBtn" class="btn-tool" aria-pressed="false" onclick="togglePause()">Ⅱ 暫停</button>
+      <button type="button" class="btn-back-lobby btn-rule-help" onclick="toggleInstructionsModal(true)">📖 玩法說明</button>
+      <button type="button" id="soundBtn" class="btn-tool" aria-pressed="true" onclick="toggleSound()">♪ 音效開</button>
+      <button type="button" id="pauseBtn" class="btn-tool" aria-pressed="false" onclick="togglePause()">Ⅱ 暫停</button>
     </div>
     <div class="hud-right">
       <div class="info-badge unit-badge" id="badgeUnit">生物觀察任務</div>
-      <div class="info-badge progress-badge"><span>觀察紀錄</span><strong id="badgeProgress">0 / 0</strong></div>
+      <div class="info-badge progress-badge"><span>觀察進度</span><strong id="badgeProgress">0 / 0</strong></div>
       <div class="info-badge combo-badge"><span class="stat-label">連續命中</span><strong id="badgeCombo">Combo 0</strong></div>
       <div class="info-badge score-badge"><span class="stat-label">研究積分</span><strong id="badgeScore">得分 0</strong></div>
     </div>
@@ -193,13 +208,19 @@
   <!-- 主舞台 -->
   <main class="game-shell">
     <div class="mission-track" aria-hidden="true"><div id="missionFill"></div></div>
+
+    <!-- 題目卡片 -->
     <section class="question-card" id="questionCard">
       <div class="question-top">
-        <span class="question-kicker"><i></i> 本日觀察 / BIOLOGY</span><span class="time-counter"><strong id="timeSeconds">25</strong><small>SEC</small></span>
-        
+        <span class="question-kicker"><i></i> 本日觀察任務 · BIOLOGY</span>
+        <span class="time-counter"><strong id="timeSeconds">25</strong><small>SEC</small></span>
       </div>
       <div id="questionText" class="question-text">準備觀察，讓知識探出頭。</div>
-      <div class="question-bottom"><span id="timeHint" class="time-hint">先讀題，再出手</span><span class="input-hint">點選地洞或答案卡 · 鍵盤 A–D</span></div><div class="soft-timer" aria-label="本題時間"><div id="timeFill"></div></div>
+      <div class="soft-timer" aria-label="本題時間"><div id="timeFill"></div></div>
+      <div class="question-bottom">
+        <span id="timeHint" class="time-hint">先讀題，再出手</span>
+        <span class="input-hint">點選地洞或答案卡 · 鍵盤 A–D</span>
+      </div>
     </section>
 
     <!-- 四個選項卡片 -->
@@ -208,47 +229,70 @@
     <!-- 四個地洞舞台 -->
     <section class="arena-wrap">
       <div class="arena-title">
-        <span><small class="arena-kicker">THE OBSERVATION PATCH</small>淘氣豆出沒區</span>
+        <span><small class="arena-kicker">THE OBSERVATION PATCH</small>🌱 淘氣豆出沒地洞</span>
         <span id="hammerLevel">🔨 Lv.1 小木槌</span>
       </div>
-      <div class="patch-scene"><div class="patch-decoration" aria-hidden="true"><span>✦</span><span>🌱</span><span>🌿</span><span>✧</span></div><div class="field-stage" id="fieldStage"></div></div>
-      <div id="statusToast" class="status-toast" role="status" aria-live="polite"></div><div class="bean-legend"><span><i class="legend-dot target-dot"></i>微笑豆 · 答題 +10</span><span><i class="legend-dot gold-dot"></i>金豆 · 獎勵 +3</span><span><i class="legend-dot baby-dot"></i>奶嘴豆 · −1</span><span><i class="legend-dot guard-dot"></i>巡邏員 · 暈眩</span></div>
+      <div class="patch-scene">
+        <div class="patch-decoration" aria-hidden="true"><span>✦</span><span>🌱</span><span>🌿</span><span>✧</span></div>
+        <div class="field-stage" id="fieldStage"></div>
+      </div>
+      <div id="statusToast" class="status-toast" role="status" aria-live="polite"></div>
+      <div class="bean-legend">
+        <span><i class="legend-dot target-dot"></i>微笑豆 · 正解 +10</span>
+        <span><i class="legend-dot gold-dot"></i>金豆 · 獎勵 +3</span>
+        <span><i class="legend-dot baby-dot"></i>奶嘴豆 · 哭哭 −1</span>
+        <span><i class="legend-dot guard-dot"></i>巡邏員 · 警報暈眩</span>
+      </div>
     </section>
   </main>
 
-  <footer class="field-footer"><span>看清楚・想一想・再出手</span><span>每次觀察，都是新發現。</span></footer>
-  <section class="overlay" id="pauseModal" hidden role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="dialog-box pause-card"><span class="pause-symbol" aria-hidden="true">Ⅱ</span><p class="eyebrow">TAKE A BREATH</p><h2 id="pauseTitle">觀察暫停中</h2><p class="dialog-sub">倒數和淘氣豆都在等你。<br>準備好了，再繼續探索。</p><button type="button" class="btn-action" onclick="setPaused(false)">繼續觀察 ↗</button></div></section>
+  <footer class="field-footer">
+    <span>看清楚・想一想・再出手</span>
+    <span>每次觀察，都是新發現。</span>
+  </footer>
+
+  <!-- 暫停彈窗 -->
+  <section class="overlay" id="pauseModal" hidden role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="dialog-box pause-card">
+      <span class="pause-symbol" aria-hidden="true">Ⅱ</span>
+      <p class="eyebrow">TAKE A BREATH</p>
+      <h2 id="pauseTitle">觀察暫停中</h2>
+      <p class="dialog-sub">倒數和淘氣豆都在等你。<br>準備好了，隨時繼續探索！</p>
+      <button type="button" class="btn-action" onclick="setPaused(false)">繼續探索 ➜</button>
+    </div>
+  </section>
+
   <!-- 暈眩警示覆蓋層 -->
   <div class="stun-overlay" id="stunOverlay" hidden>
     <div class="stun-card">
       <div class="stun-stars">⭐💫⭐</div>
       <strong>被巡邏員抓包了！</strong>
-      <span>警報暈眩 1.2 秒</span>
+      <span>防衛冷卻暈眩 1.2 秒</span>
     </div>
   </div>
 
   <!-- 觀念訂正彈窗 -->
   <section class="overlay" id="feedbackModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="dialog-box result-card">
-      <h2 id="modalTitle">作答結果</h2>
+      <h2 id="modalTitle">💡 觀念釐清與訂正</h2>
       <div id="modalBody" class="explain-body"></div>
-      <button type="button" class="btn-action" id="modalBtn">繼續前進 ➜</button>
+      <button type="button" class="btn-action" id="modalBtn">我看懂了，繼續前進 ➜</button>
     </div>
   </section>
 
   <!-- 遊戲詳細說明彈窗 -->
   <section class="overlay" id="instructionsModal" hidden role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
     <div class="dialog-box rule-modal-card">
-      <h2 id="instructionsTitle" style="color:#0369A1; margin-bottom:12px;">📖 淘氣豆：遊戲玩法與規則說明</h2>
-      <div class="explain-body rule-explain-list" style="text-align:left; font-size:0.9rem; line-height:1.6; display:grid; gap:8px;">
-        <p>🎯 <strong>如何作答</strong>：看清上方題目後，當對應選項（A、B、C、D）的「微笑淘氣豆」探頭時，點擊地洞、對應答案卡，或按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 敲擊作答！</p>
+      <h2 id="instructionsTitle">📖 淘氣豆：玩法與觀察指南</h2>
+      <div class="explain-body rule-explain-list" style="display:grid; gap:10px;">
+        <p>🎯 <strong>如何作答</strong>：看清題目後，當對應選項（A、B、C、D）的「微笑淘氣豆」探頭時，點擊地洞、對應答案卡，或按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 敲擊作答！</p>
         <p>🔨 <strong>連擊升級</strong>：連續答對可累積 Combo，每連擊 2 次升級錘子（最高 Lv.5 終極槌）。每題答對固定 +10 分，答錯扣 1 分並中斷連擊。</p>
         <p>🍼 <strong>奶嘴豆 (哭哭臉 😭)</strong>：誤敲戴奶嘴眼眶帶淚的奶嘴豆，會發出哭聲並扣 1 分。</p>
         <p>💢 <strong>巡邏員 (生氣臉 😠)</strong>：千萬別敲擊斜眼斜眉帶有怒氣標誌 💢 的巡邏員豆，否則會引發警報並暈眩 1.2 秒！</p>
         <p>✨ <strong>閃耀金豆 (開心星眼 🤩)</strong>：稀有黃金豆現身，命中可獲得額外 BONUS +3 分獎勵！</p>
         <p>📜 <strong>防偽成績單</strong>：挑戰完成後頒發 `BEAN-XXXXXX` 防偽成績單，可一鍵複製文字貼至 Google Classroom 繳交作業！</p>
       </div>
-      <button type="button" class="btn-action" style="margin-top:10px; background:#0284C7;" onclick="toggleInstructionsModal(false)">我看懂了 ➜</button>
+      <button type="button" class="btn-action" onclick="toggleInstructionsModal(false)">我看懂了，返回遊戲 ➜</button>
     </div>
   </section>
 
@@ -257,10 +301,16 @@
     <div class="modal-box cert-box">
       <div class="cert-header">
         <div class="cert-stamp">MISSION COMPLETE</div>
-        <p class="eyebrow">FIELD NOTES / 觀察成果</p><h2 id="certTitle">今天的探索，完成！</h2>
+        <p class="eyebrow">FIELD NOTES / 觀察成果</p>
+        <h2 id="certTitle">今天的探索，完成！</h2>
         <div class="cert-id" id="certIdDisplay">驗證碼：BEAN-000000</div>
       </div>
-      <div class="result-highlight"><span>答對題數</span><strong id="certAccuracy">0 / 0</strong><small>每一次訂正，都是下一次答對的起點。</small></div><div class="cert-body">
+      <div class="result-highlight">
+        <span>答對題數</span>
+        <strong id="certAccuracy">0 / 0</strong>
+        <small>每一次訂正，都是下一次答對的起點。</small>
+      </div>
+      <div class="cert-body">
         <div class="cert-row">
           <span>👤 學生資料：</span>
           <strong id="certStudentInfo">701 班 01 號 王小明</strong>
@@ -292,7 +342,7 @@
       </div>
 
       <div class="cert-actions">
-        <button type="button" id="btnSubmitScoreGas" class="btn-action" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:white; font-weight:800; margin-bottom:8px; width:100%; border-radius:12px; padding:12px; font-size:1.05rem; cursor:pointer;" onclick="triggerBeanGasSubmit()">🚀 查看結算與交卷檢核</button>
+        <button type="button" id="btnSubmitScoreGas" class="btn-action" onclick="triggerBeanGasSubmit()">🚀 查看結算與交卷檢核</button>
         <button type="button" class="btn-copy-cert" id="btnCopyCert" onclick="copyCertToClipboard()">📋 複製成績單驗證碼 (斷網備用)</button>
         <div class="cert-btn-group">
           <button type="button" class="btn-restart" onclick="resetToStart()">再戰一局 🔄</button>
@@ -302,6 +352,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=5.0"></script>
+  <script src="game.js?v=9.0"></script>
 </body>
 </html>
