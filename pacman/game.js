@@ -391,13 +391,30 @@ function prepareQuestionPool(rawList) {
   const pool = rawList.map(item => {
     let options = [];
     let ansIdx = 0;
+    const rawAns = item.answer !== undefined ? item.answer : item.ans;
+
     if (item.options && Array.isArray(item.options)) {
       options = item.options.map(o => typeof o === 'string' ? o : (o.text || JSON.stringify(o)));
-      ansIdx = typeof item.ans === 'number' ? item.ans : (item.ans?.charCodeAt(0) - 65 || 0);
+      if (typeof rawAns === 'number') {
+        ansIdx = rawAns;
+      } else if (typeof rawAns === 'string') {
+        const trimmed = rawAns.trim().toUpperCase();
+        if (['A','B','C','D'].includes(trimmed)) {
+          ansIdx = trimmed.charCodeAt(0) - 65;
+        } else {
+          const num = parseInt(trimmed, 10);
+          ansIdx = !isNaN(num) ? num : (options.findIndex(opt => opt === rawAns.trim()) || 0);
+        }
+      }
     } else if (item.choices && typeof item.choices === 'object') {
       ['A','B','C','D'].forEach((k, idx) => {
         if (item.choices[k]) options.push(item.choices[k]);
-        if (item.ans === k) ansIdx = idx;
+        if (rawAns === k || rawAns === idx || rawAns === String(idx)) ansIdx = idx;
+      });
+    } else if (item.options && typeof item.options === 'object') {
+      ['A','B','C','D'].forEach((k, idx) => {
+        if (item.options[k]) options.push(item.options[k]);
+        if (rawAns === k || rawAns === idx || rawAns === String(idx)) ansIdx = idx;
       });
     }
     if (options.length < 2) options = ["選項 A", "選項 B", "選項 C", "選項 D"];
