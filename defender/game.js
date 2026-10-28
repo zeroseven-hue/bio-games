@@ -703,6 +703,19 @@ canvas.addEventListener("pointerdown", (e) => {
   e.preventDefault();
   pointerId = e.pointerId;
   canvas.setPointerCapture?.(e.pointerId);
+
+  const rect = canvas.getBoundingClientRect();
+  const clickX = (e.clientX - rect.left) * cw / rect.width;
+  const clickY = (e.clientY - rect.top) * ch / rect.height;
+
+  // 🎯 觸控直接點擊外星怪發動直覺射擊 (Tap-to-Shoot Monster)
+  const clickedEnemy = enemies.find(m => Math.hypot(clickX - m.x, clickY - m.y) < 52);
+  if (clickedEnemy) {
+    player.x = clickedEnemy.x;
+    fireBullet();
+    return;
+  }
+
   positionPointer(e.clientX);
   fireBullet();
 });

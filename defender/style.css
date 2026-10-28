@@ -79,13 +79,12 @@ body {
   width: 100%;
   max-width: 1260px;
   margin: auto;
-  display: grid;
-  grid-template-columns: minmax(340px, 440px) minmax(0, 1fr);
-  grid-template-rows: auto auto auto minmax(460px, 1fr) auto auto;
-  min-height: min(920px, calc(100dvh - 40px));
+  display: flex;
+  flex-direction: column;
+  min-height: min(920px, calc(100dvh - 20px));
   background: var(--surface-white);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 28px;
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow-pop);
   position: relative;
@@ -344,17 +343,16 @@ header {
    5. 題目閱讀面板 (App Question Studio - 核心留白與層次)
    ======================================================== */
 #question-panel {
-  grid-column: 1;
-  grid-row: 4;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 28px 24px 24px;
+  gap: 12px;
+  padding: 16px 24px 14px;
   background: var(--surface-white);
-  border-right: 1px solid var(--border-light);
+  border-bottom: 1.5px solid var(--border-light);
   min-width: 0;
   position: relative;
-  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .question-meta {
@@ -534,18 +532,17 @@ header {
    6. 戰鬥星空主畫布 (Modern Space Arcade Stage)
    ======================================================== */
 #canvas-wrap {
-  grid-column: 2;
-  grid-row: 4;
+  width: 100%;
+  flex: 1;
+  min-height: clamp(380px, 50vh, 580px);
   position: relative;
   overflow: hidden;
-  min-width: 0;
-  min-height: 460px;
   background:
     radial-gradient(ellipse 70% 50% at 75% 20%, rgba(2, 132, 199, 0.22) 0%, transparent 70%),
     radial-gradient(ellipse 60% 45% at 20% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
     #071122;
   isolation: isolate;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 canvas {
@@ -1074,8 +1071,7 @@ kbd {
     display: none;
   }
   #canvas-wrap {
-    height: clamp(320px, 42dvh, 480px);
-    min-height: 320px;
+    min-height: clamp(340px, 46dvh, 520px);
     flex: 1;
     border-left: 0;
   }
