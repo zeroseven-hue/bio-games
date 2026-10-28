@@ -529,7 +529,6 @@ async function startMission(bonusCount) {
     isRunning = true;
 
     updateHUD();
-    initEnemies();
     loadQuestion(0);
     requestAnimationFrame(gameLoop);
   } catch (error) {
