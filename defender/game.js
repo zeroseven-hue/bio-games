@@ -225,6 +225,38 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
+/* ⏱️ 課堂 20 分鐘整體計時與多輪累積狀態 */
+let sessionStartTime = null;
+let sessionElapsedSeconds = 0;
+let sessionTimer = null;
+let sessionRounds = 1;
+let sessionTotalScore = 0;
+let sessionTotalCorrect = 0;
+let sessionAnsweredQuestions = new Set();
+let sessionWarned18m = false;
+
+function formatSessionTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function startSessionClock() {
+  if (sessionTimer) return;
+  sessionStartTime = Date.now();
+  sessionTimer = setInterval(() => {
+    if (!isRunning || isPaused) return;
+    sessionElapsedSeconds++;
+    const el = document.getElementById("session-time-val");
+    if (el) el.textContent = formatSessionTime(sessionElapsedSeconds);
+
+    if (sessionElapsedSeconds >= 18 * 60 && !sessionWarned18m) {
+      sessionWarned18m = true;
+      combatFeedback("🔔 課堂時間剩餘約 2 分鐘，請把握時間完成本輪並準備交卷！");
+    }
+  }, 1000);
+}
+
 let player = { x: 200, y: 400, w: 46, h: 42, speed: 7.5 };
 let bullets = [];
 let enemies = [];
@@ -236,7 +268,11 @@ let feedbackTimer = null;
 const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
 function updateMissionUI() {
   const progress = document.getElementById("question-progress");
-  if (progress) progress.textContent = isRunning ? "MISSION / " + Math.min(currentQIndex + 1, gameQuestions.length) + " · " + gameQuestions.length : "任務待命";
+  if (progress) progress.textContent = isRunning ? `MISSION / ${Math.min(currentQIndex + 1, gameQuestions.length)} · ${gameQuestions.length}` : "任務待命";
+  const roundEl = document.getElementById("round-val");
+  if (roundEl) roundEl.textContent = sessionRounds;
+  const statTag = document.getElementById("session-stats-tag");
+  if (statTag) statTag.textContent = `第 ${sessionRounds} 輪 · 累計答對 ${sessionTotalCorrect} 題`;
   const fill = document.getElementById("mission-fill");
   if (fill) fill.style.width = (gameQuestions.length ? logs.length / gameQuestions.length * 100 : 0) + "%";
   for (const letter of "ABCD") {
@@ -447,17 +483,28 @@ async function startMission(bonusCount) {
       document.getElementById("bigscreen-pad").style.display = "none";
     }
 
+    startSessionClock();
+    if (bonusCount) {
+      sessionRounds++;
+    }
+
     if (student.unit && student.unit !== "FAST_DEFAULT") {
       currentUnitId = student.unit;
     } else if (!currentUnitId) {
       currentUnitId = dispatchedUnit || "FAST_DEFAULT";
     }
 
-    // 取得題庫資料並隨機抽取題目 (依 URL ?qcount=N 或預設 10 題)
+    // 取得題庫資料並隨機抽取題目 (20分鐘課堂防重複優先)
     const urlParams = new URLSearchParams(window.location.search);
     const targetQCount = bonusCount === 10 ? 10 : Math.max(1, parseInt(urlParams.get("qcount") || urlParams.get("count")) || 10);
     const pool = await fetchQuestionsForCurrentUnit();
-    gameQuestions = shuffleArray(pool).slice(0, targetQCount);
+    let unusedPool = pool.filter(q => !sessionAnsweredQuestions.has(q.q));
+    if (unusedPool.length < targetQCount) {
+      sessionAnsweredQuestions.clear();
+      unusedPool = [...pool];
+    }
+    gameQuestions = shuffleArray(unusedPool).slice(0, targetQCount);
+    gameQuestions.forEach(q => sessionAnsweredQuestions.add(q.q));
 
     document.getElementById("end-modal").style.display = "none";
     document.getElementById("start-modal").style.display = "none";
@@ -690,6 +737,7 @@ function hitTarget(enemy) {
   if (enemy.letter === q.ans) {
     soundHitCorrect();
     combo++;
+    sessionTotalCorrect++;
     const speedBonus = Math.floor(qTimeRemaining * 10);
     score += 100 + combo * 25 + speedBonus;
     combatFeedback("🎯 命中正解 +" + (100 + combo * 25 + speedBonus) + (combo > 1 ? " · " + combo + " 連擊！" : ""));
@@ -1150,8 +1198,8 @@ function triggerDefenderGasSubmit() {
       gameTitle: GAME_TITLE,
       gameId: "defender",
       score: score,
-      scoreDisplay: `${score} 分 (答對 ${correctCount}/${gameQuestions.length} 題)`,
-      duration: lives <= 0 ? "護盾耗盡，任務結算" : "任務圓滿通關",
+      scoreDisplay: `${score} 分 (第 ${sessionRounds} 輪 答對 ${correctCount}/${gameQuestions.length} 題 · 累計答對 ${sessionTotalCorrect} 題)`,
+      duration: `課堂歷時 ${formatSessionTime(sessionElapsedSeconds)} (完成 ${sessionRounds} 輪)`,
       initialClass: student.class || playerProfile.cls || "701",
       initialSeat: student.seat || playerProfile.seat || "01",
       initialName: student.name || playerProfile.name || "防衛隊員",

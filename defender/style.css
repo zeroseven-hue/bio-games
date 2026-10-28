@@ -173,6 +173,26 @@ header {
   color: #0284c7;
 }
 
+.hud-session, .hud-round {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.hud-session span, .hud-round span {
+  color: #16a34a;
+}
+
+#session-stats-tag {
+  color: #0369a1;
+  font-size: 11px;
+  font-weight: 700;
+  background: #e0f2fe;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #bae6fd;
+}
+
 .header-tools {
   margin-left: auto;
   display: flex;

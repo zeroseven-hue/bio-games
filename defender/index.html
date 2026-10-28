@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>生物小蜜蜂：星際防衛隊 V5.1 (Bio Defender)</title>
-  <link rel="stylesheet" href="style.css?v=5.1" />
+  <title>生物小蜜蜂：星際防衛隊 V5.2 (Bio Defender)</title>
+  <link rel="stylesheet" href="style.css?v=5.2" />
 </head>
 <body>
 
@@ -23,11 +23,13 @@
       <span class="live-tag">星艦通訊 · 已連線</span>
     </div>
 
-    <!-- 頂部 HUD 資訊列 -->
+    <!-- 頂部 HUD 資訊列 (支援 20 分鐘課堂活動節奏) -->
     <header>
       <div class="hud-item">🛡️ 護盾 <span id="lives-val">3</span></div>
       <div class="hud-item">🏆 戰分 <span id="score-val">0</span></div>
       <div class="hud-item">🔥 連擊 <span id="combo-val">0</span></div>
+      <div class="hud-item hud-session" title="課堂活動進行時間">⏱️ 歷時 <span id="session-time-val">00:00</span></div>
+      <div class="hud-item hud-round" title="20分鐘累計挑戰輪數">🛸 第 <span id="round-val">1</span> 輪</div>
       <div class="header-tools">
         <button type="button" class="btn-tool btn-zoom" id="btn-zoom" onclick="toggleZoom()" title="放大題目字體">🔍 放大題目</button>
         <button type="button" class="btn-tool btn-freeze" id="btn-freeze" onclick="togglePause()" title="老師講解全場凍結 (快捷鍵：P)">⏸️ 暫停講解</button>
@@ -57,6 +59,7 @@
     <div id="question-panel">
       <div class="question-meta">
         <span id="question-progress">MISSION / 1 · 10</span>
+        <span id="session-stats-tag">第 1 輪 · 累計答對 0 題</span>
         <strong id="timer-label">25 秒</strong>
       </div>
       <div class="time-bar-bg">
@@ -195,6 +198,6 @@
 
   <!-- 引入通用成績上傳模組與遊戲邏輯 -->
   <script src="../score-submit-modal.js?v=4.5"></script>
-  <script src="game.js?v=5.1"></script>
+  <script src="game.js?v=5.2"></script>
 </body>
 </html>
