@@ -181,8 +181,10 @@
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
+        overflow-y: auto;
         z-index: 999999;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
         padding: 16px;
@@ -282,8 +284,10 @@
         border: none;
         cursor: pointer;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
+        overflow-y: auto;
         gap: 8px;
         transition: all 0.2s ease;
         box-sizing: border-box;
@@ -1310,12 +1314,6 @@
           </div>
           ${options.hideUnit ? '' : `
             <div style="font-size:0.85rem; font-weight:700; color:${theme.accentColor}; margin-top:6px;">
-              📚 挑戰主題：${cleanUnitTitle(currentStudent.unitTitle) || '專屬任務'}
-            </div>
-          `}
-        </div>
-          ${options.hideUnit ? '' : `
-            <div style="font-size:0.82rem; color:${theme.accentColor}; margin-top:4px;">
               📚 挑戰主題：${cleanUnitTitle(currentStudent.unitTitle) || '專屬任務'}
             </div>
           `}
