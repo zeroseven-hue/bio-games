@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>生物小蜜蜂：星際防衛隊 V5.0 (Bio Defender)</title>
-  <link rel="stylesheet" href="style.css?v=5.0" />
+  <title>生物小蜜蜂：星際防衛隊 V5.1 (Bio Defender)</title>
+  <link rel="stylesheet" href="style.css?v=5.1" />
 </head>
 <body>
 
@@ -28,10 +28,22 @@
       <div class="hud-item">🛡️ 護盾 <span id="lives-val">3</span></div>
       <div class="hud-item">🏆 戰分 <span id="score-val">0</span></div>
       <div class="hud-item">🔥 連擊 <span id="combo-val">0</span></div>
-      <div class="hud-item">
-        <button class="btn-sound" id="sound-btn" onclick="toggleSound()">🔊 音效</button>
+      <div class="header-tools">
+        <button type="button" class="btn-tool btn-zoom" id="btn-zoom" onclick="toggleZoom()" title="放大題目字體">🔍 放大題目</button>
+        <button type="button" class="btn-tool btn-freeze" id="btn-freeze" onclick="togglePause()" title="老師講解全場凍結 (快捷鍵：P)">⏸️ 暫停講解</button>
+        <button type="button" class="btn-sound" id="sound-btn" onclick="toggleSound()">🔊 音效</button>
       </div>
     </header>
+
+    <!-- 👨‍🏫 教師全場凍結講解覆蓋層 -->
+    <div class="pause-overlay" id="pauseOverlay" style="display: none;">
+      <div class="pause-card">
+        <div class="pause-icon">👨‍🏫</div>
+        <h2>全場暫停 · 老師重點講解</h2>
+        <p>作答計時、戰機巡航與星際音效已全數凍結！<br>請全班抬頭看黑板，專心聆聽老師重點解說。</p>
+        <button type="button" class="primary-btn" onclick="togglePause(false)" style="margin-top: 18px; max-width: 220px; margin-left: auto; margin-right: auto;">▶️ 解除凍結，繼續任務</button>
+      </div>
+    </div>
 
     <!-- 📚 單元切換列 (動態載入中央題庫) -->
     <div class="unit-bar">
@@ -79,7 +91,7 @@
 
     <div class="mission-progress" aria-hidden="true"><span id="mission-fill"></span></div>
     <footer class="control-guide">
-      <span><strong>快捷鎖定</strong> <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd>　<strong>移動</strong> ← → 或拖曳　<strong>發射</strong> 空白鍵</span>
+      <span><strong>快捷鎖定</strong> <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 或 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>　<strong>移動</strong> ← → 或拖曳　<strong>發射</strong> 空白鍵　<strong>凍結</strong> <kbd>P</kbd></span>
       <span>載具觸控：點按發射 · 拖曳巡航</span>
     </footer>
 
@@ -183,6 +195,6 @@
 
   <!-- 引入通用成績上傳模組與遊戲邏輯 -->
   <script src="../score-submit-modal.js?v=4.5"></script>
-  <script src="game.js?v=5.0"></script>
+  <script src="game.js?v=5.1"></script>
 </body>
 </html>

@@ -188,6 +188,43 @@ let isRunning = false;
 let logs = [];
 let playerProfile = { cls: "", seat: "", name: "" };
 
+let isPaused = false;
+let isZoomed = false;
+let emergencyRepairs = 0;
+
+function togglePause(forceState) {
+  if (!isRunning && !isPaused) return;
+  isPaused = typeof forceState === "boolean" ? forceState : !isPaused;
+  const overlay = document.getElementById("pauseOverlay");
+  if (overlay) overlay.style.display = isPaused ? "flex" : "none";
+  const btn = document.getElementById("btn-freeze");
+  if (btn) btn.textContent = isPaused ? "▶️ 繼續任務" : "⏸️ 暫停講解";
+
+  if (isPaused) {
+    if (audioCtx && audioCtx.state === 'running') {
+      audioCtx.suspend().catch(() => {});
+    }
+  } else {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  }
+}
+
+function toggleZoom() {
+  isZoomed = !isZoomed;
+  const panel = document.getElementById("question-panel");
+  if (panel) panel.classList.toggle("font-zoomed", isZoomed);
+  const btn = document.getElementById("btn-zoom");
+  if (btn) btn.textContent = isZoomed ? "🔍 標準字體" : "🔍 放大題目";
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && isRunning && !isPaused) {
+    togglePause(true);
+  }
+});
+
 let player = { x: 200, y: 400, w: 46, h: 42, speed: 7.5 };
 let bullets = [];
 let enemies = [];
@@ -436,6 +473,8 @@ async function startMission(bonusCount) {
     score = 0;
     lives = 3;
     combo = 0;
+    emergencyRepairs = 0;
+    isPaused = false;
     currentQIndex = 0;
     logs = [];
     particles = [];
@@ -462,7 +501,7 @@ function loadQuestion(idx) {
   hintTimer = null;
   document.getElementById("hint-banner").style.display = "none";
   bullets = [];
-  if (idx >= gameQuestions.length || lives <= 0) {
+  if (idx >= gameQuestions.length) {
     endMission();
     return;
   }
@@ -536,7 +575,7 @@ function startTimer() {
   clearInterval(qTimer);
   const version = questionVersion;
   qTimer = setInterval(() => {
-    if (!isRunning || questionSettled || version !== questionVersion) return;
+    if (!isRunning || isPaused || questionSettled || version !== questionVersion) return;
     qTimeRemaining -= 0.1;
     const label = document.getElementById("timer-label");
     if (label) label.textContent = Math.max(0, Math.ceil(qTimeRemaining)) + " 秒";
@@ -565,31 +604,42 @@ function handleTimeout() {
   if (!settleQuestion()) return;
   lives--;
   combo = 0;
+  if (lives <= 0) {
+    lives = 1;
+    emergencyRepairs++;
+    combatFeedback("🚨 護盾歸零！緊急防衛系統充能，堅持完成挑戰！");
+  }
   updateHUD();
   soundExplode();
   revealAnswer();
   const current = gameQuestions[currentQIndex];
-  logs.push({ q: current.q, correct: false, ans: current.ans, reason: "思考逾時" });
-  showHint(`⏰ 時間到！正確答案是 [${current.ans}]。<br>${current.hint}`);
+  logs.push({ q: current.q, correct: false, ans: current.ans, reason: "思考逾時", hint: current.hint });
+  showHint(`⏰ 時間到！正確答案是 [${current.ans}]。<br>💡 <b>觀念解析：</b>${current.hint}`);
 }
 
 /* ========================================================
-   5. 操控與鎖定雷射發射邏輯 (無連發限制)
+   5. 操控與鎖定雷射發射邏輯 (支援鍵盤數字鍵與教師暫停)
    ======================================================== */
 window.addEventListener("keydown", (e) => {
   if (!isRunning || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target?.tagName || "") || e.target?.isContentEditable) return;
+  if (e.code === "KeyP" || (e.code === "Space" && e.ctrlKey)) {
+    e.preventDefault();
+    togglePause();
+    return;
+  }
+  if (isPaused) return;
   if (e.code === "Space" && e.target?.tagName === "BUTTON") return;
-  if (["Space", "ArrowLeft", "ArrowRight", "KeyA", "KeyB", "KeyC", "KeyD"].includes(e.code)) e.preventDefault();
+  if (["Space", "ArrowLeft", "ArrowRight", "KeyA", "KeyB", "KeyC", "KeyD", "Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) e.preventDefault();
   keys[e.code] = true;
   if (e.code === "Space") {
     fireBullet();
-  } else if (e.code === "KeyA") {
+  } else if (e.code === "KeyA" || e.code === "Digit1") {
     directShoot('A');
-  } else if (e.code === "KeyB") {
+  } else if (e.code === "KeyB" || e.code === "Digit2") {
     directShoot('B');
-  } else if (e.code === "KeyC") {
+  } else if (e.code === "KeyC" || e.code === "Digit3") {
     directShoot('C');
-  } else if (e.code === "KeyD") {
+  } else if (e.code === "KeyD" || e.code === "Digit4") {
     directShoot('D');
   }
 });
@@ -603,7 +653,7 @@ function positionPointer(clientX) {
   player.x = Math.max(player.w / 2, Math.min(cw - player.w / 2, (clientX - rect.left) * cw / rect.width));
 }
 canvas.addEventListener("pointerdown", (e) => {
-  if (!isRunning || questionSettled || pointerId !== null || (e.pointerType === "mouse" && e.button !== 0)) return;
+  if (!isRunning || isPaused || questionSettled || pointerId !== null || (e.pointerType === "mouse" && e.button !== 0)) return;
   e.preventDefault();
   pointerId = e.pointerId;
   canvas.setPointerCapture?.(e.pointerId);
@@ -617,7 +667,7 @@ for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
 
 /* 直覺鎖定發射：大黑板觸控或按 A/B/C/D 鍵 */
 function directShoot(letter) {
-  if (isOverheated || !isRunning || questionSettled) return;
+  if (isPaused || isOverheated || !isRunning || questionSettled) return;
   const target = enemies.find(e => e.letter === letter);
   if (target) {
     player.x = target.x; // 戰機立刻移至對應怪物下方
@@ -627,7 +677,7 @@ function directShoot(letter) {
 
 /* 無限制發射（移除原本 bullets.length >= 2 的鎖死問題） */
 function fireBullet() {
-  if (isOverheated || !isRunning || questionSettled) return;
+  if (isPaused || isOverheated || !isRunning || questionSettled) return;
   bullets.push({ x: player.x, y: player.y - 18, vy: -11, r: 6 });
   soundLaser();
 }
@@ -642,26 +692,33 @@ function hitTarget(enemy) {
     combo++;
     const speedBonus = Math.floor(qTimeRemaining * 10);
     score += 100 + combo * 25 + speedBonus;
-    combatFeedback("命中正解 +" + (100 + combo * 25 + speedBonus) + (combo > 1 ? " · " + combo + " 連擊" : ""));
-    logs.push({ q: q.q, correct: true, ans: q.ans });
+    combatFeedback("🎯 命中正解 +" + (100 + combo * 25 + speedBonus) + (combo > 1 ? " · " + combo + " 連擊！" : ""));
+    logs.push({ q: q.q, correct: true, ans: q.ans, hint: q.hint });
     updateHUD();
     currentQIndex++;
-    loadQuestion(currentQIndex);
+    setTimeout(() => {
+      if (isRunning) loadQuestion(currentQIndex);
+    }, 600);
   } else {
     soundExplode();
     lives--;
     combo = 0;
+    if (lives <= 0) {
+      lives = 1;
+      emergencyRepairs++;
+      combatFeedback("🚨 護盾歸零！緊急防衛系統充能，堅持完成挑戰！");
+    }
     updateHUD();
-    logs.push({ q: q.q, correct: false, ans: q.ans, myAns: enemy.letter });
+    logs.push({ q: q.q, correct: false, ans: q.ans, myAns: enemy.letter, hint: q.hint });
     revealAnswer(enemy.letter);
     triggerOverheat();
-    showHint(`❌ 擊中 [${enemy.letter}] 錯囉！正確答案是 [${q.ans}]。<br>${q.hint}`);
+    showHint(`❌ 擊中 [${enemy.letter}] 錯囉！正確答案是 [${q.ans}]。<br>💡 <b>觀念解析：</b>${q.hint}`);
   }
 }
 
 function triggerOverheat() {
   isOverheated = true;
-  setTimeout(() => { isOverheated = false; }, 2500);
+  setTimeout(() => { isOverheated = false; }, 2200);
 }
 
 function showHint(html) {
@@ -677,7 +734,7 @@ function showHint(html) {
     banner.style.display = "none";
     currentQIndex++;
     loadQuestion(currentQIndex);
-  }, 3500);
+  }, 3000);
 }
 
 function updateHUD() {
@@ -873,35 +930,67 @@ function drawEyes(x1, y1, x2, y2) {
 /* 遊戲主迴圈 */
 function gameLoop() {
   if (!isRunning) return;
-  gameTick++;
+
+  if (!isPaused) {
+    gameTick++;
+
+    stars.forEach(s => {
+      s.y += reducedMotion ? 0 : s.vy;
+      if (s.y > ch) s.y = 0;
+    });
+
+    if (keys["ArrowLeft"]) player.x -= player.speed;
+    if (keys["ArrowRight"]) player.x += player.speed;
+    player.x = Math.max(player.w / 2, Math.min(cw - player.w / 2, player.x));
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      b.y += b.vy;
+
+      let hit = false;
+      for (let j = 0; j < enemies.length; j++) {
+        const e = enemies[j];
+        if (Math.hypot(b.x - e.x, b.y - e.y) < 26) {
+          hit = true;
+          hitTarget(e);
+          break;
+        }
+      }
+      if (hit) break;
+      if (b.y < 0) bullets.splice(i, 1);
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= p.decay;
+      if (p.alpha <= 0) particles.splice(i, 1);
+    }
+  }
 
   ctx.clearRect(0, 0, cw, ch);
   drawArena();
 
   stars.forEach(s => {
-    s.y += reducedMotion ? 0 : s.vy;
-    if (s.y > ch) s.y = 0;
     ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  if (keys["ArrowLeft"]) player.x -= player.speed;
-  if (keys["ArrowRight"]) player.x += player.speed;
-  player.x = Math.max(player.w / 2, Math.min(cw - player.w / 2, player.x));
   drawPlayer(player.x, player.y);
 
   enemies.forEach(e => {
-    e.x = e.baseX + Math.sin(gameTick * 0.04) * 22;
-    e.y = e.baseY + Math.cos(gameTick * 0.06) * 6;
+    const curX = isPaused ? e.x : (e.baseX + Math.sin(gameTick * 0.04) * 22);
+    const curY = isPaused ? e.y : (e.baseY + Math.cos(gameTick * 0.06) * 6);
+    e.x = curX;
+    e.y = curY;
     drawMonster(e);
   });
 
-  for (let i = bullets.length - 1; i >= 0; i--) {
+  for (let i = 0; i < bullets.length; i++) {
     const b = bullets[i];
-    b.y += b.vy;
-
     ctx.save();
     ctx.fillStyle = combo >= 2 ? "#fbbf24" : "#00e5ff";
     ctx.shadowColor = ctx.fillStyle;
@@ -911,30 +1000,10 @@ function gameLoop() {
     ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
-
-    let hit = false;
-    for (let j = 0; j < enemies.length; j++) {
-      const e = enemies[j];
-      if (Math.hypot(b.x - e.x, b.y - e.y) < 26) {
-        hit = true;
-        hitTarget(e);
-        break;
-      }
-    }
-    // 命中會清空子彈或切換題目，不再遍歷原本的陣列索引。
-    if (hit) break;
-    if (b.y < 0) bullets.splice(i, 1);
   }
 
-  for (let i = particles.length - 1; i >= 0; i--) {
+  for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.alpha -= p.decay;
-    if (p.alpha <= 0) {
-      particles.splice(i, 1);
-      continue;
-    }
     ctx.save();
     ctx.globalAlpha = Math.max(0, p.alpha);
     ctx.fillStyle = p.color;
@@ -952,6 +1021,7 @@ function gameLoop() {
    ======================================================== */
 function endMission() {
   isRunning = false;
+  isPaused = false;
   questionSettled = true;
   questionVersion++;
   clearTimeout(hintTimer);
@@ -1001,7 +1071,10 @@ function endMission() {
     const div = document.createElement("div");
     div.className = `review-item ${l.correct ? 'correct' : 'wrong'}`;
     div.innerHTML = `<strong>第 ${idx + 1} 題：</strong>${l.q}<br>` +
-      (l.correct ? `✅ 正確` : `❌ 你的選擇: [${l.myAns || l.reason || '超時'}]（正解: [${l.ans}]）`);
+      (l.correct
+        ? `✅ <b>答對！</b>正解: [${l.ans}]`
+        : `❌ <b>答錯！</b>你的選擇: [${l.myAns || l.reason || '超時'}] ｜ <b>正確答案: [${l.ans}]</b><br><span style="color:#0369a1; font-size:12px; display:inline-block; margin-top:2px;">💡 <b>觀念解析：</b>${l.hint || '請複習本單元重點觀念。'}</span>`
+      );
     listEl.appendChild(div);
   });
 
@@ -1018,14 +1091,21 @@ function copyCertText() {
   const hashVal = document.getElementById("cert-hash").textContent;
   const rankVal = document.getElementById("end-rank").textContent;
 
-  const textToCopy = `【生物星際防衛隊 防偽認證戰報】\n` +
+  const wrongNotes = logs
+    .filter(l => !l.correct)
+    .map((l, i) => `${i + 1}. 題目：${l.q}\n   ❌ 選擇：[${l.myAns || l.reason || '超時'}] ｜ ✅ 正解：[${l.ans}]\n   💡 解析：${l.hint || '無'}`)
+    .join('\n');
+
+  const textToCopy = `【生物星際防衛隊 課堂學習戰報】\n` +
     `👤 隊員身分：${userTag}\n` +
     `🎖️ 任務評級：${rankVal}\n` +
     `🏆 最終戰分：${scoreVal} 分\n` +
     `🎯 答對題數：${statsVal}\n` +
     `📅 完成時間：${timeVal}\n` +
-    `🔒 防偽驗證碼：${hashVal}\n` +
-    `🌱 驗證平台：bio-games (GitHub Pages)`;
+    `🔒 防偽序號：${hashVal}\n` +
+    `🌱 平台：bio-games (GitHub Pages)\n\n` +
+    `📝【錯題觀念自我檢討】\n` +
+    (wrongNotes ? wrongNotes : '🎉 本次挑戰全員全對，觀念精熟！');
 
   const statusEl = document.getElementById("copyStatus");
   const copyRes = document.getElementById("copyResult");
@@ -1036,7 +1116,7 @@ function copyCertText() {
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(textToCopy).then(() => {
-      if (statusEl) statusEl.textContent = "✅ 已成功複製完整防偽學習紀錄至剪貼簿！";
+      if (statusEl) statusEl.textContent = "✅ 已成功複製學習戰報與錯題檢討至剪貼簿！";
     }).catch(() => {
       fallbackCopy(textToCopy);
     });
@@ -1053,7 +1133,7 @@ function fallbackCopy(text) {
   const statusEl = document.getElementById("copyStatus");
   try {
     document.execCommand('copy');
-    if (statusEl) statusEl.textContent = "✅ 已成功複製完整防偽學習紀錄至剪貼簿！";
+    if (statusEl) statusEl.textContent = "✅ 已成功複製學習戰報與錯題檢討至剪貼簿！";
   } catch (err) {
     if (statusEl) statusEl.textContent = "⚠️ 請手動複製下方文字框或截圖保存。";
   }

@@ -173,11 +173,39 @@ header {
   color: #0284c7;
 }
 
-.hud-item:last-child {
+.header-tools {
   margin-left: auto;
-  padding: 0;
-  border: 0;
-  background: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-tool {
+  border: 1.5px solid #bae6fd;
+  background: #ffffff;
+  color: #0369a1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  min-height: 40px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btn-tool:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
+}
+
+.btn-freeze {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.btn-freeze:hover {
+  background: #fef3c7;
+  border-color: #d97706;
 }
 
 .btn-sound {
@@ -194,6 +222,62 @@ header {
 .btn-sound:hover {
   background: #f1f5f9;
   border-color: #94a3b8;
+}
+
+/* 👨‍🏫 教師全場凍結覆蓋層 */
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 25;
+}
+
+.pause-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border: 3px solid #0284c7;
+  border-radius: 24px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(2, 132, 199, 0.35);
+  color: #0f172a;
+}
+
+.pause-icon {
+  font-size: 3.5rem;
+  margin-bottom: 10px;
+}
+
+.pause-card h2 {
+  font-size: 24px;
+  color: #0369a1;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.pause-card p {
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* 🔍 題目字體放大模式 (Accessibility) */
+#question-panel.font-zoomed #q-text {
+  font-size: clamp(20px, 1.8vw, 24px) !important;
+  line-height: 1.8 !important;
+}
+
+#question-panel.font-zoomed .opt-card {
+  font-size: 17px !important;
+  padding: 14px 18px !important;
+  min-height: 56px !important;
 }
 
 /* 📚 單元切換列 (動態載入中央題庫) */
