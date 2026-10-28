@@ -81,14 +81,19 @@ body {
   margin: auto;
   display: flex;
   flex-direction: column;
-  min-height: min(920px, calc(100dvh - 20px));
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--surface-white);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--shadow-pop);
   position: relative;
   isolation: isolate;
+  touch-action: none !important;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ========================================================
@@ -471,11 +476,10 @@ header {
 .opt-card.C { --opt-accent: var(--accent-amber); }
 .opt-card.D { --opt-accent: var(--accent-emerald); }
 
-.opt-card:hover:not(:disabled) {
-  background: var(--opt-hover-bg);
-  border-color: var(--opt-accent);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px -4px rgba(2, 132, 199, 0.14), var(--shadow-sm);
+.opt-card {
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
 
 .opt-card:active:not(:disabled) {
@@ -550,7 +554,7 @@ canvas {
   position: absolute;
   width: 100%;
   height: 100%;
-  touch-action: none;
+  touch-action: none !important;
 }
 
 .arena-label {

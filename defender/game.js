@@ -694,10 +694,19 @@ window.addEventListener("keyup", (e) => { keys[e.code] = false; });
 
 window.addEventListener("blur", () => { keys = {}; });
 let pointerId = null;
+let isDragging = false;
+let isAimingMonster = false;
+
+function onOptionGridClick() {
+  combatFeedback("🎯 鎖定作答：請操控戰機射擊怪獸，或直接戳天上的怪獸！");
+}
+window.onOptionGridClick = onOptionGridClick;
+
 function positionPointer(clientX) {
   const rect = canvas.getBoundingClientRect();
   player.x = Math.max(player.w / 2, Math.min(cw - player.w / 2, (clientX - rect.left) * cw / rect.width));
 }
+
 canvas.addEventListener("pointerdown", (e) => {
   if (!isRunning || isPaused || questionSettled || pointerId !== null || (e.pointerType === "mouse" && e.button !== 0)) return;
   e.preventDefault();
@@ -708,20 +717,40 @@ canvas.addEventListener("pointerdown", (e) => {
   const clickX = (e.clientX - rect.left) * cw / rect.width;
   const clickY = (e.clientY - rect.top) * ch / rect.height;
 
-  // 🎯 觸控直接點擊外星怪發動直覺射擊 (Tap-to-Shoot Monster)
-  const clickedEnemy = enemies.find(m => Math.hypot(clickX - m.x, clickY - m.y) < 52);
+  // 🎯 1. 觸控直接戳天上的外星怪：瞬間鎖定並直接開火！(Tap-to-Shoot Monster - 零學習門檻)
+  const clickedEnemy = enemies.find(m => Math.hypot(clickX - m.x, clickY - m.y) < 58);
   if (clickedEnemy) {
+    isAimingMonster = true;
+    isDragging = false;
     player.x = clickedEnemy.x;
     fireBullet();
     return;
   }
 
+  // 🚀 2. 在下方巡航區域碰觸：只負責滑動巡航，絕對不誤射子彈！
+  isAimingMonster = false;
+  isDragging = true;
   positionPointer(e.clientX);
-  fireBullet();
 });
-canvas.addEventListener("pointermove", (e) => { if (pointerId === e.pointerId) positionPointer(e.clientX); });
+
+canvas.addEventListener("pointermove", (e) => {
+  if (pointerId === e.pointerId && isDragging) {
+    positionPointer(e.clientX);
+  }
+});
+
 for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
-  canvas.addEventListener(type, (e) => { if (pointerId === e.pointerId) pointerId = null; });
+  canvas.addEventListener(type, (e) => {
+    if (pointerId === e.pointerId) {
+      if (isDragging && !isAimingMonster && isRunning && !isPaused && !questionSettled) {
+        // 🎯 巡航結束：手指抬起時發射雷射 (Release-to-Shoot)！
+        fireBullet();
+      }
+      isDragging = false;
+      isAimingMonster = false;
+      pointerId = null;
+    }
+  });
 }
 
 /* 直覺鎖定發射：大黑板觸控或按 A/B/C/D 鍵 */
@@ -909,6 +938,32 @@ function drawMonster(e) {
   ctx.textBaseline = "middle";
   ctx.fillText(e.letter, 0, bubbleY + 1);
 
+  // 📝 怪物頭頂浮動選項短標籤 (讓怪獸本身就是答案本體！)
+  const currentQ = gameQuestions[currentQIndex];
+  const optVal = currentQ?.options?.[e.letter] || "";
+  if (optVal) {
+    const shortLabel = optVal.length > 7 ? optVal.slice(0, 6) + "…" : optVal;
+    ctx.save();
+    ctx.font = "bold 11px sans-serif";
+    const textW = ctx.measureText(shortLabel).width;
+    const bW = Math.max(38, textW + 14);
+    const bY = 22;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.82)";
+    ctx.strokeStyle = e.theme;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-bW / 2, bY, bW, 18, 5);
+    else ctx.rect(-bW / 2, bY, bW, 18);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(shortLabel, 0, bY + 9);
+    ctx.restore();
+  }
+
   ctx.fillStyle = e.theme;
 
   if (e.name === "octopus") {
@@ -1040,6 +1095,19 @@ function gameLoop() {
   });
 
   drawPlayer(player.x, player.y);
+
+  // 🎯 戰機瞄準輔助導引線 (Laser Sight Reticle)
+  if (isDragging && !isPaused) {
+    ctx.save();
+    ctx.setLineDash([5, 6]);
+    ctx.strokeStyle = combo >= 2 ? "rgba(251, 191, 36, 0.45)" : "rgba(56, 189, 248, 0.45)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y - 20);
+    ctx.lineTo(player.x, 45);
+    ctx.stroke();
+    ctx.restore();
+  }
 
   enemies.forEach(e => {
     const curX = isPaused ? e.x : (e.baseX + Math.sin(gameTick * 0.04) * 22);

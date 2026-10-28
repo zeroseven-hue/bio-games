@@ -2,12 +2,12 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>生物小蜜蜂：星際防衛隊 V5.5 (Bio Defender)</title>
-  <link rel="stylesheet" href="style.css?v=5.5" />
+  <title>生物小蜜蜂：星際防衛隊 V5.6 (Bio Defender)</title>
+  <link rel="stylesheet" href="style.css?v=5.6" />
 </head>
 <body>
 
@@ -66,13 +66,13 @@
         <div class="time-bar-fill" id="time-fill"></div>
       </div>
       <div id="q-text">戰機通訊系統連線中...</div>
-      <div class="options-grid">
-        <button type="button" class="opt-card A" id="opt-A" onclick="directShoot('A')" disabled>A. --</button>
-        <button type="button" class="opt-card B" id="opt-B" onclick="directShoot('B')" disabled>B. --</button>
-        <button type="button" class="opt-card C" id="opt-C" onclick="directShoot('C')" disabled>C. --</button>
-        <button type="button" class="opt-card D" id="opt-D" onclick="directShoot('D')" disabled>D. --</button>
+      <div class="options-grid" onclick="onOptionGridClick()" title="題目情報看板">
+        <div class="opt-card A" id="opt-A">A. --</div>
+        <div class="opt-card B" id="opt-B">B. --</div>
+        <div class="opt-card C" id="opt-C">C. --</div>
+        <div class="opt-card D" id="opt-D">D. --</div>
       </div>
-      <div class="question-note">🎮 <b>星際戰術：</b>雙手握持平板，在下方星空中滑動戰機開火，或直接點擊天上的外星生物怪！</div>
+      <div class="question-note">🎮 <b>星際作答：</b>直接戳天上的外星怪開火，或拖曳戰機瞄準後放手射擊！</div>
     </div>
 
     <!-- 戰鬥主畫布 -->
@@ -95,7 +95,7 @@
     <div class="mission-progress" aria-hidden="true"><span id="mission-fill"></span></div>
     <footer class="control-guide">
       <span><strong>快捷鎖定</strong> <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 或 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>　<strong>移動</strong> ← → 或拖曳　<strong>發射</strong> 空白鍵　<strong>凍結</strong> <kbd>P</kbd></span>
-      <span>載具觸控：點按發射 · 拖曳巡航</span>
+      <span>載具觸控：直接戳怪開火 · 滑動瞄準放手射擊</span>
     </footer>
 
     <!-- 彈窗 1：降級身分備查（主要由通用 score-submit-modal.js 接管開局） -->
@@ -198,6 +198,6 @@
 
   <!-- 引入通用成績上傳模組與遊戲邏輯 -->
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=5.5"></script>
+  <script src="game.js?v=5.6"></script>
 </body>
 </html>
