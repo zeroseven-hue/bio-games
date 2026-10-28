@@ -22,7 +22,7 @@
 
 ---
 
-## 2. GitHub Pages 快取刷新機制（Cache-Busting）
+## 2. GitHub Pages 快取刷新機制（Cache-Busting）與雙分支部署規範
 
 學生 iPad 與瀏覽器會極度頑固地快取靜態 `.css` 與 `.js` 檔案。
 * 任何遊戲代碼修改後，必須在對應之 `index.html` 更新查詢版本號：
@@ -31,6 +31,7 @@
   <script src="game.js?v=2.1"></script>
   ```
 * 大廳首頁 `index.html` 內的遊戲跳轉連結亦需同步加上版本號（例如 `jurassic/index.html?v=2.1`）。
+* **Git 雙分支同步推播鐵則（Dual-Push Rule）**：GitHub Pages 伺服器部署來源為 `main` 分支，預設分支為 `master`。本地 Git 已設置雙向推播規格，每次 `git push` 自動更新 `main` 與 `master`，杜絕任何分支遺漏與版本不同步問題。
 
 ---
 
