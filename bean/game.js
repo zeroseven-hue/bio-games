@@ -1,7 +1,8 @@
 
 function cleanUnitTitle(raw) {
   if (!raw) return '精選題庫';
-  let str = decodeURIComponent(String(raw)).trim();
+  let str = String(raw).trim();
+  try { str = decodeURIComponent(str); } catch (_) {}
   str = str.replace(/[\(（]\s*派卷鎖定\s*[\)）]/g, '').trim();
   str = str.replace(/^課堂指定單元\s*[:：]?\s*/, '').trim();
   if (str.startsWith('(') && str.endsWith(')')) str = str.slice(1, -1).trim();
@@ -265,6 +266,99 @@ let spawnTimer = null;
 let hideTimer = null;
 let tickTimer = null;
 let currentSpawn = null;
+let initialized = false;
+let starting = false;
+let paused = false;
+let pausedAt = 0;
+let questionSettled = false;
+let correctCount = 0;
+const pendingDelays = new Set();
+
+// All round callbacks are owned by the current question and can be paused or cancelled.
+function gameDelay(fn, ms) {
+  const task = { fn, remaining: ms, due: performance.now() + ms, id: null };
+  pendingDelays.add(task);
+  if (!paused) armDelay(task);
+  return task;
+}
+function armDelay(task) {
+  task.due = performance.now() + task.remaining;
+  task.id = setTimeout(() => { pendingDelays.delete(task); task.fn(); }, task.remaining);
+}
+function cancelDelay(task) {
+  if (!task) return;
+  clearTimeout(task.id);
+  pendingDelays.delete(task);
+}
+function setPaused(value) {
+  if (!document.body.classList.contains('playing') || value === paused) return;
+  paused = value;
+  if (paused) {
+    pausedAt = performance.now();
+    clearInterval(tickTimer);
+    pendingDelays.forEach(task => {
+      task.remaining = Math.max(0, task.due - pausedAt);
+      clearTimeout(task.id);
+    });
+    try { speechSynthesis.cancel(); } catch (_) {}
+  } else {
+    const elapsed = performance.now() - pausedAt;
+    questionStart += elapsed;
+    startTime += elapsed;
+    pendingDelays.forEach(armDelay);
+    if (!questionSettled) tickTimer = setInterval(tick, 200);
+  }
+  document.body.classList.toggle('is-paused', paused);
+  $('pauseModal').hidden = !paused;
+  $('pauseBtn').setAttribute('aria-pressed', String(paused));
+}
+function togglePause() { setPaused(!paused); }
+function toggleSound() {
+  soundOn = !soundOn;
+  $('soundBtn').textContent = soundOn ? '♪ 音效開' : '♪ 音效關';
+  $('soundBtn').setAttribute('aria-pressed', String(soundOn));
+  if (soundOn) safeAudio();
+  else { try { speechSynthesis.cancel(); } catch (_) {} }
+}
+function setQuestionCount(value) {
+  selectedCount = value;
+  document.querySelectorAll('.btn-pill').forEach(b => {
+    const active = b.dataset.count === String(value);
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', String(active));
+  });
+}
+function presentLaunch(student) {
+  if (student) {
+    window.BioGameSuite?.syncStudentToDom(student);
+    studentProfile = { className: student.class, seat: student.seat, name: student.name };
+  }
+  checkUrlParams();
+  const profile = $('launchProfile');
+  if (profile) profile.textContent = studentProfile.name ? studentProfile.className + ' 班 · ' + studentProfile.seat + ' 號 · ' + studentProfile.name : '準備好進行今天的生物觀察了嗎？';
+  $('beanLaunch').hidden = false;
+  $('beanLaunch').classList.toggle('authenticated', !!studentProfile.name);
+  $('startBtn').disabled = false;
+}
+function continueQuestion() {
+  if ($('feedbackModal').hidden) return;
+  $('feedbackModal').hidden = true;
+  idx++;
+  renderQuestion();
+}
+function markAnswer(hole, kind) {
+  const card = document.querySelector('[data-answer="' + hole + '"]');
+  if (card) card.classList.add(kind);
+}
+function hitBurst(hole, label, kind) {
+  const col = document.querySelector('[data-hole="' + hole + '"]');
+  if (!col) return;
+  const burst = document.createElement('span');
+  burst.className = 'hit-burst ' + kind;
+  burst.textContent = label;
+  col.appendChild(burst);
+  gameDelay(() => burst.remove(), 600);
+}
 
 const cfg = {
   questionMs: 25000,
@@ -288,6 +382,16 @@ async function init() {
   await loadManifestAndUnits();
   checkUrlParams();
   setupKeyboardHotkeys();
+  initialized = true;
+  let saved = null;
+  try {
+    const candidate = JSON.parse(sessionStorage.getItem('bgs_authed_student') || 'null');
+    if (candidate?.name && candidate.class && candidate.seat) saved = candidate;
+  } catch (_) {}
+  if (saved) presentLaunch(saved);
+  else if (window.BioGameSuite) {
+    window.BioGameSuite.showLogin({ gameTitle: '淘氣豆・生物研究站', onStart: presentLaunch });
+  } else presentLaunch();
 }
 
 // 載入預存個人資料
@@ -312,7 +416,7 @@ function saveProfile(className, seat, name) {
 // 動態載入題庫 Manifest
 async function loadManifestAndUnits() {
   const select = $('unitSelect');
-  select.innerHTML = '<option value="all">🌐 ALL (1~15單元 綜合隨機出題)</option>';
+  select.innerHTML = '<option value="all">綜合觀察 · 隨機單元</option>';
 
   const manifestPaths = ['../questions/manifest.json', 'questions/manifest.json'];
   let manifestData = null;
@@ -352,7 +456,8 @@ function checkUrlParams() {
   if (paramName) $('inputName').value = paramName;
 
   if (paramUnit) {
-    const decoded = decodeURIComponent(paramUnit).trim();
+    $('unitSelect').disabled = true;
+    const decoded = paramUnit.trim();
     const match = manifestUnits.find(u => u.file === decoded || u.id === decoded);
     selectedUnitId = match ? match.file : decoded;
     if (Array.from($('unitSelect').options).some(o => o.value === selectedUnitId)) {
@@ -383,7 +488,11 @@ function buildArena() {
 
   TAGS.forEach((tag, i) => {
     // 選項卡片
-    const a = document.createElement('div');
+    const a = document.createElement('button');
+    a.type = 'button';
+    a.dataset.answer = i;
+    a.addEventListener('pointerdown', e => { e.preventDefault(); hitHole(i); });
+    a.addEventListener('click', e => { if (e.detail === 0) hitHole(i); });
     a.className = 'answer-card';
     a.innerHTML = `<span class="answer-tag">${tag}</span><span id="answer-${i}">—</span>`;
     answers.appendChild(a);
@@ -393,13 +502,16 @@ function buildArena() {
     col.className = 'hole-column';
     col.innerHTML = `
       <div class="hole-label">${tag}</div>
-      <div class="hole" data-hole="${i}" role="button" aria-label="${tag} 洞">
+      <div class="hole" data-hole="${i}" role="button" tabindex="0" aria-label="敲擊 ${tag} 洞">
         <div class="character-slot" id="slot-${i}"></div>
       </div>
     `;
     col.querySelector('.hole').addEventListener('pointerdown', e => {
       e.preventDefault();
       hitHole(i);
+    });
+    col.querySelector('.hole').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); hitHole(i); }
     });
     arena.appendChild(col);
   });
@@ -408,7 +520,13 @@ function buildArena() {
 // 鍵盤快捷鍵監聽
 function setupKeyboardHotkeys() {
   window.addEventListener('keydown', e => {
-    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.repeat || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.key === 'Escape') {
+      if (!$('instructionsModal').hidden) toggleInstructionsModal(false);
+      else togglePause();
+      return;
+    }
+    if (paused) return;
     const key = e.key.toUpperCase();
     if (key === 'A' || key === '1') hitHole(0);
     else if (key === 'B' || key === '2') hitHole(1);
@@ -417,9 +535,8 @@ function setupKeyboardHotkeys() {
     else if (key === 'ENTER' || key === ' ') {
       const modal = $('feedbackModal');
       if (modal && !modal.hidden) {
-        modal.hidden = true;
-        idx++;
-        renderQuestion();
+        e.preventDefault();
+        continueQuestion();
       }
     }
   });
@@ -443,7 +560,7 @@ function bindUI() {
     }
   });
   document.addEventListener('pointerdown', () => $('hammerCursor')?.classList.add('swing'));
-  document.addEventListener('pointerup', () => setTimeout(() => $('hammerCursor')?.classList.remove('swing'), 90));
+  document.addEventListener('pointerup', () => gameDelay(() => $('hammerCursor')?.classList.remove('swing'), 90));
 }
 
 // 驗證學生表單
@@ -526,7 +643,7 @@ async function fetchQuestionsForUnit(unitId) {
 }
 
 function correctIndex(q) {
-  if (Number.isInteger(q.answer)) return Math.max(0, Math.min(3, q.answer));
+  if (Number.isInteger(q.answer)) return q.answer >= 0 && q.answer <= 3 ? q.answer : -1;
   if (typeof q.answer === 'string') {
     const s = q.answer.trim().toUpperCase();
     if (TAGS.includes(s)) return TAGS.indexOf(s);
@@ -537,7 +654,7 @@ function correctIndex(q) {
 }
 
 function validQuestion(q) {
-  return q && typeof q.question === 'string' && Array.isArray(q.options) && q.options.length >= 4 && correctIndex(q) >= 0;
+  return q && typeof q.question === 'string' && Array.isArray(q.options) && q.options.length === 4 && correctIndex(q) >= 0;
 }
 
 function shuffle(a) {
@@ -551,6 +668,7 @@ function shuffle(a) {
 
 // 開始遊戲
 async function startGame() {
+  if (!initialized || starting) return;
   safeAudio();
   const alreadyAuthed = window.BioGameSuite && window.BioGameSuite.getStudent && window.BioGameSuite.getStudent().name;
   if (alreadyAuthed) {
@@ -562,17 +680,32 @@ async function startGame() {
   }
 
   selectedUnitId = $('unitSelect').value;
+  const suiteStudent = window.BioGameSuite?.getStudent?.();
+  if (suiteStudent) {
+    Object.assign(suiteStudent, { class: studentProfile.className, seat: studentProfile.seat, name: studentProfile.name,
+      unit: selectedUnitId, unitTitle: $('unitSelect').selectedOptions[0]?.text || selectedUnitId });
+    try { sessionStorage.setItem('bgs_authed_student', JSON.stringify(suiteStudent)); } catch (_) {}
+  }
+  starting = true;
+  clearTimers();
+  clearSpawn();
+  paused = false;
+  document.body.classList.remove('is-paused');
+  $('pauseModal').hidden = true;
+  $('feedbackModal').hidden = true;
+  $('certModal').style.display = 'none';
 
   const startBtn = $('startBtn');
   startBtn.textContent = '載入題庫中… ⏳';
   startBtn.disabled = true;
 
-  rawBank = await fetchQuestionsForUnit(selectedUnitId);
+  try { rawBank = await fetchQuestionsForUnit(selectedUnitId); }
+  finally { starting = false; startBtn.disabled = false; }
 
   startBtn.textContent = '開始挑戰 🔨';
   startBtn.disabled = false;
 
-  const shuffled = shuffle(rawBank);
+  const shuffled = shuffle(rawBank).map(q => ({ ...q, options: [...q.options], shuffled: false }));
   pool = selectedCount === 'all' ? shuffled : shuffled.slice(0, Math.min(selectedCount, shuffled.length));
 
   idx = 0;
@@ -582,15 +715,17 @@ async function startGame() {
   hammerLevel = 1;
   totalAttempts = 0;
   correctFirstTry = 0;
+  correctCount = 0;
   startTime = Date.now();
 
   const unitSelectObj = $('unitSelect');
   const unitTitle = (unitSelectObj && unitSelectObj.selectedIndex >= 0 && unitSelectObj.options[unitSelectObj.selectedIndex])
     ? unitSelectObj.options[unitSelectObj.selectedIndex].text
     : '精選快問快答';
-  $('badgeUnit').textContent = `單元：${unitTitle.split('：')[1] || unitTitle.split(' ')[0] || unitTitle}`;
+  $('badgeUnit').textContent = unitTitle;
+  $('badgeUnit').title = unitTitle;
 
-  $('startScreen').hidden = true;
+  $('beanLaunch').hidden = true;
   document.body.classList.add('playing');
   renderQuestion();
 }
@@ -603,6 +738,11 @@ function renderQuestion() {
   clearSpawn();
   currentQuestionSpawns = 0;
   targetSpawnedInCurrentQuestion = false;
+  questionSettled = false;
+  $('feedbackModal').hidden = true;
+  $('stunOverlay').hidden = true;
+  document.querySelectorAll('.answer-card').forEach(card => card.classList.remove('answer-correct', 'answer-wrong'));
+  document.querySelectorAll('.hit-burst').forEach(el => el.remove());
 
   if (idx >= pool.length) {
     endGame();
@@ -615,7 +755,7 @@ function renderQuestion() {
 
   const q = pool[idx];
   if (!q.shuffled) {
-    const origCorrectText = (q.options && q.answer !== undefined) ? q.options[q.answer] : (q.options ? q.options[0] : '');
+    const origCorrectText = q.options[correctIndex(q)];
     const rawOptions = [...(q.options || [])];
     for (let i = rawOptions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -627,21 +767,24 @@ function renderQuestion() {
     q.shuffled = true;
   }
 
-  $('badgeProgress').textContent = `題號 ${idx + 1} / ${pool.length}`;
+  $('badgeProgress').textContent = `${idx + 1} / ${pool.length}`;
+  $('missionFill').style.width = (idx / pool.length * 100) + '%';
   $('badgeScore').textContent = `得分 ${score}`;
   updateCombo();
   $('questionText').textContent = `${idx + 1}. ${q.question}`;
 
   q.options.slice(0, 4).forEach((x, i) => $('answer-' + i).textContent = x);
 
-  $('timeHint').textContent = '先看懂題目再出手';
+  $('timeHint').textContent = '觀察時間 · 先讀題，再出手';
+  $('timeSeconds').textContent = '25';
+  $('questionCard').classList.remove('time-urgent');
   $('timeFill').style.width = '100%';
   $('statusToast').textContent = '';
 
   questionStart = performance.now();
   tickTimer = setInterval(tick, 200);
 
-  setTimeout(() => {
+  gameDelay(() => {
     if (idx < pool.length) {
       locked = false;
       $('timeHint').textContent = '開始！看準正確答案出錘';
@@ -651,9 +794,12 @@ function renderQuestion() {
 }
 
 function tick() {
+  if (paused || questionSettled) return;
   const elapsed = performance.now() - questionStart;
   const remain = Math.max(0, 1 - elapsed / cfg.questionMs);
   $('timeFill').style.width = (remain * 100) + '%';
+  $('timeSeconds').textContent = Math.ceil(Math.max(0, cfg.questionMs - elapsed) / 1000);
+  $('questionCard').classList.toggle('time-urgent', remain < .28);
 
   if (elapsed > 18000 && elapsed < 22000) $('timeHint').textContent = '⏰ 時間快到了';
   else if (elapsed >= 22000) $('timeHint').textContent = '💡 再看一次關鍵字';
@@ -662,9 +808,9 @@ function tick() {
 }
 
 function scheduleSpawn(delay) {
-  clearTimeout(spawnTimer);
+  cancelDelay(spawnTimer);
   if (locked || stunned) return;
-  spawnTimer = setTimeout(spawnCharacter, delay ?? (cfg.spawnMin + Math.random() * (cfg.spawnMax - cfg.spawnMin)));
+  spawnTimer = gameDelay(spawnCharacter, delay ?? (cfg.spawnMin + Math.random() * (cfg.spawnMax - cfg.spawnMin)));
 }
 
 let targetSpawnedInCurrentQuestion = false;
@@ -717,7 +863,7 @@ function spawnCharacter() {
     slot.classList.add('up');
   }
 
-  hideTimer = setTimeout(() => {
+  hideTimer = gameDelay(() => {
     clearSpawn();
     scheduleSpawn();
   }, cfg.visibleMs);
@@ -779,13 +925,20 @@ function characterHTML(type) {
   </div>`;
 }
 
+let instructionsPausedGame = false;
 function toggleInstructionsModal(show) {
-  const modal = $('instructionsModal');
-  if (modal) modal.hidden = !show;
+  if (show) {
+    instructionsPausedGame = document.body.classList.contains('playing') && !paused;
+    if (instructionsPausedGame) setPaused(true);
+    $('pauseModal').hidden = true;
+  }
+  $('instructionsModal').hidden = !show;
+  if (!show && instructionsPausedGame) { instructionsPausedGame = false; setPaused(false); }
+  else if (!show && paused) $('pauseModal').hidden = false;
 }
 
 function clearSpawn() {
-  clearTimeout(hideTimer);
+  cancelDelay(hideTimer);
   if (currentSpawn) {
     const s = $('slot-' + currentSpawn.hole);
     if (s) {
@@ -798,7 +951,9 @@ function clearSpawn() {
 
 // 敲擊地洞
 function hitHole(hole) {
-  if (locked || stunned || !currentSpawn || currentSpawn.hole !== hole) return;
+  if (paused || locked || stunned || !currentSpawn || currentSpawn.consumed || currentSpawn.hole !== hole) return;
+  safeAudio();
+  currentSpawn.consumed = true;
 
   const type = currentSpawn.type;
 
@@ -813,7 +968,7 @@ function hitHole(hole) {
     stunned = true;
     $('stunOverlay').hidden = false;
     speak('看清楚再敲！', .9, 1.05);
-    setTimeout(() => {
+    gameDelay(() => {
       $('stunOverlay').hidden = true;
       stunned = false;
       scheduleSpawn(150);
@@ -822,11 +977,12 @@ function hitHole(hole) {
   }
   if (type === 'gold') {
     score += 3;
+    hitBurst(hole, '+3 ✦', 'burst-gold');
     $('badgeScore').textContent = `得分 ${score}`;
     beep('gold');
     toast('✨ 金豆 BONUS +3', 'good');
     animateHit(hole);
-    setTimeout(() => {
+    gameDelay(() => {
       clearSpawn();
       scheduleSpawn(250);
     }, 250);
@@ -839,6 +995,11 @@ function hitHole(hole) {
   attempts++;
 
   if (hole === correct) {
+    questionSettled = true;
+    clearTimers();
+    correctCount++;
+    markAnswer(hole, 'answer-correct');
+    hitBurst(hole, '+10 ✓', 'burst-good');
     if (attempts === 1) correctFirstTry++;
     score += 10;
     combo++;
@@ -852,7 +1013,7 @@ function hitHole(hole) {
     animateHit(hole);
     locked = true;
 
-    setTimeout(() => {
+    gameDelay(() => {
       idx++;
       renderQuestion();
     }, 650);
@@ -862,6 +1023,10 @@ function hitHole(hole) {
 }
 
 function wrongAnswer() {
+  questionSettled = true;
+  clearTimers();
+  if (currentSpawn) markAnswer(currentSpawn.hole, 'answer-wrong');
+  markAnswer(correctIndex(pool[idx]), 'answer-correct');
   score = Math.max(0, score - 1);
   combo = 0;
   hammerLevel = Math.max(1, hammerLevel - 1);
@@ -883,7 +1048,7 @@ function penalty(msg, n) {
   beep('bad');
   toast(msg, 'bad');
   clearSpawn();
-  setTimeout(() => scheduleSpawn(250), 220);
+  gameDelay(() => scheduleSpawn(250), 220);
 }
 
 function animateHit(hole) {
@@ -892,7 +1057,7 @@ function animateHit(hole) {
   if (m) m.classList.add('hit');
   if (hammerLevel >= 3) {
     document.body.classList.add('screen-shake');
-    setTimeout(() => document.body.classList.remove('screen-shake'), 190);
+    gameDelay(() => document.body.classList.remove('screen-shake'), 190);
   }
 }
 
@@ -914,7 +1079,9 @@ function updateCombo() {
 }
 
 function timeoutQuestion() {
-  if (locked && performance.now() - questionStart < cfg.questionMs) return;
+  if (paused || questionSettled) return;
+  questionSettled = true;
+  markAnswer(correctIndex(pool[idx]), 'answer-correct');
   locked = true;
   clearTimers();
   clearSpawn();
@@ -931,12 +1098,9 @@ function showQuestionFeedback(title, body) {
   $('modalTitle').textContent = title;
   $('modalBody').innerHTML = body;
   $('modalBtn').textContent = '我看懂了 ➜';
-  $('modalBtn').onclick = () => {
-    $('feedbackModal').hidden = true;
-    idx++;
-    renderQuestion();
-  };
+  $('modalBtn').onclick = continueQuestion;
   $('feedbackModal').hidden = false;
+  $('modalBtn').focus();
 }
 
 // 隨機防偽碼
@@ -956,6 +1120,9 @@ function endGame() {
   locked = true;
   document.body.classList.remove('playing');
 
+  questionSettled = true;
+  $('missionFill').style.width = '100%';
+  $('certAccuracy').textContent = correctCount + ' / ' + pool.length;
   totalTimeSec = Math.round((Date.now() - startTime) / 1000);
   currentCertCode = generateCertCode();
 
@@ -982,7 +1149,10 @@ function endGame() {
     showScoreSubmitModal({
       gameTitle: '淘氣豆：生物敲敲研究所',
       score: score,
-      scoreDisplay: `${score} 分 (共答對 ${pool.length} 題)`,
+      scoreDisplay: `${score} 分 (答對 ${correctCount} / ${pool.length} 題)`,
+      accuracy: Math.round(correctCount / pool.length * 100) + '%',
+      errorCount: pool.length - correctCount,
+      keywords: correctCount === pool.length ? '全對無錯題' : '請參考作答訂正',
       duration: `${totalTimeSec} 秒`,
       initialClass: studentProfile.className || '701',
       initialSeat: studentProfile.seat || '01',
@@ -1009,12 +1179,15 @@ function copyCertToClipboard() {
   const unitTitle = unitSelectObj.options[unitSelectObj.selectedIndex].text;
   const copyText = `【淘氣豆敲敲研究所】成績單驗證碼：${currentCertCode} | 班級座號：${studentProfile.className}班${studentProfile.seat}號 | 姓名：${studentProfile.name} | 挑戰單元：${unitTitle} | 最終得分：${score}分 | 最高Combo：${maxCombo} | 費時：${totalTimeSec}秒`;
 
-  navigator.clipboard.writeText(copyText).then(() => {
+  Promise.resolve().then(() => {
+    if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+    return navigator.clipboard.writeText(copyText);
+  }).then(() => {
     const btn = $('btnCopyCert');
     const originalText = btn.textContent;
     btn.textContent = '✅ 已成功複製成績單文字！';
     btn.style.background = '#16A34A';
-    setTimeout(() => {
+    gameDelay(() => {
       btn.textContent = originalText;
       btn.style.background = '#0284C7';
     }, 2500);
@@ -1025,21 +1198,27 @@ function copyCertToClipboard() {
 
 function resetToStart() {
   $('certModal').style.display = 'none';
-  $('startScreen').hidden = false;
+  clearTimers();
+  clearSpawn();
+  $('feedbackModal').hidden = true;
+  presentLaunch();
 }
 
 function clearTimers() {
-  clearTimeout(spawnTimer);
-  clearTimeout(hideTimer);
+  cancelDelay(spawnTimer);
+  cancelDelay(hideTimer);
   clearInterval(tickTimer);
+  pendingDelays.forEach(cancelDelay);
 }
 
 function escapeHTML(v) {
   return String(v).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 }
 
+document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
+window.addEventListener('pageshow', e => { if (e.persisted) setPaused(true); });
 window.addEventListener('pagehide', () => {
-  clearTimers();
+  setPaused(true);
   try { speechSynthesis.cancel(); } catch (e) {}
 });
 

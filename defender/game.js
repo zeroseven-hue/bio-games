@@ -915,47 +915,21 @@ function drawMonster(e) {
   ctx.translate(e.x, e.y);
   ctx.shadowColor = e.theme;
   ctx.shadowBlur = 12;
-
-  const bubbleY = -24 + Math.sin(gameTick * 0.1) * 2;
+  // 🎯 醒目 ABCD 目標字母徽章（純粹無文字遮擋，直覺對應上方題庫看板）
+  const bubbleY = -26 + Math.sin(gameTick * 0.1) * 2;
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.arc(0, bubbleY, 11, 0, Math.PI * 2);
+  ctx.arc(0, bubbleY, 13, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = e.theme;
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 3;
   ctx.stroke();
 
   ctx.fillStyle = "#0f172a";
-  ctx.font = "900 13px sans-serif";
+  ctx.font = "900 14px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(e.letter, 0, bubbleY + 1);
-
-  // 📝 怪物頭頂浮動選項短標籤 (讓怪獸本身就是答案本體！)
-  const currentQ = gameQuestions[currentQIndex];
-  const optVal = currentQ?.options?.[e.letter] || "";
-  if (optVal) {
-    const shortLabel = optVal.length > 7 ? optVal.slice(0, 6) + "…" : optVal;
-    ctx.save();
-    ctx.font = "bold 11px sans-serif";
-    const textW = ctx.measureText(shortLabel).width;
-    const bW = Math.max(38, textW + 14);
-    const bY = 22;
-    ctx.fillStyle = "rgba(15, 23, 42, 0.82)";
-    ctx.strokeStyle = e.theme;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(-bW / 2, bY, bW, 18, 5);
-    else ctx.rect(-bW / 2, bY, bW, 18);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(shortLabel, 0, bY + 9);
-    ctx.restore();
-  }
 
   ctx.fillStyle = e.theme;
 

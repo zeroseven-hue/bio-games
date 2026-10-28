@@ -2,11 +2,13 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>淘氣豆：生物敲敲研究所 V1.0</title>
-  <link rel="stylesheet" href="style.css?v=7.2">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>淘氣豆・生物研究站</title>
+  <link rel="stylesheet" href="style.css?v=8.0">
 </head>
 <body>
+  <div class="scene-art" aria-hidden="true"><span class="sun-orbit"></span><span class="leaf leaf-one"></span><span class="leaf leaf-two"></span><span class="leaf leaf-three"></span><span class="horizon"></span></div>
+  <div class="site-heading"><a class="brand-mark" href="#" onclick="toggleInstructionsModal(true);return false" aria-label="淘氣豆遊戲說明"><span class="brand-icon">🫘</span><span>BEAN LAB<small>生物敲敲研究所</small></span></a><span class="station-tag"><i></i> FIELD STATION / 01</span></div>
   <!-- 大錘子懸浮游標 (電腦桌機專用) -->
   <div id="hammerCursor" class="hammer-cursor" aria-hidden="true">
     <svg class="hammer-svg" viewBox="-25 -25 150 150" width="124" height="124" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
@@ -64,7 +66,7 @@
   </div>
 
   <!-- 開始畫面：學生登入、單元與題數選擇 -->
-  <section class="overlay" id="startScreen" style="display: none !important;">
+  <section class="overlay" id="beanLaunch" hidden>
     <div class="dialog-box start-card">
       <div class="mascot-preview" aria-hidden="true">
         <div class="mischief mascot">
@@ -75,9 +77,9 @@
           <span class="body"></span>
         </div>
       </div>
-      <p class="eyebrow">BIOLOGY QUICK WHACK GAME</p>
-      <h1 class="game-title">🫘 淘氣豆：生物敲敲研究所</h1>
-      <p class="dialog-sub">看準題目，敲擊正確答案洞口探頭的淘氣豆！鍵盤支援 A / B / C / D</p>
+      <p class="eyebrow">YOUR NEXT FIELD MISSION</p>
+      <h1 class="game-title">小小地洞，<br>大大生物發現。</h1><p id="launchProfile" class="launch-profile">正在準備研究站…</p>
+      <p class="dialog-sub">讀懂題目，等待淘氣豆探頭，用知識完成今天的觀察任務。</p>
 
       <!-- 學生身分登記區 -->
       <div class="profile-box">
@@ -130,7 +132,7 @@
               <option value="27">27</option>
               <option value="28">28</option>
               <option value="29">29</option>
-              <option value="30">30</option>
+              <option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option>
             </select>
           </div>
           <div class="input-field flex-name">
@@ -145,7 +147,7 @@
       <div class="config-group" id="unitSelectorGroup">
         <label class="config-label" for="unitSelect">📚 選擇複習單元：</label>
         <select id="unitSelect" class="styled-select">
-          <option value="all">🌐 ALL (1~15單元 綜合隨機出題)</option>
+          <option value="all">綜合觀察 · 隨機單元</option>
         </select>
       </div>
 
@@ -170,33 +172,34 @@
       <div class="preset-tag" id="presetTag" hidden></div>
 
       <div class="start-actions">
-        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">開始挑戰 🔨</button>
+        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">進入觀察站 <span aria-hidden="true">↗</span></button>
       </div>
     </div>
   </section>
 
   <!-- 頂部 HUD 狀態列 -->
-  <header class="hud">
+  <header class="hud" aria-label="遊戲狀態">
     <div class="hud-left">
-      <button type="button" class="btn-back-lobby btn-rule-help" onclick="toggleInstructionsModal(true)">📖 遊戲說明</button>
+      <button type="button" class="btn-back-lobby btn-rule-help" onclick="toggleInstructionsModal(true)">玩法說明</button><button type="button" id="soundBtn" class="btn-tool" aria-pressed="true" onclick="toggleSound()">♪ 音效開</button><button type="button" id="pauseBtn" class="btn-tool" aria-pressed="false" onclick="togglePause()">Ⅱ 暫停</button>
     </div>
     <div class="hud-right">
-      <div class="info-badge" id="badgeUnit">單元：載入中</div>
-      <div class="info-badge" id="badgeProgress">題號 0 / 0</div>
-      <div class="info-badge combo-badge">🔥 <span id="badgeCombo">Combo 0</span></div>
-      <div class="info-badge" id="badgeScore">得分 0</div>
+      <div class="info-badge unit-badge" id="badgeUnit">生物觀察任務</div>
+      <div class="info-badge progress-badge"><span>觀察紀錄</span><strong id="badgeProgress">0 / 0</strong></div>
+      <div class="info-badge combo-badge"><span class="stat-label">連續命中</span><strong id="badgeCombo">Combo 0</strong></div>
+      <div class="info-badge score-badge"><span class="stat-label">研究積分</span><strong id="badgeScore">得分 0</strong></div>
     </div>
   </header>
 
   <!-- 主舞台 -->
   <main class="game-shell">
-    <section class="question-card">
+    <div class="mission-track" aria-hidden="true"><div id="missionFill"></div></div>
+    <section class="question-card" id="questionCard">
       <div class="question-top">
-        <span class="question-kicker">BIOLOGY QUESTION</span>
-        <span id="timeHint" class="time-hint">先看懂題目再出手</span>
+        <span class="question-kicker"><i></i> 本日觀察 / BIOLOGY</span><span class="time-counter"><strong id="timeSeconds">25</strong><small>SEC</small></span>
+        
       </div>
-      <div id="questionText" class="question-text">題庫載入中…</div>
-      <div class="soft-timer" aria-label="本題時間"><div id="timeFill"></div></div>
+      <div id="questionText" class="question-text">準備觀察，讓知識探出頭。</div>
+      <div class="question-bottom"><span id="timeHint" class="time-hint">先讀題，再出手</span><span class="input-hint">點選地洞或答案卡 · 鍵盤 A–D</span></div><div class="soft-timer" aria-label="本題時間"><div id="timeFill"></div></div>
     </section>
 
     <!-- 四個選項卡片 -->
@@ -205,14 +208,16 @@
     <!-- 四個地洞舞台 -->
     <section class="arena-wrap">
       <div class="arena-title">
-        <span>等待正確答案洞口的淘氣豆出現</span>
+        <span><small class="arena-kicker">THE OBSERVATION PATCH</small>淘氣豆出沒區</span>
         <span id="hammerLevel">🔨 Lv.1 小木槌</span>
       </div>
-      <div class="field-stage" id="fieldStage"></div>
-      <div id="statusToast" class="status-toast" aria-live="polite"></div>
+      <div class="patch-scene"><div class="patch-decoration" aria-hidden="true"><span>✦</span><span>🌱</span><span>🌿</span><span>✧</span></div><div class="field-stage" id="fieldStage"></div></div>
+      <div id="statusToast" class="status-toast" role="status" aria-live="polite"></div><div class="bean-legend"><span><i class="legend-dot target-dot"></i>微笑豆 · 答題 +10</span><span><i class="legend-dot gold-dot"></i>金豆 · 獎勵 +3</span><span><i class="legend-dot baby-dot"></i>奶嘴豆 · −1</span><span><i class="legend-dot guard-dot"></i>巡邏員 · 暈眩</span></div>
     </section>
   </main>
 
+  <footer class="field-footer"><span>看清楚・想一想・再出手</span><span>每次觀察，都是新發現。</span></footer>
+  <section class="overlay" id="pauseModal" hidden role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="dialog-box pause-card"><span class="pause-symbol" aria-hidden="true">Ⅱ</span><p class="eyebrow">TAKE A BREATH</p><h2 id="pauseTitle">觀察暫停中</h2><p class="dialog-sub">倒數和淘氣豆都在等你。<br>準備好了，再繼續探索。</p><button type="button" class="btn-action" onclick="setPaused(false)">繼續觀察 ↗</button></div></section>
   <!-- 暈眩警示覆蓋層 -->
   <div class="stun-overlay" id="stunOverlay" hidden>
     <div class="stun-card">
@@ -223,7 +228,7 @@
   </div>
 
   <!-- 觀念訂正彈窗 -->
-  <section class="overlay" id="feedbackModal" hidden>
+  <section class="overlay" id="feedbackModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="dialog-box result-card">
       <h2 id="modalTitle">作答結果</h2>
       <div id="modalBody" class="explain-body"></div>
@@ -232,12 +237,12 @@
   </section>
 
   <!-- 遊戲詳細說明彈窗 -->
-  <section class="overlay" id="instructionsModal" hidden>
+  <section class="overlay" id="instructionsModal" hidden role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
     <div class="dialog-box rule-modal-card">
-      <h2 style="color:#0369A1; margin-bottom:12px;">📖 淘氣豆：遊戲玩法與規則說明</h2>
+      <h2 id="instructionsTitle" style="color:#0369A1; margin-bottom:12px;">📖 淘氣豆：遊戲玩法與規則說明</h2>
       <div class="explain-body rule-explain-list" style="text-align:left; font-size:0.9rem; line-height:1.6; display:grid; gap:8px;">
-        <p>🎯 <strong>如何作答</strong>：看清上方題目後，當對應選項（A、B、C、D）的「微笑淘氣豆」探頭時，點擊地洞或按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 敲擊作答！</p>
-        <p>🔨 <strong>連擊升級</strong>：連續擊中正確答案可累積 Combo 倍率，每連擊 2 次升級錘子（最高 Lv.5 終極槌），得分與打擊爽快感倍增！</p>
+        <p>🎯 <strong>如何作答</strong>：看清上方題目後，當對應選項（A、B、C、D）的「微笑淘氣豆」探頭時，點擊地洞、對應答案卡，或按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 敲擊作答！</p>
+        <p>🔨 <strong>連擊升級</strong>：連續答對可累積 Combo，每連擊 2 次升級錘子（最高 Lv.5 終極槌）。每題答對固定 +10 分，答錯扣 1 分並中斷連擊。</p>
         <p>🍼 <strong>奶嘴豆 (哭哭臉 😭)</strong>：誤敲戴奶嘴眼眶帶淚的奶嘴豆，會發出哭聲並扣 1 分。</p>
         <p>💢 <strong>巡邏員 (生氣臉 😠)</strong>：千萬別敲擊斜眼斜眉帶有怒氣標誌 💢 的巡邏員豆，否則會引發警報並暈眩 1.2 秒！</p>
         <p>✨ <strong>閃耀金豆 (開心星眼 🤩)</strong>：稀有黃金豆現身，命中可獲得額外 BONUS +3 分獎勵！</p>
@@ -248,14 +253,14 @@
   </section>
 
   <!-- 防偽成績單結算彈窗 -->
-  <div class="modal" id="certModal">
+  <div class="modal" id="certModal" role="dialog" aria-modal="true" aria-labelledby="certTitle">
     <div class="modal-box cert-box">
       <div class="cert-header">
-        <div class="cert-stamp">VERIFIED</div>
-        <h2>📜 淘氣豆敲敲研究所 ‧ 防偽成績單</h2>
+        <div class="cert-stamp">MISSION COMPLETE</div>
+        <p class="eyebrow">FIELD NOTES / 觀察成果</p><h2 id="certTitle">今天的探索，完成！</h2>
         <div class="cert-id" id="certIdDisplay">驗證碼：BEAN-000000</div>
       </div>
-      <div class="cert-body">
+      <div class="result-highlight"><span>答對題數</span><strong id="certAccuracy">0 / 0</strong><small>每一次訂正，都是下一次答對的起點。</small></div><div class="cert-body">
         <div class="cert-row">
           <span>👤 學生資料：</span>
           <strong id="certStudentInfo">701 班 01 號 王小明</strong>
@@ -297,6 +302,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=4.4"></script>
+  <script src="game.js?v=5.0"></script>
 </body>
 </html>
