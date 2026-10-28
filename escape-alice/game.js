@@ -536,7 +536,7 @@ function ending() {
     </div>
 
     <div class="buttons" style="display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap">
-      <button id="submitGasScoreBtn" class="primary" style="background:linear-gradient(135deg, #16a34a, #15803d);font-size:1.05rem;padding:12px 22px;color:white;font-weight:bold;cursor:pointer;">🚀 送出成績至試算表 (優先推薦)</button>
+      <button id="submitGasScoreBtn" class="primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);font-size:1.05rem;padding:12px 22px;color:white;font-weight:bold;cursor:pointer;">🚀 查看結算與交卷檢核</button>
       <button id="copyResultBtn" class="goldBtn" style="font-size:1.05rem;padding:12px 22px">📋 複製探險戰報 (斷網備用)</button>
       <button class="primary" id="again">返回首頁</button>
     </div>

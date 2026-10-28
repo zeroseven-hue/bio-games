@@ -1259,7 +1259,7 @@ function finishWin() {
   modal(`
     ${window.lastCert}
     <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button type="button" class="btn" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800;" onclick="submitFarmScore(${stage}, '${lev.award}')">🚀 送出成績至試算表 (優先推薦)</button>
+      <button type="button" class="btn" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:white; font-weight:800;" onclick="submitFarmScore(${stage}, '${lev.award}')">🚀 查看結算與交卷檢核</button>
       <button type="button" class="btn alt" onclick="printCert()">🖨️ 列印／儲存獎狀</button>
       ${next}
       <button type="button" class="btn dark" onclick="closeModal()">留在本關</button>

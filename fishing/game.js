@@ -997,8 +997,9 @@ function endFishingSession() {
 }
 
 function handleGenerateCert() {
-  const cVal = classInput.value.trim() || "701";
-  const sVal = seatInput.value.trim() || "第1組";
+  const st = (window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent() : {};
+  const cVal = st.class || classInput.value.trim() || "701";
+  const sVal = st.name ? `${st.seat} 號 ${st.name}` : (seatInput.value.trim() || "01 號");
   idModal.classList.add("hidden");
 
   certHeroText.textContent = `${cVal} 班 ${sVal}`;
@@ -1017,7 +1018,11 @@ function triggerFishingGasSubmit() {
       gameTitle: "生物大釣手：海洋生態捕撈",
       score: score,
       scoreDisplay: score + " 分",
-      duration: "捕撈結算"
+      duration: "捕撈結算",
+      gameId: "fishing",
+      initialClass: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().class : "") || classInput?.value?.trim() || "701",
+      initialSeat: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().seat : "") || seatInput?.value?.trim() || "01",
+      initialName: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().name : "") || "生態大釣手"
     });
   }
 }

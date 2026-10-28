@@ -467,7 +467,7 @@ function showEnding() {
     </div>
 
     <div class="buttons" style="justify-content:center;gap:12px;margin-top:16px;flex-wrap:wrap">
-      <button id="submitGasScoreBtn" class="primary" style="background:linear-gradient(135deg, #16a34a, #15803d);font-size:1.05rem;padding:12px 24px;color:white;font-weight:bold;cursor:pointer;">🚀 送出成績至試算表 (優先推薦)</button>
+      <button id="submitGasScoreBtn" class="primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);font-size:1.05rem;padding:12px 24px;color:white;font-weight:bold;cursor:pointer;">🚀 查看結算與交卷檢核</button>
       <button id="copyResultBtn" class="goldBtn" style="font-size:1.05rem;padding:12px 24px">📋 複製探險紀錄 (斷網備用)</button>
       <button id="again" class="btn">↻ 返回首頁</button>
     </div>

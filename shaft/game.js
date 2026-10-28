@@ -208,10 +208,14 @@ function initEventListeners() {
   document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
     if (typeof showScoreSubmitModal === "function") {
       showScoreSubmitModal({
-        gameTitle: "生物大墜落：細胞深淵探險",
+        gameTitle: "生物大墜落：細胞深淵下樓梯",
+        gameId: "shaft",
         score: Math.round(depth || 100),
         scoreDisplay: "抵達 " + Math.round(depth || 100) + " 公尺深淵",
-        duration: "深淵挑戰"
+        duration: timerDisplay?.textContent || "深淵挑戰",
+        initialClass: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().class : "") || inputSeatNo?.value?.slice(0, 3) || "701",
+        initialSeat: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().seat : "") || inputSeatNo?.value?.slice(3) || "01",
+        initialName: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().name : "") || inputStudentName?.value?.trim() || "探險家"
       });
     }
   });
@@ -1445,6 +1449,9 @@ function gameOver() {
   clearInterval(secondsTimer);
 
   victoryTitle.textContent = correctAnswersCount >= TARGET_CORRECT_GOAL ? `🎉 恭喜答對 ${TARGET_CORRECT_GOAL} 題全勝通關！` : `💥 探險結束！共答對 ${correctAnswersCount} 題 (到達 B${maxDepth} 樓)`;
+  const st = (window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent() : {};
+  if (st.class && st.seat) inputSeatNo.value = `${st.class}${st.seat}`;
+  if (st.name) inputStudentName.value = st.name;
   updateCertCode();
   openModal(victoryModal);
 }

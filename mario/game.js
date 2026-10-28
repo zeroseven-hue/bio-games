@@ -186,10 +186,13 @@ function initEventListeners() {
     if (typeof showScoreSubmitModal === "function") {
       const c = parseInt(document.getElementById("certCoins")?.textContent || "0", 10);
       showScoreSubmitModal({
-        gameTitle: "瑪利歐生物冒險世界",
+        gameTitle: "超級瑪利歐：生物冒險王",
         score: score,
         scoreDisplay: score + " 分 (" + c + " 🪙)",
-        duration: "通關挑戰"
+        duration: "4關全破",
+        initialClass: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().class : "") || inputClass?.value?.trim() || "701",
+        initialSeat: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().seat : "") || inputSeat?.value?.trim() || "01",
+        initialName: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().name : "") || "冒險勇士"
       });
     }
   });
@@ -600,7 +603,12 @@ function handleStageComplete() {
   playStageClearSound();
 
   if (totalAnsweredCount >= targetQCount || currentStageIndex >= STAGE_CONFIG.length - 1) {
-    openModal(studentIdModal);
+    const st = (window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent() : null;
+    if (st && st.name) {
+      generateCertificate();
+    } else {
+      openModal(studentIdModal);
+    }
   } else {
     const nextStg = STAGE_CONFIG[currentStageIndex + 1];
     stageClearTitle.textContent = `🎉 晉級！${nextStg.title}`;
@@ -623,7 +631,11 @@ function generateCertificate() {
   const seat = inputSeat.value.trim() || "01";
   currentCertCode = `M-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  certStudentInfo.textContent = `${cls} 班 ${seat} 號`;
+  const st = (window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent() : {};
+  const cCls = st.class || cls;
+  const cSeat = st.seat || seat;
+  const cName = st.name ? ` ${st.name}` : "";
+  certStudentInfo.textContent = `${cCls} 班 ${cSeat} 號${cName}`;
   certCode.textContent = currentCertCode;
   certCoins.textContent = `${coins} 🪙`;
 
