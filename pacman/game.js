@@ -1,3 +1,13 @@
+/**
+ * 👾 生物小精靈塔防：微觀免疫大作戰 (Bio-Pacman Defense Grid) V5.0
+ * 升級特徵：
+ * 1. 現代 Web App 風格介面、抗日光燈眩光 Light Mode 題目卡與結算卡
+ * 2. 移除所有歷史冗餘雙鍵，收斂為單一「🚀 查看結算與交卷檢核」三階段送出
+ * 3. 支援 20 分鐘課堂活動節奏計時 (歷時計時器與 18 分鐘防超時提示)
+ * 4. 教師全場凍結機制 (⏸️ 暫停講解 / 快捷鍵 P) 支援觀念精講
+ * 5. 無障礙題目大字體切換 (🔍 放大題目)
+ * 6. 完整連動 BioGameSuite 與 Google Apps Script (最高分同單元覆蓋)
+ */
 
 function cleanUnitTitle(raw) {
   if (!raw) return '精選題庫';
@@ -18,30 +28,21 @@ function cleanUnitTitle(raw) {
   return str || raw;
 }
 
-/**
- * 👾 生物小精靈塔防：微觀免疫大作戰 (Bio-Pacman Defense Grid) V2.0 旗艦版
- * 升級亮點：
- * 1. 21x15 超大迷宮 + 3 大漸進關卡進程 (Stage 1 ~ 3)
- * 2. 嚴格生物觀念：B 淋巴球第三道防線、特異性結合凝集、粒線體 ATP 強效吞噬
- * 3. 巨噬細胞動態偽足、流感冠狀病毒刺突、Y型抗體砲塔全高畫質 Canvas 繪製
- * 4. Google Classroom 防偽通關證書 (PAC-8812) + 金銀銅牌評分
- * 5. 課堂英雄排行榜 (Leaderboard) + 特教無壓力模式
- */
-
-// 1. Web Audio API 音效引擎
+// 1. Web Audio API 音效引擎 (支援全域靜音與 iPad 解鎖)
+let soundEnabled = true;
 class SoundFX {
   constructor() { this.ctx = null; }
   init() {
     if (!this.ctx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioContext();
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
     }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
   }
   playEat() {
-    if (!this.ctx) return;
+    if (!soundEnabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -54,10 +55,10 @@ class SoundFX {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.05);
-    } catch (e) {}
+    } catch (_) {}
   }
   playPower() {
-    if (!this.ctx) return;
+    if (!soundEnabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -70,10 +71,10 @@ class SoundFX {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.25);
-    } catch (e) {}
+    } catch (_) {}
   }
   playBuild() {
-    if (!this.ctx) return;
+    if (!soundEnabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -86,10 +87,10 @@ class SoundFX {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.25);
-    } catch (e) {}
+    } catch (_) {}
   }
   playHit() {
-    if (!this.ctx) return;
+    if (!soundEnabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -102,10 +103,17 @@ class SoundFX {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.12);
-    } catch (e) {}
+    } catch (_) {}
   }
 }
 const sfx = new SoundFX();
+
+window.toggleSound = function() {
+  soundEnabled = !soundEnabled;
+  sfx.init();
+  const btn = document.getElementById("sound-btn");
+  if (btn) btn.textContent = soundEnabled ? "🔊 音效" : "🔇 靜音";
+};
 
 // 2. 備援離線題庫
 const FALLBACK_QUESTIONS = [
@@ -135,7 +143,7 @@ const FALLBACK_QUESTIONS = [
   }
 ];
 
-// 3. 21 x 15 超大雙倍迷宮地圖 (Stage 1, Stage 2, Stage 3)
+// 3. 21 x 15 迷宮地圖 (Stage 1, Stage 2, Stage 3)
 const STAGE_MAPS = [
   // Stage 1: 微觀細胞防線 (21x15)
   [
@@ -173,7 +181,7 @@ const STAGE_MAPS = [
     [1,3,0,0,1,0,0,0,0,4,1,4,0,0,0,0,1,0,0,4,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
-  // Stage 3: 血管免疫大反攻 (21x15 超級 Boss 擂台)
+  // Stage 3: 血管免疫大反攻 (21x15)
   [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,3,0,0,0,0,0,0,1,3,1,3,1,0,0,0,0,0,0,4,1],
@@ -193,13 +201,13 @@ const STAGE_MAPS = [
   ]
 ];
 
-let currentStageIndex = 0; // 0, 1, 2
+let currentStageIndex = 0;
 let MAP_TILES = JSON.parse(JSON.stringify(STAGE_MAPS[0]));
 const TILE_SIZE = 32;
 const ROWS = 15;
 const COLS = 21;
 
-// 全域狀態
+// 全域遊戲與作戰狀態
 let canvas, ctx;
 let atp = 0;
 let score = 0;
@@ -211,7 +219,8 @@ let dotsEatenCount = 0;
 let wrongList = [];
 let animFrame = 0;
 
-let isTimeFrozen = true; // ⭐ 安全凍結守門員：開局前幽靈嚴格靜止
+let isTimeFrozen = true;
+let isTeacherPaused = false;
 let isCountingDown = false;
 let invulnerableTimer = 0;
 let powerModeTimer = 0;
@@ -225,6 +234,68 @@ let towers = [];
 let bullets = [];
 let floatingTexts = [];
 
+// 課堂 20 分鐘計時器
+let sessionElapsedSeconds = 0;
+let sessionTimer = null;
+
+function startSessionTimer() {
+  if (sessionTimer) return;
+  sessionTimer = setInterval(() => {
+    if (!isTeacherPaused) {
+      sessionElapsedSeconds++;
+      const el = document.getElementById("session-time-val");
+      if (el) {
+        el.textContent = formatSessionTime(sessionElapsedSeconds);
+        if (sessionElapsedSeconds >= 1080) { // 18 分鐘
+          el.style.color = "#f43f5e";
+          el.style.fontWeight = "900";
+        }
+      }
+    }
+  }, 1000);
+}
+
+function formatSessionTime(totalSec) {
+  const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
+  const s = (totalSec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+// 教師凍結暫停控制 (快捷鍵 P)
+window.togglePause = function(forceState) {
+  if (typeof forceState === "boolean") {
+    isTeacherPaused = forceState;
+  } else {
+    isTeacherPaused = !isTeacherPaused;
+  }
+  isTimeFrozen = isTeacherPaused;
+  const overlay = document.getElementById("pauseOverlay");
+  if (overlay) {
+    overlay.style.display = isTeacherPaused ? "flex" : "none";
+  }
+};
+
+// 無障礙題目大字體切換
+window.toggleZoom = function() {
+  document.body.classList.toggle("font-zoomed");
+  const isZoomed = document.body.classList.contains("font-zoomed");
+  const btn = document.getElementById("btn-zoom");
+  if (btn) btn.textContent = isZoomed ? "🔍 標準" : "🔍 放大";
+};
+
+// 取得當前已登入學生資料 (連動 BioGameSuite)
+function getAuthenticatedStudent() {
+  if (window.BioGameSuite && typeof window.BioGameSuite.getStudent === 'function') {
+    const st = window.BioGameSuite.getStudent();
+    if (st && st.name) return st;
+  }
+  try {
+    const raw = sessionStorage.getItem("bgs_authed_student");
+    if (raw) return JSON.parse(raw);
+  } catch (_) {}
+  return { class: "701", seat: "01", name: "微觀免疫員" };
+}
+
 // 玩家（巨噬細胞）
 const player = {
   x: 1 * TILE_SIZE,
@@ -237,7 +308,7 @@ const player = {
   mouthAngle: 0.2
 };
 
-// 病原體鬼魂 (4 種病毒生動特徵)
+// 病原體鬼魂
 let ghosts = [];
 
 function initGhostsForStage(stageIdx) {
@@ -264,46 +335,41 @@ function initGhostsForStage(stageIdx) {
 
 // 4. 載入中央題庫與 Manifest
 async function loadManifestAndUnits() {
-  const unitSelect = document.getElementById('unit-select');
+  const select = document.getElementById('unit-select');
   try {
     const res = await fetch(`../questions/manifest.json?t=${Date.now()}`);
     if (!res.ok) throw new Error("Manifest not found");
     const manifest = await res.json();
     allUnits = manifest.units || [];
 
-    unitSelect.innerHTML = '';
+    select.innerHTML = '';
     allUnits.forEach(u => {
       const opt = document.createElement('option');
       opt.value = u.file;
-      opt.textContent = u.title;
-      unitSelect.appendChild(opt);
+      opt.textContent = cleanUnitTitle(u.title || u.file);
+      select.appendChild(opt);
     });
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUnit = urlParams.get("unit") || urlParams.get("file");
+    const params = new URLSearchParams(window.location.search);
+    const targetUnit = params.get('unit') || params.get('file');
 
     if (targetUnit) {
-      const decoded = decodeURIComponent(targetUnit).trim();
-      const found = allUnits.find(u => u.file === decoded || u.id === decoded);
+      const decoded = decodeURIComponent(targetUnit);
+      const found = allUnits.find(u => u.file.includes(decoded) || u.title?.includes(decoded));
       if (found) {
-        unitSelect.value = found.file;
+        select.value = found.file;
         await loadUnitQuestions(found.file);
       } else {
-        const opt = document.createElement("option");
-        opt.value = decoded;
-        opt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
-        unitSelect.appendChild(opt);
-        unitSelect.value = decoded;
         await loadUnitQuestions(decoded);
       }
     } else if (allUnits.length > 0) {
-      unitSelect.value = allUnits[0].file;
+      select.value = allUnits[0].file;
       await loadUnitQuestions(allUnits[0].file);
     } else {
       questionPool = prepareQuestionPool(FALLBACK_QUESTIONS);
     }
   } catch (err) {
-    unitSelect.innerHTML = '<option value="fallback">單元：人體防禦與免疫</option>';
+    console.warn("題庫載入降級為離線精選題庫:", err);
     questionPool = prepareQuestionPool(FALLBACK_QUESTIONS);
   }
 }
@@ -311,7 +377,7 @@ async function loadManifestAndUnits() {
 async function loadUnitQuestions(unitFile) {
   try {
     const res = await fetch(`../questions/${unitFile}?t=${Date.now()}`);
-    if (!res.ok) throw new Error("HTTP Error");
+    if (!res.ok) throw new Error("Unit not found");
     const data = await res.json();
     const rawList = data.questions || [];
     questionPool = prepareQuestionPool(rawList);
@@ -322,21 +388,27 @@ async function loadUnitQuestions(unitFile) {
 
 function prepareQuestionPool(rawList) {
   if (!rawList || rawList.length === 0) rawList = FALLBACK_QUESTIONS;
-  let suitable = rawList.filter(q => (q.q || q.question || '').length <= 55);
-  if (suitable.length < 4) suitable = rawList;
-
-  const normalized = suitable.map(item => ({
-    q: item.q || item.question,
-    options: item.options,
-    ans: item.ans !== undefined ? item.ans : item.answer,
-    desc: item.desc || item.explanation || "詳見課本概念複習。"
-  }));
-
-  for (let i = normalized.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [normalized[i], normalized[j]] = [normalized[j], normalized[i]];
-  }
-  return normalized;
+  const pool = rawList.map(item => {
+    let options = [];
+    let ansIdx = 0;
+    if (item.options && Array.isArray(item.options)) {
+      options = item.options.map(o => typeof o === 'string' ? o : (o.text || JSON.stringify(o)));
+      ansIdx = typeof item.ans === 'number' ? item.ans : (item.ans?.charCodeAt(0) - 65 || 0);
+    } else if (item.choices && typeof item.choices === 'object') {
+      ['A','B','C','D'].forEach((k, idx) => {
+        if (item.choices[k]) options.push(item.choices[k]);
+        if (item.ans === k) ansIdx = idx;
+      });
+    }
+    if (options.length < 2) options = ["選項 A", "選項 B", "選項 C", "選項 D"];
+    return {
+      q: item.question || item.q || "請選出正確的生物學敘述：",
+      options,
+      ans: ansIdx,
+      desc: item.explanation || item.desc || "詳讀課本對應章節以掌握核心概念。"
+    };
+  });
+  return pool.sort(() => Math.random() - 0.5);
 }
 
 // 5. 初始化與雙重手勢/按鈕控制
@@ -350,13 +422,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadManifestAndUnits();
   initStage(0);
 
-  document.getElementById('unit-select').addEventListener('change', async (e) => {
+  document.getElementById('unit-select')?.addEventListener('change', async (e) => {
     await loadUnitQuestions(e.target.value);
   });
 
-  // 鍵盤操控
+  // 鍵盤操控 (支援 WASD, 方向鍵, 空白建召喚 B 細胞, P 暫停)
   window.addEventListener('keydown', (e) => {
     sfx.init();
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      togglePause();
+      return;
+    }
     if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') setPlayerDir(0, -1);
     if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') setPlayerDir(0, 1);
     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') setPlayerDir(-1, 0);
@@ -405,23 +482,23 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }, { passive: true });
 
-  document.getElementById('btn-build').addEventListener('click', tryBuildTower);
-  document.getElementById('btn-restart').addEventListener('click', () => { location.reload(); });
-  document.getElementById('btn-next-stage').addEventListener('click', advanceNextStage);
-  document.getElementById('btn-leaderboard').addEventListener('click', openLeaderboard);
-  document.getElementById('btn-show-board').addEventListener('click', saveAndShowLeaderboard);
-  document.getElementById('btn-close-leaderboard').addEventListener('click', closeLeaderboard);
+  document.getElementById('btn-build')?.addEventListener('click', tryBuildTower);
+  document.getElementById('btn-restart')?.addEventListener('click', () => { location.reload(); });
+  document.getElementById('btn-next-stage')?.addEventListener('click', advanceNextStage);
+  document.getElementById('btn-leaderboard')?.addEventListener('click', openLeaderboard);
+  document.getElementById('btn-show-board')?.addEventListener('click', saveAndShowLeaderboard);
+  document.getElementById('btn-close-leaderboard')?.addEventListener('click', closeLeaderboard);
 
   // 抽屜設定
-  document.getElementById('btn-drawer').addEventListener('click', () => {
-    document.getElementById('drawer-panel').classList.remove('hidden');
+  document.getElementById('btn-drawer')?.addEventListener('click', () => {
+    document.getElementById('drawer-panel')?.classList.remove('hidden');
   });
-  document.getElementById('btn-close-drawer').addEventListener('click', () => {
-    document.getElementById('drawer-panel').classList.add('hidden');
+  document.getElementById('btn-close-drawer')?.addEventListener('click', () => {
+    document.getElementById('drawer-panel')?.classList.add('hidden');
   });
-  document.getElementById('btn-apply-drawer').addEventListener('click', () => {
-    isStressFreeMode = document.getElementById('check-stress-free').checked;
-    document.getElementById('drawer-panel').classList.add('hidden');
+  document.getElementById('btn-apply-drawer')?.addEventListener('click', () => {
+    isStressFreeMode = document.getElementById('check-stress-free')?.checked || false;
+    document.getElementById('drawer-panel')?.classList.add('hidden');
     addFloatingText(isStressFreeMode ? "🧩 已開啟特教無壓力模式 (無限生命)" : "💾 課堂設定已套用", player.x + 16, player.y - 12, "#38bdf8");
     updateUI();
   });
@@ -440,25 +517,27 @@ function initStage(stageIdx) {
   floatingTexts = [];
   initGhostsForStage(stageIdx);
 
-  const stageTitles = ["Stage 1: 微觀細胞防線", "Stage 2: 淋巴結防禦網", "Stage 3: 血管免疫大反攻"];
-  document.getElementById('stage-badge').textContent = stageTitles[stageIdx];
+  const stageTitles = ["Stage 1", "Stage 2", "Stage 3"];
+  const stageBadge = document.getElementById('stage-badge');
+  if (stageBadge) stageBadge.textContent = stageTitles[stageIdx] || `Stage ${stageIdx + 1}`;
 
   // 自動切換下一單元題庫
-  if (allUnits.length > stageIdx) {
-    document.getElementById('unit-select').value = allUnits[stageIdx].file;
+  const unitSelect = document.getElementById('unit-select');
+  if (unitSelect && allUnits.length > stageIdx) {
+    unitSelect.value = allUnits[stageIdx].file;
     loadUnitQuestions(allUnits[stageIdx].file);
   }
   updateUI();
 }
 
 function advanceNextStage() {
-  document.getElementById('result-modal').classList.add('hidden');
+  document.getElementById('result-modal')?.classList.add('hidden');
   if (currentStageIndex < 2) {
     initStage(currentStageIndex + 1);
     startResumeCountdown();
   } else {
-    alert("🎉 恭喜！您已全破《微觀免疫大作戰》三大關卡！獲頒最高免疫霸主榮譽！");
     initStage(0);
+    startResumeCountdown();
   }
 }
 
@@ -471,7 +550,7 @@ function addFloatingText(text, x, y, color = "#ef4444") {
   floatingTexts.push({ text, x, y, timer: 75, color });
 }
 
-// 6. 出題與時間凍結 Modal
+// 6. 出題與時間凍結 Modal (Light Mode 高對比卡片)
 function formatQuestionText(text) {
   const keywords = ["粒線體", "葉綠體", "第一道防線", "第三道防線", "呼吸作用", "光合作用", "ATP", "抗體", "B 淋巴細胞", "巨噬細胞", "特異性結合"];
   let formatted = text;
@@ -499,9 +578,9 @@ function triggerQuiz(type, onCorrectCallback) {
   const feedbackText = document.getElementById('feedback-text');
   const closeBtn = document.getElementById('feedback-close-btn');
 
-  modal.classList.remove('hidden');
-  feedbackBox.classList.add('hidden');
-  optionsGrid.innerHTML = '';
+  modal?.classList.remove('hidden');
+  feedbackBox?.classList.add('hidden');
+  if (optionsGrid) optionsGrid.innerHTML = '';
 
   const tagMap = {
     'MITO': '⚡ 粒線體事件 (呼吸作用釋放 ATP)',
@@ -509,54 +588,67 @@ function triggerQuiz(type, onCorrectCallback) {
     'TOWER': '🛡️ 第三道防線 (B 淋巴球抗體哨站檢定)',
     'ATP_CHECK': '🧬 ATP 代謝哨卡題'
   };
-  typeTag.textContent = tagMap[type] || '生物學測驗';
-  questionEl.innerHTML = formatQuestionText(qObj.q);
+  if (typeTag) typeTag.textContent = tagMap[type] || '生物學測驗';
+  if (questionEl) questionEl.innerHTML = formatQuestionText(qObj.q);
 
   let isLocked = true;
-  setTimeout(() => { isLocked = false; }, 400);
+  setTimeout(() => { isLocked = false; }, 300);
 
   qObj.options.forEach((optText, idx) => {
     const btn = document.createElement('button');
-    btn.className = 'opt-btn';
+    btn.type = 'button';
+    btn.className = 'opt-card';
     btn.textContent = `${['A','B','C','D'][idx]}. ${optText}`;
     btn.onclick = () => {
       if (isLocked) return;
-      document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+      document.querySelectorAll('.opt-card').forEach(b => b.disabled = true);
 
       if (idx === qObj.ans) {
         answeredCorrect++;
-        feedbackText.innerHTML = `<strong style="color:#10b981;">✅ 正確！觀念完美融會貫通！</strong><br>${qObj.desc}`;
-        feedbackBox.classList.remove('hidden');
-        closeBtn.onclick = () => {
-          modal.classList.add('hidden');
-          startResumeCountdown(onCorrectCallback);
-        };
+        btn.classList.add('is-correct');
+        sfx.playBuild();
+        if (feedbackText) feedbackText.innerHTML = `<strong style="color:#059669;">✅ 正確！觀念完美融會貫通！</strong><br>${qObj.desc}`;
+        feedbackBox?.classList.remove('hidden');
+        if (closeBtn) {
+          closeBtn.disabled = false;
+          closeBtn.textContent = "確認觀念，重返防線 🚀";
+          closeBtn.onclick = () => {
+            modal?.classList.add('hidden');
+            startResumeCountdown(onCorrectCallback);
+          };
+        }
       } else {
+        btn.classList.add('is-wrong');
+        // 同時將正確答案高亮標註為綠色，方便學生立即訂正
+        const correctBtn = optionsGrid.children[qObj.ans];
+        if (correctBtn) correctBtn.classList.add('is-correct');
+
         wrongList.push({ q: qObj.q, right: qObj.options[qObj.ans], desc: qObj.desc });
-        feedbackText.innerHTML = `<strong style="color:#ef4444;">❌ 答錯了！正確解答：[${qObj.options[qObj.ans]}]</strong><br>${qObj.desc}`;
-        feedbackBox.classList.remove('hidden');
-        closeBtn.disabled = true;
+        if (feedbackText) feedbackText.innerHTML = `<strong style="color:#e11d48;">❌ 答錯了！正確解答：[${qObj.options[qObj.ans]}]</strong><br>${qObj.desc}`;
+        feedbackBox?.classList.remove('hidden');
+        if (closeBtn) {
+          closeBtn.disabled = true;
+          let cd = 3;
+          closeBtn.textContent = `請先閱讀觀念解析 (${cd}s)...`;
+          const timer = setInterval(() => {
+            cd--;
+            if (cd <= 0) {
+              clearInterval(timer);
+              closeBtn.disabled = false;
+              closeBtn.textContent = "我吸收觀念了，重返防線 🚀";
+            } else {
+              closeBtn.textContent = `請先閱讀觀念解析 (${cd}s)...`;
+            }
+          }, 1000);
 
-        let cd = 3;
-        closeBtn.textContent = `請先閱讀觀念解析 (${cd}s)...`;
-        const timer = setInterval(() => {
-          cd--;
-          if (cd <= 0) {
-            clearInterval(timer);
-            closeBtn.disabled = false;
-            closeBtn.textContent = "我吸收觀念了，重返防線 🚀";
-          } else {
-            closeBtn.textContent = `請先閱讀觀念解析 (${cd}s)...`;
-          }
-        }, 1000);
-
-        closeBtn.onclick = () => {
-          modal.classList.add('hidden');
-          startResumeCountdown();
-        };
+          closeBtn.onclick = () => {
+            modal?.classList.add('hidden');
+            startResumeCountdown();
+          };
+        }
       }
     };
-    optionsGrid.appendChild(btn);
+    optionsGrid?.appendChild(btn);
   });
 }
 
@@ -565,10 +657,10 @@ function startResumeCountdown(callback) {
   isCountingDown = true;
   const overlay = document.getElementById('countdown-overlay');
   const numEl = document.getElementById('countdown-num');
-  overlay.classList.remove('hidden');
+  overlay?.classList.remove('hidden');
 
   let count = 3;
-  numEl.textContent = count;
+  if (numEl) numEl.textContent = count;
 
   // 防貼臉：將 3.5 格範圍內的鬼魂彈回中央重生
   ghosts.forEach(g => {
@@ -582,16 +674,16 @@ function startResumeCountdown(callback) {
   const timer = setInterval(() => {
     count--;
     if (count > 0) {
-      numEl.textContent = count;
+      if (numEl) numEl.textContent = count;
     } else {
       clearInterval(timer);
-      overlay.classList.add('hidden');
+      overlay?.classList.add('hidden');
       isCountingDown = false;
       isTimeFrozen = false;
       invulnerableTimer = 90; // 1.5 秒無敵閃爍保護
       if (callback) callback();
     }
-  }, 500);
+  }, 450);
 }
 
 // 8. 召喚 B 淋巴球架設特異性抗體哨站
@@ -607,7 +699,7 @@ function tryBuildTower() {
     triggerQuiz('TOWER', () => {
       atp -= 20;
       towers.push({ x: tileX * TILE_SIZE + 16, y: tileY * TILE_SIZE + 16, range: 120, cooldown: 0 });
-      MAP_TILES[tileY][tileX] = 2; // 變更為平地
+      MAP_TILES[tileY][tileX] = 2;
       sfx.playBuild();
       addFloatingText("🛡️ B 淋巴球抗體哨站建立完成！", player.x + 16, player.y - 12, "#10b981");
       updateUI();
@@ -618,7 +710,7 @@ function tryBuildTower() {
 // 9. 遊戲主循環
 function gameLoop() {
   animFrame++;
-  if (!isTimeFrozen && !isCountingDown) {
+  if (!isTimeFrozen && !isCountingDown && !isTeacherPaused) {
     updateGame();
   }
   renderGame();
@@ -663,13 +755,12 @@ function updateGame() {
       });
     }
 
-    // 檢查地圖上的養分豆是否全部吃完（關卡勝利判定）
     checkStageClear();
 
   } else if (tileType === 3) { // 粒線體
     MAP_TILES[currRow][currCol] = 2;
     triggerQuiz('MITO', () => {
-      powerModeTimer = 480; // 8秒強效吞噬模式
+      powerModeTimer = 480;
       sfx.playPower();
       addFloatingText("⚡ 粒線體 ATP 爆發 (強效吞噬模式)!", player.x + 16, player.y - 12, "#ff5555");
     });
@@ -677,21 +768,21 @@ function updateGame() {
     MAP_TILES[currRow][currCol] = 2;
     triggerQuiz('CHLO', () => {
       atp += 30;
-      slowModeTimer = 360; // 6秒全場病原體緩速
+      slowModeTimer = 360;
       sfx.playPower();
       addFloatingText("🌿 葉綠體光合產糖 (全場緩速)!", player.x + 16, player.y - 12, "#22c55e");
       updateUI();
     });
   }
 
-  // 🛡️ B 淋巴球抗體哨站邏輯：1.5s 發射特異性抗體子彈
+  // 🛡️ B 淋巴球抗體哨站邏輯
   towers.forEach(t => {
     if (t.cooldown > 0) t.cooldown--;
     if (t.cooldown <= 0) {
       const targetGhost = ghosts.find(g => Math.hypot(t.x - (g.x + 16), t.y - (g.y + 16)) <= t.range);
       if (targetGhost) {
         bullets.push({ x: t.x, y: t.y, targetGhost, speed: 6.5 });
-        t.cooldown = 90; // 1.5秒射擊冷卻
+        t.cooldown = 90;
       }
     }
   });
@@ -704,7 +795,6 @@ function updateGame() {
     const dist = Math.hypot(dx, dy);
 
     if (dist < 12) {
-      // 專一性結合凝集
       b.targetGhost.x = 10 * TILE_SIZE;
       b.targetGhost.y = 7 * TILE_SIZE;
       kills++;
@@ -737,7 +827,6 @@ function updateGame() {
     const pDist = Math.hypot(player.x - g.x, player.y - g.y);
     if (pDist < 20) {
       if (powerModeTimer > 0) {
-        // 強效吞噬病原體
         g.x = 10 * TILE_SIZE;
         g.y = 7 * TILE_SIZE;
         kills++;
@@ -796,7 +885,7 @@ function canMove(nextX, nextY) {
   );
 }
 
-// 10. 高畫質生物角色 Canvas 繪製 (巨噬細胞偽足、病毒刺突、Y型抗體砲塔)
+// 10. 高畫質生物角色 Canvas 繪製
 function renderGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -818,7 +907,6 @@ function renderGame() {
         ctx.arc(x + 16, y + 16, 3, 0, Math.PI * 2);
         ctx.fill();
       } else if (type === 3) {
-        // 粒線體 (雙層膜與內膜摺皺 Cristae)
         ctx.fillStyle = '#ff5555';
         ctx.beginPath();
         ctx.ellipse(x + 16, y + 16, 10, 6, Math.PI / 4, 0, Math.PI * 2);
@@ -829,7 +917,6 @@ function renderGame() {
         ctx.moveTo(x + 10, y + 14); ctx.lineTo(x + 22, y + 18);
         ctx.stroke();
       } else if (type === 4) {
-        // 葉綠體 (雙層膜與葉綠餅 Thylakoids 疊層)
         ctx.fillStyle = '#22c55e';
         ctx.beginPath();
         ctx.arc(x + 16, y + 16, 9, 0, Math.PI * 2);
@@ -838,7 +925,6 @@ function renderGame() {
         ctx.fillRect(x + 12, y + 13, 8, 3);
         ctx.fillRect(x + 12, y + 17, 8, 3);
       } else if (type === 5) {
-        // B 淋巴球哨站基座
         ctx.strokeStyle = '#06b6d4';
         ctx.lineWidth = 2;
         ctx.strokeRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
@@ -852,7 +938,6 @@ function renderGame() {
     ctx.beginPath();
     ctx.arc(t.x, t.y, 8, 0, Math.PI * 2);
     ctx.fill();
-    // Y 字型抗體結構
     ctx.strokeStyle = '#67e8f9';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -860,7 +945,6 @@ function renderGame() {
     ctx.lineTo(t.x - 5, t.y - 8);
     ctx.moveTo(t.x, t.y - 2); ctx.lineTo(t.x + 5, t.y - 8);
     ctx.stroke();
-    // 攻擊範圍光圈
     ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -876,12 +960,11 @@ function renderGame() {
     ctx.fill();
   });
 
-  // 巨噬細胞 (Player Macrophage - 帶動態偽足與細胞核)
+  // 巨噬細胞
   if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 8) % 2 === 0) {
     const px = player.x + 16, py = player.y + 16;
     ctx.fillStyle = powerModeTimer > 0 ? '#facc15' : '#60a5fa';
     
-    // 繪製動態偽足觸手 (Pseudopods)
     ctx.beginPath();
     for (let i = 0; i < 8; i++) {
       const angle = (i * Math.PI / 4) + (animFrame * 0.05);
@@ -894,20 +977,18 @@ function renderGame() {
     ctx.closePath();
     ctx.fill();
 
-    // 細胞核
     ctx.fillStyle = powerModeTimer > 0 ? '#b45309' : '#1e3a8a';
     ctx.beginPath();
     ctx.arc(px - 2, py - 2, 4, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // 病原體鬼魂 (生動生物特徵)
+  // 病原體鬼魂
   ghosts.forEach(g => {
     const gx = g.x + 16, gy = g.y + 16;
     ctx.fillStyle = powerModeTimer > 0 ? '#3b82f6' : g.color;
 
     if (g.type === 'influenza') {
-      // 流感病毒：紅色球體 + 表面冠狀刺突蛋白 (Spikes)
       ctx.beginPath();
       ctx.arc(gx, gy, 10, 0, Math.PI * 2);
       ctx.fill();
@@ -921,19 +1002,16 @@ function renderGame() {
         ctx.stroke();
       }
     } else if (g.type === 'strep') {
-      // 鏈球菌：連鎖雙球菌
       ctx.beginPath();
       ctx.arc(gx - 4, gy, 7, 0, Math.PI * 2);
       ctx.arc(gx + 4, gy, 7, 0, Math.PI * 2);
       ctx.fill();
     } else {
-      // 腺病毒/Boss：多角形與刺突
       ctx.beginPath();
       ctx.arc(gx, gy, 11, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // 病毒大眼睛
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(gx - 3, gy - 2, 3, 0, Math.PI * 2);
@@ -956,16 +1034,27 @@ function renderGame() {
 }
 
 function updateUI() {
-  document.getElementById('atp-val').textContent = atp;
-  document.getElementById('correct-count').textContent = answeredCorrect;
-  document.getElementById('lives-val').textContent = isStressFreeMode ? "∞ (無限)" : '❤️'.repeat(Math.max(0, lives));
+  const atpEl = document.getElementById('atp-val');
+  if (atpEl) atpEl.textContent = atp;
+  const corEl = document.getElementById('correct-count');
+  if (corEl) corEl.textContent = answeredCorrect;
+  const livesEl = document.getElementById('lives-val');
+  if (livesEl) livesEl.textContent = isStressFreeMode ? "∞ (無限)" : '❤️'.repeat(Math.max(0, lives));
 }
 
-// 11. Google Classroom 防偽認證證書卡與金銀銅評等
+// 11. 結算防偽證書卡片 (Classroom Light Mode 現代風格)
 function endGame(isClear = false) {
   isTimeFrozen = true;
   const modal = document.getElementById('result-modal');
-  modal.classList.remove('hidden');
+  modal?.classList.remove('hidden');
+
+  const student = getAuthenticatedStudent();
+
+  // 更新身分水印與隊員姓名
+  const watermarkEl = document.getElementById('cert-watermark');
+  if (watermarkEl) watermarkEl.textContent = `${student.class} ${student.seat} ${student.name}`;
+  const userEl = document.getElementById('cert-user');
+  if (userEl) userEl.textContent = `${student.class} 班 ${student.seat} 號 ${student.name}`;
 
   document.getElementById('final-score').textContent = score;
   const acc = answeredTotal > 0 ? Math.round((answeredCorrect / answeredTotal) * 100) : 0;
@@ -973,54 +1062,114 @@ function endGame(isClear = false) {
   document.getElementById('final-kills').textContent = kills;
   document.getElementById('final-stage').textContent = `Stage ${currentStageIndex + 1}`;
 
-  // 金銀銅評等
+  // 金銀銅評等徽章
   const medalBadge = document.getElementById('cert-medal-badge');
-  if (acc >= 85) {
-    medalBadge.textContent = "🥇 國家金牌免疫研究員認證 🥇";
-    medalBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
-  } else if (acc >= 70) {
-    medalBadge.textContent = "🥈 國家銀牌免疫研究員認證 🥈";
-    medalBadge.style.background = "linear-gradient(135deg, #94a3b8, #64748b)";
-  } else {
-    medalBadge.textContent = "🥉 國家銅牌免疫研究員認證 🥉";
-    medalBadge.style.background = "linear-gradient(135deg, #b45309, #78350f)";
+  if (medalBadge) {
+    if (acc >= 85) {
+      medalBadge.textContent = "🥇 國家金牌免疫研究員認證 🥇";
+      medalBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
+    } else if (acc >= 70) {
+      medalBadge.textContent = "🥈 國家銀牌免疫研究員認證 🥈";
+      medalBadge.style.background = "linear-gradient(135deg, #94a3b8, #64748b)";
+    } else {
+      medalBadge.textContent = "🥉 國家銅牌免疫研究員認證 🥉";
+      medalBadge.style.background = "linear-gradient(135deg, #b45309, #78350f)";
+    }
   }
 
   const randNum = Math.floor(1000 + Math.random() * 9000);
   const verifyCode = `PAC-${randNum}`;
-  document.getElementById('security-code').textContent = verifyCode;
+  const secEl = document.getElementById('security-code');
+  if (secEl) secEl.textContent = verifyCode;
 
+  // 錯題回顧清單
   const wrongBox = document.getElementById('wrong-summary');
   const wrongListEl = document.getElementById('wrong-list');
   if (wrongList.length > 0) {
-    wrongBox.classList.remove('hidden');
-    wrongListEl.innerHTML = '';
-    wrongList.forEach(item => {
-      const li = document.createElement('li');
-      li.style.marginBottom = '6px';
-      li.innerHTML = `<strong>${item.q}</strong><br><span style="color:#10b981;">正確解答：${item.right}</span> | ${item.desc}`;
-      wrongListEl.appendChild(li);
-    });
+    wrongBox?.classList.remove('hidden');
+    if (wrongListEl) {
+      wrongListEl.innerHTML = '';
+      wrongList.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${item.q}</strong><br><span style="color:#059669; font-weight:700;">正確解答：${item.right}</span><br><span style="color:#475569;">${item.desc}</span>`;
+        wrongListEl.appendChild(li);
+      });
+    }
   } else {
-    wrongBox.classList.add('hidden');
+    wrongBox?.classList.add('hidden');
   }
+
+  // 準備剪貼簿備份文本
+  const copyText = `【生物小精靈：微觀免疫大作戰 成果證書】
+防衛隊員：${student.class}班 ${student.seat}號 ${student.name}
+作戰總分：${score} 分
+命中率：${acc}%
+消滅病原體：${kills} 隻
+通關階段：Stage ${currentStageIndex + 1}
+課堂歷時：${formatSessionTime(sessionElapsedSeconds)}
+防偽碼：${verifyCode}
+------------------------------
+${wrongList.length > 0 ? '待訂正錯題：\n' + wrongList.map(w => `• ${w.q}（正確：${w.right}）`).join('\n') : '🎉 全數答對，觀念融會貫通！'}`;
+
+  const copyArea = document.getElementById("copyResult");
+  if (copyArea) copyArea.value = copyText;
 }
+
+// 叫起通用三階段結算彈窗 (黃金單一入口，徹底消除雙胞胎按鈕衝突)
+window.triggerPacmanGasSubmit = function() {
+  if (typeof showScoreSubmitModal === "function") {
+    const student = getAuthenticatedStudent();
+    const acc = answeredTotal > 0 ? Math.round((answeredCorrect / answeredTotal) * 100) : 0;
+    showScoreSubmitModal({
+      gameTitle: "人體免疫小精靈：微觀免疫大作戰",
+      gameId: "pacman",
+      score: score,
+      scoreDisplay: `${score} 分 (Stage ${currentStageIndex + 1} · 答對率 ${acc}% · 擊殺 ${kills} 隻病原體)`,
+      duration: `課堂歷時 ${formatSessionTime(sessionElapsedSeconds)} (Stage ${currentStageIndex + 1})`,
+      initialClass: student.class || "701",
+      initialSeat: student.seat || "01",
+      initialName: student.name || "微觀免疫員",
+      onBonusChallenge: () => {
+        advanceNextStage();
+      },
+      onRetry: () => {
+        location.reload();
+      }
+    });
+  }
+};
+
+// 複製成績文字檔至剪貼簿 (斷網備用)
+window.copyPacmanCertText = function() {
+  const copyArea = document.getElementById("copyResult");
+  const statusEl = document.getElementById("copyStatus");
+  if (!copyArea) return;
+  copyArea.style.display = "block";
+  copyArea.select();
+  try {
+    document.execCommand('copy');
+    if (statusEl) statusEl.textContent = "✅ 已成功複製學習成果與錯題紀錄至剪貼簿！";
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "⚠️ 請手動複製或截圖畫面儲存。";
+  }
+  copyArea.style.display = "none";
+};
 
 // 12. 課堂英雄排行榜 (Leaderboard)
 function loadLeaderboard() {
   try {
-    const raw = localStorage.getItem("pacman_leaderboard_v2.0");
+    const raw = localStorage.getItem("pacman_leaderboard_v5.0");
     leaderboardData = raw ? JSON.parse(raw) : [];
   } catch (e) { leaderboardData = []; }
 }
 
 function saveAndShowLeaderboard() {
-  const nameInput = document.getElementById('student-id').value.trim() || "匿名同學";
+  const student = getAuthenticatedStudent();
   const acc = answeredTotal > 0 ? Math.round((answeredCorrect / answeredTotal) * 100) : 0;
-  const verifyCode = document.getElementById('security-code').textContent || "PAC-8812";
+  const verifyCode = document.getElementById('security-code')?.textContent || "PAC-8812";
 
   leaderboardData.push({
-    name: nameInput,
+    name: `${student.class} ${student.seat} ${student.name}`,
     score: score,
     acc: `${acc}%`,
     stage: `Stage ${currentStageIndex + 1}`,
@@ -1030,50 +1179,47 @@ function saveAndShowLeaderboard() {
 
   leaderboardData.sort((a, b) => b.score - a.score);
   leaderboardData = leaderboardData.slice(0, 10);
-  localStorage.setItem("pacman_leaderboard_v2.0", JSON.stringify(leaderboardData));
+  try {
+    localStorage.setItem("pacman_leaderboard_v5.0", JSON.stringify(leaderboardData));
+  } catch (_) {}
 
-  document.getElementById('result-modal').classList.add('hidden');
+  document.getElementById('result-modal')?.classList.add('hidden');
   openLeaderboard();
 }
 
 function openLeaderboard() {
   const modal = document.getElementById('leaderboard-modal');
   const tbody = document.querySelector('#leaderboard-table tbody');
-  tbody.innerHTML = '';
-
-  if (leaderboardData.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">尚無排行榜紀錄</td></tr>';
-  } else {
-    leaderboardData.forEach((item, idx) => {
-      const tr = document.createElement('tr');
-      const badge = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`;
-      tr.innerHTML = `
-        <td><b>${badge}</b></td>
-        <td><b>${item.name}</b></td>
-        <td style="color:#facc15; font-weight:bold;">${item.score}</td>
-        <td>${item.acc}</td>
-        <td>${item.stage}</td>
-        <td style="font-family:monospace; color:#38bdf8;">${item.code}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+  if (tbody) {
+    tbody.innerHTML = '';
+    if (leaderboardData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#64748b;">尚無排行榜紀錄</td></tr>';
+    } else {
+      leaderboardData.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        const badge = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`;
+        tr.innerHTML = `
+          <td><b>${badge}</b></td>
+          <td><b>${item.name}</b></td>
+          <td style="color:#0284c7; font-weight:800;">${item.score}</td>
+          <td>${item.acc}</td>
+          <td>${item.stage}</td>
+          <td><code style="font-family:monospace; color:#d97706; background:#fef3c7; padding:2px 6px; border-radius:4px;">${item.code}</code></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
   }
-  modal.classList.remove('hidden');
+  modal?.classList.remove('hidden');
 }
 
 function closeLeaderboard() {
-  document.getElementById('leaderboard-modal').classList.add('hidden');
+  document.getElementById('leaderboard-modal')?.classList.add('hidden');
 }
 
-  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
-    if (typeof showScoreSubmitModal === "function") {
-      showScoreSubmitModal({
-        gameTitle: "人體免疫小精靈",
-        score: score,
-        scoreDisplay: score + " 分 (擊殺 " + kills + " 隻病原體)",
-        duration: "Stage " + stage
-      });
-    }
-  });
-
-window.startGame = function() { isTimeFrozen = false; };
+// 支援外部啟動呼叫 (BioGameSuite 登入完畢後自動喚醒)
+window.startGame = function() {
+  isTimeFrozen = false;
+  isTeacherPaused = false;
+  startSessionTimer();
+};
