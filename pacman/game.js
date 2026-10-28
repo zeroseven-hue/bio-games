@@ -628,17 +628,10 @@ function triggerQuiz(type, onCorrectCallback) {
         feedbackBox?.classList.remove('hidden');
         if (closeBtn) {
           closeBtn.disabled = true;
-          let cd = 3;
-          closeBtn.textContent = `請先閱讀觀念解析 (${cd}s)...`;
-          const timer = setInterval(() => {
-            cd--;
-            if (cd <= 0) {
-              clearInterval(timer);
-              closeBtn.disabled = false;
-              closeBtn.textContent = "我吸收觀念了，重返防線 🚀";
-            } else {
-              closeBtn.textContent = `請先閱讀觀念解析 (${cd}s)...`;
-            }
+          closeBtn.textContent = "請先閱讀觀念解析 (1s)...";
+          setTimeout(() => {
+            closeBtn.disabled = false;
+            closeBtn.textContent = "我吸收觀念了，重返防線 🚀";
           }, 1000);
 
           closeBtn.onclick = () => {
@@ -652,17 +645,13 @@ function triggerQuiz(type, onCorrectCallback) {
   });
 }
 
-// 7. 解凍 3-2-1 倒數與防貼臉彈開機制
+// 7. 解凍極速 0.5s 快閃與防貼臉彈開機制
 function startResumeCountdown(callback) {
   isCountingDown = true;
   const overlay = document.getElementById('countdown-overlay');
   const numEl = document.getElementById('countdown-num');
-  overlay?.classList.remove('hidden');
 
-  let count = 3;
-  if (numEl) numEl.textContent = count;
-
-  // 防貼臉：將 3.5 格範圍內的鬼魂彈回中央重生
+  // 防貼臉：將 3.5 格範圍內的鬼魂瞬間彈回中央重生 (0ms 運算)
   ghosts.forEach(g => {
     const dist = Math.hypot(player.x - g.x, player.y - g.y);
     if (dist < TILE_SIZE * 3.5) {
@@ -671,19 +660,24 @@ function startResumeCountdown(callback) {
     }
   });
 
-  const timer = setInterval(() => {
-    count--;
-    if (count > 0) {
-      if (numEl) numEl.textContent = count;
-    } else {
-      clearInterval(timer);
-      overlay?.classList.add('hidden');
-      isCountingDown = false;
-      isTimeFrozen = false;
-      invulnerableTimer = 90; // 1.5 秒無敵閃爍保護
-      if (callback) callback();
+  // 0.5 秒半透明金色 GO! 快閃，不阻擋背景迷宮
+  if (overlay && numEl) {
+    overlay.classList.remove('hidden');
+    overlay.style.background = 'rgba(2, 6, 23, 0.45)';
+    numEl.textContent = '⚡ GO!';
+    numEl.style.fontSize = '54px';
+  }
+
+  setTimeout(() => {
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.background = '';
     }
-  }, 450);
+    isCountingDown = false;
+    isTimeFrozen = false;
+    invulnerableTimer = 120; // 2.0 秒無敵閃爍保護
+    if (callback) callback();
+  }, 500);
 }
 
 // 8. 召喚 B 淋巴球架設特異性抗體哨站
