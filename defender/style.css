@@ -663,47 +663,7 @@ canvas {
 }
 
 /* ========================================================
-   7. 教室大黑板大觸屏專用按鈕 (Tactical Big Buttons)
-   ======================================================== */
-#bigscreen-pad {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 14px;
-  background: var(--surface-white);
-  padding: 14px 28px;
-  border-top: 1px solid var(--border-light);
-}
-
-.touch-btn {
-  flex: 1;
-  min-height: 56px;
-  border: 2px solid currentColor;
-  background: var(--surface-ground);
-  border-radius: 16px;
-  font-weight: 850;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-.touch-btn:hover {
-  background: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.touch-btn:active {
-  transform: translateY(1px) scale(0.98);
-}
-
-.btn-A { color: var(--accent-rose); }
-.btn-B { color: var(--primary-blue); }
-.btn-C { color: var(--accent-amber); }
-.btn-D { color: var(--accent-emerald); }
-
-/* ========================================================
-   8. 底部快捷鍵指引 (Modern Footbar & Keycaps)
+   7. 底部快捷鍵指引 (Modern Footbar & Keycaps)
    ======================================================== */
 .control-guide {
   grid-column: 1 / -1;
@@ -1081,14 +1041,6 @@ kbd {
   }
   .control-guide {
     padding: 10px 18px;
-  }
-  #bigscreen-pad {
-    padding: 10px 18px;
-    gap: 10px;
-  }
-  .touch-btn {
-    font-size: 14px;
-    min-height: 48px;
   }
 }
 

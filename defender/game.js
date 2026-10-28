@@ -476,13 +476,6 @@ async function startMission(bonusCount) {
 
     initAudio();
 
-    const modeEl = document.getElementById("mode-select");
-    if (modeEl && modeEl.value === "bigscreen") {
-      document.getElementById("bigscreen-pad").style.display = "flex";
-    } else {
-      document.getElementById("bigscreen-pad").style.display = "none";
-    }
-
     startSessionClock();
     if (bonusCount) {
       sessionRounds++;
