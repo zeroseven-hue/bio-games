@@ -77,7 +77,12 @@ async function loadBank(){state.questions=DEMO_QUESTIONS.map(normalize).filter(B
 function show(id){$(id).classList.remove('hidden')}function hide(id){$(id).classList.add('hidden')}
 function timerRender(){if(state.timerOff){$('timer').textContent='⌛ 無時間限制';return;}const m=Math.floor(state.remaining/60),s=state.remaining%60;$('timer').textContent=`⌛ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;if(state.remaining<=60)$('timer').style.color='#ff978c';}
 function tick(){if(state.teacherPreview||state.ended||!state.started||state.timerOff||state.awarding)return;state.remaining=Math.max(0,state.durationSec-Math.floor((Date.now()-state.startedAt)/1000));timerRender();if(state.remaining===0)timeUp();saveProgress();}
-function start(){if(!state.assignments.length||!readTimes())return;state.stage=0;state.solved.clear();state.elapsed=0;state.startedAt=0;state.awardPauseAt=0;state.wrong=0;state.wrongByKey={};beginStage();hide('intro');hide('tutorialOverlay');state.started=true;state.startedAt=Date.now();renderStage();timerRender();clearInterval(state.interval);state.interval=setInterval(tick,250);if(!state.muted)chime();}
+function start(){
+  if(!state.assignments || !state.assignments.length){
+    state.questions = DEMO_QUESTIONS.map(normalize).filter(Boolean);
+    state.assignments = assignQuestions(state.questions);
+  }
+  if(!state.assignments.length||!readTimes())return;state.stage=0;state.solved.clear();state.elapsed=0;state.startedAt=0;state.awardPauseAt=0;state.wrong=0;state.wrongByKey={};beginStage();hide('intro');hide('tutorialOverlay');state.started=true;state.startedAt=Date.now();renderStage();timerRender();clearInterval(state.interval);state.interval=setInterval(tick,250);if(!state.muted)chime();}
 function chime(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=620;g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.2);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.2);setTimeout(()=>c.close(),350);}catch(e){}}
 function renderStage(){const st=stages[state.stage];$('stageName').textContent=st.name;$('stageSub').textContent=st.sub;$('scene').style.backgroundImage=`url('${st.image}')`;$('sceneCaption').textContent='觀察物件附近的微弱青色光點；找不到時按「探索提示」';$('hotspots').innerHTML='';st.objects.forEach(([name,x,y],i)=>{const key=`${state.stage}-${i}`,done=state.solved.has(key);const b=document.createElement('button');b.className='hotspot'+(done?' done':'');b.style.left=x+'%';b.style.top=y+'%';b.setAttribute('aria-label',name+(done?'，已完成':''));b.innerHTML=(done?'✓':'')+`<span>${name}</span>`;b.addEventListener('click',()=>openQuestion(i));$('hotspots').append(b);});const count=st.objects.filter((_,i)=>state.solved.has(`${state.stage}-${i}`)).length;$('stageDots').innerHTML=st.objects.map((_,i)=>`<span class="dot ${state.solved.has(`${state.stage}-${i}`)?'on':''}"></span>`).join('');$('totalProgress').textContent=`${state.solved.size} / 16`;$('bottomText').textContent=`本重封印：${count} / ${st.objects.length}　｜　全程 ${state.solved.size} / 16`;}
 function scanTo(index){const b=$('hotspots').children[index];if(!b)return;const r=b.getBoundingClientRect(),s=$('scene').getBoundingClientRect();$('lens').style.left=(r.left+r.width/2-s.left)+'px';$('lens').style.top=(r.top+r.height/2-s.top)+'px';$('scene').classList.add('scanning');setTimeout(()=>$('scene').classList.remove('scanning'),850);}
@@ -489,6 +494,31 @@ if(studentMode){for(const id of ['teacherPreviewBtn','teacherToggle']){const el=
 
 
 // ⭐ 密室逃脫共用題庫適配器 Hook
+// ⭐ 對外暴露標準開局進入點 (供 BioGameSuite 身分確認後喚醒古堡密室探險)
+window.startGame = async function () {
+  hide('intro');
+  hide('tutorialOverlay');
+  if (!state.assignments || !state.assignments.length) {
+    state.questions = DEMO_QUESTIONS.map(normalize).filter(Boolean);
+    state.assignments = assignQuestions(state.questions);
+  }
+  readTimes();
+  const student = (window.BioGameSuite && window.BioGameSuite.getStudent && window.BioGameSuite.getStudent()) || window.currentStudent;
+  if (student && student.unit && student.unit !== 'FAST_DEFAULT' && typeof switchUnit === 'function') {
+    try {
+      await switchUnit(student.unit);
+    } catch (_) {}
+  }
+  start();
+};
+
+window.addEventListener('biogame:start', () => {
+  if (!state.started) {
+    if (typeof window.startGame === 'function') window.startGame();
+    else start();
+  }
+});
+
 window.__ESCAPE_HOOK__ = {
   type: 'castle',
   setQuestions: (pool) => {

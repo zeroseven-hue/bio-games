@@ -1767,7 +1767,34 @@
         syncStudentToDom(student);
         isGameActive = true;
 
-        // 徹底壓制各遊戲原本舊有的登入介面
+        // 1. 優先呼叫遊戲標準對外啟動函式
+        let started = false;
+        if (typeof window.startGame === 'function') {
+          try { window.startGame(); started = true; } catch (e) { console.warn('window.startGame 執行異常:', e); }
+        } else if (typeof window.startMission === 'function') {
+          try { window.startMission(); started = true; } catch (e) { console.warn('window.startMission 執行異常:', e); }
+        }
+
+        // 2. 若無標準函式，在隱藏舊面板前點擊既有開始按鈕
+        if (!started) {
+          const possibleStartButtons = [
+            document.getElementById('startBtn'),
+            document.getElementById('start-btn'),
+            document.getElementById('btnStart'),
+            document.getElementById('btnStartGame'),
+            document.getElementById('startGameBtn'),
+            document.getElementById('enter-lab'),
+            document.getElementById('start'),
+            document.getElementById('coverStart')
+          ];
+          for (const btn of possibleStartButtons) {
+            if (btn && typeof btn.click === 'function') {
+              try { btn.click(); started = true; break; } catch (_) {}
+            }
+          }
+        }
+
+        // 3. 徹底壓制各遊戲原本舊有的登入介面
         const redundantEls = [
           document.getElementById('start-modal'),
           document.getElementById('setupCard'),
@@ -1778,29 +1805,6 @@
         redundantEls.forEach(el => {
           if (el) el.style.display = 'none';
         });
-
-        // 自動觸發遊戲既有的開始函式或按鈕
-        if (typeof window.startGame === 'function') {
-          try { window.startGame(); return; } catch (_) {}
-        }
-        if (typeof window.startMission === 'function') {
-          try { window.startMission(); return; } catch (_) {}
-        }
-
-        const possibleStartButtons = [
-          document.getElementById('startBtn'),
-          document.getElementById('start-btn'),
-          document.getElementById('btnStart'),
-          document.getElementById('btnStartGame'),
-          document.getElementById('startGameBtn'),
-          document.getElementById('enter-lab'),
-          document.getElementById('start')
-        ];
-        for (const btn of possibleStartButtons) {
-          if (btn && btn.offsetParent !== null && typeof btn.click === 'function') {
-            try { btn.click(); break; } catch (_) {}
-          }
-        }
       }
     });
   }

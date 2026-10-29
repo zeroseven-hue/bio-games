@@ -998,6 +998,11 @@ if (document.readyState === 'loading') {
 }
 
 // ⭐ 密室逃脫共用題庫適配器 Hook
+window.startGame = function() {
+  $('home')?.classList.add('hidden');
+  changeStage(0);
+};
+
 window.__ESCAPE_HOOK__ = {
   type: 'micro',
   get levels() { return levels; },

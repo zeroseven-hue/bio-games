@@ -1564,6 +1564,12 @@
   }
 
   // 支援共用 escape-adapter.js hook
+  window.startGame = function() {
+    $('home')?.classList.add('is-collapsed');
+    $('home')?.classList.add('hidden');
+    gotoScene(1);
+  };
+
   window.__ESCAPE_HOOK__ = {
     type: 'school',
     stages: stages

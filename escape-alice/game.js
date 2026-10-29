@@ -1095,6 +1095,11 @@ function init() {
 }
 
 // 註冊全域 Hook
+window.startGame = function() {
+  $('home')?.classList.add('hidden');
+  goto(0);
+};
+
 window.__ESCAPE_HOOK__ = {
   type: 'alice',
   levels: levels

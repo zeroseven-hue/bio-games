@@ -797,6 +797,11 @@ function makeMilestones(n) {
   return Array.from({ length: q }, (_, i) => Math.max(1, Math.min(g, Math.floor((i * g) / Math.max(1, q)) + 1)));
 }
 
+window.startGame = function() {
+  closeModal();
+  startLevel(1);
+};
+
 async function startLevel(n) {
   closeModal();
   stage = n;
