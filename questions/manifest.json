@@ -1,6 +1,6 @@
 {
   "version": "3.1",
-  "lastUpdated": "2026-10-29T01:31:01.278Z",
+  "lastUpdated": "2026-10-29",
   "publishers": [
     {
       "id": "hanlin",
@@ -518,7 +518,7 @@
               "publisher": "康軒版",
               "semester": "7上",
               "file": "康軒版/bio01/bio01_3-4人體防禦系統.json",
-              "count": 38
+              "count": 50
             },
             {
               "id": "bio01_4-1神經系統",
@@ -582,10 +582,10 @@
               "publisher": "康軒版",
               "semester": "7上",
               "file": "康軒版/bio01/bio01_尺度.json",
-              "count": 36
+              "count": 50
             }
           ],
-          "totalQuestions": 1205
+          "totalQuestions": 1231
         },
         {
           "id": "72",
@@ -627,7 +627,7 @@
           "totalQuestions": 150
         }
       ],
-      "totalQuestions": 1355
+      "totalQuestions": 1381
     },
     {
       "id": "nani",
@@ -1323,7 +1323,7 @@
       "publisher": "康軒版",
       "semester": "7上",
       "file": "康軒版/bio01/bio01_3-4人體防禦系統.json",
-      "count": 38
+      "count": 50
     },
     {
       "id": "bio01_4-1神經系統",
@@ -1387,7 +1387,7 @@
       "publisher": "康軒版",
       "semester": "7上",
       "file": "康軒版/bio01/bio01_尺度.json",
-      "count": 36
+      "count": 50
     },
     {
       "id": "bio01_7上_一段50題快問快答(第1~2章)",
@@ -1598,5 +1598,5 @@
       "count": 50
     }
   ],
-  "totalQuestions": 5269
+  "totalQuestions": 5295
 }
