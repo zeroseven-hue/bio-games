@@ -1,6 +1,6 @@
 {
   "version": "3.1",
-  "lastUpdated": "2026-10-29T01:28:10.690Z",
+  "lastUpdated": "2026-10-29T01:31:01.278Z",
   "publishers": [
     {
       "id": "hanlin",
@@ -756,7 +756,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_4-3植物的感應.json",
-              "count": 47
+              "count": 50
             },
             {
               "id": "bio01_5-1呼吸與氣體的恆定",
