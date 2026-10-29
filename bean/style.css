@@ -1355,6 +1355,16 @@ body:not(.playing) #pauseBtn {
   padding: 30px 34px;
 }
 
+/* 當學生已在圖一登入完成時，圖二轉型為精緻「任務出擊簡報卡」，徹底隱藏重複身分與單元輸入 */
+#beanLaunch.authenticated .profile-box,
+#beanLaunch.authenticated #unitSelectorGroup {
+  display: none !important;
+}
+
+#beanLaunch.authenticated .start-card {
+  padding: 26px 32px;
+}
+
 #beanLaunch .mascot-preview {
   height: 72px;
   margin-bottom: 8px;

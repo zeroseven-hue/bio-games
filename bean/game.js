@@ -335,7 +335,14 @@ function presentLaunch(student) {
   }
   checkUrlParams();
   const profile = $('launchProfile');
-  if (profile) profile.textContent = studentProfile.name ? studentProfile.className + ' 班 · ' + studentProfile.seat + ' 號 · ' + studentProfile.name : '準備好進行今天的生物觀察了嗎？';
+  if (profile) {
+    if (studentProfile.name) {
+      const uText = (targetUnit && targetUnit !== 'all') ? ('單元 ' + targetUnit) : '生物綜合複習';
+      profile.innerHTML = `👤 <b>${studentProfile.className} 班 ${studentProfile.seat} 號 ${studentProfile.name}</b> · 📚 <b>${uText}</b>`;
+    } else {
+      profile.textContent = '準備好進行今天的生物觀察了嗎？';
+    }
+  }
   $('beanLaunch').hidden = false;
   $('beanLaunch').classList.toggle('authenticated', !!studentProfile.name);
   $('startBtn').disabled = false;
@@ -859,7 +866,7 @@ function scheduleSpawn(delay) {
 
 let targetSpawnedInCurrentQuestion = false;
 
-// 生產淘氣豆 (修正：全隨機非預測登場，兼顧不卡拖延與樂趣性)
+// 生產淘氣豆 (重要機制：微笑淘氣豆在所有洞口都會出現，考驗學生題目理解，杜絕盲敲表情！)
 function spawnCharacter() {
   if (locked || stunned) return;
   clearSpawn();
@@ -868,36 +875,33 @@ function spawnCharacter() {
   const correct = correctIndex(q);
   currentQuestionSpawns++;
 
-  let type = 'target';
-  let hole = Math.floor(Math.random() * 4); // ⭐ 四個洞口絕對公平 25% 機率探頭！
+  // 1. 決定地洞位置 (0:A, 1:B, 2:C, 3:D)：均勻隨機
+  let hole = Math.floor(Math.random() * 4);
 
-  const r = Math.random();
-
-  // 若經過 3 次探頭仍未出現正解洞口，第 4 次提高正解出現機率，避免學生無聊空等；
-  // 但在第 1~3 次，嚴格遵守四個洞口均勻隨機 (正解首次出現率嚴格為 25%，絕非80%！)
-  if (!targetSpawnedInCurrentQuestion && currentQuestionSpawns >= 4) {
+  // 防乾等機制：若該題探頭 4 次都未出現正解洞口，第 5 次保底出在正解洞口，避免學生無聊乾等
+  if (!targetSpawnedInCurrentQuestion && currentQuestionSpawns >= 5) {
     hole = correct;
-    type = 'target';
     targetSpawnedInCurrentQuestion = true;
+  } else if (hole === correct) {
+    targetSpawnedInCurrentQuestion = true;
+  }
+
+  // 2. 決定角色類型 (獨立於洞口是否正確)：
+  // 核心改進：微笑淘氣豆 (target) 在所有洞口 (A、B、C、D) 都會冒出！
+  // 學生絕不能「只看表情敲」，必須「看清題目」判斷該洞是不是正確答案！
+  // 敲中正解洞的微笑豆 -> 答對得分 +10
+  // 敲中錯誤洞的微笑豆 -> 答錯扣分 -1 並彈出觀念解析
+  const r = Math.random();
+  let type = 'target';
+
+  if (r < 0.08) {
+    type = 'gold';      // 8% 稀有金豆 (BONUS +3)
+  } else if (r < 0.18) {
+    type = 'guard';     // 10% 巡邏員 (暈眩 1.2s)
+  } else if (r < 0.28) {
+    type = 'baby';      // 10% 奶嘴豆 (-1 分)
   } else {
-    if (hole === correct) {
-      // 冒在正確洞口
-      if (r < 0.12) {
-        type = 'gold'; // 稀有金豆
-      } else {
-        type = 'target'; // 正確答案淘氣豆
-        targetSpawnedInCurrentQuestion = true;
-      }
-    } else {
-      // 冒在錯誤洞口 (干擾豆，學生敲到會扣分/連擊中斷)
-      if (r < 0.25) {
-        type = 'guard'; // 巡邏員 😠
-      } else if (r < 0.50) {
-        type = 'baby'; // 哭哭奶嘴豆 😭
-      } else {
-        type = 'distractor'; // 干擾選項淘氣豆
-      }
-    }
+    type = 'target';    // 72% 微笑淘氣豆 (A~D各洞均勻出現，敲對正解洞才得分，敲錯洞扣分！)
   }
 
   currentSpawn = { hole, type };

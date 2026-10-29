@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>淘氣豆・生物敲敲研究所</title>
-  <link rel="stylesheet" href="style.css?v=9.1">
+  <link rel="stylesheet" href="style.css?v=9.2">
 </head>
 <body>
   <!-- 柔和環境光暈與葉片裝飾 -->
@@ -84,10 +84,10 @@
           <span class="body"></span>
         </div>
       </div>
-      <p class="eyebrow">FIELD OBSERVATION MISSION</p>
+      <p class="eyebrow">MISSION BRIEFING · 任務出擊簡報</p>
       <h1 class="game-title">淘氣豆・生物敲敲研究所</h1>
       <p id="launchProfile" class="launch-profile">正在準備研究站…</p>
-      <p class="dialog-sub">仔細讀題，等待淘氣豆探頭，用扎實觀念完成今天的觀察任務！</p>
+      <p class="dialog-sub">仔細讀題，微笑淘氣豆在各洞都會隨機探頭，看準「正確答案的地洞」再出錘！</p>
 
       <!-- 學生身分登記區 -->
       <div class="profile-box">
@@ -166,9 +166,9 @@
 
       <!-- 規則說明卡片 -->
       <div class="rules-card">
-        <span>🎯 敲中正確答案淘氣豆 <b>+10 分</b>，連續答對累積 <b>Combo</b> 升級大錘！</span>
-        <span>✨ 稀有金豆現身 <b>BONUS +3 分</b> ｜ ❌ 答錯扣分連擊中斷</span>
-        <span>🍼 誤敲奶嘴豆 <b>-1</b> ｜ 💢 誤敲巡邏員 <b>短暫暈眩 1.2 秒</b></span>
+        <span>🎯 <b>看清題目再出手</b>：微笑淘氣豆在各洞都會隨機冒出，敲中「正解地洞」<b>+10 分</b>！</span>
+        <span>❌ 敲到「錯誤選項地洞」扣分並中斷連擊，跳出觀念解析</span>
+        <span>✨ 稀有金豆現身 <b>BONUS +3 分</b> ｜ 🍼 誤敲奶嘴豆 <b>-1</b> ｜ 💢 誤敲巡邏員 <b>暈眩 1.2 秒</b></span>
       </div>
 
       <!-- 題數選擇 -->
@@ -185,7 +185,7 @@
       <div class="preset-tag" id="presetTag" hidden></div>
 
       <div class="start-actions">
-        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">進入觀察站 ➜</button>
+        <button type="button" class="btn-action" id="startBtn" onclick="startGame()">🚀 準備就緒，開始出擊！ ➜</button>
       </div>
     </div>
   </section>
@@ -285,7 +285,7 @@
     <div class="dialog-box rule-modal-card">
       <h2 id="instructionsTitle">📖 淘氣豆：玩法與觀察指南</h2>
       <div class="explain-body rule-explain-list" style="display:grid; gap:10px;">
-        <p>🎯 <strong>如何作答</strong>：看清題目後，當對應選項（A、B、C、D）的「微笑淘氣豆」探頭時，點擊地洞、對應答案卡，或按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 敲擊作答！</p>
+        <p>🎯 <strong>如何作答</strong>：看清題目與四個選項，確認正確解答是哪一個（A、B、C 或 D）。微笑淘氣豆會在各個地洞隨機探頭，請務必<strong>看準正確答案所屬的地洞</strong>再出錘！敲擊錯誤選項地洞會扣分並跳出訂正解析。亦可直接按下鍵盤 <kbd>A</kbd>/<kbd>B</kbd>/<kbd>C</kbd>/<kbd>D</kbd> 快速出錘。</p>
         <p>🔨 <strong>連擊升級</strong>：連續答對可累積 Combo，每連擊 2 次升級錘子（最高 Lv.5 終極槌）。每題答對固定 +10 分，答錯扣 1 分並中斷連擊。</p>
         <p>🍼 <strong>奶嘴豆 (哭哭臉 😭)</strong>：誤敲戴奶嘴眼眶帶淚的奶嘴豆，會發出哭聲並扣 1 分。</p>
         <p>💢 <strong>巡邏員 (生氣臉 😠)</strong>：千萬別敲擊斜眼斜眉帶有怒氣標誌 💢 的巡邏員豆，否則會引發警報並暈眩 1.2 秒！</p>
@@ -352,6 +352,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=9.1"></script>
+  <script src="game.js?v=9.2"></script>
 </body>
 </html>
