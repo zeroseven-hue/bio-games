@@ -1,6 +1,6 @@
 {
   "version": "3.1",
-  "lastUpdated": "2026-10-23T13:19:56.716Z",
+  "lastUpdated": "2026-10-29T01:28:10.690Z",
   "publishers": [
     {
       "id": "hanlin",
@@ -644,7 +644,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_1-1探究自然的方法.json",
-              "count": 48
+              "count": 50
             },
             {
               "id": "bio01_1-2生命現象與細胞的發現",
@@ -660,7 +660,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_1-3細胞的形態與構造.json",
-              "count": 38
+              "count": 50
             },
             {
               "id": "bio01_1-4細胞所組成與物質進出方式",
@@ -668,7 +668,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_1-4細胞所組成與物質進出方式.json",
-              "count": 44
+              "count": 50
             },
             {
               "id": "bio01_1-5生物體的組成層次",
@@ -692,7 +692,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_2-2酵素.json",
-              "count": 47
+              "count": 50
             },
             {
               "id": "bio01_2-3植物如何製造養分",
@@ -732,7 +732,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_3-3人體的防禦.json",
-              "count": 8
+              "count": 50
             },
             {
               "id": "bio01_4-1神經系統",
@@ -772,7 +772,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_5-2血糖的恆定.json",
-              "count": 48
+              "count": 50
             },
             {
               "id": "bio01_5-3排泄與水分的恆定",
@@ -796,7 +796,7 @@
               "publisher": "南一版",
               "semester": "7上",
               "file": "南一版/bio01/bio01_尺度.json",
-              "count": 45
+              "count": 50
             }
           ],
           "totalQuestions": 1021
