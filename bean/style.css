@@ -776,9 +776,9 @@ body:not(.playing) #pauseBtn {
   border-color: var(--primary);
 }
 
-/* 3D 質感地洞本體 */
+/* 3D 質感地洞本體 (The Natural Burrow) */
 .hole {
-  height: 160px;
+  height: 154px;
   position: relative;
   overflow: hidden;
   border-radius: 20px 20px 50% 50%;
@@ -787,31 +787,31 @@ body:not(.playing) #pauseBtn {
   outline: none;
 }
 
-/* 土丘外圈光暈 */
+/* 土丘外圈自然草圈與土壤過渡 */
 .hole::before {
   content: "";
   position: absolute;
   left: 2%;
   right: 2%;
-  bottom: 12px;
-  height: 54px;
+  bottom: 10px;
+  height: 52px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #8b5a36 0%, #6d4223 100%);
-  box-shadow: 0 8px 0 #543219, 0 12px 16px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(180deg, #65a30d 0%, #4d7c0f 20%, #784a27 50%, #4a2c15 100%);
+  box-shadow: 0 6px 0 #281609, 0 10px 18px rgba(0, 0, 0, 0.16);
   z-index: 0;
 }
 
-/* 地洞內部深邃黑洞 */
+/* 地洞內部自然深色漸層洞口 */
 .hole::after {
   content: "";
   position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: 16px;
-  height: 44px;
+  left: 7%;
+  right: 7%;
+  bottom: 14px;
+  height: 42px;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 65%, #382416 0%, #1a100a 85%);
-  box-shadow: inset 0 10px 12px rgba(0, 0, 0, 0.7);
+  background: radial-gradient(ellipse at 50% 60%, #2e1a0d 0%, #100804 85%);
+  box-shadow: inset 0 8px 12px rgba(0, 0, 0, 0.8);
   z-index: 1;
 }
 
@@ -822,196 +822,290 @@ body:not(.playing) #pauseBtn {
   left: 50%;
   bottom: -115px;
   transform: translateX(-50%);
-  width: 100px;
+  width: 90px;
   height: 120px;
   transition: bottom 0.22s var(--ease-spring);
   pointer-events: none;
 }
 
 .character-slot.up {
-  bottom: 26px;
+  bottom: 24px;
 }
 
 /* ==========================================================================
-   精緻萌系淘氣豆純 CSS 向量角色 (Mascots)
+   精緻萌系淘氣豆純 CSS 向量角色 (Unified Mascot System)
+   - 告別割裂兩截色與黑線：全身一體成型流暢圓潤豆體
+   - 精緻腮紅、高光靈動大眼、嫩綠發芽小葉
+   - 溫潤和諧的暖色系，消除刺眼生硬感
    ========================================================================== */
 .mascot {
   position: relative;
-  width: 92px;
-  height: 110px;
+  width: 74px;
+  height: 104px;
   margin: auto;
-  filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.14));
+  filter: drop-shadow(0 6px 6px rgba(45, 24, 11, 0.15));
 }
 
+/* 一體成型完整豆豆主體 (The Unified Bean Body) */
 .mascot .body {
   position: absolute;
-  left: 13px;
-  bottom: 4px;
-  width: 66px;
-  height: 70px;
-  border-radius: 48% 48% 42% 42%;
-  background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
-  border: 3.5px solid #3d2f25;
+  left: 2px;
+  bottom: 2px;
+  width: 70px;
+  height: 94px;
+  border-radius: 48% 48% 44% 44% / 46% 46% 42% 42%;
+  border: 3px solid #2d180b;
+  box-sizing: border-box;
+  background: linear-gradient(175deg, #fffbeb 0%, #fef08a 25%, #fcd34d 55%, #f59e0b 85%, #d97706 100%);
+  box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.8), inset 0 -6px 12px rgba(180, 83, 9, 0.35);
+  z-index: 1;
+  transition: all var(--transition-fast);
 }
 
-.mascot::before {
+/* 雙頰粉嫩腮紅 (Sweet Blushing Cheeks) */
+.mascot::before, .mascot::after {
   content: "";
   position: absolute;
-  left: 11px;
-  top: 8px;
-  width: 70px;
-  height: 64px;
-  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-  border: 3.5px solid #3d2f25;
-  border-radius: 50% 50% 46% 48%;
-  z-index: 2;
+  top: 48px;
+  width: 12px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(251, 113, 133, 0.55);
+  filter: blur(0.5px);
+  z-index: 5;
+  pointer-events: none;
 }
+.mascot::before { left: 9px; }
+.mascot::after { right: 9px; }
 
+/* 頭頂嫩綠發芽萌葉 (Green Botanical Sprout) */
 .tuft {
   position: absolute;
-  z-index: 3;
+  z-index: 10;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 16px;
+  border: none;
+  pointer-events: none;
+}
+.tuft::before {
+  content: "";
+  position: absolute;
+  left: 0;
   top: 2px;
-  left: 36px;
-  width: 26px;
-  height: 15px;
-  border: 4px solid #3d2f25;
-  border-width: 4px 0 0 4px;
-  border-radius: 70% 0;
-  transform: rotate(14deg);
+  width: 11px;
+  height: 12px;
+  background: #4ade80;
+  border: 2px solid #166534;
+  border-radius: 80% 0 80% 0;
+  transform: rotate(-30deg);
+}
+.tuft::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 12px;
+  height: 13px;
+  background: #22c55e;
+  border: 2px solid #166534;
+  border-radius: 0 80% 0 80%;
+  transform: rotate(25deg);
 }
 
+/* 靈動大眼 (Eyes with Catchlight) */
 .eye {
   position: absolute;
-  z-index: 4;
-  top: 33px;
-  width: 8px;
-  height: 11px;
-  background: #3d2f25;
+  z-index: 6;
+  top: 36px;
+  width: 9px;
+  height: 13px;
+  background: #2d180b;
   border-radius: 50%;
 }
+.eye::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 3.5px;
+  height: 3.5px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+.e1 { left: 19px; }
+.e2 { right: 19px; }
 
-.e1 { left: 30px; }
-.e2 { right: 30px; }
-
+/* 甜美微笑 (Sweet Smile) */
 .mouth {
   position: absolute;
-  z-index: 4;
+  z-index: 6;
   top: 50px;
-  left: 40px;
-  width: 14px;
-  height: 8px;
-  border-bottom: 3.5px solid #3d2f25;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 13px;
+  height: 7px;
+  border-bottom: 3px solid #2d180b;
+  border-radius: 0 0 12px 12px;
+}
+.mouth-smile {
+  border-bottom: 3px solid #2d180b;
+}
+
+/* -------------------------------------------------------------
+   各角色專屬色系與表情配件 (Specific Mascots)
+   ------------------------------------------------------------- */
+
+/* 1. 微笑正解豆 (Target Bean - 暖蜜黃豆) */
+.target .body, .mischief .body {
+  background: linear-gradient(175deg, #fffbeb 0%, #fef08a 25%, #fcd34d 55%, #f59e0b 85%, #d97706 100%);
+  box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.8), inset 0 -6px 12px rgba(180, 83, 9, 0.35);
+}
+
+/* 2. 稀有金豆 (Gold Star Bean - 閃耀流金豆) */
+.gold {
+  filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.6)) drop-shadow(0 6px 6px rgba(45, 24, 11, 0.2));
+}
+.gold .body {
+  background: linear-gradient(175deg, #ffffff 0%, #fef08a 20%, #facc15 55%, #eab308 85%, #b45309 100%) !important;
+  box-shadow: inset 0 8px 14px rgba(255, 255, 255, 0.9), inset 0 -6px 12px rgba(161, 98, 7, 0.4) !important;
+}
+.gold::before, .gold::after {
+  background: rgba(245, 158, 11, 0.55);
+}
+.eye-star {
+  position: absolute;
+  z-index: 6;
+  font-size: 15px;
+  top: 32px;
+  line-height: 1;
+}
+.eye-star.e1 { left: 16px; }
+.eye-star.e2 { right: 16px; }
+.mouth-joy {
+  width: 15px !important;
+  height: 9px !important;
+  background: #ea580c;
+  border: 2px solid #2d180b;
+  border-radius: 0 0 10px 10px !important;
+  top: 50px !important;
+}
+
+/* 3. 哭哭奶嘴豆 (Baby Bean - 萌萌抹茶豌豆) */
+.baby .body {
+  background: linear-gradient(175deg, #f0fdf4 0%, #dcfce7 25%, #86efac 60%, #4ade80 85%, #22c55e 100%) !important;
+  box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.8), inset 0 -6px 12px rgba(21, 128, 61, 0.3) !important;
+}
+.baby::before, .baby::after {
+  background: rgba(244, 63, 94, 0.45);
+}
+.pacifier {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 17px;
+  height: 14px;
+  background: #fef08a;
+  border: 2px solid #b45309;
+  border-radius: 50% 50% 40% 40%;
+  z-index: 7;
+}
+.pacifier::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #f43f5e;
   border-radius: 50%;
 }
-
-/* 巡邏員 (Guard) */
-.guard .body, .guard::before {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+.tear {
+  position: absolute;
+  z-index: 7;
+  font-size: 13px;
+  top: 42px;
+  animation: dropTear 0.7s infinite alternate;
 }
+.t1 { left: 14px; }
+.t2 { right: 14px; }
 
+/* 4. 生氣巡邏員 (Guard Bean - 傲嬌小辣豆) */
+.guard .body {
+  background: linear-gradient(175deg, #fff1f2 0%, #fda4af 25%, #fb7185 60%, #f43f5e 85%, #e11d48 100%) !important;
+  box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.75), inset 0 -6px 12px rgba(159, 18, 57, 0.35) !important;
+}
+.guard::before, .guard::after {
+  background: rgba(190, 18, 60, 0.45);
+}
 .eyebrow-angry {
   position: absolute;
-  z-index: 5;
-  top: 26px;
-  width: 14px;
-  height: 4px;
-  background: #3d2f25;
+  z-index: 7;
+  top: 30px;
+  width: 13px;
+  height: 3.5px;
+  background: #2d180b;
   border-radius: 2px;
 }
-
-.e1-brow { left: 25px; transform: rotate(22deg); }
-.e2-brow { right: 25px; transform: rotate(-22deg); }
-
+.e1-brow { left: 16px; transform: rotate(22deg); }
+.e2-brow { right: 16px; transform: rotate(-22deg); }
+.anger-mark {
+  position: absolute;
+  z-index: 8;
+  top: 10px;
+  right: -2px;
+  font-size: 20px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  animation: pulseAngry 1s infinite alternate;
+}
+@keyframes pulseAngry {
+  from { transform: scale(0.95); }
+  to { transform: scale(1.15); }
+}
 .mouth-frown {
   border-bottom: none !important;
-  border-top: 3.5px solid #3d2f25 !important;
-  border-radius: 50% 50% 0 0 !important;
+  border-top: 3px solid #2d180b !important;
+  border-radius: 10px 10px 0 0 !important;
   top: 53px !important;
 }
 
-.guard::after {
-  content: "💢";
-  position: absolute;
-  z-index: 5;
-  right: 4px;
-  top: 10px;
-  font-size: 22px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+/* 5. 調皮干擾豆 (Distractor Bean - 焦糖肉桂豆) */
+.distractor .body {
+  background: linear-gradient(175deg, #fff7ed 0%, #fed7aa 25%, #fdba74 60%, #fb923c 85%, #ea580c 100%) !important;
+  box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.75), inset 0 -6px 12px rgba(194, 65, 12, 0.35) !important;
 }
-
-/* 奶嘴豆 (Baby) */
-.baby .body, .baby::before {
-  background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+.distractor::before, .distractor::after {
+  background: rgba(234, 88, 12, 0.45);
 }
-
-.tear {
-  position: absolute;
-  z-index: 5;
-  font-size: 13px;
-  top: 40px;
-  animation: dropTear 0.7s infinite alternate;
+.eye-wink {
+  height: 3px !important;
+  top: 41px !important;
+  border-radius: 2px !important;
+  transform: rotate(-12deg);
 }
-
-.t1 { left: 22px; }
-.t2 { right: 22px; }
-
-@keyframes dropTear {
-  from { transform: translateY(0); opacity: 0.7; }
-  to { transform: translateY(4px); opacity: 1; }
-}
-
-.baby::after {
-  content: "🍼";
-  position: absolute;
-  z-index: 5;
-  left: 33px;
-  top: 47px;
-  font-size: 26px;
-}
-
-/* 閃耀金豆 (Gold Star Bean) */
-.gold {
-  filter: drop-shadow(0 0 14px #facc15);
-}
-
-.gold .body, .gold::before {
-  background: linear-gradient(135deg, #fffbeb 0%, #fde047 50%, #eab308 100%);
-}
-
-.eye-star {
-  position: absolute;
-  z-index: 5;
-  font-size: 14px;
-  top: 28px;
-}
-
-.eye-star.e1 { left: 26px; }
-.eye-star.e2 { right: 26px; }
-
-.mouth-joy {
-  width: 16px !important;
-  height: 10px !important;
-  background: #ea580c;
-  border: 2px solid #3d2f25;
+.eye-wink::after { display: none !important; }
+.mouth-tongue {
+  width: 13px !important;
+  height: 7px !important;
+  border-bottom: 3px solid #2d180b !important;
   border-radius: 0 0 10px 10px !important;
-  top: 48px !important;
-  left: 38px !important;
+  top: 49px !important;
 }
-
-.gold::after {
-  content: "✨";
+.mouth-tongue::after {
+  content: "";
   position: absolute;
-  z-index: 6;
-  right: 0px;
+  left: 2px;
   top: 4px;
-  font-size: 24px;
-  animation: sparkleRotate 1.5s infinite linear;
-}
-
-@keyframes sparkleRotate {
-  0% { transform: scale(0.9) rotate(0deg); }
-  50% { transform: scale(1.15) rotate(180deg); }
-  100% { transform: scale(0.9) rotate(360deg); }
+  width: 9px;
+  height: 7px;
+  background: #fb7185;
+  border: 1.5px solid #2d180b;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
 }
 
 /* 淘氣晃動與打擊動畫 */

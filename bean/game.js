@@ -916,31 +916,32 @@ function spawnCharacter() {
 // 產生不同表情與角色的 HTML
 function characterHTML(type) {
   if (type === 'guard') {
-    // 巡邏員：斜眼生氣表情 + 憤怒標誌
+    // 巡邏員：傲嬌小辣豆 + 逗趣怒眉 + 憤怒符號
     return `<div class="mascot guard wiggle">
       <span class="tuft"></span>
       <span class="eyebrow-angry e1-brow"></span>
       <span class="eyebrow-angry e2-brow"></span>
       <span class="eye eye-angry e1"></span>
       <span class="eye eye-angry e2"></span>
+      <span class="anger-mark">💢</span>
       <span class="mouth mouth-frown"></span>
       <span class="body"></span>
     </div>`;
   }
   if (type === 'baby') {
-    // 奶嘴豆：哭哭眼 + 水滴眼淚 + 奶嘴
+    // 奶嘴豆：萌萌抹茶豆 + 晶瑩水滴 + 軟萌奶嘴
     return `<div class="mascot baby wiggle">
       <span class="tuft"></span>
       <span class="eye eye-crying e1"></span>
       <span class="eye eye-crying e2"></span>
       <span class="tear t1">💧</span>
       <span class="tear t2">💧</span>
-      <span class="mouth mouth-cry"></span>
+      <span class="pacifier"></span>
       <span class="body"></span>
     </div>`;
   }
   if (type === 'gold') {
-    // 金豆：星星眼 + 大笑
+    // 金豆：香檳金流光 + 璀璨星眸 + 開心大笑
     return `<div class="mascot gold wiggle">
       <span class="tuft"></span>
       <span class="eye-star e1">✨</span>
@@ -950,16 +951,16 @@ function characterHTML(type) {
     </div>`;
   }
   if (type === 'distractor') {
-    // 干擾淘氣豆：俏皮吐舌眨眼表情 😜 (敲錯會扣分)
+    // 干擾淘氣豆：焦糖肉桂豆 + 俏皮單眨眼 + 可愛小舌頭
     return `<div class="mascot distractor wiggle">
       <span class="tuft"></span>
       <span class="eye eye-wink e1"></span>
       <span class="eye e2"></span>
-      <span class="mouth mouth-tongue">👅</span>
+      <span class="mouth mouth-tongue"></span>
       <span class="body"></span>
     </div>`;
   }
-  // 正確目標淘氣豆：開心微笑 ☺️
+  // 正確目標淘氣豆：暖蜜黃豆 + 靈動大眼 + 軟糯微笑
   return `<div class="mascot target wiggle">
     <span class="tuft"></span>
     <span class="eye e1"></span>
