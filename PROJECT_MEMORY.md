@@ -42,18 +42,22 @@
 
 ---
 
-## 4. 題庫結構規範
+## 4. 題庫結構與審核規範 (遵循 bio-shared-question-bank-workflow 標準)
 
 * 所有單元 JSON 必須符合標準規格：
   ```json
   {
-    "unitId": "unit01_scientific_method",
-    "unitTitle": "01 科學方法與探究",
+    "unitId": "bio01_3-3人體的防禦",
+    "unitTitle": "3-3 人體的防禦",
+    "publisher": "南一版",
+    "semester": "7上",
+    "questionCount": 50,
+
     "questions": [
       {
         "id": 1,
         "question": "題目敘述...",
-        "options": ["選項A", "選項B", "選項C", "選項D"],
+        "options": ["選項0文字", "選項1文字", "選項2文字", "選項3文字"],
         "answer": 0,
         "difficulty": "易|中|難",
         "explanation": "深度生物觀念解析..."
