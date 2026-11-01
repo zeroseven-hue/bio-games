@@ -608,3 +608,104 @@ body {
   line-height: 1.6;
   margin-bottom: 16px;
 }
+
+/* Cell Abyss · research station interface, v7 */
+:root { --bg-panel:#fffdf8; --text-main:#173c47; --accent-green:#087f75; }
+* { touch-action:auto; }
+body { background:#e9f0ed; color:#173c47; }
+.game-wrapper { background:#e9f0ed; padding:12px 18px 10px; gap:8px; }
+.game-header { flex-wrap:wrap; gap:10px 20px; background:#fffdf8; border:1px solid #d5e4df; border-radius:18px; padding:12px 18px; box-shadow:0 4px 16px #173c4708; flex-shrink:0; }
+.header-left { gap:14px; }
+.game-logo { display:flex; align-items:center; gap:10px; color:#163f49; font-size:1.16rem; line-height:1.3; white-space:nowrap; }
+.game-logo small { display:block; color:#44817e; font-size:.62rem; letter-spacing:.23em; margin-bottom:3px; }
+.logo-symbol { display:grid; place-items:center; width:44px; height:44px; border-radius:13px; background:#e4f2ea; font-size:1.6rem; }
+.mode-tag { color:#387468; background:#edf5ee; border:1px solid #d8e8dc; padding:5px 9px; }
+.header-center { flex:1; justify-content:center; }
+.status-pill { background:#f1f6f2; color:#3e5e64; border:1px solid #dce8df; border-radius:12px; padding:8px 12px; gap:12px; font-size:.83rem; flex-wrap:wrap; justify-content:center; }
+.pill-item b { color:#164e58; }
+.goal-progress-bar-wrap { display:block; width:100%; height:5px; margin:4px 0 0; background:#d9e7df; border:0; }
+.goal-progress-fill { background:linear-gradient(90deg,#0f8d80,#63c692); }
+.header-right { gap:6px; flex-wrap:wrap; }
+.btn-tool { min-height:40px; background:#f2f6f2; color:#214f59; border:1px solid #cddfd6; border-radius:10px; padding:8px 10px; font-size:.78rem; }
+.btn-tool:hover { background:#e2efe7; transform:translateY(-1px); }
+.btn-green { color:#08675e; background:#e1f1e9; }
+.btn-purple { color:#58427c; background:#f0eaf8; border-color:#dbd0e9; }
+.btn-tool.active-zoom { background:#d6eeed; color:#075a62; border-color:#7ebcb8; }
+.speed-selector { color:#4b6c71; }
+.styled-speed-select { min-height:40px; background:#fffdf8; color:#264f59; border-color:#ccdcd4; max-width:180px; }
+.unit-bar { background:transparent; border:0; padding:0 8px; flex-shrink:0; }
+.unit-selector-box { max-width:900px; }
+.unit-label { color:#456961; font-size:.8rem; }
+.styled-unit-select { background:#fffdf8; color:#214f59; border:1px solid #c8ddd2; box-shadow:none; font-size:.85rem; min-height:36px; }
+.styled-unit-select:disabled { opacity:1; color:#214f59; -webkit-text-fill-color:#214f59; }
+.fate-question-banner { background:#fffdf8; color:#183f4a; border:1px solid #d6dfce; border-left:5px solid #d3aa4a; border-radius:14px; margin:0; padding:12px 18px; gap:18px; box-shadow:0 3px 10px #183f4905; flex-shrink:0; }
+.fq-badge { background:#f5edce; color:#71571d; border-radius:9px; font-size:.95rem; box-shadow:none; padding:9px 12px; }
+.fq-badge small { display:block; font-size:.5rem; letter-spacing:.1em; margin-bottom:3px; }
+.fq-content { color:#173e49; text-shadow:none; font-size:1.1rem; line-height:1.5; }
+.fate-question-banner.zoomed-question .fq-content { font-size:1.35rem; }
+.canvas-container { border-radius:18px; border:1px solid #365763; background:radial-gradient(ellipse at 50% 25%,#173e4c,#081b2a); box-shadow:inset 0 0 60px #020c1880,0 5px 18px #173c4712; touch-action:none; isolation:isolate; }
+#gameCanvas { border:0; box-shadow:none; background:none; image-rendering:auto; width:auto; height:100%; max-width:100%; aspect-ratio:4/3; }
+.canvas-container:after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:17px; box-shadow:inset 0 0 50px #00122145; transition:box-shadow .25s; }
+.canvas-container[data-feedback="correct"]:after { box-shadow:inset 0 0 38px #2dd4bf75; }
+.canvas-container[data-feedback="wrong"]:after { box-shadow:inset 0 0 38px #fb718575; }
+.touch-zone { font-size:.95rem; color:#d5fff936; align-items:flex-end; padding-bottom:15px; text-shadow:none; }
+.touch-left { border-right:1px dashed #b7e6df18; background:none; }
+.touch-right { background:none; }
+.concept-toast-banner { top:12px; background:#fff9e9; color:#4d421f; border:1px solid #d8c899; border-radius:12px; padding:11px 16px; font-size:.95rem; max-width:92%; width:max-content; box-shadow:0 8px 22px #020d2530; line-height:1.5; }
+.giant-touch-bar { flex-shrink:0; background:transparent; border:0; padding:0; gap:12px; }
+.btn-giant-touch { height:54px; min-height:54px; border-radius:13px; border:1px solid #ffffff45; letter-spacing:.03em; font-size:1rem; touch-action:none; box-shadow:0 3px 0 #103c48; }
+.btn-touch-left { background:linear-gradient(125deg,#235c76,#174861); }
+.btn-touch-right { background:linear-gradient(125deg,#167b70,#0a605b); }
+.btn-giant-touch:active { transform:translateY(2px); box-shadow:0 1px 0 #103c48; }
+.modal-overlay { background:#0c2635b8; }
+.modal-box { background:#fffdf8; border:1px solid #d8e5d9; border-radius:24px; color:#183f49; padding:28px; box-shadow:0 24px 90px #061a3860; touch-action:pan-y; overscroll-behavior:contain; }
+.modal-box h2 { font-size:1.4rem; line-height:1.5; }
+.rule-item { border-radius:12px; padding:15px 16px; font-size:.95rem; line-height:1.7; }
+.rule-item.blue { background:#e9f2f7; border-color:#508ca6; }
+.rule-item.green { background:#e7f3e9; border-color:#4b9374; }
+.rule-item.orange { background:#f7efdb; border-color:#c19b43; }
+.btn-action { min-height:48px; border-radius:12px; line-height:1.4; }
+.btn-success { background:#137669; }
+.btn-gold { background:#80621e; }
+.freeze-box { background:#fffdf8; color:#183f49; }
+.freeze-box p { margin:12px 0 22px; line-height:1.7; }
+.cert-form-wrapper { background:#f0f5ef; border-color:#dce5d8; }
+.cert-code-box { background:#173f4b; }
+.styled-input,.styled-textarea { background:#fffefb; color:#173e49; min-height:44px; font-size:1rem; user-select:text; touch-action:auto; }
+.modal-actions-row { flex-wrap:wrap; }
+.modal-actions-row .btn-action { flex:1 1 160px; }
+.portrait-warning { display:none !important; }
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible { outline:3px solid #d1a43d; outline-offset:3px; }
+@media (max-width:1180px) { .game-wrapper { padding:8px 12px; gap:6px; } .game-header { padding:8px 12px; gap:6px 12px; } .header-right { width:100%; justify-content:center; } .header-center { justify-content:flex-end; } .game-logo { font-size:1rem; } .logo-symbol { width:36px; height:36px; } .fate-question-banner { padding:9px 12px; } }
+@media (max-height:650px) and (orientation:landscape) { .game-wrapper { padding:5px 9px; gap:4px; } .game-header { padding:5px 10px; } .game-logo small,.mode-tag,.speed-selector label { display:none; } .header-right { width:auto; } .btn-tool,.styled-speed-select { min-height:34px; padding:5px 7px; } .header-center { flex:0 1 auto; } .status-pill { padding:5px 8px; font-size:.75rem; gap:7px; } .game-logo { font-size:.85rem; } .logo-symbol { display:none; } .unit-label { font-size:.72rem; } .styled-unit-select { min-height:30px; padding:3px 8px; } .fate-question-banner { padding:7px 10px; min-height:44px; } .fq-content { font-size:.95rem; } .fq-badge { font-size:.8rem; padding:6px; } .btn-giant-touch { height:44px; min-height:44px; font-size:.9rem; } }
+@media (orientation:portrait) { .game-wrapper { height:100dvh; } .game-header { gap:8px; } .header-left { width:100%; justify-content:space-between; } .header-center { width:100%; justify-content:center; } .header-right { gap:5px; } .speed-selector { width:100%; justify-content:center; } .btn-tool { flex:1; font-size:.72rem; } .unit-label { display:none; } .fate-question-banner { gap:9px; padding:9px; } .fq-badge small { display:none; } .fq-badge { font-size:.75rem; padding:7px; } .fq-content { font-size:.95rem; } #gameCanvas { width:100%; height:auto; max-height:100%; } .btn-giant-touch { font-size:.8rem; } }
+@supports (height:100dvh) { body,.game-wrapper { height:100dvh; } }
+@media (prefers-reduced-motion:reduce) { *,*:before,*:after { animation:none !important; transition:none !important; } }
+
+/* Responsive guardrails for narrow browsers and shared-module inline themes. */
+.unit-selector-box,.styled-unit-select,.header-center { min-width:0; }
+.styled-unit-select { width:0; max-width:100%; }
+.styled-unit-select:disabled { background:#fffdf8; color:#214f59; border-color:#c8ddd2; }
+.modal-box,.freeze-box { background:#fffdf8 !important; color:#183f49 !important; border:1px solid #cedfd2 !important; box-shadow:0 20px 70px #061a3860 !important; }
+.modal-box h2,.freeze-box h2,.freeze-box p { color:#183f49 !important; }
+@media (max-width:700px) and (orientation:landscape) {
+ .game-header { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; }
+ .header-left { min-width:0; } .header-center { justify-content:flex-end; }
+ .header-right { grid-column:1/-1; flex-wrap:nowrap; width:100%; gap:4px; }
+ .header-right .btn-tool { flex:1; min-width:0; font-size:.65rem; white-space:nowrap; padding:4px; }
+ .styled-speed-select { width:105px; max-width:105px; font-size:.65rem; padding:3px; }
+ .status-pill { font-size:.65rem; gap:5px; padding:4px 6px; }
+ .goal-progress-bar-wrap { display:none; } .unit-label { display:none; }
+ .game-logo { font-size:.72rem; } .fq-badge small { display:none; }
+ .fq-content { font-size:.85rem; } .fate-question-banner { gap:8px; }
+}
+@media (orientation:portrait) {
+ body { overflow-y:auto; overflow-x:hidden; }
+ .game-wrapper { height:auto; min-height:100dvh; }
+ .canvas-container { min-height:260px; flex:0 0 auto; aspect-ratio:4/3; }
+ #gameCanvas { width:100%; height:100%; }
+ .giant-touch-bar { position:sticky; bottom:0; padding:5px 0; background:#e9f0ed; }
+ .status-pill { gap:6px; padding:6px; } .pill-item { white-space:nowrap; }
+ .header-center { width:100%; } .status-pill { width:100%; }
+ .modal-box { touch-action:pan-y; }
+}

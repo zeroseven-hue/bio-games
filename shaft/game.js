@@ -19,7 +19,7 @@ function cleanUnitTitle(raw) {
 }
 
 /**
- * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V7.0
+ * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V8.0
  * 1. 🍄 升級為最新三明治終極標準模組 (BioGameSuite / ScoreSubmitModal) 與復古像素街機風首尾連動！
  * 2. 🛡️ 開局前物理完全凍結 (Pre-Login Freeze) + 結算時強制凍結 (Post-Game Freeze)。
  * 3. 🎯 課堂派卷守門鎖定 (?unit=xxx)，自動鎖定指定單元並防止中途切換偷看題庫。
@@ -52,6 +52,17 @@ let currentTimeFactor = 1.0;
 let gameLoopTimer = null;
 let secondsTimer = null;
 let lastFrameTime = Date.now();
+let physicsAccumulator = 0;
+let toastTimer = null;
+let feedbackTimer = 0;
+const activePointers = new Map();
+function clearControls() { keys.left = false; keys.right = false; activePointers.clear(); }
+function syncPointers() {
+  keys.left = [...activePointers.values()].includes('left');
+  keys.right = [...activePointers.values()].includes('right');
+}
+function showFeedback(kind) { feedbackTimer = .6; canvasContainer.dataset.feedback = kind; }
+
 
 // 玩家角色物理屬性 (極速響應：即按即移、放開即停)
 const player = {
@@ -183,7 +194,7 @@ function initEventListeners() {
   document.addEventListener("touchstart", unlockAudioContext);
   document.addEventListener("pointerdown", unlockAudioContext);
 
-  const clearKeys = () => { keys.left = false; keys.right = false; };
+  const clearKeys = clearControls;
 
   window.addEventListener("keydown", (e) => {
     unlockAudioContext();
@@ -191,6 +202,8 @@ function initEventListeners() {
       e.preventDefault();
       toggleTeacherFreeze();
     }
+    if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+    if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code)) e.preventDefault();
     if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = true;
     if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = true;
   });
@@ -206,26 +219,18 @@ function initEventListeners() {
     if (document.hidden) clearKeys();
   });
 
-  if (btnTouchLeft && btnTouchRight) {
-    btnTouchLeft.addEventListener("touchstart", (e) => { e.preventDefault(); keys.left = true; }, { passive: false });
-    btnTouchLeft.addEventListener("touchend", (e) => { e.preventDefault(); keys.left = false; }, { passive: false });
-    btnTouchLeft.addEventListener("touchcancel", (e) => { e.preventDefault(); keys.left = false; }, { passive: false });
-    btnTouchLeft.addEventListener("mousedown", () => keys.left = true);
-    btnTouchLeft.addEventListener("mouseup", () => keys.left = false);
-    btnTouchLeft.addEventListener("mouseleave", () => keys.left = false);
-
-    btnTouchRight.addEventListener("touchstart", (e) => { e.preventDefault(); keys.right = true; }, { passive: false });
-    btnTouchRight.addEventListener("touchend", (e) => { e.preventDefault(); keys.right = false; }, { passive: false });
-    btnTouchRight.addEventListener("touchcancel", (e) => { e.preventDefault(); keys.right = false; }, { passive: false });
-    btnTouchRight.addEventListener("mousedown", () => keys.right = true);
-    btnTouchRight.addEventListener("mouseup", () => keys.right = false);
-    btnTouchRight.addEventListener("mouseleave", () => keys.right = false);
+  function bindControl(el, direction) {
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault(); unlockAudioContext(); el.setPointerCapture(e.pointerId);
+      const rect = el.getBoundingClientRect();
+      activePointers.set(e.pointerId, direction || (e.clientX < rect.left + rect.width / 2 ? 'left' : 'right'));
+      syncPointers();
+    });
+    for (const type of ['pointerup','pointercancel','lostpointercapture']) {
+      el.addEventListener(type, e => { activePointers.delete(e.pointerId); syncPointers(); });
+    }
   }
-
-  canvasContainer.addEventListener("touchstart", handleTouchStart, { passive: false });
-  canvasContainer.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
-  canvasContainer.addEventListener("touchend", handleTouchEnd, { passive: false });
-  canvasContainer.addEventListener("touchcancel", handleTouchEnd, { passive: false });
+  bindControl(btnTouchLeft, 'left'); bindControl(btnTouchRight, 'right'); bindControl(canvasContainer);
 
   selectSpeed.addEventListener("change", (e) => {
     baseSpeed = parseFloat(e.target.value) || 0.4;
@@ -633,6 +638,10 @@ function getFallbackQuestions() {
 
 // 重置遊戲與建立高密度安全巨型階梯
 function resetGame(autoStart = true) {
+  clearControls(); physicsAccumulator = 0; isRulesOpen = false; isTeacherFrozen = false;
+  closeModal(rulesModal); closeModal(teacherFreezeModal);
+  clearTimeout(toastTimer); conceptToast.classList.add('hidden');
+  feedbackTimer = 0; delete canvasContainer.dataset.feedback;
   hearts = 7;
   maxHearts = 7;
   depth = 0;
@@ -702,7 +711,7 @@ function resetGame(autoStart = true) {
     gameLoopTimer = requestAnimationFrame(gameLoop);
 
     secondsTimer = setInterval(() => {
-      if (isTeacherFrozen || isRulesOpen || !isGameRunning) return;
+      if (isTeacherFrozen || isRulesOpen || document.hidden || !isGameRunning) return;
       gameTimeSeconds++;
       updateUI();
     }, 1000);
@@ -910,14 +919,19 @@ function gameLoop() {
   const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
   lastFrameTime = now;
 
-  if (!isTeacherFrozen && !isRulesOpen) {
-    updatePhysics(dt);
-    updateParticles(dt);
-  }
+  if (!isTeacherFrozen && !isRulesOpen && !document.hidden) {
+    physicsAccumulator += dt;
+    while (physicsAccumulator + 1e-9 >= 1 / 60 && isGameRunning) {
+      updatePhysics(1 / 60); updateParticles(1 / 60);
+      feedbackTimer = Math.max(0, feedbackTimer - 1 / 60);
+      physicsAccumulator -= 1 / 60;
+    }
+    if (!feedbackTimer) delete canvasContainer.dataset.feedback;
+  } else { physicsAccumulator = 0; }
 
   renderCanvas();
 
-  gameLoopTimer = requestAnimationFrame(gameLoop);
+  if (isGameRunning) gameLoopTimer = requestAnimationFrame(gameLoop);
 }
 
 // 命運問答時機：當階梯進入畫面 (y <= 540) 且離小人 <= 240px 時啟動 0.3x 適度減速
@@ -930,7 +944,7 @@ function updatePhysics(dt) {
     slowdownBoostTimer -= dt;
   }
 
-  const fateStairNear = stairs.find(s => s.type === "FATE_OPTION" && !s.isCrumbled && s.y <= 540 && (s.y - player.y) < 240 && (s.y - player.y) > -50);
+  const fateStairNear = stairs.find(s => s.type === "FATE_OPTION" && !s.isTriggered && !s.isCrumbled && s.y <= 540 && (s.y - player.y) < 240 && (s.y - player.y) > -50);
   if (fateStairNear) {
     isBulletTime = true;
     speedMultiplier = 0.3; // 輕度減速 0.3x
@@ -972,7 +986,7 @@ function updatePhysics(dt) {
 
     if (s.type === "HEART" && s.isTriggered && !s.isCrumbled) {
       s.crumbleTimer += dt;
-      if (s.crumbleTimer >= 1.2) {
+      if (s.crumbleTimer >= 1.5) {
         s.isCrumbled = true;
         spawnCrumbleDebris(s.x, s.y, s.width, s.height);
         if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
@@ -1015,6 +1029,7 @@ function updatePhysics(dt) {
       player.isGrounded = true;
 
       handleStairCollision(s);
+      if (!isGameRunning) return;
     }
 
     if (s.y < -35) {
@@ -1093,6 +1108,7 @@ function handleStairCollision(s) {
         s.isTriggered = true;
         s.answeredState = "correct";
         correctAnswersCount++;
+        showFeedback("correct");
         playFanfare();
         player.invincibleTimer = 3.0;
         slowdownBoostTimer = 0; // 立刻恢復 100% 正常速度
@@ -1172,6 +1188,7 @@ function createSafetyStair(x, y, width) {
 function takeDamage() {
   if (player.invincibleTimer > 0) return;
   hearts--;
+  showFeedback("wrong");
   playHitSound();
   updateUI();
   if (hearts <= 0) {
@@ -1183,17 +1200,18 @@ function takeDamage() {
 function showConceptToast(text) {
   conceptToastText.textContent = text;
   conceptToast.classList.remove("hidden");
-  setTimeout(() => {
-    conceptToast.classList.add("hidden");
-  }, 4500);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { conceptToast.classList.add("hidden"); }, 6000);
 }
 
 // 畫面繪製 (超前顯示頂部題目)
 function renderCanvas() {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+  drawCellWorld();
+
   // 1. 背景網格
-  ctx.strokeStyle = "rgba(51, 65, 85, 0.2)";
+  ctx.strokeStyle = "rgba(115, 210, 211, 0.045)";
   ctx.lineWidth = 1;
   for (let x = 0; x < CANVAS_WIDTH; x += 40) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke();
@@ -1212,6 +1230,7 @@ function renderCanvas() {
   // 3. 繪製階梯
   stairs.forEach(s => {
     if (s.isCrumbled) return;
+    ctx.save(); ctx.shadowColor = s.type === 'FATE_OPTION' ? '#38bdf8' : '#0d9488'; ctx.shadowBlur = 7;
 
     if (s.type === "NORMAL") {
       ctx.fillStyle = "#16a34a";
@@ -1298,15 +1317,17 @@ function renderCanvas() {
       if (content.length <= 15) {
         let fSize = isTextZoomed ? 16 : 14.5;
         ctx.font = `bold ${fSize}px sans-serif`;
-        ctx.fillText(`${statusPrefix}${label} ${content}`, s.x + 12, s.y + 29);
+        ctx.fillText(`${statusPrefix}${label} ${content}`, s.x + 12, s.y + 29, s.width - 24);
       } else {
         let fSize = isTextZoomed ? 13 : 12;
         ctx.font = `bold ${fSize}px sans-serif`;
         const [optL1, optL2] = wrapOptionText(content, 14);
         ctx.fillText(`${statusPrefix}${label} ${optL1}`, s.x + 10, s.y + 20);
-        ctx.fillText(`   ${optL2}`, s.x + 10, s.y + 38);
+        ctx.fillText(`   ${optL2}`, s.x + 10, s.y + 38, s.width - 20);
       }
     }
+    ctx.restore();
+    ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(s.x + 3,s.y + 2,s.width - 6,2);
   });
 
   // 4. 繪製微型階梯瓦解落石碎屑 (向下自然墜落，0.35秒極速淡出，在背景層絕不擋視線與題目)
@@ -1619,6 +1640,7 @@ window.restartShaftGame = function() {
 
 
 function openRulesModal() {
+  clearControls();
   isRulesOpen = true;
   openModal(rulesModal);
 }
@@ -1630,6 +1652,7 @@ function closeRulesModal() {
 }
 
 function toggleTeacherFreeze() {
+  clearControls();
   isTeacherFrozen = !isTeacherFrozen;
   if (isTeacherFrozen) openModal(teacherFreezeModal);
   else closeModal(teacherFreezeModal);
@@ -1637,3 +1660,26 @@ function toggleTeacherFreeze() {
 
 function openModal(el) { if (el) el.classList.remove("hidden"); }
 function closeModal(el) { if (el) el.classList.add("hidden"); }
+
+function drawCellWorld() {
+  const bg = ctx.createLinearGradient(0, 0, 800, 600);
+  bg.addColorStop(0, '#102c40'); bg.addColorStop(.55, '#0a2033'); bg.addColorStop(1, '#071421');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,800,600);
+  const offset = totalDistanceDescended;
+  for (let i=0; i<13; i++) {
+    const x = (i * 193 + 61) % 830;
+    const y = ((i * 131 - offset * .18) % 780 + 780) % 780 - 90;
+    const r = 25 + (i % 4) * 14;
+    ctx.beginPath(); ctx.ellipse(x,y,r,r*.72,(i%3)*.6,0,Math.PI*2);
+    ctx.fillStyle = i%2 ? 'rgba(45,212,191,.045)' : 'rgba(125,151,255,.045)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(94,234,212,.12)'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x+5,y-3,r*.23,0,Math.PI*2); ctx.fillStyle='rgba(129,140,248,.13)'; ctx.fill();
+  }
+  for(let i=0;i<35;i++) {
+    const x=(i*137+29)%800, y=((i*83-offset*.35)%600+600)%600;
+    ctx.fillStyle='rgba(165,243,252,'+(.12+(i%3)*.08)+')'; ctx.beginPath(); ctx.arc(x,y,1+i%2,0,Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle='rgba(148,216,222,.3)'; ctx.font='600 11px sans-serif';
+  ctx.fillText('CELL ABYSS / 細胞深淵',24,48);
+  ctx.textAlign='right'; ctx.fillText('B'+maxDepth+' · 探索中',776,48); ctx.textAlign='left';
+}

@@ -6,8 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>生物大墜落：細胞深淵下樓梯 V7.0 - Bio-Shaft: Cell Abyss</title>
-  <link rel="stylesheet" href="style.css?v=7.0">
+  <title>生物大墜落：細胞深淵下樓梯 V8.0 - Bio-Shaft: Cell Abyss</title>
+  <link rel="stylesheet" href="style.css?v=8.2">
 </head>
 <body>
 
@@ -18,8 +18,8 @@
     <!-- 頂部主控列 (HUD) -->
     <header class="game-header">
       <div class="header-left">
-        <h1 class="game-logo">🧬 深淵下樓梯</h1>
-        <div class="mode-tag" id="modeTag">👥 小組競賽 (第 1 棒下樓梯探險家)</div>
+        <h1 class="game-logo"><span class="logo-symbol">🧬</span><span><small>CELL ABYSS</small>細胞深淵探險</span></h1>
+        <div class="mode-tag" id="modeTag">👥 小組競賽</div>
       </div>
 
       <div class="header-center">
@@ -56,19 +56,19 @@
 
     <!-- 頂部獨立命運題目看板 (專屬全寬度容器，100% 完整字數自然折行，永不切字) -->
     <div class="fate-question-banner" id="fateQuestionBanner">
-      <div class="fq-badge">❓ 命運問答</div>
+      <div class="fq-badge"><small>CHOOSE YOUR PATH</small>命運問答</div>
       <div class="fq-content" id="topQuestionStem">正在載入命運試題... 請留意下方命運階梯做出抉擇！</div>
     </div>
 
     <!-- 主遊戲 Canvas 畫布容器 -->
     <div class="canvas-container" id="canvasContainer">
       <!-- 頂部浮動觀念筆記提示 (位於畫布頂部，答錯時即時提示觀念且不干擾題目看板) -->
-      <div class="concept-toast-banner hidden" id="conceptToast">
+      <div class="concept-toast-banner hidden" id="conceptToast" role="status" aria-live="polite">
         <span class="toast-icon">💡</span>
         <span class="toast-text" id="conceptToastText">生物觀念解析：...</span>
       </div>
 
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      <canvas id="gameCanvas" aria-label="使用左右方向鍵或下方按鈕移動，選擇答案階梯" width="800" height="600"></canvas>
 
       <!-- iPad 左右半屏盲操指示微光 (前3秒閃爍提示) -->
       <div class="touch-guide-overlay" id="touchGuideOverlay">
@@ -101,14 +101,14 @@
         </div>
         <div class="rule-item green">
           <b>🪜 2. 二選一命運階梯與子彈時間</b>
-          <p>遇到「❓ 命運問答」時，速度減速為 28% 超慢子彈時間！看清題幹，降落選擇<b>左邊 🅰️</b> 或 <b>右邊 🅱️</b>！踩對發動無敵衝刺，踩錯扣心並有安全階梯接住！</p>
+          <p>遇到「❓ 命運問答」時，階梯上升速度減為 30% 超慢子彈時間！看清題幹，降落選擇<b>左邊 🅰️</b> 或 <b>右邊 🅱️</b>！踩對獲得短暫無敵，踩錯扣心並有安全階梯接住！</p>
         </div>
         <div class="rule-item orange">
           <b>🌪️ 3. 深淵熱氣流救援保底</b>
           <p>若不小心掉落畫面底部，系統會發動「深淵熱氣流」大彈跳救援回到頂部，扣 1 心保保底！</p>
         </div>
       </div>
-      <button id="btnCloseRules" class="btn-action btn-success">開始深淵探險！ 🚀</button>
+      <button id="btnCloseRules" class="btn-action btn-success">準備好了，繼續探險 →</button>
     </div>
   </div>
 
@@ -164,6 +164,8 @@
 
   <script src="sounds_b64.js?v=5.8"></script>
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=7.0"></script>
+  <script src="game.js?v=8.0"></script>
 </body>
 </html>
+
+
