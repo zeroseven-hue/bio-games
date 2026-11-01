@@ -19,17 +19,13 @@ function cleanUnitTitle(raw) {
 }
 
 /**
- * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V4.3 修正版
- * 1. 🛑 修正「再次探險」按鈕卡死與開局即通關 Bug：重構層數計算 (totalDistanceDescended / 70)，開局精準由 B0 樓起算！
- * 2. 🛑 修正答對連續跳躍 Bug：答對降落於正確平台後，小人【平穩站立】於階梯上隨之爬升，絕不再重複起跳！
- * 3. ⚡ 題目超前展示優化：命運階梯在底層一刷出 (距離 380~450px)，頂部題目橫條即時顯現！
- * 4. 🐢 超長緩速跑道 (380px)：距離命運階梯 380px 時發動 12% 龜速極緩速，充裕時間秒讀題幹！
- * 5. 60fps 絲滑加權引擎 + 「即按即移、放開即停」極速響應操控，徹底消除滑冰感與微卡頓！
- * 6. 補血階梯 1.5 秒緩衝碎裂：踩中補血階梯（+1 💖）後，階梯維持 1.5 秒堅固實體讓學生安全移開！
- * 7. 地下 B30 樓通關目標制：到達 B30 樓（約 2.5 分鐘完賽）即頒發通關證書！
- * 8. 答對爆發彩虹星光彩帶與黃金無敵光芒動畫，極致提升成就感！
- * 9. 遠離頂部天花板尖刺：小人登場位置 (y = 200)，腳下預設 340px 超大安全初生平台！
- * 10. 高對比巨型 iPad 雙側盲操按鈕 (> 54px)。
+ * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V7.0
+ * 1. 🍄 升級為最新三明治終極標準模組 (BioGameSuite / ScoreSubmitModal) 與復古像素街機風首尾連動！
+ * 2. 🛡️ 開局前物理完全凍結 (Pre-Login Freeze) + 結算時強制凍結 (Post-Game Freeze)。
+ * 3. 🎯 課堂派卷守門鎖定 (?unit=xxx)，自動鎖定指定單元並防止中途切換偷看題庫。
+ * 4. 🏆 全新 Classroom Light Mode 抗日光燈眩光護眼評量認證卡 + 單一核心結算檢核入口。
+ * 5. 🚀 完整連動 Google Apps Script (GAS) 最高分同單元覆蓋與四項平板交回自我檢核。
+ * 6. 🛑 徹底消除原生 alert/confirm，剪貼簿複製改為行內安靜狀態提示。
  */
 
 const CANVAS_WIDTH = 800;
@@ -119,23 +115,58 @@ const btnSound = document.getElementById("btnSound");
 const rulesModal = document.getElementById("rulesModal");
 const btnCloseRules = document.getElementById("btnCloseRules");
 const victoryModal = document.getElementById("victoryModal");
-const victoryTitle = document.getElementById("victoryTitle");
-const inputSeatNo = document.getElementById("inputSeatNo");
-const inputStudentName = document.getElementById("inputStudentName");
-const inputReflection = document.getElementById("inputReflection");
-const certCodeValue = document.getElementById("certCodeValue");
-const btnCopyCert = document.getElementById("btnCopyCert");
-const btnRestartGame = document.getElementById("btnRestartGame");
 const teacherFreezeModal = document.getElementById("teacherFreezeModal");
 const btnUnfreeze = document.getElementById("btnUnfreeze");
+
+// 取得當前已登入學生身分 (連動 BioGameSuite 與 sessionStorage)
+function getAuthenticatedStudent() {
+  if (window.BioGameSuite && typeof window.BioGameSuite.getStudent === "function") {
+    const st = window.BioGameSuite.getStudent();
+    if (st && st.name) return st;
+  }
+  try {
+    const raw = sessionStorage.getItem("bgs_authed_student");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.name) return parsed;
+    }
+  } catch (_) {}
+  return { class: "701", seat: "01", name: "下樓梯探險家" };
+}
 
 // 頁面初始化
 window.addEventListener("DOMContentLoaded", async () => {
   setupCanvasDPI();
   initEventListeners();
   await loadManifestAndUnits();
-  // ⭐ 安全凍結守門員：加載時僅繪製初生平台，嚴禁物理下墜與計時器偷跑！
-  resetGame(false);
+
+  // 監聽 BioGameSuite 自定義開局事件
+  window.addEventListener("biogame:start", (e) => {
+    if (e.detail) {
+      if (e.detail.unit && e.detail.unit !== "FAST_DEFAULT") {
+        const match = findMatchingUnit(e.detail.unit, allManifestUnits);
+        if (match) {
+          selectUnit.value = match.file;
+          ensureUnitQuestionsLoaded(match.file);
+        }
+      }
+    }
+    resetGame(true);
+  });
+
+  // 檢查是否已在同一 session 驗證過
+  let saved = null;
+  try {
+    const candidate = JSON.parse(sessionStorage.getItem("bgs_authed_student") || "null");
+    if (candidate?.name && candidate.class && candidate.seat) saved = candidate;
+  } catch (_) {}
+
+  if (saved) {
+    resetGame(true);
+  } else {
+    // 未登入前保持安全凍結，僅繪製初始平台
+    resetGame(false);
+  }
 });
 
 function setupCanvasDPI() {
@@ -203,29 +234,6 @@ function initEventListeners() {
   btnFreeze.addEventListener("click", toggleTeacherFreeze);
   btnUnfreeze.addEventListener("click", toggleTeacherFreeze);
   btnSound.addEventListener("click", toggleSound);
-
-  
-  document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
-    if (typeof showScoreSubmitModal === "function") {
-      showScoreSubmitModal({
-        gameTitle: "生物大墜落：細胞深淵下樓梯",
-        gameId: "shaft",
-        score: Math.round(depth || 100),
-        scoreDisplay: "抵達 " + Math.round(depth || 100) + " 公尺深淵",
-        duration: timerDisplay?.textContent || "深淵挑戰",
-        initialClass: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().class : "") || inputSeatNo?.value?.slice(0, 3) || "701",
-        initialSeat: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().seat : "") || inputSeatNo?.value?.slice(3) || "01",
-        initialName: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().name : "") || inputStudentName?.value?.trim() || "探險家"
-      });
-    }
-  });
-  btnCopyCert.addEventListener("click", copyCertificationData);
-  btnRestartGame.addEventListener("click", () => {
-    closeModal(victoryModal);
-    resetGame();
-  });
-
-  [inputSeatNo, inputStudentName].forEach(el => el.addEventListener("input", updateCertCode));
 
   setTimeout(() => {
     if (touchGuideOverlay) touchGuideOverlay.classList.add("fade-out");
@@ -525,9 +533,15 @@ async function loadManifestAndUnits() {
         const decoded = decodeURIComponent(unitParam).trim();
         const customOpt = document.createElement("option");
         customOpt.value = decoded;
-        customOpt.textContent = (typeof cleanUnitTitle === "function" ? cleanUnitTitle(decoded) : decoded);
+        customOpt.textContent = cleanUnitTitle(decoded);
         selectUnit.appendChild(customOpt);
         selectUnit.value = decoded;
+      }
+      // 課堂派卷守門鎖定：學生無法自行切換題庫單元
+      selectUnit.disabled = true;
+      const unitLabel = document.querySelector(".unit-label");
+      if (unitLabel) {
+        unitLabel.innerHTML = "🎯 <b>課堂指定單元 (派卷專屬)：</b>";
       }
     }
 
@@ -1448,38 +1462,135 @@ function gameOver() {
   cancelAnimationFrame(gameLoopTimer);
   clearInterval(secondsTimer);
 
-  victoryTitle.textContent = correctAnswersCount >= TARGET_CORRECT_GOAL ? `🎉 恭喜答對 ${TARGET_CORRECT_GOAL} 題全勝通關！` : `💥 探險結束！共答對 ${correctAnswersCount} 題 (到達 B${maxDepth} 樓)`;
-  const st = (window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent() : {};
-  if (st.class && st.seat) inputSeatNo.value = `${st.class}${st.seat}`;
-  if (st.name) inputStudentName.value = st.name;
-  updateCertCode();
-  openModal(victoryModal);
-}
+  const student = getAuthenticatedStudent();
+  const m = Math.floor(gameTimeSeconds / 60).toString().padStart(2, "0");
+  const s = (gameTimeSeconds % 60).toString().padStart(2, "0");
+  const score = Math.min(100, Math.round((correctAnswersCount / TARGET_CORRECT_GOAL) * 100));
+  const isVictory = correctAnswersCount >= TARGET_CORRECT_GOAL;
 
-function updateCertCode() {
-  const seat = inputSeatNo.value.trim() || "05";
-  const name = inputStudentName.value.trim() || "下樓梯探險家";
-  const str = `${seat}-${name}-${maxDepth}-${gameTimeSeconds}`;
+  const victoryTitle = document.getElementById("victoryTitle");
+  const certMedalBadge = document.getElementById("certMedalBadge");
+  if (victoryTitle) {
+    victoryTitle.textContent = isVictory
+      ? `🎉 恭喜答對 ${TARGET_CORRECT_GOAL} 題全勝通關！`
+      : `💥 探險結束！共答對 ${correctAnswersCount} 題 (到達 B${maxDepth} 樓)`;
+  }
+  if (certMedalBadge) {
+    certMedalBadge.textContent = isVictory
+      ? "🥇 國家細胞深淵探險家認證 🥇"
+      : "🎖️ 深淵探險挑戰紀錄認證 🎖️";
+  }
+
+  const certStudent = document.getElementById("certStudent");
+  if (certStudent) {
+    certStudent.textContent = `${student.class} 班 ${student.seat} 號 ${student.name}`;
+  }
+
+  const finalScore = document.getElementById("finalScore");
+  if (finalScore) finalScore.textContent = `${score} 分`;
+
+  const finalCorrect = document.getElementById("finalCorrect");
+  if (finalCorrect) finalCorrect.textContent = `${correctAnswersCount} / ${TARGET_CORRECT_GOAL} 題 (正確率 ${score}%)`;
+
+  const finalDepth = document.getElementById("finalDepth");
+  if (finalDepth) finalDepth.textContent = `深入地下 B${maxDepth} 樓`;
+
+  const finalTime = document.getElementById("finalTime");
+  if (finalTime) finalTime.textContent = `${m}:${s}`;
+
+  const certWatermark = document.getElementById("certWatermark");
+  if (certWatermark) certWatermark.textContent = `${student.class} ${student.seat} ${student.name}`;
+
+  const seatStr = `${student.class || "701"}${student.seat || "01"}`;
+  const str = `${seatStr}-${student.name || "探險家"}-${maxDepth}-${gameTimeSeconds}`;
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = (hash << 5) - hash + str.charCodeAt(i);
   const code = Math.abs(hash).toString(16).toUpperCase().padStart(4, "0");
-  certCodeValue.textContent = `SHAFT-${code}-${seat}`;
+  const securityCode = document.getElementById("securityCode");
+  if (securityCode) securityCode.textContent = `SHAFT-${code}-${seatStr}`;
+
+  const copyStatus = document.getElementById("copyStatus");
+  if (copyStatus) copyStatus.textContent = "";
+
+  openModal(victoryModal);
 }
 
-function copyCertificationData() {
-  const text = `【生物大墜落：細胞深淵下樓梯 - 課堂通關證書】\n` +
-    `👤 探險家：${inputSeatNo.value} ${inputStudentName.value}\n` +
-    `🪜 深入地下最深紀錄：B${maxDepth} 樓\n` +
-    `⏱️ 探險時間：${timerDisplay.textContent}\n` +
-    `📝 課堂心得：${inputReflection.value}\n` +
-    `🧬 防偽認證碼：${certCodeValue.textContent}`;
+// 叫起通用三階段結算彈窗 (連動 BioGameSuite 與 GAS 試算表)
+window.triggerShaftGasSubmit = function() {
+  if (typeof showScoreSubmitModal === "function") {
+    const student = getAuthenticatedStudent();
+    const score = Math.min(100, Math.round((correctAnswersCount / TARGET_CORRECT_GOAL) * 100));
+    const m = Math.floor(gameTimeSeconds / 60).toString().padStart(2, "0");
+    const s = (gameTimeSeconds % 60).toString().padStart(2, "0");
 
-  navigator.clipboard.writeText(text).then(() => {
-    alert("✅ 防偽認證證書與心得文字已成功複製！可直接上傳繳交至 Google Classroom！");
-  }).catch(() => {
-    alert("複製失敗，請手動複製以下內容：\n\n" + text);
-  });
+    showScoreSubmitModal({
+      gameTitle: "生物大墜落：細胞深淵下樓梯",
+      gameId: "shaft",
+      score: score,
+      scoreDisplay: `${score} 分 (答對 ${correctAnswersCount}/${TARGET_CORRECT_GOAL} 題 · 到達 B${maxDepth} 樓 · 剩餘 ${hearts}💖)`,
+      duration: `探險歷時 ${m}:${s}`,
+      initialClass: student.class || "701",
+      initialSeat: student.seat || "01",
+      initialName: student.name || "下樓梯探險家",
+      onBonusChallenge: () => {
+        TARGET_CORRECT_GOAL += 10;
+        hearts = Math.min(maxHearts, hearts + 3);
+        closeModal(victoryModal);
+        resetGame(true);
+      }
+    });
+  }
+};
+
+// 複製學習紀錄與認證碼 (斷網備用，零彈窗干擾)
+window.copyShaftCertText = function() {
+  const student = getAuthenticatedStudent();
+  const m = Math.floor(gameTimeSeconds / 60).toString().padStart(2, "0");
+  const s = (gameTimeSeconds % 60).toString().padStart(2, "0");
+  const score = Math.min(100, Math.round((correctAnswersCount / TARGET_CORRECT_GOAL) * 100));
+  const code = document.getElementById("securityCode")?.textContent || "SHAFT-0000";
+  const unitName = selectUnit?.options[selectUnit.selectedIndex]?.text || cleanUnitTitle(selectUnit?.value) || "生物題庫";
+
+  const text = `【生物大墜落：細胞深淵下樓梯 - 課堂評量認證】\n` +
+    `👤 探險隊員：${student.class} 班 ${student.seat} 號 ${student.name}\n` +
+    `📚 挑戰單元：${unitName}\n` +
+    `🏆 評量總分：${score} 分\n` +
+    `🎯 答對題數：${correctAnswersCount} / ${TARGET_CORRECT_GOAL} 題\n` +
+    `🪜 深入樓層：深入地下 B${maxDepth} 樓\n` +
+    `⏱️ 探險時間：${m}:${s}\n` +
+    `🧬 防偽認證序號：${code}`;
+
+  const statusEl = document.getElementById("copyStatus");
+  const copyArea = document.getElementById("copyResult");
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (statusEl) statusEl.textContent = "✅ 已成功複製通關認證紀錄！可直接繳交至 Google Classroom！";
+    }).catch(() => fallbackCopy(text, copyArea, statusEl));
+  } else {
+    fallbackCopy(text, copyArea, statusEl);
+  }
+};
+
+function fallbackCopy(text, copyArea, statusEl) {
+  if (copyArea) {
+    copyArea.value = text;
+    copyArea.style.display = "block";
+    copyArea.select();
+    try {
+      document.execCommand("copy");
+      if (statusEl) statusEl.textContent = "✅ 已成功複製通關認證紀錄！可直接繳交至 Google Classroom！";
+    } catch (_) {
+      if (statusEl) statusEl.textContent = "⚠️ 複製失敗，請手動複製下方文字";
+    }
+  }
 }
+
+// 再次探險重啟
+window.restartShaftGame = function() {
+  closeModal(victoryModal);
+  resetGame(true);
+};
 
 function toggleTeacherFreeze() {
   isTeacherFrozen = !isTeacherFrozen;
@@ -1487,5 +1598,5 @@ function toggleTeacherFreeze() {
   else closeModal(teacherFreezeModal);
 }
 
-function openModal(el) { el.classList.remove("hidden"); }
-function closeModal(el) { el.classList.add("hidden"); }
+function openModal(el) { if (el) el.classList.remove("hidden"); }
+function closeModal(el) { if (el) el.classList.add("hidden"); }

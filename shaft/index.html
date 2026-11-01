@@ -1,10 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>生物大墜落：細胞深淵下樓梯 - Bio-Shaft: Cell Abyss</title>
-  <link rel="stylesheet" href="style.css?v=6.7">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>生物大墜落：細胞深淵下樓梯 V7.0 - Bio-Shaft: Cell Abyss</title>
+  <link rel="stylesheet" href="style.css?v=7.0">
 </head>
 <body>
 
@@ -43,7 +46,7 @@
       </div>
     </header>
 
-    <!-- 題庫單元選擇 Bar (單一權威來源，移除左側重複多餘標籤，置中大器且防歧義) -->
+    <!-- 題庫單元選擇 Bar (單一權威來源，置中大器且防歧義) -->
     <div class="unit-bar">
       <div class="unit-selector-box">
         <label for="selectUnit" class="unit-label">📚 當前挑戰題庫單元：</label>
@@ -109,47 +112,47 @@
     </div>
   </div>
 
-  <!-- 2. 🎉 探險通關 / 結算證書 Modal -->
+  <!-- 2. 🎉 探險通關 / 防偽評量認證卡 Modal (Classroom Light Mode 教室抗眩光護眼版) -->
   <div class="modal-overlay hidden" id="victoryModal">
-    <div class="modal-box victory-box">
-      <div class="victory-header">
-        <div class="trophy-icon">🏆</div>
-        <h2 id="victoryTitle">🎉 細胞深淵探險成功！創下深淵紀錄！</h2>
+    <div class="modal-box certificate-card">
+      <div class="cert-header">
+        <span class="cert-gold-badge" id="certMedalBadge">🥇 國家細胞深淵探險家認證 🥇</span>
+        <h2 id="victoryTitle">🏆 細胞深淵探險評量認證卡</h2>
+        <p class="cert-subtitle">國中七年級生物 課堂形成性評量通關認證</p>
       </div>
 
-      <div class="cert-form-wrapper">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="inputSeatNo">👤 班級與座號 (例: 70105)</label>
-            <input type="text" id="inputSeatNo" class="styled-input" placeholder="70105">
-          </div>
-          <div class="form-group">
-            <label for="inputStudentName">✍️ 探險家姓名</label>
-            <input type="text" id="inputStudentName" class="styled-input" placeholder="探險家同學">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputReflection">📝 課堂生物學習心得與檢討 (可直接繳交 Google Classroom)</label>
-          <textarea id="inputReflection" class="styled-textarea" rows="3" placeholder="今天下樓梯探險中，我複習了葉綠體與細胞壁的差異..."></textarea>
-        </div>
-
-        <div class="cert-code-box">
-          <div>Google Classroom 官方防偽認證碼：</div>
-          <div class="cert-code-value" id="certCodeValue">SHAFT-0000-70105</div>
-          <div class="cert-subtext">包含防偽雜湊標記，請截圖上傳或點擊下方按鈕複製內文</div>
-        </div>
+      <!-- 防偽卡片 (供學生核對，浮水印自動帶入真實姓名) -->
+      <div class="cert-card-inner" id="certCard">
+        <div class="cert-watermark" id="certWatermark">701 01 探險家</div>
+        <div class="cert-row"><span>👤 探險隊員：</span><strong id="certStudent">701 班 01 號 探險家</strong></div>
+        <div class="cert-row"><span>🏆 評量總分：</span><strong id="finalScore" class="score-highlight">100 分</strong></div>
+        <div class="cert-row"><span>🎯 答題成績：</span><strong id="finalCorrect">10 / 10 題 (正確率 100%)</strong></div>
+        <div class="cert-row"><span>🪜 深入樓層：</span><strong id="finalDepth">深入地下 B30 樓</strong></div>
+        <div class="cert-row"><span>⏱️ 探險歷時：</span><strong id="finalTime">00:00</strong></div>
+        <div class="cert-row"><span>🔒 防偽驗證序號：</span><code id="securityCode">SHAFT-0000-70101</code></div>
       </div>
 
-      <div class="modal-actions-row">
-        <button id="btnSubmitScoreGas" class="btn-action" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:white; font-weight:800;">🚀 查看結算與交卷檢核</button>
-          <button id="btnCopyCert" class="btn-action btn-gold">📋 複製認證碼 (斷網備用)</button>
-        <button id="btnRestartGame" class="btn-action btn-success">🔄 再次探險</button>
+      <!-- 📸 提醒提示 -->
+      <div class="cert-classroom-hint">
+        📸 <b>成績已備查！請點擊下方紅色出擊按鈕登錄成績試算表</b>
+      </div>
+
+      <!-- 主操作按鈕列 (收斂為單一交卷檢核入口，徹底消弭雙鍵衝突) -->
+      <div class="cert-actions">
+        <button type="button" class="btn-action btn-gas-submit" id="btnSubmitScoreGas" onclick="triggerShaftGasSubmit()">🚀 查看結算與交卷檢核</button>
+        <button type="button" class="btn-action btn-gold" id="btnCopyCert" onclick="copyShaftCertText()">📋 複製學習紀錄 (斷網備用)</button>
+        <p id="copyStatus" class="copy-status-text"></p>
+        <textarea id="copyResult" style="display: none;" readonly aria-label="學習紀錄內容"></textarea>
+      </div>
+
+      <!-- 次要操作列 -->
+      <div class="cert-sub-actions">
+        <button type="button" class="btn-action btn-restart" id="btnRestartGame" onclick="restartShaftGame()">🔄 再次探險</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. 教師一鍵凍結 Modal -->
+  <!-- 3. 教師一鍵凍結 Modal (Light Mode 抗眩光版) -->
   <div class="modal-overlay hidden" id="teacherFreezeModal">
     <div class="modal-box freeze-box">
       <div class="freeze-icon">⏸️</div>
@@ -161,6 +164,6 @@
 
   <script src="sounds_b64.js?v=5.8"></script>
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=4.4"></script>
+  <script src="game.js?v=7.0"></script>
 </body>
 </html>
