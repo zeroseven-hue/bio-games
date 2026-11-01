@@ -177,7 +177,7 @@
               "publisher": "翰林版",
               "semester": "7上",
               "file": "翰林版/bio01/bio01_6-1呼吸與氣體恆定.json",
-              "count": 60
+              "count": 50
             },
             {
               "id": "bio01_6-2排泄與水分恆定",
@@ -185,7 +185,7 @@
               "publisher": "翰林版",
               "semester": "7上",
               "file": "翰林版/bio01/bio01_6-2排泄與水分恆定.json",
-              "count": 60
+              "count": 50
             },
             {
               "id": "bio01_6-3-1血糖恆定",
@@ -193,7 +193,7 @@
               "publisher": "翰林版",
               "semester": "7上",
               "file": "翰林版/bio01/bio01_6-3-1血糖恆定.json",
-              "count": 60
+              "count": 50
             },
             {
               "id": "bio01_6-3-1體溫",
@@ -201,7 +201,7 @@
               "publisher": "翰林版",
               "semester": "7上",
               "file": "翰林版/bio01/bio01_6-3-1體溫.json",
-              "count": 60
+              "count": 50
             },
             {
               "id": "bio01_尺度",
@@ -209,7 +209,7 @@
               "publisher": "翰林版",
               "semester": "7上",
               "file": "翰林版/bio01/bio01_尺度.json",
-              "count": 49
+              "count": 50
             }
           ],
           "totalQuestions": 1440
