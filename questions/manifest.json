@@ -352,7 +352,7 @@
               "publisher": "翰林版",
               "semester": "7下",
               "file": "翰林版/bio02/bio02_5-1生物多樣性.json",
-              "count": 60
+              "count": 50
             },
             {
               "id": "bio02_5-2生物危機",
@@ -360,7 +360,7 @@
               "publisher": "翰林版",
               "semester": "7下",
               "file": "翰林版/bio02/bio02_5-2生物危機.json",
-              "count": 60
+              "count": 50
             },
             {
               "id": "bio02_5-3保育",
@@ -368,7 +368,7 @@
               "publisher": "翰林版",
               "semester": "7下",
               "file": "翰林版/bio02/bio02_5-3保育.json",
-              "count": 60
+              "count": 50
             }
           ],
           "totalQuestions": 1139
