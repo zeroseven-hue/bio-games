@@ -1745,6 +1745,26 @@
           currentStudent = authed;
           isGameActive = true;
           syncStudentToDom(authed);
+
+          // 廣播已驗證身分開局事件
+          try {
+            window.dispatchEvent(new CustomEvent('biogame:start', { detail: authed }));
+          } catch (_) {}
+
+          // 在遊戲初始化完成後呼叫標準啟動入口
+          const tryStart = () => {
+            if (typeof window.startGame === 'function') {
+              try { window.startGame(); } catch (e) { console.warn('window.startGame 執行異常:', e); }
+            } else if (typeof window.startMission === 'function') {
+              try { window.startMission(); } catch (e) { console.warn('window.startMission 執行異常:', e); }
+            }
+          };
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(tryStart, 50));
+          } else {
+            setTimeout(tryStart, 50);
+          }
           return;
         }
       } catch (_) {}

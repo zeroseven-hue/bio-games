@@ -30,7 +30,7 @@ function cleanUnitTitle(raw) {
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
-const TARGET_CORRECT_GOAL = 10; // 答對 10 題全勝通關目標
+let TARGET_CORRECT_GOAL = 10; // 答對題數全勝通關目標 (支援 ?qcount= 動態配置)
 
 let hearts = 7;
 let maxHearts = 7;
@@ -46,6 +46,8 @@ let isBulletTime = false;
 let isGameRunning = false;
 let isTeacherFrozen = false;
 let isTextZoomed = false;
+let isRulesOpen = false;
+let currentTimeFactor = 1.0;
 
 let gameLoopTimer = null;
 let secondsTimer = null;
@@ -181,6 +183,8 @@ function initEventListeners() {
   document.addEventListener("touchstart", unlockAudioContext);
   document.addEventListener("pointerdown", unlockAudioContext);
 
+  const clearKeys = () => { keys.left = false; keys.right = false; };
+
   window.addEventListener("keydown", (e) => {
     unlockAudioContext();
     if (e.code === "Space" && !["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) {
@@ -196,21 +200,32 @@ function initEventListeners() {
     if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = false;
   });
 
+  // 視窗失焦或頁面切換時自動清除移動鍵，防止放手後持續漂移
+  window.addEventListener("blur", clearKeys);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) clearKeys();
+  });
+
   if (btnTouchLeft && btnTouchRight) {
     btnTouchLeft.addEventListener("touchstart", (e) => { e.preventDefault(); keys.left = true; }, { passive: false });
     btnTouchLeft.addEventListener("touchend", (e) => { e.preventDefault(); keys.left = false; }, { passive: false });
+    btnTouchLeft.addEventListener("touchcancel", (e) => { e.preventDefault(); keys.left = false; }, { passive: false });
     btnTouchLeft.addEventListener("mousedown", () => keys.left = true);
     btnTouchLeft.addEventListener("mouseup", () => keys.left = false);
+    btnTouchLeft.addEventListener("mouseleave", () => keys.left = false);
 
     btnTouchRight.addEventListener("touchstart", (e) => { e.preventDefault(); keys.right = true; }, { passive: false });
     btnTouchRight.addEventListener("touchend", (e) => { e.preventDefault(); keys.right = false; }, { passive: false });
+    btnTouchRight.addEventListener("touchcancel", (e) => { e.preventDefault(); keys.right = false; }, { passive: false });
     btnTouchRight.addEventListener("mousedown", () => keys.right = true);
     btnTouchRight.addEventListener("mouseup", () => keys.right = false);
+    btnTouchRight.addEventListener("mouseleave", () => keys.right = false);
   }
 
   canvasContainer.addEventListener("touchstart", handleTouchStart, { passive: false });
   canvasContainer.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
   canvasContainer.addEventListener("touchend", handleTouchEnd, { passive: false });
+  canvasContainer.addEventListener("touchcancel", handleTouchEnd, { passive: false });
 
   selectSpeed.addEventListener("change", (e) => {
     baseSpeed = parseFloat(e.target.value) || 0.4;
@@ -229,8 +244,9 @@ function initEventListeners() {
     if (fateQuestionBanner) fateQuestionBanner.classList.toggle("zoomed-question", isTextZoomed);
   });
 
-  btnRules.addEventListener("click", () => openModal(rulesModal));
-  btnCloseRules.addEventListener("click", () => closeModal(rulesModal));
+  // 開啟指南時自動暫停遊戲物理與計時，關閉時無縫還原
+  btnRules.addEventListener("click", openRulesModal);
+  btnCloseRules.addEventListener("click", closeRulesModal);
   btnFreeze.addEventListener("click", toggleTeacherFreeze);
   btnUnfreeze.addEventListener("click", toggleTeacherFreeze);
   btnSound.addEventListener("click", toggleSound);
@@ -240,24 +256,29 @@ function initEventListeners() {
   }, 4000);
 }
 
+function updateCanvasTouches(touches) {
+  const rect = canvasContainer.getBoundingClientRect();
+  let left = false;
+  let right = false;
+  for (let i = 0; i < touches.length; i++) {
+    const t = touches[i];
+    const touchX = t.clientX - rect.left;
+    if (touchX < rect.width / 2) left = true;
+    else right = true;
+  }
+  keys.left = left;
+  keys.right = right;
+}
+
 function handleTouchStart(e) {
   e.preventDefault();
   unlockAudioContext();
-  const rect = canvasContainer.getBoundingClientRect();
-  for (let i = 0; i < e.touches.length; i++) {
-    const t = e.touches[i];
-    const touchX = t.clientX - rect.left;
-    if (touchX < rect.width / 2) keys.left = true;
-    else keys.right = true;
-  }
+  updateCanvasTouches(e.touches);
 }
 
 function handleTouchEnd(e) {
   e.preventDefault();
-  if (e.touches.length === 0) {
-    keys.left = false;
-    keys.right = false;
-  }
+  updateCanvasTouches(e.touches);
 }
 
 // 音效系統 (載入官方原版《小朋友下樓梯》極致 100% WAV 音效素材)
@@ -672,7 +693,7 @@ function resetGame(autoStart = true) {
 
   updateUI();
 
-  clearInterval(gameLoopTimer);
+  if (gameLoopTimer) cancelAnimationFrame(gameLoopTimer);
   clearInterval(secondsTimer);
 
   if (autoStart) {
@@ -681,7 +702,7 @@ function resetGame(autoStart = true) {
     gameLoopTimer = requestAnimationFrame(gameLoop);
 
     secondsTimer = setInterval(() => {
-      if (isTeacherFrozen || !isGameRunning) return;
+      if (isTeacherFrozen || isRulesOpen || !isGameRunning) return;
       gameTimeSeconds++;
       updateUI();
     }, 1000);
@@ -881,6 +902,7 @@ function spawnStarParticles(x, y) {
 }
 
 // 60fps 絲滑物理主循環
+// 幀率無關物理主循環 (相容 60Hz / 120Hz ProMotion 螢幕)
 function gameLoop() {
   if (!isGameRunning) return;
 
@@ -888,7 +910,7 @@ function gameLoop() {
   const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
   lastFrameTime = now;
 
-  if (!isTeacherFrozen) {
+  if (!isTeacherFrozen && !isRulesOpen) {
     updatePhysics(dt);
     updateParticles(dt);
   }
@@ -918,8 +940,11 @@ function updatePhysics(dt) {
   }
 
   const currentSpeed = baseSpeed * speedMultiplier;
+  // 幀率標準化因子：在 60fps 下為 1.0；在 120fps 下為 0.5；在 30fps 下為 2.0
+  const timeFactor = Math.min(Math.max(dt * 60, 0.2), 3.0);
+  currentTimeFactor = timeFactor;
 
-  // 1. 極速響應操控 (即按即移、放開即停，0 滑冰感)
+  // 1. 極速響應操控 (依 timeFactor 換算，各更新率速度完全一致)
   if (keys.left) {
     player.vx = -player.speed;
   } else if (keys.right) {
@@ -928,17 +953,17 @@ function updatePhysics(dt) {
     player.vx = 0;
   }
 
-  player.x += player.vx;
+  player.x += player.vx * timeFactor;
   player.x = Math.max(10, Math.min(CANVAS_WIDTH - player.width - 10, player.x));
 
-  // 2. 重力加速度
-  player.vy += 0.48;
-  player.y += player.vy;
+  // 2. 重力加速度 (依 timeFactor 換算)
+  player.vy += 0.48 * timeFactor;
+  player.y += player.vy * timeFactor;
   const wasGroundedLastFrame = player.isGrounded;
   player.isGrounded = false;
 
-  // 3. 階梯上升 (溫和 1.4px/frame)
-  const stairRiseSpeed = 1.4 * currentSpeed;
+  // 3. 階梯上升 (依 timeFactor 換算，保持各螢幕更新率下樓梯手感完全一致)
+  const stairRiseSpeed = 1.4 * currentSpeed * timeFactor;
   totalDistanceDescended += stairRiseSpeed; // 累加下降距離計算層數
 
   for (let i = stairs.length - 1; i >= 0; i--) {
@@ -971,7 +996,7 @@ function updatePhysics(dt) {
       }
     }
 
-    const prevY = player.y - player.vy;
+    const prevY = player.y - player.vy * currentTimeFactor;
     if (
       player.vy >= 0 &&
       prevY + player.height <= s.y + 8 &&
@@ -1037,9 +1062,9 @@ function updatePhysics(dt) {
 
 function handleStairCollision(s) {
   if (s.type === "CONVEYOR_LEFT") {
-    player.x -= 2.2;
+    player.x -= 2.2 * currentTimeFactor;
   } else if (s.type === "CONVEYOR_RIGHT") {
-    player.x += 2.2;
+    player.x += 2.2 * currentTimeFactor;
   } else if (s.type === "SPRING") {
     player.vy = -13;
     playJumpSound();
@@ -1591,6 +1616,18 @@ window.restartShaftGame = function() {
   closeModal(victoryModal);
   resetGame(true);
 };
+
+
+function openRulesModal() {
+  isRulesOpen = true;
+  openModal(rulesModal);
+}
+
+function closeRulesModal() {
+  isRulesOpen = false;
+  lastFrameTime = Date.now();
+  closeModal(rulesModal);
+}
 
 function toggleTeacherFreeze() {
   isTeacherFrozen = !isTeacherFrozen;
