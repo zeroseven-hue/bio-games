@@ -332,12 +332,15 @@ function presentLaunch(student) {
   if (student) {
     window.BioGameSuite?.syncStudentToDom(student);
     studentProfile = { className: student.class, seat: student.seat, name: student.name };
+    if (student.unit && student.unit !== 'FAST_DEFAULT') {
+      selectedUnitId = student.unit;
+    }
   }
   checkUrlParams();
   const profile = $('launchProfile');
   if (profile) {
     if (studentProfile.name) {
-      const uText = (targetUnit && targetUnit !== 'all') ? ('單元 ' + targetUnit) : '生物綜合複習';
+      const uText = (selectedUnitId && selectedUnitId !== 'all') ? ('單元 ' + cleanUnitTitle(selectedUnitId)) : '生物綜合複習';
       profile.innerHTML = `👤 <b>${studentProfile.className} 班 ${studentProfile.seat} 號 ${studentProfile.name}</b> · 📚 <b>${uText}</b>`;
     } else {
       profile.textContent = '準備好進行今天的生物觀察了嗎？';
@@ -390,15 +393,46 @@ async function init() {
   checkUrlParams();
   setupKeyboardHotkeys();
   initialized = true;
+
+  // 監聽 BioGameSuite 自定義開局事件
+  window.addEventListener('biogame:start', (e) => {
+    if (e.detail) {
+      studentProfile = { className: e.detail.class, seat: e.detail.seat, name: e.detail.name };
+      if (e.detail.unit && e.detail.unit !== 'FAST_DEFAULT') {
+        selectedUnitId = e.detail.unit;
+      }
+    }
+    startGame();
+  });
+
   let saved = null;
   try {
     const candidate = JSON.parse(sessionStorage.getItem('bgs_authed_student') || 'null');
     if (candidate?.name && candidate.class && candidate.seat) saved = candidate;
   } catch (_) {}
-  if (saved) presentLaunch(saved);
-  else if (window.BioGameSuite) {
-    window.BioGameSuite.showLogin({ gameTitle: '淘氣豆・生物研究站', onStart: presentLaunch });
-  } else presentLaunch();
+
+  if (saved) {
+    studentProfile = { className: saved.class, seat: saved.seat, name: saved.name };
+    if (saved.unit && saved.unit !== 'FAST_DEFAULT') {
+      selectedUnitId = saved.unit;
+    }
+    presentLaunch(saved);
+  } else if (window.BioGameSuite) {
+    window.BioGameSuite.showLogin({
+      gameTitle: '淘氣豆・生物敲敲研究所',
+      onStart: (student) => {
+        if (student) {
+          studentProfile = { className: student.class, seat: student.seat, name: student.name };
+          if (student.unit && student.unit !== 'FAST_DEFAULT') {
+            selectedUnitId = student.unit;
+          }
+        }
+        startGame();
+      }
+    });
+  } else {
+    presentLaunch();
+  }
 }
 
 // 載入預存個人資料
