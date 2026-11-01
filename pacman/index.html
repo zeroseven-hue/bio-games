@@ -6,23 +6,23 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>生物小精靈塔防：微觀免疫大作戰 V5.2 (Bio-Pacman Defense Grid)</title>
-  <link rel="stylesheet" href="style.css?v=5.2">
+  <title>生物小精靈塔防：微觀免疫大作戰 V6.0 (Bio-Pacman Defense Grid)</title>
+  <link rel="stylesheet" href="style.css?v=6.0">
 </head>
 <body>
   <div id="game-app">
     <!-- 頂部現代品牌標頭 (Masthead) -->
     <div class="masthead">
       <div class="brand">
-        <span class="brand-symbol" aria-hidden="true">👾</span>
+        <span class="brand-symbol" aria-hidden="true">✦</span>
         <div>
           <p class="eyebrow">BIO PACMAN · IMMUNE DEFENSE GRID</p>
-          <h1>生物小精靈：微觀免疫大作戰</h1>
+          <h1>微觀免疫<span class="title-accent">防衛隊</span></h1>
         </div>
       </div>
       <div class="masthead-badge">
         <span class="live-dot"></span>
-        <span>微觀防線 · 巡航中</span>
+        <span>IMMUNE LAB / 防衛任務</span>
       </div>
     </div>
 
@@ -92,15 +92,22 @@
       </div>
     </section>
 
+    <section class="mission-strip" aria-label="本關任務">
+      <div><span class="section-kicker">MISSION <span id="mission-number">01</span> / 03</span><h2 id="mission-title">細胞防線巡航</h2><p>收集 ATP・回答生物問題・建立抗體哨站</p></div>
+      <div class="mission-progress"><div><span>本關能量收集</span><strong id="collect-label">0%</strong></div><progress id="collect-progress" max="100" value="0" aria-label="本關能量收集進度"></progress><small id="collect-detail">收集所有能量點，前進下一道防線</small></div>
+    </section>
     <!-- 主遊戲畫布與操控區 -->
     <main id="game-container">
       <div class="canvas-wrapper">
-        <canvas id="gameCanvas" width="672" height="480"></canvas>
+        <div class="arena-label"><span><i></i> LIVE FIELD</span><span id="field-status" role="status" aria-live="polite">等待防衛隊員就緒</span></div>
+        <canvas id="gameCanvas" width="672" height="480" aria-label="免疫防線迷宮，使用方向鍵、WASD、下方方向按鈕或在畫布滑動操作"></canvas>
         <div id="countdown-overlay" class="hidden">
           <span id="countdown-num">3</span>
         </div>
       </div>
 
+      <div class="field-readout"><span id="effect-status">🧬 巨噬細胞 · 巡航模式</span><span id="turn-status">第 1 位隊員準備作答</span></div>
+      <div class="control-hint"><span>電腦 <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> / WASD · <kbd>空白</kbd> 建塔</span><span>觸控：方向鍵或滑動迷宮 · <kbd>P</kbd> 暫停</span></div>
       <!-- 胞器與機制圖例說明 (對齊國中生物正確防禦觀念) -->
       <div id="organelle-legend">
         <div class="legend-chip legend-mito">
@@ -143,16 +150,17 @@
           <span class="freeze-tag">⏸️ 全場時間凍結 ‧ 請從容作答</span>
         </div>
         <div class="quiz-body">
-          <h3 id="quiz-question">讀取生物題目中...</h3>
+          <p class="quiz-turn" id="quiz-turn">觀察 → 思考 → 選擇</p><h3 id="quiz-question">讀取生物題目中...</h3>
           <div id="quiz-options" class="options-grid"></div>
         </div>
-        <div id="quiz-feedback" class="feedback-box hidden">
+        <div id="quiz-feedback" class="feedback-box hidden" role="status" aria-live="polite">
           <p id="feedback-text"></p>
           <button type="button" id="feedback-close-btn" class="primary-btn">確認觀念，重返防線 🚀</button>
         </div>
       </div>
     </div>
 
+    <div id="field-toast" class="field-toast" role="status" aria-live="polite"></div>
     <!-- Google Classroom 防偽認證結算卡 (Classroom Light Mode 抗眩光卡片) -->
     <div id="result-modal" class="modal-overlay hidden">
       <div class="modal-card certificate-card">
@@ -230,7 +238,7 @@
     </div>
   </div>
 
-  <script src="../score-submit-modal.js?v=4.6"></script>
-  <script src="game.js?v=5.2"></script>
+  <script src="../score-submit-modal.js?v=4.7"></script>
+  <script src="game.js?v=6.0"></script>
 </body>
 </html>

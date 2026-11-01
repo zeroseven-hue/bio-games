@@ -227,8 +227,54 @@ let powerModeTimer = 0;
 let slowModeTimer = 0;
 let isStressFreeMode = false;
 let leaderboardData = [];
+let turnMode = 3;
+let stageDotTotal = 1;
+let particles = [];
+let toastTimer;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function showFieldToast(text) {
+  const el = document.getElementById('field-toast');
+  if (!el) return;
+  el.textContent = text; el.classList.add('visible');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('visible'), 2400);
+}
+function emitParticles(x, y, color, count = 10) {
+  if (reducedMotion) return;
+  for (let i=0; i<count; i++) {
+    const angle = Math.random()*Math.PI*2, speed = 0.5+Math.random()*2;
+    particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:24,max:24,color});
+  }
+  if (particles.length>160) particles.splice(0, particles.length-160);
+}
+function respawnGhost(g) {
+  const preferred = [[10,7],[10,6],[10,5]];
+  const tile = preferred.find(([c,r]) => MAP_TILES[r][c] !== 1);
+  g.x = tile[0]*TILE_SIZE; g.y = tile[1]*TILE_SIZE;
+  g.dirX = 0; g.dirY = -1;
+}
+function updateFieldReadout() {
+  const setText = (el, text) => { if (el && el.textContent !== text) el.textContent = text; };
+  const remaining = MAP_TILES.flat().filter(t=>t===0).length;
+  const percentage = Math.round((stageDotTotal-remaining)/stageDotTotal*100);
+  const progress = document.getElementById('collect-progress');
+  if (progress) progress.value = percentage;
+  const label = document.getElementById('collect-label');
+  if (label) label.textContent = percentage+'%';
+  const detail = document.getElementById('collect-detail');
+  setText(detail, '剩餘 '+remaining+' 個能量點 · 本關 '+towers.length+' 座抗體哨站');
+  const effect = document.getElementById('effect-status');
+  setText(effect, powerModeTimer>0 ? '⚡ 強效吞噬 · '+Math.ceil(powerModeTimer/60)+'s' : slowModeTimer>0 ? '🌿 全場緩速 · '+Math.ceil(slowModeTimer/60)+'s' : '🧬 巨噬細胞 · 巡航模式');
+  const turn = document.getElementById('turn-status');
+  setText(turn, turnMode===1 ? '單人防衛任務' : '第 '+(answeredTotal%turnMode+1)+' 位隊員準備作答');
+  const button = document.getElementById('btn-build');
+  const tile = MAP_TILES[Math.floor((player.y+16)/32)]?.[Math.floor((player.x+16)/32)];
+  if (button) button.classList.toggle('build-ready', tile===5 && atp>=20 && !isTimeFrozen && !isTeacherPaused && !isCountingDown);
+  const status = document.getElementById('field-status');
+  setText(status, isTeacherPaused ? '老師講解中' : isTimeFrozen ? '防線凍結 · 安心思考' : tile===5 ? (atp>=20 ? '哨站就位 · 可召喚 B 細胞' : '建塔需要 20 ATP') : '防線巡航中');
+}
 
 let allUnits = [];
+let preserveSelectedUnit = new URLSearchParams(window.location.search).has('unit') || new URLSearchParams(window.location.search).has('file');
 let questionPool = [];
 let towers = [];
 let bullets = [];
@@ -268,7 +314,8 @@ window.togglePause = function(forceState) {
   } else {
     isTeacherPaused = !isTeacherPaused;
   }
-  isTimeFrozen = isTeacherPaused;
+  // Teacher pause is independent of quiz/result freeze.
+  updateFieldReadout();
   const overlay = document.getElementById("pauseOverlay");
   if (overlay) {
     overlay.style.display = isTeacherPaused ? "flex" : "none";
@@ -432,20 +479,25 @@ function prepareQuestionPool(rawList) {
 window.addEventListener('DOMContentLoaded', async () => {
   canvas = document.getElementById('gameCanvas');
   ctx = canvas.getContext('2d');
-  canvas.width = COLS * TILE_SIZE;
-  canvas.height = ROWS * TILE_SIZE;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = COLS * TILE_SIZE * pixelRatio;
+  canvas.height = ROWS * TILE_SIZE * pixelRatio;
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
   loadLeaderboard();
   await loadManifestAndUnits();
   initStage(0);
 
   document.getElementById('unit-select')?.addEventListener('change', async (e) => {
+    preserveSelectedUnit = true;
     await loadUnitQuestions(e.target.value);
   });
 
   // 鍵盤操控 (支援 WASD, 方向鍵, 空白建召喚 B 細胞, P 暫停)
   window.addEventListener('keydown', (e) => {
+    if (e.target?.closest('input, textarea, select, [contenteditable="true"]')) return;
     sfx.init();
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
     if (e.key === 'p' || e.key === 'P') {
       e.preventDefault();
       togglePause();
@@ -458,48 +510,29 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (e.key === ' ' || e.key === 'Enter') tryBuildTower();
   });
 
-  // 觸控 D-Pad 按鈕
-  document.querySelectorAll('.d-btn').forEach(btn => {
-    const handleDir = (e) => {
-      e.preventDefault();
+  // Pointer events share one path across mouse, pen and iPad touch.
+  document.querySelectorAll('.d-btn[data-dir]').forEach(btn => {
+    const move = () => {
       sfx.init();
-      const dir = btn.dataset.dir;
-      if (dir === 'UP') setPlayerDir(0, -1);
-      if (dir === 'DOWN') setPlayerDir(0, 1);
-      if (dir === 'LEFT') setPlayerDir(-1, 0);
-      if (dir === 'RIGHT') setPlayerDir(1, 0);
+      const dirs = {UP:[0,-1],DOWN:[0,1],LEFT:[-1,0],RIGHT:[1,0]};
+      setPlayerDir(...dirs[btn.dataset.dir]);
     };
-    btn.addEventListener('touchstart', handleDir, { passive: false });
-    btn.addEventListener('click', handleDir);
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); move(); btn.classList.add('pressed'); btn.setPointerCapture(e.pointerId); });
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type=>btn.addEventListener(type,()=>btn.classList.remove('pressed')));
+    btn.addEventListener('click', e => { if(e.detail===0) move(); });
   });
-
-  // iPad 手勢滑動 (Swipe Control)
-  let touchStartX = 0, touchStartY = 0;
-  canvas.addEventListener('touchstart', (e) => {
-    sfx.init();
-    if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }
-  }, { passive: true });
-
-  canvas.addEventListener('touchend', (e) => {
-    if (e.changedTouches.length === 1) {
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-      const dx = touchEndX - touchStartX;
-      const dy = touchEndY - touchStartY;
-      if (Math.hypot(dx, dy) > 20) {
-        if (Math.abs(dx) > Math.abs(dy)) {
-          setPlayerDir(dx > 0 ? 1 : -1, 0);
-        } else {
-          setPlayerDir(dy > 0 ? 1 : -1, 0);
-        }
-      }
-    }
-  }, { passive: true });
-
-  document.getElementById('btn-build')?.addEventListener('click', tryBuildTower);
+  let swipeStart = null;
+  canvas.addEventListener('pointerdown', e => {
+    if (!e.isPrimary) return;
+    sfx.init(); swipeStart = {x:e.clientX,y:e.clientY}; canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointerup', e => {
+    if (!swipeStart) return;
+    const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y; swipeStart=null;
+    if (Math.hypot(dx,dy)>16) setPlayerDir(...(Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)]));
+  });
+  canvas.addEventListener('pointercancel',()=>{swipeStart=null;});
+  document.getElementById('btn-build')?.addEventListener('click', () => { sfx.init(); tryBuildTower(); });
   document.getElementById('btn-restart')?.addEventListener('click', () => { location.reload(); });
   document.getElementById('btn-next-stage')?.addEventListener('click', advanceNextStage);
   document.getElementById('btn-leaderboard')?.addEventListener('click', openLeaderboard);
@@ -515,6 +548,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('btn-apply-drawer')?.addEventListener('click', () => {
     isStressFreeMode = document.getElementById('check-stress-free')?.checked || false;
+    turnMode = Number(document.getElementById('select-turn-mode')?.value || 1);
     document.getElementById('drawer-panel')?.classList.add('hidden');
     addFloatingText(isStressFreeMode ? "🧩 已開啟特教無壓力模式 (無限生命)" : "💾 課堂設定已套用", player.x + 16, player.y - 12, "#38bdf8");
     updateUI();
@@ -533,15 +567,24 @@ function initStage(stageIdx) {
   bullets = [];
   floatingTexts = [];
   initGhostsForStage(stageIdx);
+  ghosts.forEach(g => { if (MAP_TILES[g.y/TILE_SIZE][g.x/TILE_SIZE]===1) respawnGhost(g); });
+  stageDotTotal = MAP_TILES.flat().filter(t=>t===0).length;
+  particles = [];
+  powerModeTimer = 0; slowModeTimer = 0;
+  const missionTitles = ['細胞防線巡航','淋巴結防禦網','血管免疫大反攻'];
+  const title = document.getElementById('mission-title');
+  if (title) title.textContent = missionTitles[stageIdx];
+  const number = document.getElementById('mission-number');
+  if (number) number.textContent = String(stageIdx+1).padStart(2,'0');
 
   const stageTitles = ["Stage 1", "Stage 2", "Stage 3"];
   const stageBadge = document.getElementById('stage-badge');
   if (stageBadge) stageBadge.textContent = stageTitles[stageIdx] || `Stage ${stageIdx + 1}`;
 
-  // 自動切換下一單元題庫
-  const unitSelect = document.getElementById('unit-select');
-  if (unitSelect && allUnits.length > stageIdx) {
-    unitSelect.value = allUnits[stageIdx].file;
+  // Keep explicit teaching-unit selection; retain default curriculum progression.
+  if (stageIdx > 0 && !preserveSelectedUnit && allUnits.length > stageIdx) {
+    const unitSelect = document.getElementById('unit-select');
+    if (unitSelect) unitSelect.value = allUnits[stageIdx].file;
     loadUnitQuestions(allUnits[stageIdx].file);
   }
   updateUI();
@@ -551,10 +594,14 @@ function advanceNextStage() {
   document.getElementById('result-modal')?.classList.add('hidden');
   if (currentStageIndex < 2) {
     initStage(currentStageIndex + 1);
-    startResumeCountdown();
+    startResumeCountdown(() => {
+      startSessionTimer();
+    });
   } else {
     initStage(0);
-    startResumeCountdown();
+    startResumeCountdown(() => {
+      startSessionTimer();
+    });
   }
 }
 
@@ -565,6 +612,8 @@ function setPlayerDir(dx, dy) {
 
 function addFloatingText(text, x, y, color = "#ef4444") {
   floatingTexts.push({ text, x, y, timer: 75, color });
+  if (floatingTexts.length>8) floatingTexts.shift();
+  showFieldToast(text);
 }
 
 // 6. 出題與時間凍結 Modal (Light Mode 高對比卡片)
@@ -586,6 +635,8 @@ function triggerQuiz(type, onCorrectCallback) {
   }
   const qObj = questionPool.pop();
   answeredTotal++;
+  const turnLabel = document.getElementById('quiz-turn');
+  if (turnLabel) turnLabel.textContent = (turnMode===1 ? '單人挑戰' : '第 '+((answeredTotal-1)%turnMode+1)+' 位隊員作答')+' · 第 '+answeredTotal+' 題';
 
   const modal = document.getElementById('quiz-modal');
   const typeTag = document.getElementById('quiz-type-tag');
@@ -622,6 +673,8 @@ function triggerQuiz(type, onCorrectCallback) {
 
       if (idx === qObj.ans) {
         answeredCorrect++;
+        emitParticles(player.x+16,player.y+16,'#5eead4',18);
+        updateUI();
         btn.classList.add('is-correct');
         sfx.playBuild();
         if (feedbackText) feedbackText.innerHTML = `<strong style="color:#059669;">✅ 正確！觀念完美融會貫通！</strong><br>${qObj.desc}`;
@@ -672,8 +725,7 @@ function startResumeCountdown(callback) {
   ghosts.forEach(g => {
     const dist = Math.hypot(player.x - g.x, player.y - g.y);
     if (dist < TILE_SIZE * 3.5) {
-      g.x = 10 * TILE_SIZE;
-      g.y = 7 * TILE_SIZE;
+      respawnGhost(g);
     }
   });
 
@@ -699,9 +751,11 @@ function startResumeCountdown(callback) {
 
 // 8. 召喚 B 淋巴球架設特異性抗體哨站
 function tryBuildTower() {
+  if (isTimeFrozen || isCountingDown || isTeacherPaused) return;
   const tileX = Math.floor((player.x + TILE_SIZE / 2) / TILE_SIZE);
   const tileY = Math.floor((player.y + TILE_SIZE / 2) / TILE_SIZE);
 
+  if (MAP_TILES[tileY][tileX] !== 5) { showFieldToast('移動到青色哨站格，再召喚 B 細胞'); return; }
   if (MAP_TILES[tileY][tileX] === 5) {
     if (atp < 20) {
       addFloatingText("⚠️ ATP 能量不足 (需要 20 ATP)", player.x + 16, player.y - 12, "#ef4444");
@@ -719,20 +773,40 @@ function tryBuildTower() {
 }
 
 // 9. 遊戲主循環
-function gameLoop() {
-  animFrame++;
-  if (!isTimeFrozen && !isCountingDown && !isTeacherPaused) {
-    updateGame();
+let lastFrameTime = 0, frameAccumulator = 0;
+document.addEventListener('visibilitychange', () => { lastFrameTime=0; frameAccumulator=0; });
+function gameLoop(time) {
+  if (!lastFrameTime) lastFrameTime=time;
+  frameAccumulator += Math.min(time-lastFrameTime, 80);
+  lastFrameTime=time;
+  while(frameAccumulator >= 1000/60) {
+    if (!isTimeFrozen && !isCountingDown && !isTeacherPaused) {
+      animFrame++; updateGame();
+      particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;});
+      particles=particles.filter(p=>p.life>0);
+    }
+    frameAccumulator -= 1000/60;
   }
   renderGame();
+  if (time - lastReadoutTime >= 100) { updateFieldReadout(); lastReadoutTime = time; }
   requestAnimationFrame(gameLoop);
 }
+
+let lastReadoutTime = 0;
 
 function updateGame() {
   if (powerModeTimer > 0) powerModeTimer--;
   if (slowModeTimer > 0) slowModeTimer--;
   if (invulnerableTimer > 0) invulnerableTimer--;
 
+  // Snap only the perpendicular axis near a grid junction for reliable turns.
+  if (player.nextDirX && !player.dirX) {
+    const alignedY = Math.round(player.y/TILE_SIZE)*TILE_SIZE;
+    if (Math.abs(player.y-alignedY)<=player.speed && canMove(player.x+player.nextDirX*player.speed,alignedY)) player.y=alignedY;
+  } else if (player.nextDirY && !player.dirY) {
+    const alignedX = Math.round(player.x/TILE_SIZE)*TILE_SIZE;
+    if (Math.abs(player.x-alignedX)<=player.speed && canMove(alignedX,player.y+player.nextDirY*player.speed)) player.x=alignedX;
+  }
   // 移動玩家
   if (canMove(player.x + player.nextDirX * player.speed, player.y + player.nextDirY * player.speed)) {
     player.dirX = player.nextDirX;
@@ -752,6 +826,7 @@ function updateGame() {
     MAP_TILES[currRow][currCol] = 2;
     atp += 2;
     score += 10;
+    emitParticles(currCol*32+16,currRow*32+16,'#fde68a',4);
     dotsEatenCount++;
     sfx.playEat();
     updateUI();
@@ -786,6 +861,8 @@ function updateGame() {
     });
   }
 
+  if (isTimeFrozen) return;
+
   // 🛡️ B 淋巴球抗體哨站邏輯
   towers.forEach(t => {
     if (t.cooldown > 0) t.cooldown--;
@@ -806,8 +883,8 @@ function updateGame() {
     const dist = Math.hypot(dx, dy);
 
     if (dist < 12) {
-      b.targetGhost.x = 10 * TILE_SIZE;
-      b.targetGhost.y = 7 * TILE_SIZE;
+      emitParticles(b.x,b.y,'#67e8f9',12);
+      respawnGhost(b.targetGhost);
       kills++;
       score += 60;
       sfx.playHit();
@@ -832,14 +909,16 @@ function updateGame() {
         g.dirY = choice.y;
       }
     }
-    g.x += g.dirX * ghostSpeed;
-    g.y += g.dirY * ghostSpeed;
+    if (canMove(g.x + g.dirX * ghostSpeed, g.y + g.dirY * ghostSpeed)) {
+      g.x += g.dirX * ghostSpeed;
+      g.y += g.dirY * ghostSpeed;
+    }
 
     const pDist = Math.hypot(player.x - g.x, player.y - g.y);
     if (pDist < 20) {
       if (powerModeTimer > 0) {
-        g.x = 10 * TILE_SIZE;
-        g.y = 7 * TILE_SIZE;
+        emitParticles(g.x+16,g.y+16,'#fbbf24',14);
+        respawnGhost(g);
         kills++;
         score += 100;
         sfx.playHit();
@@ -848,6 +927,8 @@ function updateGame() {
       } else if (invulnerableTimer <= 0) {
         if (!isStressFreeMode) {
           lives--;
+          invulnerableTimer = 120;
+          emitParticles(player.x+16,player.y+16,'#fb7185',16);
           player.x = 1 * TILE_SIZE;
           player.y = 1 * TILE_SIZE;
           addFloatingText("💔 免疫防線受損!", player.x + 16, player.y - 12, "#ef4444");
@@ -888,6 +969,7 @@ function canMove(nextX, nextY) {
   const top = Math.floor((nextY + margin) / TILE_SIZE);
   const bottom = Math.floor((nextY + TILE_SIZE - margin) / TILE_SIZE);
 
+  if (left<0 || right>=COLS || top<0 || bottom>=ROWS) return false;
   return (
     MAP_TILES[top][left] !== 1 &&
     MAP_TILES[top][right] !== 1 &&
@@ -898,7 +980,14 @@ function canMove(nextX, nextY) {
 
 // 10. 高畫質生物角色 Canvas 繪製
 function renderGame() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, 672, 480);
+  const field = ctx.createLinearGradient(0,0,672,480);
+  const tones = [ ['#071c30','#0c303b','#123d52','#17495e','#287186'], ['#0d2030','#183d36','#224b4b','#2b5955','#4e8c7c'], ['#271a32','#352438','#4a354f','#563c59','#97657f'] ][currentStageIndex];
+  field.addColorStop(0,tones[0]); field.addColorStop(1,tones[1]);
+  ctx.fillStyle=field; ctx.fillRect(0,0,672,480);
+  ctx.strokeStyle='rgba(96,196,213,.045)';ctx.lineWidth=1;
+  for(let x=0;x<672;x+=16){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,480);ctx.stroke();}
+  for(let y=0;y<480;y+=16){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(672,y);ctx.stroke();}
 
   // 地圖牆壁與豆子
   for (let r = 0; r < ROWS; r++) {
@@ -908,11 +997,17 @@ function renderGame() {
       const y = r * TILE_SIZE;
 
       if (type === 1) {
-        ctx.fillStyle = '#1e3a8a';
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-        ctx.strokeStyle = '#3b82f6';
-        ctx.strokeRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+        ctx.fillStyle = tones[2]; ctx.fillRect(x,y,32,32);
+        ctx.fillStyle = tones[3]; ctx.fillRect(x+2,y+2,28,28);
+        ctx.strokeStyle=tones[4]; ctx.lineWidth=1.5;
+        ctx.beginPath();
+        if(r===0 || MAP_TILES[r-1][c]!==1){ctx.moveTo(x+1,y+1);ctx.lineTo(x+31,y+1);}
+        if(r===ROWS-1 || MAP_TILES[r+1][c]!==1){ctx.moveTo(x+1,y+31);ctx.lineTo(x+31,y+31);}
+        if(c===0 || MAP_TILES[r][c-1]!==1){ctx.moveTo(x+1,y+1);ctx.lineTo(x+1,y+31);}
+        if(c===COLS-1 || MAP_TILES[r][c+1]!==1){ctx.moveTo(x+31,y+1);ctx.lineTo(x+31,y+31);}
+        ctx.stroke();
       } else if (type === 0) {
+        ctx.fillStyle='rgba(253,230,138,.10)';ctx.beginPath();ctx.arc(x+16,y+16,7,0,Math.PI*2);ctx.fill();
         ctx.fillStyle = '#fef08a';
         ctx.beginPath();
         ctx.arc(x + 16, y + 16, 3, 0, Math.PI * 2);
@@ -936,9 +1031,10 @@ function renderGame() {
         ctx.fillRect(x + 12, y + 13, 8, 3);
         ctx.fillRect(x + 12, y + 17, 8, 3);
       } else if (type === 5) {
-        ctx.strokeStyle = '#06b6d4';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+        ctx.fillStyle='rgba(45,212,191,.13)';ctx.fillRect(x+3,y+3,26,26);
+        ctx.strokeStyle = '#5eead4';ctx.lineWidth = 1.5;
+        ctx.strokeRect(x+5,y+5,22,22);
+        ctx.beginPath();ctx.moveTo(x+11,y+16);ctx.lineTo(x+21,y+16);ctx.moveTo(x+16,y+11);ctx.lineTo(x+16,y+21);ctx.stroke();
       }
     }
   }
@@ -971,15 +1067,19 @@ function renderGame() {
     ctx.fill();
   });
 
+  particles.forEach(p=>{ctx.globalAlpha=p.life/p.max;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,2.4,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
   // 巨噬細胞
   if (invulnerableTimer === 0 || Math.floor(invulnerableTimer / 8) % 2 === 0) {
     const px = player.x + 16, py = player.y + 16;
-    ctx.fillStyle = powerModeTimer > 0 ? '#facc15' : '#60a5fa';
+    ctx.fillStyle=powerModeTimer>0?'rgba(250,204,21,.18)':'rgba(56,189,248,.17)';
+    ctx.beginPath();ctx.arc(px,py,18,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle = powerModeTimer > 0 ? '#facc15' : '#7dd3fc';
     
     ctx.beginPath();
     for (let i = 0; i < 8; i++) {
-      const angle = (i * Math.PI / 4) + (animFrame * 0.05);
-      const dist = 12 + Math.sin(animFrame * 0.1 + i) * 2.5;
+      const phase = reducedMotion ? 0 : animFrame;
+      const angle = (i * Math.PI / 4) + (phase * 0.05);
+      const dist = 12 + Math.sin(phase * 0.1 + i) * 2.5;
       const tx = px + Math.cos(angle) * dist;
       const ty = py + Math.sin(angle) * dist;
       if (i === 0) ctx.moveTo(tx, ty);
@@ -997,6 +1097,7 @@ function renderGame() {
   // 病原體鬼魂
   ghosts.forEach(g => {
     const gx = g.x + 16, gy = g.y + 16;
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(gx,gy+11,12,5,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle = powerModeTimer > 0 ? '#3b82f6' : g.color;
 
     if (g.type === 'influenza') {
@@ -1035,6 +1136,7 @@ function renderGame() {
     ctx.fill();
   });
 
+  ctx.textAlign = 'left';
   // Floating Text 漂浮字幕
   floatingTexts.forEach(ft => {
     ctx.fillStyle = ft.color;
@@ -1045,6 +1147,7 @@ function renderGame() {
 }
 
 function updateUI() {
+  updateFieldReadout();
   const atpEl = document.getElementById('atp-val');
   if (atpEl) atpEl.textContent = atp;
   const corEl = document.getElementById('correct-count');
@@ -1056,6 +1159,10 @@ function updateUI() {
 // 11. 結算防偽證書卡片 (Classroom Light Mode 現代風格)
 function endGame(isClear = false) {
   isTimeFrozen = true;
+  if (sessionTimer) {
+    clearInterval(sessionTimer);
+    sessionTimer = null;
+  }
   const modal = document.getElementById('result-modal');
   modal?.classList.remove('hidden');
 
