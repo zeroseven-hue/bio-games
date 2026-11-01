@@ -1242,6 +1242,12 @@
 
     nameInp.addEventListener('input', updateValidationState);
     nameInp.addEventListener('change', updateValidationState);
+    nameInp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!btnNext.disabled) btnNext.click();
+      }
+    });
 
     // 初始化檢驗狀態
     updateValidationState();
@@ -1337,6 +1343,15 @@
     `;
 
     document.body.appendChild(overlay);
+
+    const btnStart = overlay.querySelector('#bgsBtnStart');
+    if (btnStart) setTimeout(() => btnStart.focus(), 50);
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (btnStart) btnStart.click();
+      }
+    });
 
     overlay.querySelector('#bgsBtnBack').addEventListener('click', () => {
       overlay.remove();
