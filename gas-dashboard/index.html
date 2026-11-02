@@ -695,9 +695,9 @@
           <option value="708">708 班</option>
           <option value="709">709 班</option>
           <option value="710" selected>710 班</option>
-          <option value="7甲">7甲 班</option>
-          <option value="7乙">7乙 班</option>
-          <option value="7丙">7丙 班</option>
+          <option value="七甲">七甲</option>
+          <option value="七乙">七乙</option>
+          <option value="七丙">七丙</option>
         </select>
 
         <div class="seat-count-box">
@@ -824,10 +824,10 @@
     // 1. 班級字串統一正規化對照函式 (相容 "710", "7年10班", "七年十班", "710班", "7-10")
     function normalizeClassStr(input) {
       if (!input) return "";
-      const str = String(input).trim();
+      const str = String(input).trim().replace(/班$/, "");
       const matchSpecial = str.match(/(?:7|七)[\s-]*([甲乙丙])/);
-      if (matchSpecial) return "7" + matchSpecial[1];
-      if (/^[甲乙丙]$/.test(str)) return "7" + str;
+      if (matchSpecial) return "七" + matchSpecial[1];
+      if (/^[甲乙丙]$/.test(str)) return "七" + str;
 
       const digits = str.match(/\d+/g);
       if (digits) {

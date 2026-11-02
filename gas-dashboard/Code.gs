@@ -30,10 +30,10 @@ function formatSeatWithPadding(seatStr) {
 // 3. 班級字串正規化（相容 "710"、"7年10班"、"七年十班"、"710班"）
 function normalizeClassStr(input) {
   if (!input) return "";
-  var s = String(input).trim();
+  var s = String(input).trim().replace(/班$/, "");
   var matchSpecial = s.match(/(?:7|七)[\s-]*([甲乙丙])/);
-  if (matchSpecial) return "7" + matchSpecial[1];
-  if (/^[甲乙丙]$/.test(s)) return "7" + s;
+  if (matchSpecial) return "七" + matchSpecial[1];
+  if (/^[甲乙丙]$/.test(s)) return "七" + s;
 
   var digits = s.match(/\d+/g);
   if (digits) {
@@ -540,8 +540,7 @@ function doGet(e) {
 '          <option value="703">703 班</option><option value="704">704 班</option>\n' +
 '          <option value="705">705 班</option><option value="706">706 班</option>\n' +
 '          <option value="707">707 班</option><option value="708">708 班</option>\n' +
-'          <option value="709">709 班</option><option value="710">710 班</option>\n          <option value="7甲">7甲 班</option><option value="7乙">7乙 班</option><option value="7丙">7丙 班</option>\n' +
-'        </select>\n' +
+'          <option value="709">709 班</option><option value="710">710 班</option>\n          <option value="七甲">七甲</option><option value="七乙">七乙</option><option value="七丙">七丙</option>\n        </select>\n' +
 '        <div style="display:flex; align-items:center; gap:6px; font-weight:800; font-size:0.9rem;">\n' +
 '          <span>應到人數：</span>\n' +
 '          <input type="number" class="styled-input" id="totalSeatsInput" value="30" min="1" max="50" onchange="saveClassConfig(); renderDashboard();" />\n' +

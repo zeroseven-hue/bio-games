@@ -32,7 +32,7 @@
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzDHUfJKbGtgfYM5a1PHpQzbW2JGZL3zFTh582r95vcOKupGRfZVa0ToHbbfX1MirzbbQ/exec';
   const DEFAULT_CLASSES = [
     '701', '702', '703', '704', '705', '706', '707', '708', '709', '710',
-    '7甲', '7乙', '7丙'
+    '七甲', '七乙', '七丙'
   ];
 
   let currentStudent = { class: '', seat: '', name: '', unit: '', unitTitle: '' };
@@ -982,12 +982,12 @@
       }
     }
 
-    // 純化班級與座號 (支援 701~710 與 7甲、7乙、7丙)
+    // 純化班級與座號 (支援 701~710 與 七甲、七乙、七丙)
     if (cls) {
-      const clsStr = String(cls).trim();
-      const matchedSpecial = clsStr.match(/^7[甲乙丙]$/);
+      const clsStr = String(cls).trim().replace(/班$/, '');
+      const matchedSpecial = clsStr.match(/^(?:7|七)([甲乙丙])$/);
       if (matchedSpecial) {
-        cls = matchedSpecial[0];
+        cls = '七' + matchedSpecial[1];
       } else {
         cls = clsStr.replace(/[^\d]/g, '');
       }
@@ -1132,7 +1132,7 @@
 
         <div class="bgs-row">
           <div class="bgs-form-group">
-            <label class="bgs-label">班級 (701~710、7甲~7丙)</label>
+            <label class="bgs-label">班級 (701~710、七甲~七丙)</label>
             <select class="bgs-select" id="bgsClassSelect">${classOpts}</select>
           </div>
           <div class="bgs-form-group">
@@ -1432,7 +1432,7 @@
 
         <div class="bgs-row">
           <div class="bgs-form-group">
-            <label class="bgs-label">班級 (701~710、7甲~7丙)</label>
+            <label class="bgs-label">班級 (701~710、七甲~七丙)</label>
             <select class="bgs-select" id="bgsQuickClass">${classOpts}</select>
           </div>
           <div class="bgs-form-group">
