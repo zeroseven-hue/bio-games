@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>生物大釣手：黃金深海大捕撈 - Bio-Fishing</title>
-  <link rel="stylesheet" href="style.css?v=2.7">
+  <link rel="stylesheet" href="style.css?v=2.8">
 </head>
 <body>
   <div class="fishing-app">
     <!-- 頂部 HUD 看板 -->
     <header class="hud-header">
+      <div class="expedition-brand"><span class="brand-mark" aria-hidden="true">◉</span><div>深海研究站<small>BIO-FISHING · 150 M</small></div></div>
       <div class="hud-left">
         <div class="hud-pill depth-pill">🌊 深度 <span id="depthDisplay">150m</span></div>
         <div class="hud-pill score-pill">🏆 積分：<span id="scoreDisplay">0</span></div>
@@ -22,8 +23,8 @@
 
       <div class="hud-right">
         <button id="btnDrawer" class="btn-hud" title="單元抽屜">⚙️ 單元</button>
-        <button id="btnAudio" class="btn-hud" title="音效切換">🔊</button>
-        <button id="btnPause" class="btn-hud" title="課堂暫停">⏸️</button>
+        <button aria-label="切換音效" id="btnAudio" class="btn-hud" title="音效切換">🔊</button>
+        <button aria-label="課堂暫停" id="btnPause" class="btn-hud" title="課堂暫停">⏸️</button>
       </div>
     </header>
 
@@ -72,6 +73,8 @@
         <span class="unit-tag" id="unitTag">單元：載入中...</span>
         <span class="group-turn-tag" id="groupTurnTag">🎣 本回合神釣手：第 1 棒組員</span>
       </div>
+      <div class="mission-heading"><span>本回合研究任務</span><span id="missionProgress">已完成 0 / 10</span></div>
+      <div class="mission-track" role="progressbar" aria-label="答對題數進度" aria-valuemin="0" aria-valuenow="0" aria-valuemax="10" id="missionTrack"><span id="missionFill"></span></div>
       <h2 class="question-stem" id="questionStem">深海探測聲納啟動中...</h2>
       <!-- 靜止觀察倒數提示條 -->
       <div class="freeze-read-bar hidden" id="freezeReadBar">
@@ -82,7 +85,9 @@
 
     <!-- 遊戲主舞台：深海與黃金礦工機械爪 (Canvas) -->
     <main class="ocean-stage" id="oceanStage">
-      <canvas id="fishingCanvas"></canvas>
+      <canvas id="fishingCanvas" aria-label="海底捕撈區，瞄準對應字母的魚群後出爪"></canvas>
+      <div class="ocean-caption" aria-hidden="true"><span>LIVE SONAR</span><span>探索 · 判讀 · 捕撈</span></div>
+      <div id="catchFeedback" class="catch-feedback" role="status" aria-live="polite"></div>
       
       <!-- 機械爪冷卻遮罩 (抓錯懲罰) -->
       <div class="cooldown-overlay hidden" id="cooldownOverlay">
@@ -95,34 +100,35 @@
       </div>
 
       <!-- 觸控盲操導引 (點擊全螢幕發射) -->
-      <div class="touch-launch-zone" id="touchLaunchZone">
-        <div class="touch-guide-pill">👇 點擊螢幕任意處 或 按【空白鍵 / ↓】射出機械爪！</div>
+      <div class="touch-launch-zone" id="touchLaunchZone" role="button" tabindex="0" aria-label="射出機械爪">
+        <div class="touch-guide-pill"><span class="launch-indicator"></span><span id="launchStatus">瞄準字母魚群 · 輕觸海域出爪</span><kbd>空白鍵 / ↓</kbd></div>
       </div>
     </main>
 
     <!-- 🎯 底部四選一試題選項卡片看板 (完全不截斷選項文字，與海中 A/B/C/D 魚群一一對應) -->
-    <section class="fishing-options-tray" id="fishingOptionsTray">
-      <div class="opt-card opt-card-a" id="optCard0" data-index="0">
-        <span class="opt-badge badge-a">🅰️</span>
+    <section class="fishing-options-tray" id="fishingOptionsTray" aria-label="答案對照面板">
+      <div class="options-heading"><strong>答案對照</strong><span>點選標記，再到海域出爪</span></div>
+      <div class="opt-card opt-card-a" id="optCard0" data-index="0" role="button" tabindex="0" aria-label="標記選項 A" aria-describedby="optText0">
+        <span class="opt-badge badge-a">A</span>
         <span class="opt-content" id="optText0">載入選項 A...</span>
       </div>
-      <div class="opt-card opt-card-b" id="optCard1" data-index="1">
-        <span class="opt-badge badge-b">🅱️</span>
+      <div class="opt-card opt-card-b" id="optCard1" data-index="1" role="button" tabindex="0" aria-label="標記選項 B" aria-describedby="optText1">
+        <span class="opt-badge badge-b">B</span>
         <span class="opt-content" id="optText1">載入選項 B...</span>
       </div>
-      <div class="opt-card opt-card-c" id="optCard2" data-index="2">
-        <span class="opt-badge badge-c">🅲</span>
+      <div class="opt-card opt-card-c" id="optCard2" data-index="2" role="button" tabindex="0" aria-label="標記選項 C" aria-describedby="optText2">
+        <span class="opt-badge badge-c">C</span>
         <span class="opt-content" id="optText2">載入選項 C...</span>
       </div>
-      <div class="opt-card opt-card-d" id="optCard3" data-index="3">
-        <span class="opt-badge badge-d">🅳</span>
+      <div class="opt-card opt-card-d" id="optCard3" data-index="3" role="button" tabindex="0" aria-label="標記選項 D" aria-describedby="optText3">
+        <span class="opt-badge badge-d">D</span>
         <span class="opt-content" id="optText3">載入選項 D...</span>
       </div>
     </section>
 
     <!-- 底部資訊條 -->
     <footer class="app-footer">
-      <span>💡 操作提示：先看下方 🅰️🅱️🅲🅳 選項卡片，再瞄準海中對應字母的游動大魚發射！</span>
+      <span>操作順序：讀題 → 對照 A / B / C / D → 瞄準魚群 → 輕觸海域出爪</span>
     </footer>
 
     <!-- ==================== 彈窗面板 ==================== -->
@@ -202,6 +208,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=4.7"></script>
-  <script src="game.js?v=4.4"></script>
+  <script src="game.js?v=4.5"></script>
 </body>
 </html>

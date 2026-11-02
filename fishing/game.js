@@ -117,13 +117,24 @@ const btnRestartFishing = document.getElementById("btnRestartFishing");
 
 // Web Audio API
 let audioCtx = null;
+let isAudioMuted = false;
+
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
+function toggleAudio() {
+  initAudio();
+  isAudioMuted = !isAudioMuted;
+  if (btnAudio) {
+    btnAudio.textContent = isAudioMuted ? "🔇" : "🔊";
+    btnAudio.title = isAudioMuted ? "已靜音 (點擊開啟音效)" : "音效切換";
+  }
+}
+
 function playTone(freq, type, dur, delay = 0, vol = 0.1) {
-  if (!audioCtx) return;
+  if (isAudioMuted || !audioCtx) return;
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -147,16 +158,33 @@ function playSonarBeep() { playTone(650, "sine", 0.15, 0, 0.1); }
 // 1. 初始化與 iPad 視口調校
 // ==========================================================================
 
+let isGameReady = false;
+let pendingStartGame = false;
+
 window.addEventListener("DOMContentLoaded", async () => {
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(() => { resizeCanvas(); renderScene(); }).observe(canvas.parentElement);
+  }
+  initFishingPresentation();
   buildUnitsChecklist();
   initControls();
 
   await prepareQuestionPool();
-  // ⭐ 安全凍結守門員：先建立釣場畫面，計時器保持暫停！
+  // ⭐ 安全凍結守門員：先建立釣場畫面
   startNewFishingSession();
-  isPaused = true;
+  isGameReady = true;
+
+  if (pendingStartGame) {
+    pendingStartGame = false;
+    isPaused = false;
+    const isTimerOff = new URLSearchParams(window.location.search).get("timer") === "off";
+    if (!isTimerOff) startTimer();
+  } else {
+    isPaused = true;
+  }
+
   requestAnimationFrame(gameMainLoop);
 });
 
@@ -227,7 +255,7 @@ function initControls() {
     selectDrawerPub.onchange = renderDrawerUnitsGrid;
   }
 
-  btnAudio.onclick = () => initAudio();
+  btnAudio.onclick = () => toggleAudio();
   btnPause.onclick = togglePause;
   btnResumeGame.onclick = togglePause;
 
@@ -465,10 +493,16 @@ function renderBottomOptionCards(options) {
   }
 }
 
-function presentNextQuestion() {
-  if (questionPool.length === 0) prepareQuestionPool();
+async function presentNextQuestion() {
+  if (questionPool.length === 0) {
+    await prepareQuestionPool();
+  }
   currentQuestion = questionPool.pop(); // Fisher-Yates 抽過即移除
-  if (!currentQuestion) return;
+  if (!currentQuestion) {
+    // 題庫無可用試題，自動優雅結算
+    endFishingSession();
+    return;
+  }
 
   // 棒次輪流提示
   if (playMode === "group" || playMode === "group-tablet") {
@@ -490,6 +524,7 @@ function presentNextQuestion() {
     }
   });
   questionStem.innerHTML = stemText;
+  syncMissionProgress();
 
   // 渲染底部四選一選項卡片 (完全不縮寫截斷，全字顯示)
   renderBottomOptionCards(currentQuestion.options || []);
@@ -662,6 +697,8 @@ function handleFishPulledAboard(fish) {
     streakBadge.classList.remove("hidden");
     streakBadge.textContent = `🔥 連對 x${streak}`;
     scoreDisplay.textContent = score;
+    syncMissionProgress();
+    showCatchFeedback(answeredCount >= targetQCount ? "研究任務完成！" : "捕撈成功 · +" + (100 + (streak - 1) * 25), "success");
 
     if (answeredCount >= targetQCount) {
       setTimeout(() => {
@@ -682,6 +719,7 @@ function handleFishPulledAboard(fish) {
       setTimeout(() => cardElem.classList.remove("wrong-flash"), 2500);
     }
     playFishEscapeSound();
+    showCatchFeedback("觀念再確認 · 閱讀解析後重試", "retry");
     streak = 0;
     streakBadge.classList.add("hidden");
 
@@ -749,14 +787,30 @@ function renderScene() {
 }
 
 function drawOceanBackground() {
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-  ctx.lineWidth = 1.5;
-  for (let y = 60; y < viewH; y += 45) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.quadraticCurveTo(viewW / 2, y + 10, viewW, y);
-    ctx.stroke();
+  // Lightweight sonar chart, light shafts and seabed; decorative only.
+  ctx.save();
+  ctx.fillStyle = "rgba(179, 244, 233, 0.035)";
+  for (let i = 0; i < 3; i++) {
+    const x = viewW * (0.18 + i * 0.32);
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 45, 0);
+    ctx.lineTo(x + 130, viewH); ctx.lineTo(x - 60, viewH); ctx.fill();
   }
+  ctx.strokeStyle = "rgba(180, 234, 230, 0.09)"; ctx.lineWidth = 1;
+  for (let y = 75; y < viewH - 35; y += 70) {
+    ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(viewW - 20, y); ctx.stroke();
+    ctx.fillStyle = "rgba(205, 238, 233, 0.5)"; ctx.font = "9px monospace";
+    ctx.fillText(String(Math.round(y / viewH * 150)).padStart(3,"0") + " M", 25, y - 6);
+  }
+  ctx.strokeStyle = "rgba(173, 231, 220, 0.14)";
+  for (let i = 0; i < 15; i++) {
+    const x = (i * 83 + 37) % viewW, y = (i * 137 + 110) % Math.max(1, viewH - 40);
+    ctx.beginPath(); ctx.arc(x, y, 2 + i % 3, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(3, 29, 44, 0.45)";
+  ctx.beginPath(); ctx.moveTo(0, viewH);
+  ctx.lineTo(0, viewH - 28); ctx.quadraticCurveTo(viewW * .25, viewH - 60, viewW * .5, viewH - 22);
+  ctx.quadraticCurveTo(viewW * .8, viewH - 45, viewW, viewH - 30); ctx.lineTo(viewW, viewH); ctx.fill();
+  ctx.restore();
 }
 
 function drawFish(f) {
@@ -891,6 +945,13 @@ function startNewFishingSession() {
   scoreDisplay.textContent = score;
   streakBadge.classList.add("hidden");
   cooldownOverlay.classList.add("hidden");
+
+  // 🎣 完整重設機械吊爪物理狀態與捕獲物，防止舊魚殘留或錯誤計分
+  claw.state = "swinging";
+  claw.length = 30;
+  claw.caughtItem = null;
+  claw.originX = viewW / 2;
+  claw.originY = 16;
 
   clearInterval(timerInterval);
   clearInterval(cooldownTimer);
@@ -1028,7 +1089,57 @@ function triggerFishingGasSubmit() {
 }
 
 window.startGame = function() {
+  if (!isGameReady) {
+    pendingStartGame = true;
+    return;
+  }
   isPaused = false;
   const isTimerOff = new URLSearchParams(window.location.search).get("timer") === "off";
   if (!isTimerOff) startTimer();
 };
+
+
+// Local presentation helpers. Never select questions, award points or submit data.
+let fishingFeedbackTimer;
+let lastLaunchLabel = "";
+function syncMissionProgress() {
+  const label = document.getElementById("missionProgress");
+  const fill = document.getElementById("missionFill");
+  const track = document.getElementById("missionTrack");
+  if (!label || !fill || !track) return;
+  const completed = Math.min(answeredCount, targetQCount);
+  label.textContent = "已完成 " + completed + " / " + targetQCount;
+  fill.style.width = Math.min(100, completed / Math.max(1, targetQCount) * 100) + "%";
+  track.setAttribute("aria-valuenow", completed);
+  track.setAttribute("aria-valuemax", targetQCount);
+}
+function showCatchFeedback(message, kind) {
+  const feedback = document.getElementById("catchFeedback");
+  if (!feedback) return;
+  clearTimeout(fishingFeedbackTimer);
+  feedback.textContent = message;
+  feedback.dataset.kind = kind;
+  feedback.classList.add("visible");
+  fishingFeedbackTimer = setTimeout(() => feedback.classList.remove("visible"), 1600);
+}
+function syncLaunchStatus() {
+  const label = document.getElementById("launchStatus");
+  if (!label) return;
+  const text = isOver ? "本次捕撈結束" : isPaused ? "準備出海 · 等待開始" : isCoolingDown ? "絞盤冷卻中 · 稍後再出爪" : isFreezingRead ? "先讀題與選項 · 聲納定位中" : claw.state === "extending" ? "機械爪出擊中" : claw.state === "retracting" ? (claw.caughtItem ? "已捕獲 · 收爪確認中" : "收爪中 · 準備再次瞄準") : "瞄準字母魚群 · 輕觸海域出爪";
+  if (text !== lastLaunchLabel) {
+    label.textContent = text; lastLaunchLabel = text;
+    document.querySelector(".fishing-app").dataset.claw = claw.state;
+  }
+}
+function initFishingPresentation() {
+  document.querySelectorAll(".opt-card").forEach(card => {
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.code === "Space") { e.preventDefault(); card.click(); }
+    });
+  });
+  touchLaunchZone.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.code === "Space" || e.key === "ArrowDown") {
+      e.preventDefault(); initAudio(); triggerClawLaunch();
+    }
+  });
+}
