@@ -328,6 +328,7 @@ body {
 }
 
 .modal-overlay.hidden { display: none !important; }
+.hidden { display: none !important; }
 
 .modal-box {
   background: #ffffff;

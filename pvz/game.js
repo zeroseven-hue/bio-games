@@ -196,6 +196,7 @@ function initEventListeners() {
 
   // 答錯關卡
   btnCloseWrong.addEventListener("click", () => {
+    clearInterval(quizCountdownTimer);
     closeModal(quizModal);
     isQuizOpen = false;
     isQuizAnsweredCorrectly = false;
@@ -205,11 +206,19 @@ function initEventListeners() {
   
   document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
     if (typeof showScoreSubmitModal === "function") {
+      const student = (window.BioGameSuite && typeof window.BioGameSuite.getStudent === "function") 
+        ? window.BioGameSuite.getStudent() 
+        : { class: "701", seat: inputSeatNo?.value || "01", name: inputStudentName?.value || "召喚師" };
+      const calculatedScore = sunEnergy + (currentWave * 100);
       showScoreSubmitModal({
         gameTitle: "植物大戰殭屍：生物防衛戰",
-        score: score,
-        scoreDisplay: score + " 分 (擊退 " + wave + " 波殭屍)",
-        duration: "生存守護"
+        gameId: "pvz",
+        score: calculatedScore,
+        scoreDisplay: `${calculatedScore} 分 (波次：第 ${currentWave} 波 · 剩餘陽光：${sunEnergy})`,
+        duration: "生存守護",
+        initialClass: student.class || "701",
+        initialSeat: student.seat || "01",
+        initialName: student.name || "植物召喚師"
       });
     }
   });
@@ -311,6 +320,9 @@ async function loadManifestAndUnits() {
           rawQuestionsByUnit[decoded] = d.questions || [];
         }).catch(e => {});
       }
+      // 課堂派卷鎖定：禁止學生擅自切換題庫單元
+      selectUnit.disabled = true;
+      selectUnit.title = "🎯 教師派卷鎖定，無法變更單元";
     }
   } catch (err) {
     console.warn("題庫載入警告:", err);
@@ -593,7 +605,7 @@ function gameLoop() {
       name: zType.name,
       hp: zType.hp,
       maxHp: zType.hp,
-      speed: zType.speed * speedFactor * 1.5,
+      baseSpeed: zType.speed * 1.5,
       atk: zType.atk,
       isVaulting: zType.isVaulting,
       hasVaulted: false,
@@ -628,7 +640,8 @@ function gameLoop() {
     }
 
     if (!isEating) {
-      z.posX -= z.speed * 10;
+      const currentSpeed = (z.baseSpeed || z.speed || 0.3) * speedFactor;
+      z.posX -= currentSpeed * 10;
     }
 
     const zEl = document.getElementById(z.id);
@@ -749,6 +762,7 @@ function startQuizCountdownTimer() {
   clearInterval(quizCountdownTimer);
 
   quizCountdownTimer = setInterval(() => {
+    if (isTeacherFrozen) return;
     timeLeft--;
     quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒 (殭屍已龜速緩速中)`;
     if (timeLeft <= 0) {
@@ -840,6 +854,12 @@ function startQuizCooldownPenalty(seconds = 10) {
 }
 
 function openVictoryModal() {
+  // 終局完全凍結：停止戰鬥主迴圈、波次計時與陽光生成
+  clearInterval(gameLoopTimer);
+  clearInterval(waveCountdownTimer);
+  clearInterval(sunGenTimer);
+  clearInterval(quizCountdownTimer);
+
   updateCertCode();
   openModal(victoryModal);
 }
