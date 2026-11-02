@@ -434,7 +434,10 @@ function updateUI() {
   summonerBadge.textContent = gameMode === "group" ? `🎯 本回合植物召喚師：第 ${currentTurnMember} 棒組員` : `🎯 植物召喚師：自主`;
 
   const selUnit = selectUnit.value || "ALL";
-  unitInfoText.textContent = selUnit === "ALL" ? "🌱 關卡：全單元綜合大亂鬥 (1~10單元混合)" : `🌱 關卡：${selectUnit.options[selectUnit.selectedIndex]?.text || "生物單元"}`;
+  const selectedText = (selectUnit.options && selectUnit.selectedIndex >= 0 && selectUnit.options[selectUnit.selectedIndex]) 
+    ? selectUnit.options[selectUnit.selectedIndex].text 
+    : "生物單元";
+  unitInfoText.textContent = selUnit === "ALL" ? "🌱 關卡：全單元綜合大亂鬥 (1~10單元混合)" : `🌱 關卡：${selectedText}`;
 }
 
 function selectPlantType(key) {
