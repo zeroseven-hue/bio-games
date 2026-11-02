@@ -695,6 +695,9 @@
           <option value="708">708 班</option>
           <option value="709">709 班</option>
           <option value="710" selected>710 班</option>
+          <option value="7甲">7甲 班</option>
+          <option value="7乙">7乙 班</option>
+          <option value="7丙">7丙 班</option>
         </select>
 
         <div class="seat-count-box">
@@ -822,13 +825,17 @@
     function normalizeClassStr(input) {
       if (!input) return "";
       const str = String(input).trim();
+      const matchSpecial = str.match(/(?:7|七)[\s-]*([甲乙丙])/);
+      if (matchSpecial) return "7" + matchSpecial[1];
+      if (/^[甲乙丙]$/.test(str)) return "7" + str;
+
       const digits = str.match(/\d+/g);
       if (digits) {
         if (digits.length >= 2) {
-          return digits[0] + digits[1].padStart(2, "0"); // "7年10班" -> "710", "7年1班" -> "701"
+          return digits[0] + digits[1].padStart(2, "0");
         } else if (digits.length === 1) {
           const d = digits[0];
-          if (d.length === 3) return d; // "710", "701"
+          if (d.length === 3) return d;
           if (d.length <= 2) return "7" + d.padStart(2, "0");
         }
       }

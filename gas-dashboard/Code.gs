@@ -31,6 +31,10 @@ function formatSeatWithPadding(seatStr) {
 function normalizeClassStr(input) {
   if (!input) return "";
   var s = String(input).trim();
+  var matchSpecial = s.match(/(?:7|七)[\s-]*([甲乙丙])/);
+  if (matchSpecial) return "7" + matchSpecial[1];
+  if (/^[甲乙丙]$/.test(s)) return "7" + s;
+
   var digits = s.match(/\d+/g);
   if (digits) {
     if (digits.length >= 2) return digits[0] + digits[1].padStart(2, "0");
@@ -536,7 +540,7 @@ function doGet(e) {
 '          <option value="703">703 班</option><option value="704">704 班</option>\n' +
 '          <option value="705">705 班</option><option value="706">706 班</option>\n' +
 '          <option value="707">707 班</option><option value="708">708 班</option>\n' +
-'          <option value="709">709 班</option><option value="710">710 班</option>\n' +
+'          <option value="709">709 班</option><option value="710">710 班</option>\n          <option value="7甲">7甲 班</option><option value="7乙">7乙 班</option><option value="7丙">7丙 班</option>\n' +
 '        </select>\n' +
 '        <div style="display:flex; align-items:center; gap:6px; font-weight:800; font-size:0.9rem;">\n' +
 '          <span>應到人數：</span>\n' +
