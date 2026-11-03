@@ -1,4 +1,39 @@
 
+function spawnZombie() {
+  if (isTeacherFrozen) return;
+  const containerRect = lawnContainer.getBoundingClientRect();
+  const lane = Math.floor(Math.random() * 5);
+  const zType = ZOMBIE_TYPES[Math.min(currentWave - 1 + (Math.random() < 0.35 ? 1 : 0), ZOMBIE_TYPES.length - 1)];
+
+  const zId = `zombie-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+  const zEl = document.createElement("div");
+  zEl.className = "zombie-sprite";
+  zEl.id = zId;
+  zEl.innerHTML = `
+    <span>${zType.avatar}</span>
+    <div class="zombie-hp-bar"><div class="zombie-hp-fill" id="hp-${zId}" style="width:100%;"></div></div>
+  `;
+  const startX = (containerRect.width > 100) ? (containerRect.width - 50) : 600;
+  zEl.style.left = `${startX}px`;
+
+  const laneEl = document.getElementById(`lane-${lane}`);
+  if (laneEl) laneEl.appendChild(zEl);
+
+  activeZombies.push({
+    id: zId,
+    name: zType.name,
+    hp: zType.hp,
+    maxHp: zType.hp,
+    baseSpeed: zType.speed * 1.5,
+    atk: zType.atk,
+    isVaulting: zType.isVaulting,
+    hasVaulted: false,
+    lane,
+    posX: startX
+  });
+}
+
+
 function cleanUnitTitle(raw) {
   if (!raw) return '精選題庫';
   let str = decodeURIComponent(String(raw)).trim();
@@ -34,7 +69,7 @@ function cleanUnitTitle(raw) {
 
 // 植物性狀與成本
 const PLANT_TYPES = {
-  pea: { id: "pea", name: "胞器豌豆射手", icon: "🪴", cost: 50, maxHp: 100, atk: 20 },
+  pea: { id: "pea", name: "胞器豌豆射手", icon: "🟢", cost: 50, maxHp: 100, atk: 20 },
   nut: { id: "nut", name: "堅果細胞壁", icon: "🌰", cost: 60, maxHp: 350, atk: 0 },
   sun: { id: "sun", name: "葉綠體葵花", icon: "🌻", cost: 40, maxHp: 80, atk: 0 },
   cherry: { id: "cherry", name: "櫻桃胞器爆彈", icon: "🍒", cost: 100, maxHp: 1, atk: 999 }
@@ -147,11 +182,28 @@ window.addEventListener("DOMContentLoaded", async () => {
   initEventListeners();
   await loadManifestAndUnits();
   initLawnGrid();
-  // ⭐ 安全凍結守門員：頁面加載時僅初始化草地，嚴禁計時器與殭屍生成！
+  // ⭐ 安全凍結守門員：頁面加載時僅初始化草地
   resetGameState(false);
+
+  // 若使用者已先行登入完成（例如 sessionStorage 存在或由 BioGameSuite 驗證），自動喚醒時鐘與戰場
+  try {
+    const authedRaw = sessionStorage.getItem('bgs_authed_student');
+    if (authedRaw || (window.BioGameSuite && typeof window.BioGameSuite.getStudent === 'function' && window.BioGameSuite.getStudent())) {
+      startTimers();
+    }
+  } catch (_) {}
+});
+
+// 監聽 BioGameSuite 標準開局廣播
+window.addEventListener('biogame:start', () => {
+  startTimers();
 });
 
 function initEventListeners() {
+  if (cardPea) cardPea.addEventListener("click", () => selectPlantType("pea"));
+  if (cardNut) cardNut.addEventListener("click", () => selectPlantType("nut"));
+  if (cardSun) cardSun.addEventListener("click", () => selectPlantType("sun"));
+  if (cardCherry) cardCherry.addEventListener("click", () => selectPlantType("cherry"));
   document.addEventListener("click", unlockAudioContext, { once: true });
   document.addEventListener("touchstart", unlockAudioContext, { once: true });
 
@@ -178,20 +230,11 @@ function initEventListeners() {
   btnFlashMode.addEventListener("click", toggleFlashMode);
   btnStartQuiz.addEventListener("click", openQuizModal);
 
-  // 答對獲得 60 陽光 (雙重 state 驗證)
+  // 答對確認按鈕：點擊關閉視窗返回草地部署
   btnConfirmQuiz.addEventListener("click", () => {
-    if (!isQuizAnsweredCorrectly) {
-      alert("⚠️ 系統提示：未答對題目無法領取陽光能量！");
-      closeModal(quizModal);
-      isQuizOpen = false;
-      return;
-    }
     closeModal(quizModal);
     isQuizOpen = false;
-    sunEnergy += 60;
-    isQuizAnsweredCorrectly = false; // 消費發放狀態
     updateUI();
-    playSunSound();
   });
 
   // 答錯關卡
@@ -442,14 +485,20 @@ function updateUI() {
 
 function selectPlantType(key) {
   selectedPlantKey = key;
-  cardPea.classList.toggle("active", key === "pea");
-  cardNut.classList.toggle("active", key === "nut");
-  cardSun.classList.toggle("active", key === "sun");
+  if (cardPea) cardPea.classList.toggle("active", key === "pea");
+  if (cardNut) cardNut.classList.toggle("active", key === "nut");
+  if (cardSun) cardSun.classList.toggle("active", key === "sun");
   if (cardCherry) cardCherry.classList.toggle("active", key === "cherry");
 }
+window.selectPlantType = selectPlantType;
 
 // 巨型觸控按鈕：一鍵部署植物至指定路 (10列密集草地)
+window.deploySelectedPlantToLane = deploySelectedPlantToLane;
 function deploySelectedPlantToLane(laneIdx) {
+  // 自動喚醒自愈防呆：若點擊部署時戰鬥主計時器未啟動，自動喚醒戰場
+  if (!gameLoopTimer) {
+    startTimers();
+  }
   if (wiltedLanes[laneIdx]) {
     alert(`⚠️ 第 ${laneIdx + 1} 路植物正在萎蔫卡彈中，請稍後再部署！`);
     return;
@@ -528,7 +577,11 @@ function deploySelectedPlantToLane(laneIdx) {
     const pEl = document.createElement("div");
     pEl.className = "plant-sprite";
     pEl.id = `plant-${laneIdx}-${emptyCol}`;
-    pEl.textContent = pData.icon;
+    if (pData.id === 'pea') {
+      pEl.innerHTML = '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="88" rx="28" ry="8" fill="#15803d" opacity="0.4"/><path d="M46 55 Q42 75 48 88" stroke="#16a34a" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M44 76 Q30 70 24 78 Q36 84 46 80" fill="#22c55e"/><path d="M50 78 Q66 74 72 82 Q58 86 48 82" fill="#16a34a"/><path d="M35 40 Q20 32 16 42 Q25 48 36 46" fill="#22c55e"/><circle cx="48" cy="45" r="25" fill="#4ade80" stroke="#15803d" stroke-width="3"/><ellipse cx="72" cy="44" rx="16" ry="12" fill="#22c55e" stroke="#15803d" stroke-width="3"/><ellipse cx="75" cy="44" rx="9" ry="8" fill="#0f172a"/><circle cx="46" cy="36" r="6" fill="#ffffff"/><circle cx="48" cy="36" r="3.5" fill="#0f172a"/><circle cx="50" cy="34" r="1.5" fill="#ffffff"/><ellipse cx="38" cy="48" rx="5" ry="3" fill="#86efac" opacity="0.7"/></svg>';
+    } else {
+      pEl.textContent = pData.icon;
+    }
     slotEl.appendChild(pEl);
   }
 
@@ -542,6 +595,13 @@ function startTimers() {
   clearInterval(sunGenTimer);
 
   gameLoopTimer = setInterval(gameLoop, 100);
+
+  // 開局 3 秒首隻病原體殭屍必定出動，消除空等當機疑慮
+  setTimeout(() => {
+    if (activeZombies.length === 0 && !isTeacherFrozen && gameLoopTimer) {
+      spawnZombie();
+    }
+  }, 3000);
 
   waveCountdownTimer = setInterval(() => {
     if (isTeacherFrozen) return;
@@ -587,34 +647,7 @@ function gameLoop() {
   // 1. 動態升級波次隨機生成殭屍
   const spawnRate = isQuizOpen ? 0.01 : (0.05 + currentWave * 0.035);
   if (Math.random() < spawnRate) {
-    const lane = Math.floor(Math.random() * 5);
-    const zType = ZOMBIE_TYPES[Math.min(currentWave - 1 + (Math.random() < 0.35 ? 1 : 0), ZOMBIE_TYPES.length - 1)];
-
-    const zId = `zombie-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-    const zEl = document.createElement("div");
-    zEl.className = "zombie-sprite";
-    zEl.id = zId;
-    zEl.innerHTML = `
-      <span>${zType.avatar}</span>
-      <div class="zombie-hp-bar"><div class="zombie-hp-fill" id="hp-${zId}" style="width:100%;"></div></div>
-    `;
-    zEl.style.left = `${containerRect.width - 50}px`;
-
-    const laneEl = document.getElementById(`lane-${lane}`);
-    if (laneEl) laneEl.appendChild(zEl);
-
-    activeZombies.push({
-      id: zId,
-      name: zType.name,
-      hp: zType.hp,
-      maxHp: zType.hp,
-      baseSpeed: zType.speed * 1.5,
-      atk: zType.atk,
-      isVaulting: zType.isVaulting,
-      hasVaulted: false,
-      lane,
-      posX: containerRect.width - 50
-    });
+    spawnZombie();
   }
 
   // 2. 移動殭屍與啃食 / 飛天跳躍越過堅果
@@ -798,7 +831,11 @@ function handleQuizSelect(selectedIndex, btnEl) {
       btnEl.style.opacity = "1.0";
     }
     playFanfare();
-    explanationText.innerHTML = `<b>✅ 答對了！獲得 +60 ☀️ 陽光能量！</b><br><br>💡 生物觀念解析：${currentActiveQuestion.explanation || "恭喜答對！"}`;
+    // ✅ 答對當下立即發放 +60 陽光並更新 UI 與音效，消除二次點擊攔截
+    sunEnergy += 60;
+    playSunSound();
+    updateUI();
+    explanationText.innerHTML = `<b>✅ 答對了！已獲得 +60 ☀️ 陽光能量！</b><br><br>💡 生物觀念解析：${currentActiveQuestion.explanation || "恭喜答對！"}`;
     quizExplanation.classList.remove("hidden");
     btnConfirmQuiz.classList.remove("hidden");
     btnCloseWrong.classList.add("hidden");
