@@ -220,48 +220,11 @@ const btnUnfreeze = document.getElementById("btnUnfreeze");
 
 // 頁面初始化
 window.addEventListener("DOMContentLoaded", async () => {
-  // 1. 課堂派卷守門前置檢查：無有效參數立即阻擋，不觸發任何題庫請求與遊戲開局
-  if (!checkDispatchGatekeeper()) {
-    return;
-  }
-
   initUrlParams();
   initEventListeners();
   await loadManifestAndUnits();
   resetGameState();
 });
-
-// 課堂派卷守門員 (嚴格前置)
-function checkDispatchGatekeeper() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const unitParam = urlParams.get("unit") || urlParams.get("file");
-
-  if (!unitParam) {
-    const guardOverlay = document.createElement("div");
-    guardOverlay.id = "dispatchGuardOverlay";
-    guardOverlay.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.92);backdrop-filter:blur(10px);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;";
-    guardOverlay.innerHTML = `
-      <div style="background:#ffffff;border:3px solid #b45309;border-radius:20px;max-width:520px;width:100%;padding:32px 24px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
-        <div style="font-size:3.5rem;margin-bottom:12px;">🔒</div>
-        <h2 style="color:#78350f;margin:0 0 12px 0;font-size:1.6rem;font-weight:900;">課堂專屬測驗守門員</h2>
-        <p style="color:#451a03;font-size:1.05rem;line-height:1.6;margin:0 0 20px 0;">
-          本遊戲僅限課堂測驗使用！<br>
-          未偵測到老師指定的派卷參數，請<b>掃描教室大螢幕或白板上的 QR Code</b> 進入作答。
-        </p>
-        <div style="background:#fef3c7;border:1px dashed #d97706;border-radius:12px;padding:12px;font-size:0.9rem;color:#92400e;margin-bottom:24px;">
-          💡 提示：若您是老師進行測試，請在網址後加上例如：<br>
-          <code style="background:#fde68a;padding:2px 6px;border-radius:4px;font-weight:bold;">?unit=翰林版/bio01/bio01_1-2科學方法.json</code>
-        </div>
-        <button onclick="window.location.reload()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#ffffff;border:none;padding:14px 28px;border-radius:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(217,119,6,0.3);">
-          🔄 重新整理檢測
-        </button>
-      </div>
-    `;
-    document.body.appendChild(guardOverlay);
-    return false;
-  }
-  return true;
-}
 
 function initUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
