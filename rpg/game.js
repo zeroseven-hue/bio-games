@@ -481,6 +481,7 @@ function resetGameState() {
   hasLele = false;
   leleShieldActive = false;
   hasPudding = false;
+  puddingSkillUsedInBattle = false;
 
   updateHeroStats();
   updateUI();
@@ -588,7 +589,7 @@ function updateUI() {
   badgeLele.textContent = hasLele ? `🐶 樂樂 (${leleShieldActive ? "護盾就緒" : "已抵擋"})` : "🐶 樂樂 (未救援)";
 
   badgePudding.className = `companion-badge ${hasPudding ? "" : "locked"}`;
-  badgePudding.textContent = hasPudding ? "🐱 布丁 (50/50 就緒)" : "🐱 布丁 (未救援)";
+  badgePudding.textContent = hasPudding ? (puddingSkillUsedInBattle ? "🐱 布丁 (本戰已用)" : "🐱 布丁 (50/50 就緒)") : "🐱 布丁 (未救援)";
 
   const avatarLele = document.getElementById("avatarLele");
   const avatarPudding = document.getElementById("avatarPudding");
@@ -610,6 +611,8 @@ function updateShopButtons() {
 }
 
 function setupStage() {
+  // 🐾 每場戰鬥（每隻怪獸登場）自動刷新重置布丁 50/50 技能
+  puddingSkillUsedInBattle = false;
   // Presentation only: the existing stage determines the environment artwork.
   battleScene.dataset.stage = String(currentStageIndex + 1);
   // 重置全體怪獸血量 (支援二週目 New Game+)
@@ -749,6 +752,7 @@ function usePudding5050() {
   if (!hasPudding || puddingSkillUsedInBattle || isQuizAnsweringLocked) return;
   puddingSkillUsedInBattle = true;
   btnUsePuddingSkill.classList.add("hidden");
+  updateUI();
 
   const correctIdx = currentActiveQuestion.answer;
   const wrongIndices = [0, 1, 2, 3].filter(i => i !== correctIdx);
@@ -1254,7 +1258,7 @@ function triggerCompanionRescue(type) {
     rescueAvatarLarge.innerHTML = `<div class="companion-rescue-crest pudding-crest">🐱</div>`;
     rescueTitle.textContent = "🎉 夥伴成功解救！並肩作戰！";
     rescueName.textContent = "🔮 智慧貓「布丁」衝破封印，靈巧跳上勇者肩頭！";
-    rescueDesc.textContent = "【專屬神技：智慧二選一 (50/50)】在戰鬥作答時，點擊技能按鈕可立即施法抹去 2 個錯誤選項！布丁將以神秘奧術光環並肩作戰！";
+    rescueDesc.textContent = "【專屬神技：智慧二選一 (50/50)】在戰鬥作答時，每場戰鬥（每隻怪獸）可點擊使用 1 次，立即施法抹去 2 個錯誤干擾項！下一隻怪獸登場時自動刷新就緒！";
   }
 
   updateUI();
