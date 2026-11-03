@@ -39,6 +39,8 @@ let isPaused = false;
 let isOver = false;
 let answeredCount = 0;
 let targetQCount = 10;
+let questionAttempts = 0; // 本題嘗試抓錯次數 (上限 3 次，防止無腦盲猜與空抓卡關)
+let isQuestionFailed = false; // 是否已達 3 次上限判定未通過
 
 // 防盲猜冷卻狀態與出題靜止讀題
 let isCoolingDown = false;
@@ -99,6 +101,8 @@ const pauseModal = document.getElementById("pauseModal");
 const btnResumeGame = document.getElementById("btnResumeGame");
 
 const noteModal = document.getElementById("noteModal");
+const noteBadge = document.getElementById("noteBadge");
+const noteTitle = document.getElementById("noteTitle");
 const noteContent = document.getElementById("noteContent");
 const btnCloseNote = document.getElementById("btnCloseNote");
 
@@ -494,6 +498,8 @@ function renderBottomOptionCards(options) {
 }
 
 async function presentNextQuestion() {
+  questionAttempts = 0;
+  isQuestionFailed = false;
   if (questionPool.length === 0) {
     await prepareQuestionPool();
   }
@@ -572,8 +578,9 @@ function spawnOceanFishesForCurrentQuestion() {
   if (correctIdx < 0 || correctIdx >= rawOptions.length) correctIdx = 0;
 
   const count = Math.min(4, rawOptions.length);
-  const minLayer = Math.max(75, viewH * 0.22);
-  const maxLayer = Math.min(viewH - 55, viewH * 0.80);
+  const minLayer = Math.max(65, viewH * 0.20);
+  // 保證最深泳層落在機械爪有效抓取範圍內 (距離底部至少 75px，避免極限角度無法碰觸)
+  const maxLayer = Math.min(viewH - 75, viewH * 0.70);
   const step = count > 1 ? (maxLayer - minLayer) / (count - 1) : 0;
 
   // 隨機分佈海中泳層深度，但每條魚的 A/B/C/D 字母徽章與底部選項完全鎖定對齊
@@ -713,30 +720,74 @@ function handleFishPulledAboard(fish) {
     }, 450);
 
   } else {
-    // ❌ 方案 B：抓錯魚掙脫逃跑！
+    // ❌ 抓錯魚處理（3次機會防盲猜機制）
+    questionAttempts++;
     if (cardElem) {
       cardElem.classList.add("wrong-flash");
       setTimeout(() => cardElem.classList.remove("wrong-flash"), 2500);
     }
     playFishEscapeSound();
-    showCatchFeedback("觀念再確認 · 閱讀解析後重試", "retry");
     streak = 0;
     streakBadge.classList.add("hidden");
 
-    noteContent.textContent = `您剛才抓到的是選項 (${fish.letter})「${fish.text}」。\n${currentQuestion.explanation || "觀念不符，請先吸收解析後再鎖定海中正確的字母大魚！"}`;
-    noteModal.classList.remove("hidden");
+    // 取得本題正確解答資訊
+    let correctLetter = "A";
+    let correctText = "";
+    const rawOptions = currentQuestion.options || [];
+    if (typeof currentQuestion.answer === "number" && rawOptions[currentQuestion.answer]) {
+      correctLetter = ["A", "B", "C", "D"][currentQuestion.answer] || "A";
+      correctText = rawOptions[currentQuestion.answer];
+    } else if (typeof currentQuestion.answer === "string") {
+      const u = currentQuestion.answer.trim().toUpperCase();
+      const idx = ["A", "B", "C", "D"].indexOf(u);
+      if (idx >= 0 && rawOptions[idx]) {
+        correctLetter = u;
+        correctText = rawOptions[idx];
+      } else {
+        const foundIdx = rawOptions.findIndex(o => o && o.trim() === currentQuestion.answer.trim());
+        if (foundIdx >= 0) {
+          correctLetter = ["A", "B", "C", "D"][foundIdx];
+          correctText = rawOptions[foundIdx];
+        }
+      }
+    }
+
+    if (questionAttempts >= 3) {
+      // 🚫 第 3 次抓錯：直接判定本題未通過，結束盲猜並強制前進
+      isQuestionFailed = true;
+      showCatchFeedback("本題嘗試上限 · 自動前進下一題", "retry");
+      if (noteBadge) noteBadge.textContent = "❌ 3次機會已用盡！本題判定未通過";
+      if (noteTitle) noteTitle.textContent = `正確答案為 (${correctLetter})「${correctText}」`;
+      noteContent.textContent = `您剛才抓到的是選項 (${fish.letter})「${fish.text}」。\n\n💡 觀念解析：\n${currentQuestion.explanation || "請仔細記住此題概念，進入下一題挑戰！"}`;
+      if (btnCloseNote) btnCloseNote.textContent = "已吸收觀念，前進下一題 ⏩";
+      noteModal.classList.remove("hidden");
+    } else {
+      // ⚠️ 第 1、2 次抓錯：彈出筆記提示，吸收觀念後再嘗試海中剩餘選項
+      showCatchFeedback(`抓錯提示 (剩 ${3 - questionAttempts} 次機會)`, "retry");
+      if (noteBadge) noteBadge.textContent = `⚠️ 抓錯提示 (剩 ${3 - questionAttempts} 次機會)`;
+      if (noteTitle) noteTitle.textContent = "這不是正確答案，先吸收觀念：";
+      noteContent.textContent = `您剛才抓到的是選項 (${fish.letter})「${fish.text}」。\n\n💡 觀念解析：\n${currentQuestion.explanation || "觀念不符，請先吸收解析後再鎖定海中正確的字母大魚！"}`;
+      if (btnCloseNote) btnCloseNote.textContent = "我吸收了，繼續鎖定剩下的魚 🎯";
+      noteModal.classList.remove("hidden");
+    }
   }
 }
 
 function handleCloseNoteModal() {
   noteModal.classList.add("hidden");
-  // 🌟 防卡死機制：檢查當前海域中是否仍有正確答案的魚，若無魚或正解已被抓光，自動補滿選項避免卡死
+  if (isQuestionFailed) {
+    // 達到 3 次上限，直接推進下一題，徹底杜絕空抓與死角卡關！
+    isQuestionFailed = false;
+    presentNextQuestion();
+    return;
+  }
+  // 🌟 正常未滿 3 次：檢查海域中是否仍有正確答案魚，若無魚或正解被意外抓光，自動補滿選項避免卡死
   const hasCorrectFish = oceanFishes.some(f => f.isCorrect);
   if (oceanFishes.length === 0 || !hasCorrectFish) {
     spawnOceanFishesForCurrentQuestion();
   }
-  // 啟動防盲猜過熱冷卻 3 秒
-  triggerCooldownPenalty(3);
+  // 啟動防盲猜過熱冷卻 2.5 秒
+  triggerCooldownPenalty(2.5);
 }
 
 function triggerCooldownPenalty(seconds) {
@@ -933,6 +984,8 @@ function startNewFishingSession() {
   const isTimerOff = urlParams.get("timer") === "off";
 
   answeredCount = 0;
+  questionAttempts = 0;
+  isQuestionFailed = false;
   score = 0;
   streak = 0;
   maxStreak = 0;
