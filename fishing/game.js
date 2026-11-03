@@ -696,7 +696,9 @@ function handleFishPulledAboard(fish) {
       setTimeout(() => cardElem.classList.remove("correct-flash"), 1800);
     }
     playCatchFishSound();
-    score += 100 + streak * 25;
+        // 🎯 統一課堂分制 (100 ~ 300 分區間)：每題 15 分 + 連擊 +3 分 (10 題通關約 180~250 分)
+    const gain = 15 + Math.min(15, streak * 3);
+    score += gain;
     streak++;
     answeredCount++;
     if (streak > maxStreak) maxStreak = streak;
@@ -705,7 +707,7 @@ function handleFishPulledAboard(fish) {
     streakBadge.textContent = `🔥 連對 x${streak}`;
     scoreDisplay.textContent = score;
     syncMissionProgress();
-    showCatchFeedback(answeredCount >= targetQCount ? "研究任務完成！" : "捕撈成功 · +" + (100 + (streak - 1) * 25), "success");
+    showCatchFeedback(answeredCount >= targetQCount ? "研究任務完成！" : "捕撈成功 · +" + gain, "success");
 
     if (answeredCount >= targetQCount) {
       setTimeout(() => {

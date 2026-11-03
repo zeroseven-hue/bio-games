@@ -772,9 +772,11 @@ function hitTarget(enemy) {
     soundHitCorrect();
     combo++;
     sessionTotalCorrect++;
-    const speedBonus = Math.floor(qTimeRemaining * 10);
-    score += 100 + combo * 25 + speedBonus;
-    combatFeedback("🎯 命中正解 +" + (100 + combo * 25 + speedBonus) + (combo > 1 ? " · " + combo + " 連擊！" : ""));
+        // 🎯 統一課堂分制 (100 ~ 300 分區間)：每題 15 分 + 連擊 +3 分 + 速度獎勵 (滿分 10 題約 180~260 分)
+    const speedBonus = Math.min(8, Math.floor(qTimeRemaining * 0.35));
+    const roundGain = 15 + Math.min(15, combo * 3) + speedBonus;
+    score += roundGain;
+    combatFeedback("🎯 命中正解 +" + roundGain + (combo > 1 ? " · " + combo + " 連擊！" : ""));
     logs.push({ q: q.q, correct: true, ans: q.ans, hint: q.hint });
     updateHUD();
     currentQIndex++;
@@ -1128,11 +1130,11 @@ function endMission() {
   document.getElementById("end-modal").style.display = "flex";
 
   const correctCount = logs.filter(l => l.correct).length;
-  let rank = "🌱 微生物小實習生";
-  if (score >= 1000 && correctCount >= 9) {
+    let rank = "🌱 微生物小實習生";
+  if (score >= 200 && correctCount >= 9) {
     rank = "👑 傳奇達爾文星艦艦長";
     soundVictory();
-  } else if (score >= 600 || correctCount >= 7) {
+  } else if (score >= 140 || correctCount >= 7) {
     rank = "🧬 細胞防衛隊長";
     soundVictory();
   } else {

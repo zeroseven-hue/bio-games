@@ -1068,13 +1068,18 @@ function openVictoryModal() {
 }
 
 function calculateScore() {
-  return (correctAnswerCount * 100) + (quickAnswerCount * 50) + (totalDamageDealt * 2) + (gold * 5);
+  // 🎯 統一課堂分制 (100 ~ 300 分區間)：每答對 1 題 10 分 + 秒答 +5 分 + 每隻怪獸擊敗貢獻 (總分約 120~280 分)
+  const base = correctAnswerCount * 10;
+  const quick = quickAnswerCount * 5;
+  const dmgBonus = Math.min(60, Math.round(totalDamageDealt * 0.05));
+  const goldBonus = Math.min(40, Math.round(gold * 0.2));
+  return base + quick + dmgBonus + goldBonus;
 }
 
 function getRankTitle(score) {
-  if (score >= 2500) return "👑 傳奇生物聖勇者";
-  if (score >= 1800) return "⚔️ 疾風聖劍客";
-  if (score >= 1000) return "🛡️ 堅定冒險家";
+  if (score >= 220) return "👑 傳奇生物聖勇者";
+  if (score >= 160) return "⚔️ 疾風聖劍客";
+  if (score >= 100) return "🛡️ 堅定冒險家";
   return "🌱 初階生物勇者";
 }
 
