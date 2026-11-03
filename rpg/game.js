@@ -126,7 +126,11 @@ let countdownTimer = null;
 let audioCtx = null;
 
 let isCurrentQuizAnsweredCorrectly = false;
+let isQuizAnsweringLocked = false;
 let quizStartTime = 0;
+let quizTimeLeft = 30;
+let freezeStartTime = 0;
+let totalFreezeDuration = 0;
 let lastCalculatedDamage = 0;
 
 // DOM 元素引用
@@ -216,11 +220,48 @@ const btnUnfreeze = document.getElementById("btnUnfreeze");
 
 // 頁面初始化
 window.addEventListener("DOMContentLoaded", async () => {
+  // 1. 課堂派卷守門前置檢查：無有效參數立即阻擋，不觸發任何題庫請求與遊戲開局
+  if (!checkDispatchGatekeeper()) {
+    return;
+  }
+
   initUrlParams();
   initEventListeners();
   await loadManifestAndUnits();
   resetGameState();
 });
+
+// 課堂派卷守門員 (嚴格前置)
+function checkDispatchGatekeeper() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const unitParam = urlParams.get("unit") || urlParams.get("file");
+
+  if (!unitParam) {
+    const guardOverlay = document.createElement("div");
+    guardOverlay.id = "dispatchGuardOverlay";
+    guardOverlay.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.92);backdrop-filter:blur(10px);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;";
+    guardOverlay.innerHTML = `
+      <div style="background:#ffffff;border:3px solid #b45309;border-radius:20px;max-width:520px;width:100%;padding:32px 24px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div style="font-size:3.5rem;margin-bottom:12px;">🔒</div>
+        <h2 style="color:#78350f;margin:0 0 12px 0;font-size:1.6rem;font-weight:900;">課堂專屬測驗守門員</h2>
+        <p style="color:#451a03;font-size:1.05rem;line-height:1.6;margin:0 0 20px 0;">
+          本遊戲僅限課堂測驗使用！<br>
+          未偵測到老師指定的派卷參數，請<b>掃描教室大螢幕或白板上的 QR Code</b> 進入作答。
+        </p>
+        <div style="background:#fef3c7;border:1px dashed #d97706;border-radius:12px;padding:12px;font-size:0.9rem;color:#92400e;margin-bottom:24px;">
+          💡 提示：若您是老師進行測試，請在網址後加上例如：<br>
+          <code style="background:#fde68a;padding:2px 6px;border-radius:4px;font-weight:bold;">?unit=翰林版/bio01/bio01_1-2科學方法.json</code>
+        </div>
+        <button onclick="window.location.reload()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#ffffff;border:none;padding:14px 28px;border-radius:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(217,119,6,0.3);">
+          🔄 重新整理檢測
+        </button>
+      </div>
+    `;
+    document.body.appendChild(guardOverlay);
+    return false;
+  }
+  return true;
+}
 
 function initUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -296,11 +337,11 @@ function initEventListeners() {
   
   document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
     if (typeof showScoreSubmitModal === "function") {
-      const s = parseInt(document.getElementById("certHighScore")?.textContent || "100", 10);
+      const s = calculateScore();
       showScoreSubmitModal({
         gameTitle: "勇者傳奇：生物知識冒險",
         score: s,
-        scoreDisplay: s + " 總積分",
+        scoreDisplay: s.toLocaleString() + " 總積分",
         duration: "地下城通關"
       });
     }
@@ -395,6 +436,13 @@ async function loadManifestAndUnits() {
           rawQuestionsByUnit[decoded] = d.questions || [];
         }).catch(e => {});
       }
+      // 🎯 課堂派卷守門鎖定：固定指定單元，禁止學生自行變更題庫單元
+      selectUnit.disabled = true;
+      selectUnit.title = "🎯 教師派卷鎖定，無法變更單元";
+      const unitLabel = document.querySelector("label[for='selectUnit']");
+      if (unitLabel) {
+        unitLabel.innerHTML = "🎯 <b>課堂指定單元 (派卷專屬)：</b>";
+      }
     }
   } catch (err) {
     console.warn("題庫載入警告:", err);
@@ -436,6 +484,14 @@ function resetGameState() {
   quickAnswerCount = 0;
   totalDamageDealt = 0;
   ngPlusCount = 0;
+  currentTurnMember = 1;
+
+  // 🗡️ 重置所有關卡敵人血量至上限
+  STAGES.forEach(stg => {
+    stg.enemies.forEach(e => {
+      e.hp = e.maxHp;
+    });
+  });
 
   hasLele = false;
   leleShieldActive = false;
@@ -563,6 +619,8 @@ function updateShopButtons() {
 }
 
 function setupStage() {
+  // Presentation only: the existing stage determines the environment artwork.
+  battleScene.dataset.stage = String(currentStageIndex + 1);
   // 重置全體怪獸血量 (支援二週目 New Game+)
   const stg = STAGES[currentStageIndex];
   const curEnemy = stg.enemies[currentEnemyIndex];
@@ -596,7 +654,10 @@ function renderMonsterAvatar(curEnemy) {
 // 答題戰鬥觸發
 function openBattleQuiz() {
   isCurrentQuizAnsweredCorrectly = false;
+  isQuizAnsweringLocked = false;
   quizStartTime = Date.now();
+  totalFreezeDuration = 0;
+  quizTimeLeft = 30;
 
   const unitFile = selectUnit.value || "unit01_scientific_method.json";
   const unitObj = allManifestUnits.find(u => u.file === unitFile);
@@ -637,22 +698,57 @@ function startCountdownTimer() {
     quizTimerBanner.textContent = "⏱️ 計時器：無限制時間";
     return;
   }
-  let timeLeft = 30;
-  quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒`;
+  quizTimerBanner.textContent = `⏱️ 倒數計時：${quizTimeLeft} 秒`;
   clearInterval(countdownTimer);
 
   countdownTimer = setInterval(() => {
-    timeLeft--;
-    quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒`;
-    if (timeLeft <= 0) {
+    if (isTeacherFrozen) return; // 凍結時暫停倒數
+
+    quizTimeLeft--;
+    quizTimerBanner.textContent = `⏱️ 倒數計時：${quizTimeLeft} 秒`;
+    if (quizTimeLeft <= 0) {
       clearInterval(countdownTimer);
-      quizTimerBanner.textContent = "🚨 時間到！請立即結算作答！";
+      handleQuizTimeout();
     }
   }, 1000);
 }
 
+// 倒數歸零強制限時結算 (扣血受創)
+function handleQuizTimeout() {
+  if (isQuizAnsweringLocked) return;
+  isQuizAnsweringLocked = true;
+
+  // 停用所有選項按鈕防點擊
+  const allBtns = quizOptions.querySelectorAll("button.btn-option");
+  allBtns.forEach(b => {
+    b.disabled = true;
+    b.style.pointerEvents = "none";
+  });
+
+  isCurrentQuizAnsweredCorrectly = false;
+  quizTimerBanner.textContent = "🚨 時間到！作答逾時！";
+  playHitSound();
+
+  // 標記正解選項
+  const correctBtn = document.getElementById(`opt-${currentActiveQuestion.answer}`);
+  if (correctBtn) correctBtn.classList.add("correct");
+
+  explanationText.textContent = `⏰ 作答超時！${currentActiveQuestion.explanation || "請留意作答時間，受怪獸反擊受創！"}`;
+  quizExplanation.classList.remove("hidden");
+
+  btnAttackBoss.classList.add("hidden");
+  btnAttackBoss.setAttribute("disabled", "true");
+  btnCloseWrong.textContent = "💥 逾時受到怪獸反擊！閉關受創 ➡️";
+  btnCloseWrong.classList.remove("hidden");
+
+  if (gameMode === "group") {
+    currentTurnMember = (currentTurnMember % 4) + 1;
+    updateUI();
+  }
+}
+
 function usePudding5050() {
-  if (!hasPudding || puddingSkillUsedInBattle) return;
+  if (!hasPudding || puddingSkillUsedInBattle || isQuizAnsweringLocked) return;
   puddingSkillUsedInBattle = true;
   btnUsePuddingSkill.classList.add("hidden");
 
@@ -665,6 +761,7 @@ function usePudding5050() {
     if (btn) {
       btn.style.opacity = "0.3";
       btn.style.pointerEvents = "none";
+      btn.disabled = true;
       btn.innerHTML += " <small>(🐱 布丁移除)</small>";
     }
   });
@@ -673,7 +770,17 @@ function usePudding5050() {
 }
 
 function handleQuizSelect(selectedIndex, btnEl) {
+  if (isQuizAnsweringLocked) return;
+  isQuizAnsweringLocked = true;
   clearInterval(countdownTimer);
+
+  // 停用全部選項，防止連續點擊或答錯改選
+  const allBtns = quizOptions.querySelectorAll("button.btn-option");
+  allBtns.forEach(b => {
+    b.disabled = true;
+    b.style.pointerEvents = "none";
+  });
+
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
 
   if (isCorrect) {
@@ -684,7 +791,10 @@ function handleQuizSelect(selectedIndex, btnEl) {
     correctAnswerCount++;
     gold += 10; // 🎯 答對每題固定 +10 金幣獎勵！
 
-    const timeTaken = Math.max(0.5, (Date.now() - quizStartTime) / 1000);
+    // 作答耗時扣除凍結期間
+    const totalElapsed = (Date.now() - quizStartTime) / 1000;
+    const freezeSec = totalFreezeDuration / 1000;
+    const timeTaken = Math.max(0.5, totalElapsed - freezeSec);
     let speedMultiplier = 1.0;
     let speedTag = "";
 
@@ -732,6 +842,11 @@ function handleQuizSelect(selectedIndex, btnEl) {
   } else {
     isCurrentQuizAnsweredCorrectly = false;
     btnEl.classList.add("incorrect");
+
+    // 將正確答案標示出來供學生學習
+    const correctBtn = document.getElementById(`opt-${currentActiveQuestion.answer}`);
+    if (correctBtn) correctBtn.classList.add("correct");
+
     playHitSound();
     explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請觀看筆記解析後再接再勵！";
     quizExplanation.classList.remove("hidden");
@@ -1036,8 +1151,16 @@ function startNewGamePlus() {
 
 function toggleTeacherFreeze() {
   isTeacherFrozen = !isTeacherFrozen;
-  if (isTeacherFrozen) openModal(teacherFreezeModal);
-  else closeModal(teacherFreezeModal);
+  if (isTeacherFrozen) {
+    freezeStartTime = Date.now();
+    openModal(teacherFreezeModal);
+  } else {
+    if (freezeStartTime > 0) {
+      totalFreezeDuration += (Date.now() - freezeStartTime);
+      freezeStartTime = 0;
+    }
+    closeModal(teacherFreezeModal);
+  }
 }
 
 function openModal(el) { el.classList.remove("hidden"); }

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>樂透大冒險：生物勇者傳奇 - RPG Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=2.7">
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
 
@@ -59,8 +59,8 @@
         <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
         <button id="btnRules" class="btn-tool btn-green" title="查看冒險指南">📖 指南</button>
         <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結</button>
-        <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
-        <button id="btnTimer" class="btn-tool" title="計時器開關">⏱️</button>
+        <button aria-label="切換音效" id="btnSound" class="btn-tool" title="音效開關">🔊</button>
+        <button aria-label="切換答題計時器" id="btnTimer" class="btn-tool" title="計時器開關">⏱️</button>
       </div>
     </header>
 
@@ -77,7 +77,8 @@
     <div class="main-stage-container">
 
       <!-- 1. ⚔️ 戰鬥舞台 (Battle Scene) -->
-      <div class="battle-scene" id="battleScene">
+      <div class="battle-scene" id="battleScene" data-stage="1">
+        <div class="scene-location" aria-hidden="true"><span class="scene-location-index"></span><span class="scene-location-title"></span></div>
 
         <!-- 左側：生物勇者與隊伍夥伴 -->
         <div class="hero-character-box">
@@ -122,6 +123,8 @@
 
         <!-- 中間：戰鬥橫幅與動作按鈕 -->
         <div class="center-action-box">
+          <div class="quest-eyebrow" aria-hidden="true">生物知識 × 勇者冒險</div>
+          <h2 class="quest-heading">讓知識成為你的武器</h2>
           <div class="battle-log-banner" id="battleBanner">遭遇野外怪獸！準備進入作答戰鬥！</div>
 
           <div class="battle-controls">
@@ -397,6 +400,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=5.0"></script>
-  <script src="game.js?v=4.4"></script>
+  <script src="game.js?v=4.5"></script>
 </body>
 </html>
