@@ -109,6 +109,11 @@ function playTone(freq, type, duration, startVol = 0.12) {
 }
 
 function soundLaser() { playTone(750, 'sine', 0.08, 0.15); }
+function soundSpore() { playTone(280, 'sine', 0.12, 0.08); }
+function soundPlayerHit() {
+  playTone(180, 'sawtooth', 0.18, 0.15);
+  setTimeout(() => playTone(120, 'sawtooth', 0.22, 0.12), 60);
+}
 function soundHitCorrect() {
   playTone(523, 'triangle', 0.1);
   setTimeout(() => playTone(784, 'triangle', 0.2), 80);
@@ -178,6 +183,9 @@ let currentQIndex = 0;
 let score = 0;
 let lives = 3;
 let combo = 0;
+let enemyBullets = [];
+let nextSporeTime = 0;
+let playerInvulnerableUntil = 0;
 let isOverheated = false;
 let qTimeRemaining = 25;
 let qTimer = null;
@@ -519,6 +527,9 @@ async function startMission(bonusCount) {
     logs = [];
     particles = [];
     bullets = [];
+    enemyBullets = [];
+    nextSporeTime = performance.now() + 4500;
+    playerInvulnerableUntil = 0;
     isRunning = true;
 
     updateHUD();
@@ -540,6 +551,8 @@ function loadQuestion(idx) {
   hintTimer = null;
   document.getElementById("hint-banner").style.display = "none";
   bullets = [];
+  enemyBullets = [];
+  nextSporeTime = performance.now() + 4200;
   if (idx >= gameQuestions.length) {
     endMission();
     return;
@@ -635,6 +648,7 @@ function settleQuestion() {
   questionSettled = true;
   clearInterval(qTimer);
   bullets = [];
+  enemyBullets = [];
   updateMissionUI();
   return true;
 }
@@ -858,6 +872,9 @@ function drawArena() {
   ctx.restore();
 }
 function drawPlayer(x, y) {
+  const isInv = performance.now() < playerInvulnerableUntil;
+  if (isInv && Math.floor(gameTick / 4) % 2 === 0) return; // 受創無敵閃爍
+
   ctx.save();
   ctx.translate(x, y);
   ctx.shadowColor = "#65e1f2";
@@ -1051,6 +1068,64 @@ function gameLoop() {
       p.alpha -= p.decay;
       if (p.alpha <= 0) particles.splice(i, 1);
     }
+
+    // 👾 怪獸偶爾反擊機制：前 4 秒安全期，之後每 4.5~6.5 秒隨機 1 隻怪獸發射慢速泡泡彈
+    const nowTime = performance.now();
+    if (!questionSettled && enemies.length > 0 && nowTime > nextSporeTime) {
+      const shooter = enemies[Math.floor(Math.random() * enemies.length)];
+      if (shooter) {
+        enemyBullets.push({
+          x: shooter.x,
+          y: shooter.y + 18,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: 2.2,
+          r: 7,
+          color: shooter.theme
+        });
+        soundSpore();
+        combatFeedback("⚠️ 警告：外星怪獸釋放了生物孢子！注意規避！");
+      }
+      nextSporeTime = nowTime + 4500 + Math.random() * 2000;
+    }
+
+    // 更新怪獸泡泡彈
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+      const eb = enemyBullets[i];
+      eb.x += eb.vx;
+      eb.y += eb.vy;
+
+      // 玩家雷射可射爆怪獸泡泡彈 (防禦攔截)
+      let intercepted = false;
+      for (let j = bullets.length - 1; j >= 0; j--) {
+        const pb = bullets[j];
+        if (Math.hypot(pb.x - eb.x, pb.y - eb.y) < eb.r + pb.r + 4) {
+          createBurstParticles(eb.x, eb.y, eb.color);
+          bullets.splice(j, 1);
+          enemyBullets.splice(i, 1);
+          intercepted = true;
+          combatFeedback("🛡️ 成功攔截生物孢子！");
+          break;
+        }
+      }
+      if (intercepted) continue;
+
+      // 命中玩家戰機判定 (帶有無敵保護)
+      if (nowTime > playerInvulnerableUntil && Math.hypot(eb.x - player.x, eb.y - player.y) < 22) {
+        createBurstParticles(player.x, player.y, "#f43f5e");
+        enemyBullets.splice(i, 1);
+        playerInvulnerableUntil = nowTime + 1400; // 1.4 秒無敵閃爍
+        soundPlayerHit();
+        lives = Math.max(1, lives - 1);
+        combo = Math.max(0, combo - 1);
+        updateHUD();
+        combatFeedback("⚡ 戰機護盾受到衝擊！啟動短暫防護罩！");
+        continue;
+      }
+
+      if (eb.y > ch + 20) {
+        enemyBullets.splice(i, 1);
+      }
+    }
   }
 
   ctx.clearRect(0, 0, cw, ch);
@@ -1062,6 +1137,25 @@ function gameLoop() {
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
     ctx.fill();
   });
+
+  // 繪製怪獸生物孢子彈 (發光柔和光波)
+  for (let i = 0; i < enemyBullets.length; i++) {
+    const eb = enemyBullets[i];
+    ctx.save();
+    ctx.shadowColor = eb.color;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = eb.color;
+    ctx.beginPath();
+    ctx.arc(eb.x, eb.y, eb.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 泡泡內部晶瑩高光
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.beginPath();
+    ctx.arc(eb.x - 2, eb.y - 2, eb.r * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
 
   drawPlayer(player.x, player.y);
 
