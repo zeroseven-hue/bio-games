@@ -973,22 +973,22 @@ body {
 .game-wrapper .hero-fullbody > .hero-suit-body { display: none; }
 .game-wrapper .hero-weapon-slot {
   position: absolute;
-  left: 155px;
-  top: 75px;
-  width: 65px;
-  height: 110px;
-  transform-origin: 40% 75%;
+  left: 138px;
+  top: 92px;
+  width: 62px;
+  height: 105px;
+  transform-origin: 42% 82%;
   animation: swordIdle 3s infinite ease-in-out alternate;
-  transform: rotate(12deg);
-  filter: drop-shadow(1px 4px 4px rgba(0,0,0,0.4));
+  transform: rotate(15deg);
+  filter: drop-shadow(1px 4px 5px rgba(0,0,0,0.45));
   pointer-events: none;
   z-index: 6;
 }
-.game-wrapper .hero-weapon-slot .weapon-svg { width: 65px; height: 110px; }
+.game-wrapper .hero-weapon-slot .weapon-svg { width: 62px; height: 105px; }
 .game-wrapper .hero-accessory-slot {
   position: absolute;
-  left: 142px;
-  top: 48px;
+  left: 138px;
+  top: 52px;
   transform: translate(-50%, -50%);
   font-size: 2.2rem;
   z-index: 7;
@@ -996,20 +996,23 @@ body {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 .game-wrapper .hero-accessory-slot.acc-sunglasses {
-  left: 142px;
-  top: 50px;
-  font-size: 2.1rem;
+  left: 138px;
+  top: 54px;
+  font-size: 2.15rem;
 }
-.game-wrapper .hero-accessory-slot.acc-feather_hat {
-  left: 135px;
-  top: 18px;
-  font-size: 2.4rem;
-  transform: translate(-50%, -50%) rotate(-8deg);
+.game-wrapper .hero-accessory-slot.acc-helmet {
+  left: 138px;
+  top: 8px;
+  font-size: 2.5rem;
+  transform: translate(-50%, -50%) rotate(3deg);
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));
 }
 .game-wrapper .hero-accessory-slot.acc-crown {
-  left: 142px;
-  top: 14px;
-  font-size: 2.3rem;
+  left: 138px;
+  top: 6px;
+  font-size: 2.4rem;
+  transform: translate(-50%, -50%) rotate(2deg);
+  filter: drop-shadow(0 3px 8px rgba(234,179,8,0.6));
 }
 .game-wrapper .hero-aura { width: 200px; height: 75px; bottom: -8px; border-radius: 50%; opacity: .7; }
 .game-wrapper #avatarLele { left: -18px; bottom: 8px; }
