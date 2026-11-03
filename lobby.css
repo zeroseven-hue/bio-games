@@ -840,3 +840,38 @@ body {
   margin-top: 0 !important;
   pointer-events: none;
 }
+
+
+/* 課堂遊戲大廳分類列最右側：成績儀表板捷徑按鈕 */
+.cat-dashboard-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  border: 2px solid #d97706;
+  background: #d97706;
+  color: #ffffff !important;
+  font-size: 0.98rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  touch-action: manipulation;
+  min-height: 44px;
+  margin-left: auto;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+}
+
+.cat-dashboard-link:hover {
+  background: #b45309;
+  border-color: #b45309;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.45);
+  color: #ffffff !important;
+}
+
+.cat-dashboard-link:active {
+  transform: translateY(0);
+}
