@@ -971,12 +971,49 @@ body {
 .game-wrapper .hero-fullbody > .hero-cape,
 .game-wrapper .hero-fullbody > .hero-panda-head,
 .game-wrapper .hero-fullbody > .hero-suit-body { display: none; }
-.game-wrapper .hero-weapon-slot { right: -3px; bottom: 84px; transform-origin: 50% 90%; animation: none; transform: rotate(22deg); filter: drop-shadow(1px 3px 2px #18302177); }
-.game-wrapper .hero-weapon-slot .weapon-svg { width: 74px; height: 134px; }
-.game-wrapper .hero-accessory-slot { left: auto; right: 24px; top: 18px; font-size: 2.25rem; transform: rotate(6deg); }
+.game-wrapper .hero-weapon-slot {
+  position: absolute;
+  left: 155px;
+  top: 75px;
+  width: 65px;
+  height: 110px;
+  transform-origin: 40% 75%;
+  animation: swordIdle 3s infinite ease-in-out alternate;
+  transform: rotate(12deg);
+  filter: drop-shadow(1px 4px 4px rgba(0,0,0,0.4));
+  pointer-events: none;
+  z-index: 6;
+}
+.game-wrapper .hero-weapon-slot .weapon-svg { width: 65px; height: 110px; }
+.game-wrapper .hero-accessory-slot {
+  position: absolute;
+  left: 142px;
+  top: 48px;
+  transform: translate(-50%, -50%);
+  font-size: 2.2rem;
+  z-index: 7;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.game-wrapper .hero-accessory-slot.acc-sunglasses {
+  left: 142px;
+  top: 50px;
+  font-size: 2.1rem;
+}
+.game-wrapper .hero-accessory-slot.acc-feather_hat {
+  left: 135px;
+  top: 18px;
+  font-size: 2.4rem;
+  transform: translate(-50%, -50%) rotate(-8deg);
+}
+.game-wrapper .hero-accessory-slot.acc-crown {
+  left: 142px;
+  top: 14px;
+  font-size: 2.3rem;
+}
 .game-wrapper .hero-aura { width: 200px; height: 75px; bottom: -8px; border-radius: 50%; opacity: .7; }
-.game-wrapper #avatarLele { left: -6px; bottom: 0; }
-.game-wrapper #avatarPudding { right: -4px; top: 72px; }
+.game-wrapper #avatarLele { left: -18px; bottom: 8px; }
+.game-wrapper #avatarPudding { left: -18px; top: 22px; right: auto; }
 .game-wrapper .hero-name-badge { background: linear-gradient(#385b47f5, #233e30f5); color: #fff4d5; border: 1px solid #d6c18c; border-radius: 7px; padding: 9px 18px; box-shadow: 0 4px 14px #142b2b33; }
 .game-wrapper .companions-box { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .game-wrapper .companion-badge { width: auto; padding: 6px 9px; background: #f9f6e6ed; color: #355038; border: 1px solid #c1cf9c; border-radius: 6px; font-size: .76rem; }
@@ -1145,14 +1182,15 @@ body {
 }
 
 .companion-lele-box {
-  left: -28px;
+  left: -22px;
   bottom: 12px;
   animation: floatLele 3s infinite ease-in-out alternate;
 }
 
 .companion-pudding-box {
-  right: -24px;
-  top: 40px;
+  left: -22px;
+  top: 25px;
+  right: auto;
   animation: floatPudding 3.4s infinite ease-in-out alternate;
 }
 

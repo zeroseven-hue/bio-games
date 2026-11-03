@@ -43,7 +43,7 @@ const ARMORS = [
 
 const ACCESSORIES = [
   { id: "sunglasses", name: "🕶️ 酷炫墨鏡", atkBonus: 5, cost: 30, icon: "🕶️" },
-  { id: "mustache", name: "🥸 紳士翹鬍", atkBonus: 5, cost: 30, icon: "🥸" },
+  { id: "feather_hat", name: "🪶 冒險戰盔", atkBonus: 5, cost: 30, icon: "🪶" },
   { id: "crown", name: "👑 耀眼皇冠", atkBonus: 10, cost: 60, icon: "👑" }
 ];
 
@@ -560,10 +560,16 @@ function updateHeroStats() {
     const acc = ACCESSORIES[equippedAccessoryIndex];
     accessoryDisplay.textContent = acc.name;
     accessoryStatItem.classList.remove("hidden");
-    if (heroAccessorySlot) heroAccessorySlot.textContent = acc.icon;
+    if (heroAccessorySlot) {
+      heroAccessorySlot.textContent = acc.icon;
+      heroAccessorySlot.className = 'hero-accessory-slot acc-' + acc.id;
+    }
   } else {
     accessoryStatItem.classList.add("hidden");
-    if (heroAccessorySlot) heroAccessorySlot.textContent = "";
+    if (heroAccessorySlot) {
+      heroAccessorySlot.textContent = "";
+      heroAccessorySlot.className = 'hero-accessory-slot';
+    }
   }
 
   heroAura.className = `hero-aura ${w.aura}`;
