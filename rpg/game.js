@@ -132,6 +132,7 @@ let quizTimeLeft = 30;
 let freezeStartTime = 0;
 let totalFreezeDuration = 0;
 let lastCalculatedDamage = 0;
+let isLastAttackCritical = false;
 
 // DOM 元素引用
 const modeTag = document.getElementById("modeTag");
@@ -625,6 +626,13 @@ function setupStage() {
 
   battleScene.classList.remove("hidden");
   campScene.classList.add("hidden");
+
+  // 🚀 自動疾速展開答題，告別多餘手動點擊「勇者出擊」！
+  setTimeout(() => {
+    if (campScene.classList.contains("hidden") && victoryModal.classList.contains("hidden") && quizModal.classList.contains("hidden")) {
+      openBattleQuiz();
+    }
+  }, 420);
 }
 
 function renderMonsterAvatar(curEnemy) {
@@ -789,15 +797,18 @@ function handleQuizSelect(selectedIndex, btnEl) {
     let speedTag = "";
 
     if (timeTaken <= 5.0) {
+      isLastAttackCritical = true;
       speedMultiplier = 1.5;
       quickAnswerCount++;
       gold += 5; // ⚡ 秒答加碼 +5 金幣 (單題總共 +15g)！
       playCoinSound();
       speedTag = `⚡【極速暴擊 1.5倍 (+15g 金幣)】作答費時 ${timeTaken.toFixed(1)} 秒！`;
     } else if (timeTaken <= 15.0) {
+      isLastAttackCritical = false;
       speedMultiplier = 1.0;
       speedTag = `⚔️【勇者重擊 1.0倍 (+10g 金幣)】作答費時 ${timeTaken.toFixed(1)} 秒。`;
     } else {
+      isLastAttackCritical = false;
       speedMultiplier = 0.7;
       speedTag = `🛡️【謹慎試探 0.7倍 (+10g 金幣)】作答耗時 ${timeTaken.toFixed(1)} 秒。`;
     }
@@ -853,26 +864,88 @@ function handleQuizSelect(selectedIndex, btnEl) {
   }
 }
 
-// 執行勇者攻擊
+// 執行勇者攻擊 (含突刺衝刺、刀光斬痕、全畫面震波與 CRITICAL 爆擊數字)
 function executeHeroAttack() {
   const stg = STAGES[currentStageIndex];
   const curEnemy = stg.enemies[currentEnemyIndex];
-
   const damage = lastCalculatedDamage || 30;
+  const isCrit = isLastAttackCritical || (equippedWeaponIndex === 2);
 
-  curEnemy.hp = Math.max(0, curEnemy.hp - damage);
-  enemyHpFill.style.width = `${(curEnemy.hp / curEnemy.maxHp) * 100}%`;
-  enemyHpText.textContent = `${curEnemy.hp} / ${curEnemy.maxHp}`;
+  const heroBox = document.querySelector(".hero-character-box");
+  const battleSceneEl = document.getElementById("battleScene");
+  const enemyBox = document.querySelector(".enemy-character-box");
 
-  enemyAvatar.classList.remove("hit-anim");
-  void enemyAvatar.offsetWidth;
-  enemyAvatar.classList.add("hit-anim");
-
-  battleBanner.textContent = `⚔️ 勇者造成了 ${damage} 點爆發傷害！`;
-
-  if (curEnemy.hp <= 0) {
-    setTimeout(handleEnemyDefeated, 400);
+  // 1. 勇者向前突刺衝刺動作 (Dash Forward)
+  if (heroBox) {
+    heroBox.classList.remove("hero-dash-attack");
+    void heroBox.offsetWidth;
+    heroBox.classList.add("hero-dash-attack");
   }
+
+  playSlashSound();
+
+  // 2. 突刺命中時點 (300ms 抵達怪獸身上爆發斬擊)
+  setTimeout(() => {
+    curEnemy.hp = Math.max(0, curEnemy.hp - damage);
+    enemyHpFill.style.width = `${(curEnemy.hp / curEnemy.maxHp) * 100}%`;
+    enemyHpText.textContent = `${curEnemy.hp} / ${curEnemy.maxHp}`;
+
+    // 刀光斬痕特效生成
+    if (enemyBox) {
+      const slash = document.createElement("div");
+      slash.className = isCrit ? "slash-effect slash-crit" : "slash-effect";
+      enemyBox.appendChild(slash);
+      setTimeout(() => slash.remove(), 450);
+
+      // 浮動傷害 / CRITICAL 爆擊數字
+      const popup = document.createElement("div");
+      popup.className = isCrit ? "damage-popup crit-popup" : "damage-popup";
+      popup.innerHTML = isCrit ? `💥 CRITICAL!<br>-${damage}` : `-${damage}`;
+      enemyBox.appendChild(popup);
+      setTimeout(() => popup.remove(), 1050);
+    }
+
+    // 怪獸受創強烈重擊震動
+    enemyAvatar.classList.remove("enemy-hit-heavy", "hit-anim");
+    void enemyAvatar.offsetWidth;
+    enemyAvatar.classList.add("enemy-hit-heavy");
+
+    // 全場畫面打擊震波 (Screen Shake)
+    if (battleSceneEl) {
+      battleSceneEl.classList.remove("screen-shake");
+      void battleSceneEl.offsetWidth;
+      battleSceneEl.classList.add("screen-shake");
+    }
+
+    // 音效震撼加成
+    if (isCrit) {
+      playCriticalSound();
+    } else {
+      playHitSound();
+    }
+
+    battleBanner.textContent = isCrit
+      ? `💥 極速暴擊！勇者聖光重創怪獸，造成 ${damage} 點毀滅傷害！`
+      : `⚔️ 勇者向前突刺！造成了 ${damage} 點斬擊傷害！`;
+
+    if (curEnemy.hp <= 0) {
+      setTimeout(handleEnemyDefeated, 650);
+    } else {
+      // 若怪獸未被擊敗，短暫回味後自動進入下一題答題
+      setTimeout(() => {
+        if (curEnemy.hp > 0 && campScene.classList.contains("hidden") && victoryModal.classList.contains("hidden")) {
+          openBattleQuiz();
+        }
+      }, 950);
+    }
+  }, 280);
+}
+
+// 爆擊專屬強烈重音
+function playCriticalSound() {
+  playTone(220, "sawtooth", 0.15, 0, 0.25);
+  playTone(440, "square", 0.18, 0.04, 0.25);
+  playTone(880, "triangle", 0.22, 0.08, 0.2);
 }
 
 function executeEnemyAttack() {
