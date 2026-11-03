@@ -263,6 +263,27 @@ function initEventListeners() {
     renderLeaderboard();
     openModal(leaderboardModal);
   });
+
+  const btnCampShortcut = document.getElementById("btnCampShortcut");
+  if (btnCampShortcut) {
+    btnCampShortcut.addEventListener("click", () => {
+      openCampScene();
+    });
+  }
+
+  const btnCloseRescue = document.getElementById("btnCloseRescue");
+  if (btnCloseRescue) {
+    btnCloseRescue.addEventListener("click", () => {
+      closeModal(document.getElementById("rescueModal"));
+      if (currentStageIndex < STAGES.length - 1) {
+        currentStageIndex++;
+        currentEnemyIndex = 0;
+        openCampScene();
+      } else {
+        openVictoryModal();
+      }
+    });
+  }
   btnCloseLeaderboard.addEventListener("click", () => closeModal(leaderboardModal));
   btnClearLeaderboard.addEventListener("click", clearLeaderboard);
 
@@ -602,13 +623,13 @@ function setupStage() {
 
 function renderMonsterAvatar(curEnemy) {
   if (curEnemy.class === "slime-green") {
-    enemyAvatar.innerHTML = `<div class="slime-blob green-blob"><span class="blob-eyes">(｀∀´)</span></div>`;
+    enemyAvatar.innerHTML = `<div class="slime-blob green-blob" title="調皮綠史萊姆"></div>`;
   } else if (curEnemy.class === "slime-purple") {
-    enemyAvatar.innerHTML = `<div class="slime-blob purple-blob"><span class="blob-eyes">(◣_◢)</span></div>`;
+    enemyAvatar.innerHTML = `<div class="slime-blob purple-blob" title="劇毒紫史萊姆"></div>`;
   } else if (curEnemy.class === "boss-red") {
-    enemyAvatar.innerHTML = `<div class="boss-blob red-blob"><span class="blob-eyes">👁️👁️👁️</span></div>`;
+    enemyAvatar.innerHTML = `<div class="boss-blob red-blob" title="三眼大魔王"></div>`;
   } else if (curEnemy.class === "boss-goblin") {
-    enemyAvatar.innerHTML = `<div class="goblin-blob boss-goblin"><span class="blob-eyes">👺💰</span></div>`;
+    enemyAvatar.innerHTML = `<div class="goblin-blob boss-goblin" title="龐大金幣哥布林"></div>`;
   } else {
     enemyAvatar.textContent = curEnemy.avatar;
   }
@@ -892,16 +913,18 @@ function handleEnemyDefeated() {
     gold += stg.chestGold;
     playCoinSound();
 
+    updateUI();
+
     if (stg.rescueCompanion === "lele") {
       hasLele = true;
       leleShieldActive = true;
-      alert("🐶 成功解救守護犬「樂樂」加入隊伍！獲得 1 次答錯傷害防護盾！");
+      triggerCompanionRescue("lele");
+      return;
     } else if (stg.rescueCompanion === "pudding") {
       hasPudding = true;
-      alert("🐱 成功解救智慧貓「布丁」加入隊伍！獲得 50/50 刪除錯誤選項技能！");
+      triggerCompanionRescue("pudding");
+      return;
     }
-
-    updateUI();
 
     if (currentStageIndex < STAGES.length - 1) {
       currentStageIndex++;
@@ -1128,3 +1151,28 @@ function toggleTeacherFreeze() {
 
 function openModal(el) { el.classList.remove("hidden"); }
 function closeModal(el) { el.classList.add("hidden"); }
+
+
+function triggerCompanionRescue(type) {
+  const rescueModal = document.getElementById("rescueModal");
+  const rescueAvatarLarge = document.getElementById("rescueAvatarLarge");
+  const rescueTitle = document.getElementById("rescueTitle");
+  const rescueName = document.getElementById("rescueName");
+  const rescueDesc = document.getElementById("rescueDesc");
+  if (!rescueModal) return;
+
+  if (type === "lele") {
+    rescueAvatarLarge.innerHTML = `<div class="companion-rescue-crest lele-crest">🐶</div>`;
+    rescueTitle.textContent = "🎉 夥伴成功解救！並肩作戰！";
+    rescueName.textContent = "🛡️ 守護犬「樂樂」突破魔物封印，奔向勇者身旁！";
+    rescueDesc.textContent = "【專屬神技：守護之盾】在戰鬥作答時，為全體隊伍提供 1 次完全免受怪獸反擊傷害護盾！樂樂將在戰鬥舞台守護在勇者身旁！";
+  } else if (type === "pudding") {
+    rescueAvatarLarge.innerHTML = `<div class="companion-rescue-crest pudding-crest">🐱</div>`;
+    rescueTitle.textContent = "🎉 夥伴成功解救！並肩作戰！";
+    rescueName.textContent = "🔮 智慧貓「布丁」衝破封印，靈巧跳上勇者肩頭！";
+    rescueDesc.textContent = "【專屬神技：智慧二選一 (50/50)】在戰鬥作答時，點擊技能按鈕可立即施法抹去 2 個錯誤選項！布丁將以神秘奧術光環並肩作戰！";
+  }
+
+  updateUI();
+  openModal(rescueModal);
+}

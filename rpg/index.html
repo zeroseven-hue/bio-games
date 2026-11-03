@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>樂透大冒險：生物勇者傳奇 - RPG Bio-Quest</title>
-  <link rel="stylesheet" href="style.css?v=3.0">
+  <link rel="stylesheet" href="style.css?v=3.1">
 </head>
 <body>
 
@@ -56,6 +56,7 @@
 
       <div class="header-right">
         <button id="btnLeaderboard" class="btn-tool btn-gold" title="查看班級英雄榮譽榜">🏆 英雄榜</button>
+        <button id="btnCampShortcut" class="btn-tool btn-gold" title="進入勇者營地整備神裝">🏕️ 營地補給</button>
         <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
         <button id="btnRules" class="btn-tool btn-green" title="查看冒險指南">📖 指南</button>
         <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結</button>
@@ -84,7 +85,7 @@
         <div class="hero-character-box">
           <div class="hero-avatar-wrapper">
             <div class="hero-aura aura-wood" id="heroAura"></div>
-            <div class="companion-avatar hidden" id="avatarLele" title="守護犬樂樂">🐶</div>
+            <div class="companion-avatar hidden companion-lele-box" id="avatarLele" title="守護犬樂樂"><div class="companion-ring ring-lele"></div><div class="companion-badge-icon">🐶</div><div class="companion-glow-tag">守護盾</div></div>
             
             <!-- 🐼 超級熊貓勇者 全身組件 (純黑白 SVG 熊貓與手持雕刻木劍) -->
             <div class="hero-fullbody" id="heroFullbody">
@@ -110,7 +111,7 @@
               </div>
             </div>
 
-            <div class="companion-avatar hidden" id="avatarPudding" title="智慧貓布丁">🐱</div>
+            <div class="companion-avatar hidden companion-pudding-box" id="avatarPudding" title="智慧貓布丁"><div class="companion-ring ring-pudding"></div><div class="companion-badge-icon">🐱</div><div class="companion-glow-tag">50/50</div></div>
           </div>
           <div class="hero-name-badge" id="heroNameBadge">生物勇者 (第 1 棒)</div>
           
@@ -276,6 +277,19 @@
     </div>
   </div>
 
+  
+  <!-- 🎊 救援同伴特別慶祝動畫 Modal -->
+  <div class="modal-overlay hidden" id="rescueModal">
+    <div class="modal-box rescue-box" id="rescueBox">
+      <div class="rescue-sparkles">✨ ⭐ ✨</div>
+      <div class="rescue-avatar-large" id="rescueAvatarLarge">🐶</div>
+      <h2 class="rescue-title" id="rescueTitle">🎉 夥伴成功解救！</h2>
+      <div class="rescue-name" id="rescueName">守護犬「樂樂」衝破魔物封印！</div>
+      <p class="rescue-desc" id="rescueDesc">獲得專屬同伴技能：抵擋 1 次答錯傷害！夥伴將並肩在勇者身旁戰鬥！</p>
+      <button id="btnCloseRescue" class="btn-action btn-gold">⚔️ 與新夥伴一同踏入下一關！ 🚀</button>
+    </div>
+  </div>
+
   <!-- 2. 🎉 通關大獲全勝 Modal (含防偽榮耀認證書卡片與排行榜登錄) -->
   <div class="modal-overlay hidden" id="victoryModal">
     <div class="modal-box victory-box">
@@ -400,6 +414,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=5.0"></script>
-  <script src="game.js?v=4.5"></script>
+  <script src="game.js?v=4.6"></script>
 </body>
 </html>
