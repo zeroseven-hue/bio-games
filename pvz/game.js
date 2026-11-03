@@ -1,4 +1,36 @@
 
+function triggerBreachWarning(laneIdx) {
+  const laneEl = document.getElementById("lane-" + laneIdx);
+  if (laneEl) {
+    laneEl.classList.add("lane-breach-flash");
+    setTimeout(() => laneEl.classList.remove("lane-breach-flash"), 1200);
+  }
+}
+
+
+// 浮動防擾通知系統 (取代原生 alert 視窗，提供絕佳遊戲與觸控體驗)
+function showToast(message, type = "info", duration = 2500) {
+  let toastContainer = document.getElementById("gameToastContainer");
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.id = "gameToastContainer";
+    toastContainer.className = "game-toast-container";
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `game-toast toast-${type}`;
+  toast.innerHTML = message;
+  toastContainer.appendChild(toast);
+
+  // 漸出並自動銷毀
+  setTimeout(() => {
+    toast.classList.add("toast-fade-out");
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+
+
 function spawnZombie() {
   if (isTeacherFrozen) return;
   const containerRect = lawnContainer.getBoundingClientRect();
@@ -192,6 +224,12 @@ window.addEventListener("DOMContentLoaded", async () => {
       startTimers();
     }
   } catch (_) {}
+
+  // ⭐ 開局新手清晰引導：提示先答題累積陽光
+  setTimeout(() => {
+    showToast("💡 <b>新手防衛指南</b>：開局請先點擊右下方<b>【❓ 答題賺陽光】</b>累積陽光能量，再點選草地或路線部署植物！", "info", 5000);
+    highlightQuizButton();
+  }, 1000);
 });
 
 // 監聽 BioGameSuite 標準開局廣播
@@ -405,7 +443,7 @@ function getFallbackQuestions() {
   ];
 }
 
-// 初始化 5 路 x 10 列密集草地戰場
+// 初始化 5 路 x 10 列密集草地戰場 (支援平板與滑鼠點擊任意空格精準種植)
 function initLawnGrid() {
   lawnGrid.innerHTML = "";
   for (let r = 0; r < 5; r++) {
@@ -417,11 +455,97 @@ function initLawnGrid() {
       const slotEl = document.createElement("div");
       slotEl.className = "cell-slot";
       slotEl.id = `slot-${r}-${c}`;
+      slotEl.title = `第 ${r + 1} 路第 ${c + 1} 格 (點擊直接種植)`;
+      
+      // 支援觸控平板與點選直接種植
+      slotEl.addEventListener("click", () => {
+        deployPlantToCell(r, c);
+      });
+
       laneEl.appendChild(slotEl);
     }
     lawnGrid.appendChild(laneEl);
   }
 }
+
+// 精準點擊草地格子種植函式 (平板/電腦兩用)
+window.deployPlantToCell = deployPlantToCell;
+function deployPlantToCell(laneIdx, colIdx) {
+  if (!gameLoopTimer) {
+    startTimers();
+  }
+
+  if (wiltedLanes[laneIdx]) {
+    showToast(`⚠️ 第 ${laneIdx + 1} 路植物正在萎蔫卡彈中，請稍候部署！`, "warning");
+    return;
+  }
+
+  const pData = PLANT_TYPES[selectedPlantKey];
+  if (sunEnergy < pData.cost) {
+    showToast(`☀️ 陽光不足！需要 ${pData.cost} 陽光，當前僅 ${sunEnergy} 陽光。請點擊「❓ 答題賺陽光」！`, "warning", 3000);
+    // 高亮震動導引答題按鈕
+    highlightQuizButton();
+    return;
+  }
+
+  // 限制每路只能種植 1 棵葵花
+  if (selectedPlantKey === "sun") {
+    const hasSunInLane = lawnState[laneIdx].some(p => p && p.key === "sun");
+    if (hasSunInLane) {
+      showToast(`🌻 第 ${laneIdx + 1} 路已有葉綠體葵花！每路限 1 棵葵花，請選擇其他路線或部署射手！`, "warning");
+      return;
+    }
+  }
+
+  // 櫻桃炸彈大招
+  if (selectedPlantKey === "cherry") {
+    deploySelectedPlantToLane(laneIdx);
+    return;
+  }
+
+  // 檢查該格子是否已有植物
+  if (lawnState[laneIdx][colIdx]) {
+    showToast(`🌿 該格子已部署了 ${PLANT_TYPES[lawnState[laneIdx][colIdx].key]?.name || "植物"}，請點擊其他空格！`, "warning");
+    return;
+  }
+
+  sunEnergy -= pData.cost;
+  updateUI();
+
+  const plantObj = {
+    key: selectedPlantKey,
+    hp: pData.maxHp,
+    maxHp: pData.maxHp,
+    lane: laneIdx,
+    col: colIdx,
+    lastActionTime: Date.now()
+  };
+
+  lawnState[laneIdx][colIdx] = plantObj;
+
+  const slotEl = document.getElementById(`slot-${laneIdx}-${colIdx}`);
+  if (slotEl) {
+    const pEl = document.createElement("div");
+    pEl.className = "plant-sprite";
+    pEl.id = `plant-${laneIdx}-${colIdx}`;
+    if (pData.id === 'pea') {
+      pEl.innerHTML = '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="88" rx="28" ry="8" fill="#15803d" opacity="0.4"/><path d="M46 55 Q42 75 48 88" stroke="#16a34a" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M44 76 Q30 70 24 78 Q36 84 46 80" fill="#22c55e"/><path d="M50 78 Q66 74 72 82 Q58 86 48 82" fill="#16a34a"/><path d="M35 40 Q20 32 16 42 Q25 48 36 46" fill="#22c55e"/><circle cx="48" cy="45" r="25" fill="#4ade80" stroke="#15803d" stroke-width="3"/><ellipse cx="72" cy="44" rx="16" ry="12" fill="#22c55e" stroke="#15803d" stroke-width="3"/><ellipse cx="75" cy="44" rx="9" ry="8" fill="#0f172a"/><circle cx="46" cy="36" r="6" fill="#ffffff"/><circle cx="48" cy="36" r="3.5" fill="#0f172a"/><circle cx="50" cy="34" r="1.5" fill="#ffffff"/><ellipse cx="38" cy="48" rx="5" ry="3" fill="#86efac" opacity="0.7"/></svg>';
+    } else {
+      pEl.textContent = pData.icon;
+    }
+    slotEl.appendChild(pEl);
+  }
+
+  playSunSound();
+  showToast(`✅ 成功在第 ${laneIdx + 1} 路第 ${colIdx + 1} 格部署 ${pData.name}！`, "success", 1500);
+}
+
+function highlightQuizButton() {
+  if (!btnStartQuiz) return;
+  btnStartQuiz.classList.add("pulse-guide");
+  setTimeout(() => btnStartQuiz.classList.remove("pulse-guide"), 2000);
+}
+
 
 // 重置遊戲狀態
 function resetGameState(autoStart = true) {
@@ -500,13 +624,13 @@ function deploySelectedPlantToLane(laneIdx) {
     startTimers();
   }
   if (wiltedLanes[laneIdx]) {
-    alert(`⚠️ 第 ${laneIdx + 1} 路植物正在萎蔫卡彈中，請稍後再部署！`);
+    showToast(`⚠️ 第 ${laneIdx + 1} 路植物正在萎蔫中，請稍候部署！`, "warning");
     return;
   }
 
   const pData = PLANT_TYPES[selectedPlantKey];
   if (sunEnergy < pData.cost) {
-    alert(`⚠️ 陽光能量不足！需要 ${pData.cost} 陽光，當前僅有 ${sunEnergy} 陽光。請點擊「❓ 答題賺陽光」！`);
+    showToast(`☀️ 陽光不足！需要 ${pData.cost} 陽光，當前僅 ${sunEnergy} 陽光。請點擊右下角「❓ 答題賺陽光」！`, "warning", 3200);
     return;
   }
 
@@ -514,7 +638,7 @@ function deploySelectedPlantToLane(laneIdx) {
   if (selectedPlantKey === "sun") {
     const hasSunInLane = lawnState[laneIdx].some(p => p && p.key === "sun");
     if (hasSunInLane) {
-      alert(`⚠️ 第 ${laneIdx + 1} 路已有葉綠體葵花！每路限種植 1 棵葵花，請選擇其他路線或部署射手！`);
+      showToast(`🌻 第 ${laneIdx + 1} 路已有葉綠體葵花！每路限 1 棵葵花，請選擇其他路線！`, "warning");
       return;
     }
   }
@@ -554,7 +678,7 @@ function deploySelectedPlantToLane(laneIdx) {
   }
 
   if (emptyCol === -1) {
-    alert(`⚠️ 第 ${laneIdx + 1} 路 10 列防線已滿！`);
+    showToast(`🛡️ 第 ${laneIdx + 1} 路防線已滿！請選擇其他路線！`, "warning");
     return;
   }
 
@@ -632,7 +756,7 @@ function startTimers() {
 function triggerNextWave(waveNum) {
   currentWave = waveNum;
   playFanfare();
-  alert(`🚨 大波病原體即將到來！當前第 ${currentWave} 波！`);
+  showToast(`🚨 大波病原體即將到來！當前第 ${currentWave} 波！`, "danger", 3500);
   updateUI();
 }
 
@@ -686,7 +810,8 @@ function gameLoop() {
     if (z.posX <= 10) {
       if (zEl) zEl.remove();
       activeZombies.splice(zIdx, 1);
-      alert(`🚨 病原體攻破第 ${z.lane + 1} 路細胞防線！`);
+      showToast(`🚨 病原體攻破第 ${z.lane + 1} 路細胞防線！`, "danger", 2000);
+      triggerBreachWarning(z.lane);
     }
   }
 
@@ -757,7 +882,7 @@ function firePeaBullet(lane, col, colWidth) {
 // 題目彈窗開啟 (含答題冷卻判斷與狀態重置)
 function openQuizModal() {
   if (isQuizCooldown) {
-    alert(`⚠️ 答錯懲罰冷卻中！請等待 ${quizCooldownSecondsLeft} 秒後再點擊「❓ 答題賺陽光」！`);
+    showToast(`⏳ 答錯冷卻中！請稍候 ${quizCooldownSecondsLeft} 秒再點答題！`, "warning");
     return;
   }
 

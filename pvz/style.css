@@ -401,3 +401,101 @@ body {
 /* Zoom Mode */
 .zoomed-text .quiz-stem { font-size: 1.5rem !important; }
 .zoomed-text .btn-option { font-size: 1.3rem !important; min-height: 60px; }
+
+
+/* ==================== 浮動防擾通知 Toast 系統 ==================== */
+.game-toast-container {
+  position: fixed;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 90vw;
+}
+
+.game-toast {
+  padding: 10px 22px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  animation: toastSlideDown 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  pointer-events: auto;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.game-toast.toast-info {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 1.5px solid #38bdf8;
+}
+
+.game-toast.toast-warning {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  border: 1.5px solid #fde047;
+}
+
+.game-toast.toast-danger {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  border: 1.5px solid #f87171;
+}
+
+.game-toast.toast-success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border: 1.5px solid #4ade80;
+}
+
+.game-toast.toast-fade-out {
+  animation: toastFadeOut 0.4s ease forwards;
+}
+
+@keyframes toastSlideDown {
+  0% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastFadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-15px) scale(0.9); }
+}
+
+/* 草地格子平板觸控與滑鼠懸浮高亮 */
+.cell-slot {
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cell-slot:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+}
+
+.cell-slot:active {
+  background-color: rgba(74, 222, 128, 0.3);
+}
+
+/* 答題按鈕高亮脈衝引導 */
+.pulse-guide {
+  animation: pulseGuide 0.8s ease infinite alternate !important;
+}
+
+@keyframes pulseGuide {
+  0% { transform: scale(1); box-shadow: 0 0 10px #f59e0b; }
+  100% { transform: scale(1.08); box-shadow: 0 0 25px #fbbf24, 0 0 40px #f59e0b; }
+}
+
+/* 路線突破警告閃紅 */
+.lane-breach-flash {
+  animation: breachFlash 0.4s ease 3 alternate;
+}
+
+@keyframes breachFlash {
+  0% { background: transparent; }
+  100% { background: rgba(239, 68, 68, 0.35); }
+}
