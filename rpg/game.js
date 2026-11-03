@@ -43,7 +43,7 @@ const ARMORS = [
 
 const ACCESSORIES = [
   { id: "sunglasses", name: "🕶️ 酷炫墨鏡", atkBonus: 5, cost: 30, icon: "🕶️" },
-  { id: "helmet", name: "🪖 騎士戰盔", atkBonus: 5, cost: 30, icon: "🪖" },
+  { id: "feather", name: "🪶 冒險羽飾", atkBonus: 5, cost: 30, icon: "🪶" },
   { id: "crown", name: "👑 耀眼皇冠", atkBonus: 10, cost: 60, icon: "👑" }
 ];
 

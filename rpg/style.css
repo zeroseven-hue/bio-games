@@ -967,50 +967,68 @@ body {
 .game-wrapper .enemy-avatar-wrapper { position: relative; width: 300px; max-width: 100%; height: 295px; align-items: flex-end; }
 .game-wrapper .hero-avatar-wrapper::before,
 .game-wrapper .enemy-avatar-wrapper::before { content: ''; position: absolute; bottom: -7px; left: 15%; width: 70%; height: 27px; border-radius: 50%; background: #132b26; opacity: .42; filter: blur(9px); z-index: -1; }
-.game-wrapper .hero-fullbody { position: relative; display: block; width: 255px; height: 310px; background: url('assets/panda-adventurer-v1.png') center bottom / contain no-repeat; filter: drop-shadow(2px 5px 5px #1c302836); }
+.game-wrapper .hero-fullbody {
+  position: relative;
+  display: block;
+  width: 255px;
+  height: 295px;
+  background: url('assets/panda-adventurer-v1.png') center bottom / contain no-repeat;
+  filter: drop-shadow(2px 5px 5px #1c302836);
+}
 .game-wrapper .hero-fullbody > .hero-cape,
 .game-wrapper .hero-fullbody > .hero-panda-head,
 .game-wrapper .hero-fullbody > .hero-suit-body { display: none; }
+
+/* 🗡️ 百分比精準鎖定：握把 100% 黏著在熊貓黑皮手套 (x: 68%, y: 52%) */
 .game-wrapper .hero-weapon-slot {
   position: absolute;
-  left: 138px;
-  top: 92px;
-  width: 62px;
-  height: 105px;
-  transform-origin: 42% 82%;
+  left: 54%;
+  top: 28%;
+  width: 28%;
+  height: 42%;
+  transform-origin: 45% 82%;
   animation: swordIdle 3s infinite ease-in-out alternate;
-  transform: rotate(15deg);
+  transform: rotate(18deg);
   filter: drop-shadow(1px 4px 5px rgba(0,0,0,0.45));
   pointer-events: none;
   z-index: 6;
 }
-.game-wrapper .hero-weapon-slot .weapon-svg { width: 62px; height: 105px; }
+.game-wrapper .hero-weapon-slot .weapon-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 🕶️ 百分比精準鎖定：飾品插槽 */
 .game-wrapper .hero-accessory-slot {
   position: absolute;
-  left: 138px;
-  top: 52px;
+  left: 54%;
+  top: 17%;
   transform: translate(-50%, -50%);
-  font-size: 2.2rem;
+  font-size: clamp(1.4rem, 2.2vw, 2.2rem);
   z-index: 7;
   pointer-events: none;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
+/* 🕶️ 墨鏡：端正貼合在熊貓雙眼上 */
 .game-wrapper .hero-accessory-slot.acc-sunglasses {
-  left: 138px;
-  top: 54px;
-  font-size: 2.15rem;
+  left: 54%;
+  top: 17.5%;
+  font-size: clamp(1.4rem, 2.2vw, 2.15rem);
 }
-.game-wrapper .hero-accessory-slot.acc-helmet {
-  left: 138px;
-  top: 8px;
-  font-size: 2.5rem;
-  transform: translate(-50%, -50%) rotate(3deg);
+/* 🪶 冒險羽飾：瀟灑斜插在熊貓左耳斗篷帽簷上 (x: 38%, y: 4%)，絕不遮眼！ */
+.game-wrapper .hero-accessory-slot.acc-feather {
+  left: 38%;
+  top: 4%;
+  font-size: clamp(1.6rem, 2.5vw, 2.5rem);
+  transform: translate(-50%, -50%) rotate(-25deg);
   filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));
 }
+/* 👑 耀眼皇冠：端正戴在頭頂皇冠區 */
 .game-wrapper .hero-accessory-slot.acc-crown {
-  left: 138px;
-  top: 6px;
-  font-size: 2.4rem;
+  left: 54%;
+  top: 2%;
+  font-size: clamp(1.6rem, 2.5vw, 2.4rem);
   transform: translate(-50%, -50%) rotate(2deg);
   filter: drop-shadow(0 3px 8px rgba(234,179,8,0.6));
 }
@@ -1127,9 +1145,7 @@ body {
   .game-wrapper .hero-character-box, .game-wrapper .enemy-character-box { min-width: 0; width: 100%; gap: 8px; }
   .game-wrapper .hero-avatar-wrapper, .game-wrapper .enemy-avatar-wrapper { width: 165px; height: 220px; }
   .game-wrapper .hero-fullbody { width: 170px; height: 230px; }
-  .game-wrapper .hero-weapon-slot { right: -5px; bottom: 62px; }
-  .game-wrapper .hero-weapon-slot .weapon-svg { width: 48px; height: 95px; }
-  .game-wrapper .hero-accessory-slot { top: 18px; right: 14px; font-size: 1.6rem; }
+  /* percentage based slots scale automatically */
   .game-wrapper .enemy-avatar { width: 165px; height: 220px; }
   .game-wrapper .slime-blob, .game-wrapper .boss-blob, .game-wrapper .goblin-blob { width: 180px; height: 180px; }
   .game-wrapper .hero-name-badge { font-size: .78rem; padding: 8px; }
@@ -1156,9 +1172,7 @@ body {
   .game-wrapper .battle-scene { min-height: 510px; padding-top: 58px; padding-bottom: 165px; }
   .game-wrapper .hero-avatar-wrapper, .game-wrapper .enemy-avatar-wrapper { height: 235px; }
   .game-wrapper .hero-fullbody { width: 210px; height: 250px; }
-  .game-wrapper .hero-weapon-slot { bottom: 68px; right: -2px; }
-  .game-wrapper .hero-weapon-slot .weapon-svg { width: 60px; height: 110px; }
-  .game-wrapper .hero-accessory-slot { right: 19px; top: 12px; font-size: 1.9rem; }
+  /* percentage based slots scale automatically */
   .game-wrapper .enemy-avatar { height: 235px; }
   .game-wrapper .slime-blob, .game-wrapper .boss-blob, .game-wrapper .goblin-blob { width: 240px; height: 240px; }
   .game-wrapper .center-action-box { padding-block: 16px; bottom: 18px; }
