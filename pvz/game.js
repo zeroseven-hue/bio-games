@@ -1,4 +1,120 @@
 
+const introGuideModal = document.getElementById("introGuideModal");
+const btnStartFirstQuiz = document.getElementById("btnStartFirstQuiz");
+const btnEnterLawnDirect = document.getElementById("btnEnterLawnDirect");
+
+function showIntroGuideModal() {
+  if (introGuideModal) {
+    openModal(introGuideModal);
+  }
+}
+
+
+// 🥔 馬鈴薯穿防護衣升級邏輯
+function upgradePotatoWithArmor(laneIdx, colIdx, plantObj) {
+  const armorCost = 40;
+  if (sunEnergy < armorCost) {
+    showToast(`🛡️ 為馬鈴薯加裝【細胞膜高科技防護衣】需要 ${armorCost} 陽光，當前僅 ${sunEnergy} 陽光！請先答題賺陽光！`, "warning", 3000);
+    highlightQuizButton();
+    return;
+  }
+
+  sunEnergy -= armorCost;
+  updateUI();
+
+  plantObj.hasArmor = true;
+  plantObj.hp = 850; // 生命值暴增至 850
+  plantObj.maxHp = 850;
+
+  const slotEl = document.getElementById(`slot-${laneIdx}-${colIdx}`);
+  const plantEl = document.getElementById(`plant-${laneIdx}-${colIdx}`);
+  if (plantEl) {
+    plantEl.innerHTML = SVG_ASSETS.potatoArmor;
+    plantEl.classList.add("plant-armored-pop");
+    setTimeout(() => plantEl.classList.remove("plant-armored-pop"), 600);
+  }
+
+  playFanfare();
+  showToast(`🛡️ 成功為第 ${laneIdx + 1} 路第 ${colIdx + 1} 格馬鈴薯穿上【合金防護衣】！生命值暴增至 850，能阻擋飛天怪！`, "success", 3000);
+}
+
+
+// 🍒 櫻桃果實爆彈：實體落地、膨脹倒數與 3x3 九宮格烈焰巨爆
+function executeCherryBomb(laneIdx, colIdx) {
+  const pData = PLANT_TYPES.cherry;
+  if (sunEnergy < pData.cost) {
+    showToast(`☀️ 陽光不足！櫻桃果實爆彈需要 ${pData.cost} 陽光，當前僅 ${sunEnergy} 陽光。請點擊「❓ 答題賺陽光」！`, "warning", 3000);
+    highlightQuizButton();
+    return;
+  }
+
+  sunEnergy -= pData.cost;
+  updateUI();
+
+  // 1. 櫻桃實體落地
+  const slotEl = document.getElementById(`slot-${laneIdx}-${colIdx}`);
+  if (!slotEl) return;
+
+  const cherryEl = document.createElement("div");
+  cherryEl.className = "plant-sprite cherry-countdown";
+  cherryEl.innerHTML = SVG_ASSETS.cherry;
+  slotEl.appendChild(cherryEl);
+
+  showToast("🍒 櫻桃果實引信已點燃！0.8 秒後大爆炸！", "warning", 1000);
+
+  // 2. 引信倒數 0.8 秒後巨爆
+  setTimeout(() => {
+    cherryEl.remove();
+    playExplosionSound();
+
+    // 觸發全螢幕微幅震動
+    const container = document.getElementById("lawnContainer");
+    if (container) {
+      container.classList.add("screen-shake");
+      setTimeout(() => container.classList.remove("screen-shake"), 500);
+    }
+
+    // 3. 範圍判定：目標列 ±1 列，且水平前後 1.8 格內的所有殭屍全部瞬殺！
+    const colWidth = (lawnContainer?.getBoundingClientRect().width || 800) / 10;
+    const centerPosX = (colIdx + 0.5) * colWidth;
+
+    activeZombies.forEach((z) => {
+      const isNeighborLane = Math.abs(z.lane - laneIdx) <= 1;
+      const isNeighborCol = Math.abs(z.posX - centerPosX) <= colWidth * 1.8;
+      if (isNeighborLane && isNeighborCol) {
+        z.hp = 0;
+        const zEl = document.getElementById(z.id);
+        if (zEl) {
+          zEl.classList.add("zombie-ash");
+          setTimeout(() => zEl.remove(), 400);
+        }
+      }
+    });
+    activeZombies = activeZombies.filter(z => z.hp > 0);
+
+    // 4. 生成 3x3 巨型火焰衝擊波 SVG 特效
+    const blastEl = document.createElement("div");
+    blastEl.className = "cherry-blast-wave";
+    blastEl.innerHTML = "💥🔥 BOOM! 🔥💥";
+    blastEl.style.left = `${colIdx * 10}%`;
+    blastEl.style.top = `${laneIdx * 20}%`;
+    lawnGrid.appendChild(blastEl);
+    setTimeout(() => blastEl.remove(), 700);
+
+    showToast("💥 櫻桃果實大爆炸！清空周圍 3x3 區域所有病原體！", "danger", 2000);
+  }, 800);
+}
+
+
+// 專屬精美植物向量圖形庫 (豌豆、馬鈴薯、防護衣馬鈴薯、櫻桃果實)
+const SVG_ASSETS = {
+  pea: '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="88" rx="28" ry="8" fill="#15803d" opacity="0.4"/><path d="M46 55 Q42 75 48 88" stroke="#16a34a" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M44 76 Q30 70 24 78 Q36 84 46 80" fill="#22c55e"/><path d="M50 78 Q66 74 72 82 Q58 86 48 82" fill="#16a34a"/><path d="M35 40 Q20 32 16 42 Q25 48 36 46" fill="#22c55e"/><circle cx="48" cy="45" r="25" fill="#4ade80" stroke="#15803d" stroke-width="3"/><ellipse cx="72" cy="44" rx="16" ry="12" fill="#22c55e" stroke="#15803d" stroke-width="3"/><ellipse cx="75" cy="44" rx="9" ry="8" fill="#0f172a"/><circle cx="46" cy="36" r="6" fill="#ffffff"/><circle cx="48" cy="36" r="3.5" fill="#0f172a"/><circle cx="50" cy="34" r="1.5" fill="#ffffff"/><ellipse cx="38" cy="48" rx="5" ry="3" fill="#86efac" opacity="0.7"/></svg>',
+  potato: '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="55" rx="36" ry="40" fill="#b45309" opacity="0.25"/><path d="M50 15 C75 15, 88 32, 88 58 C88 84, 72 94, 50 94 C28 94, 12 84, 12 58 C12 32, 25 15, 50 15 Z" fill="#d97706" stroke="#92400e" stroke-width="3.5"/><ellipse cx="32" cy="40" rx="3" ry="1.5" fill="#92400e" opacity="0.4"/><ellipse cx="68" cy="45" rx="4" ry="2" fill="#92400e" opacity="0.4"/><ellipse cx="40" cy="72" rx="3.5" ry="1.5" fill="#92400e" opacity="0.4"/><ellipse cx="62" cy="75" rx="3" ry="1.5" fill="#92400e" opacity="0.4"/><ellipse cx="38" cy="48" rx="8" ry="12" fill="#ffffff" stroke="#78350f" stroke-width="2"/><ellipse cx="62" cy="48" rx="8" ry="12" fill="#ffffff" stroke="#78350f" stroke-width="2"/><ellipse cx="41" cy="48" rx="4.5" ry="7" fill="#1e293b"/><ellipse cx="65" cy="48" rx="4.5" ry="7" fill="#1e293b"/><circle cx="43" cy="45" r="2" fill="#ffffff"/><circle cx="67" cy="45" r="2" fill="#ffffff"/><path d="M44 68 Q50 73 56 68" stroke="#78350f" stroke-width="2.5" stroke-linecap="round" fill="none"/><ellipse cx="28" cy="58" rx="4" ry="2" fill="#f87171" opacity="0.5"/><ellipse cx="72" cy="58" rx="4" ry="2" fill="#f87171" opacity="0.5"/></svg>',
+  potatoArmor: '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><circle cx="50" cy="52" r="46" fill="rgba(56, 189, 248, 0.22)" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6,4"/><path d="M50 15 C75 15, 88 32, 88 58 C88 84, 72 94, 50 94 C28 94, 12 84, 12 58 C12 32, 25 15, 50 15 Z" fill="#d97706" stroke="#92400e" stroke-width="3"/><ellipse cx="38" cy="45" rx="7" ry="10" fill="#ffffff"/><ellipse cx="62" cy="45" rx="7" ry="10" fill="#ffffff"/><ellipse cx="40" cy="45" rx="4" ry="6" fill="#0f172a"/><ellipse cx="64" cy="45" rx="4" ry="6" fill="#0f172a"/><circle cx="42" cy="43" r="1.8" fill="#ffffff"/><circle cx="66" cy="43" r="1.8" fill="#ffffff"/><path d="M22 28 Q50 6 78 28 Q50 20 22 28 Z" fill="#94a3b8" stroke="#0284c7" stroke-width="2.5"/><ellipse cx="50" cy="18" rx="6" ry="3" fill="#38bdf8"/><path d="M20 54 L32 86 L68 86 L80 54 Q50 62 20 54 Z" fill="#64748b" stroke="#38bdf8" stroke-width="3"/><circle cx="50" cy="72" r="7" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/><circle cx="50" cy="72" r="4" fill="#38bdf8"/><text x="50" y="38" font-size="12" text-anchor="middle" fill="#38bdf8" font-weight="900">🛡️</text></svg>',
+  cherry: '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><path d="M32 40 Q45 10 52 8 Q56 22 68 44" stroke="#15803d" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M50 8 Q65 4 72 12 Q58 18 50 8" fill="#22c55e" stroke="#15803d" stroke-width="1.5"/><circle cx="32" cy="58" r="22" fill="#dc2626" stroke="#991b1b" stroke-width="3"/><ellipse cx="26" cy="50" rx="6" ry="4" fill="#fca5a5" opacity="0.75"/><circle cx="28" cy="56" r="3.5" fill="#ffffff"/><circle cx="29" cy="56" r="2" fill="#000000"/><circle cx="38" cy="56" r="3.5" fill="#ffffff"/><circle cx="39" cy="56" r="2" fill="#000000"/><circle cx="68" cy="62" r="23" fill="#b91c1c" stroke="#7f1d1d" stroke-width="3"/><ellipse cx="62" cy="54" rx="7" ry="4.5" fill="#fca5a5" opacity="0.75"/><circle cx="63" cy="60" r="3.5" fill="#ffffff"/><circle cx="64" cy="60" r="2" fill="#000000"/><circle cx="73" cy="60" r="3.5" fill="#ffffff"/><circle cx="74" cy="60" r="2" fill="#000000"/></svg>'
+};
+
+
 function triggerBreachWarning(laneIdx) {
   const laneEl = document.getElementById("lane-" + laneIdx);
   if (laneEl) {
@@ -101,10 +217,10 @@ function cleanUnitTitle(raw) {
 
 // 植物性狀與成本
 const PLANT_TYPES = {
-  pea: { id: "pea", name: "胞器豌豆射手", icon: "🟢", cost: 50, maxHp: 100, atk: 20 },
-  nut: { id: "nut", name: "堅果細胞壁", icon: "🌰", cost: 60, maxHp: 350, atk: 0 },
-  sun: { id: "sun", name: "葉綠體葵花", icon: "🌻", cost: 40, maxHp: 80, atk: 0 },
-  cherry: { id: "cherry", name: "櫻桃胞器爆彈", icon: "🍒", cost: 100, maxHp: 1, atk: 999 }
+  pea: { id: "pea", name: "葉片豌豆射手 (營養器官)", icon: "🟢", cost: 50, maxHp: 120, atk: 22 },
+  nut: { id: "nut", name: "馬鈴薯細胞壁 (塊莖器官)", icon: "🥔", cost: 50, maxHp: 380, atk: 0 },
+  sun: { id: "sun", name: "葉綠體葵花 (生殖器官)", icon: "🌻", cost: 40, maxHp: 80, atk: 0 },
+  cherry: { id: "cherry", name: "櫻桃果實爆彈 (生殖器官)", icon: "🍒", cost: 100, maxHp: 1, atk: 999 }
 };
 
 // 4 大殭屍波次資料 (包含飛天跳躍殭屍)
@@ -225,11 +341,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   } catch (_) {}
 
-  // ⭐ 開局新手清晰引導：提示先答題累積陽光
+  // ⭐ 開局自動彈出居中作戰指引
   setTimeout(() => {
-    showToast("💡 <b>新手防衛指南</b>：開局請先點擊右下方<b>【❓ 答題賺陽光】</b>累積陽光能量，再點選草地或路線部署植物！", "info", 5000);
-    highlightQuizButton();
-  }, 1000);
+    showIntroGuideModal();
+  }, 600);
 });
 
 // 監聽 BioGameSuite 標準開局廣播
@@ -238,6 +353,21 @@ window.addEventListener('biogame:start', () => {
 });
 
 function initEventListeners() {
+
+  if (btnStartFirstQuiz) {
+    btnStartFirstQuiz.addEventListener("click", () => {
+      closeModal(introGuideModal);
+      openQuizModal();
+    });
+  }
+  if (btnEnterLawnDirect) {
+    btnEnterLawnDirect.addEventListener("click", () => {
+      closeModal(introGuideModal);
+      showToast("🛡️ 戰備倒數中！請隨時點擊右下角【❓ 答題賺陽光】！", "info", 3000);
+      highlightQuizButton();
+    });
+  }
+
   if (cardPea) cardPea.addEventListener("click", () => selectPlantType("pea"));
   if (cardNut) cardNut.addEventListener("click", () => selectPlantType("nut"));
   if (cardSun) cardSun.addEventListener("click", () => selectPlantType("sun"));
@@ -497,15 +627,25 @@ function deployPlantToCell(laneIdx, colIdx) {
     }
   }
 
-  // 櫻桃炸彈大招
+  // 🍒 櫻桃果實爆彈大招 (精準 3x3 延遲膨脹轟炸)
   if (selectedPlantKey === "cherry") {
-    deploySelectedPlantToLane(laneIdx);
+    executeCherryBomb(laneIdx, colIdx);
     return;
   }
 
-  // 檢查該格子是否已有植物
+  // 🥔 若點擊已有植物的格子，檢查是否為馬鈴薯升級防護衣
   if (lawnState[laneIdx][colIdx]) {
-    showToast(`🌿 該格子已部署了 ${PLANT_TYPES[lawnState[laneIdx][colIdx].key]?.name || "植物"}，請點擊其他空格！`, "warning");
+    const existing = lawnState[laneIdx][colIdx];
+    if (existing.key === 'nut') {
+      if (!existing.hasArmor) {
+        upgradePotatoWithArmor(laneIdx, colIdx, existing);
+        return;
+      } else {
+        showToast(`🛡️ 該馬鈴薯已穿上防護衣（當前生命值: ${Math.round(existing.hp)}/850）！`, "info", 2000);
+        return;
+      }
+    }
+    showToast(`🌿 該格子已部署了 ${PLANT_TYPES[existing.key]?.name || "植物"}，請點擊其他空格！`, "warning");
     return;
   }
 
@@ -529,7 +669,11 @@ function deployPlantToCell(laneIdx, colIdx) {
     pEl.className = "plant-sprite";
     pEl.id = `plant-${laneIdx}-${colIdx}`;
     if (pData.id === 'pea') {
-      pEl.innerHTML = '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="88" rx="28" ry="8" fill="#15803d" opacity="0.4"/><path d="M46 55 Q42 75 48 88" stroke="#16a34a" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M44 76 Q30 70 24 78 Q36 84 46 80" fill="#22c55e"/><path d="M50 78 Q66 74 72 82 Q58 86 48 82" fill="#16a34a"/><path d="M35 40 Q20 32 16 42 Q25 48 36 46" fill="#22c55e"/><circle cx="48" cy="45" r="25" fill="#4ade80" stroke="#15803d" stroke-width="3"/><ellipse cx="72" cy="44" rx="16" ry="12" fill="#22c55e" stroke="#15803d" stroke-width="3"/><ellipse cx="75" cy="44" rx="9" ry="8" fill="#0f172a"/><circle cx="46" cy="36" r="6" fill="#ffffff"/><circle cx="48" cy="36" r="3.5" fill="#0f172a"/><circle cx="50" cy="34" r="1.5" fill="#ffffff"/><ellipse cx="38" cy="48" rx="5" ry="3" fill="#86efac" opacity="0.7"/></svg>';
+      pEl.innerHTML = SVG_ASSETS.pea;
+    } else if (pData.id === 'nut') {
+      pEl.innerHTML = SVG_ASSETS.potato;
+    } else if (pData.id === 'cherry') {
+      pEl.innerHTML = SVG_ASSETS.cherry;
     } else {
       pEl.textContent = pData.icon;
     }
@@ -702,7 +846,11 @@ function deploySelectedPlantToLane(laneIdx) {
     pEl.className = "plant-sprite";
     pEl.id = `plant-${laneIdx}-${emptyCol}`;
     if (pData.id === 'pea') {
-      pEl.innerHTML = '<svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="88" rx="28" ry="8" fill="#15803d" opacity="0.4"/><path d="M46 55 Q42 75 48 88" stroke="#16a34a" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M44 76 Q30 70 24 78 Q36 84 46 80" fill="#22c55e"/><path d="M50 78 Q66 74 72 82 Q58 86 48 82" fill="#16a34a"/><path d="M35 40 Q20 32 16 42 Q25 48 36 46" fill="#22c55e"/><circle cx="48" cy="45" r="25" fill="#4ade80" stroke="#15803d" stroke-width="3"/><ellipse cx="72" cy="44" rx="16" ry="12" fill="#22c55e" stroke="#15803d" stroke-width="3"/><ellipse cx="75" cy="44" rx="9" ry="8" fill="#0f172a"/><circle cx="46" cy="36" r="6" fill="#ffffff"/><circle cx="48" cy="36" r="3.5" fill="#0f172a"/><circle cx="50" cy="34" r="1.5" fill="#ffffff"/><ellipse cx="38" cy="48" rx="5" ry="3" fill="#86efac" opacity="0.7"/></svg>';
+      pEl.innerHTML = SVG_ASSETS.pea;
+    } else if (pData.id === 'nut') {
+      pEl.innerHTML = SVG_ASSETS.potato;
+    } else if (pData.id === 'cherry') {
+      pEl.innerHTML = SVG_ASSETS.cherry;
     } else {
       pEl.textContent = pData.icon;
     }
@@ -720,12 +868,13 @@ function startTimers() {
 
   gameLoopTimer = setInterval(gameLoop, 100);
 
-  // 開局 3 秒首隻病原體殭屍必定出動，消除空等當機疑慮
+  // 開局 14 秒安全戰備期：留給學生充足時間答題與種下第一波防線
   setTimeout(() => {
     if (activeZombies.length === 0 && !isTeacherFrozen && gameLoopTimer) {
       spawnZombie();
+      showToast("🚨 第 1 隻病原體殭屍已進入草地！請指揮植物射擊！", "danger", 3000);
     }
-  }, 3000);
+  }, 14000);
 
   waveCountdownTimer = setInterval(() => {
     if (isTeacherFrozen) return;
@@ -784,13 +933,28 @@ function gameLoop() {
     if (targetCol >= 0 && targetCol < 10 && lawnState[z.lane][targetCol]) {
       const plant = lawnState[z.lane][targetCol];
 
-      // 飛天噬菌體殭屍 (🪰) 主動越過前排堅果，直撲後排！
+      // 飛天噬菌體殭屍 (🪰) 嘗試飛越，若遇到【防護衣馬鈴薯】則會被防護罩震落攔截！
       if (z.isVaulting && !z.hasVaulted) {
-        z.hasVaulted = true;
-        z.posX -= colWidth * 2.2; // 飛越 2.2 個格子直達後排
+        if (plant.hasArmor) {
+          z.hasVaulted = true; // 被防護衣阻擋，落地啃咬
+          showToast("🛡️ 合金防護罩成功攔截飛天噬菌體！", "info", 1500);
+          isEating = true;
+        } else {
+          z.hasVaulted = true;
+          z.posX -= colWidth * 2.2; // 飛越一般堅果直撲後排
+        }
       } else {
         isEating = true;
         plant.hp -= z.atk * 0.1;
+        // 防護衣破損降級特效
+        if (plant.hasArmor && plant.hp <= 380) {
+          plant.hasArmor = false;
+          const pEl = document.getElementById(`plant-${z.lane}-${targetCol}`);
+          if (pEl) {
+            pEl.innerHTML = SVG_ASSETS.potato;
+            showToast("⚠️ 第 " + (z.lane + 1) + " 路馬鈴薯防護衣已碎裂！請適時加固！", "warning", 1500);
+          }
+        }
         if (plant.hp <= 0) {
           lawnState[z.lane][targetCol] = null;
           const pEl = document.getElementById(`plant-${z.lane}-${targetCol}`);

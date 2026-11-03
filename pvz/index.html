@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>植物大戰殭屍：細胞防衛戰 - Plants vs. Zombies Cell Defense</title>
-  <link rel="stylesheet" href="style.css?v=2.6">
+  <link rel="stylesheet" href="style.css?v=2.7">
 </head>
 <body>
 
@@ -60,29 +60,33 @@
             <svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="88" rx="28" ry="8" fill="#15803d" opacity="0.4"/><path d="M46 55 Q42 75 48 88" stroke="#16a34a" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M44 76 Q30 70 24 78 Q36 84 46 80" fill="#22c55e"/><path d="M50 78 Q66 74 72 82 Q58 86 48 82" fill="#16a34a"/><path d="M35 40 Q20 32 16 42 Q25 48 36 46" fill="#22c55e"/><circle cx="48" cy="45" r="25" fill="#4ade80" stroke="#15803d" stroke-width="3"/><ellipse cx="72" cy="44" rx="16" ry="12" fill="#22c55e" stroke="#15803d" stroke-width="3"/><ellipse cx="75" cy="44" rx="9" ry="8" fill="#0f172a"/><circle cx="46" cy="36" r="6" fill="#ffffff"/><circle cx="48" cy="36" r="3.5" fill="#0f172a"/><circle cx="50" cy="34" r="1.5" fill="#ffffff"/><ellipse cx="38" cy="48" rx="5" ry="3" fill="#86efac" opacity="0.7"/></svg>
           </span>
           <div class="card-info">
-            <b>胞器豌豆射手</b>
+            <b>葉片豌豆射手 (營養器官)</b>
             <small>☀️ 50 陽光</small>
           </div>
         </div>
         <div class="plant-card" id="cardNut" onclick="selectPlantType('nut')">
-          <span class="card-icon">🌰</span>
+          <span class="card-icon" style="width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><ellipse cx="50" cy="55" rx="36" ry="40" fill="#b45309" opacity="0.25"/><path d="M50 15 C75 15, 88 32, 88 58 C88 84, 72 94, 50 94 C28 94, 12 84, 12 58 C12 32, 25 15, 50 15 Z" fill="#d97706" stroke="#92400e" stroke-width="3.5"/><ellipse cx="38" cy="48" rx="8" ry="12" fill="#ffffff" stroke="#78350f" stroke-width="2"/><ellipse cx="62" cy="48" rx="8" ry="12" fill="#ffffff" stroke="#78350f" stroke-width="2"/><ellipse cx="41" cy="48" rx="4.5" ry="7" fill="#1e293b"/><ellipse cx="65" cy="48" rx="4.5" ry="7" fill="#1e293b"/><circle cx="43" cy="45" r="2" fill="#ffffff"/><circle cx="67" cy="45" r="2" fill="#ffffff"/><path d="M44 68 Q50 73 56 68" stroke="#78350f" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+          </span>
           <div class="card-info">
-            <b>堅果細胞壁</b>
-            <small>☀️ 60 陽光</small>
+            <b>馬鈴薯細胞壁 (塊莖器官)</b>
+            <small>☀️ 50 陽光 · 點擊加裝防護衣</small>
           </div>
         </div>
         <div class="plant-card" id="cardSun" onclick="selectPlantType('sun')">
           <span class="card-icon">🌻</span>
           <div class="card-info">
-            <b>葉綠體葵花</b>
+            <b>葉綠體葵花 (生殖器官)</b>
             <small>☀️ 30 陽光</small>
           </div>
         </div>
         <div class="plant-card" id="cardCherry" onclick="selectPlantType('cherry')">
-          <span class="card-icon">🍒</span>
+          <span class="card-icon" style="width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 100 100" width="100%" height="100%" style="display:block;"><path d="M32 40 Q45 10 52 8 Q56 22 68 44" stroke="#15803d" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M50 8 Q65 4 72 12 Q58 18 50 8" fill="#22c55e" stroke="#15803d" stroke-width="1.5"/><circle cx="32" cy="58" r="22" fill="#dc2626" stroke="#991b1b" stroke-width="3"/><ellipse cx="26" cy="50" rx="6" ry="4" fill="#fca5a5" opacity="0.75"/><circle cx="68" cy="62" r="23" fill="#b91c1c" stroke="#7f1d1d" stroke-width="3"/><ellipse cx="62" cy="54" rx="7" ry="4.5" fill="#fca5a5" opacity="0.75"/></svg>
+          </span>
           <div class="card-info">
-            <b>櫻桃胞器爆彈</b>
-            <small>☀️ 100 陽光 (大招)</small>
+            <b>櫻桃果實爆彈 (生殖器官)</b>
+            <small>☀️ 100 陽光 · 3x3 區域大招</small>
           </div>
         </div>
 
@@ -112,6 +116,43 @@
   </div>
 
   <!-- ==================== 彈窗系統 ==================== -->
+
+  <!-- 0. 🌱 開局新手戰備引導 Modal -->
+  <div class="modal-overlay hidden" id="introGuideModal">
+    <div class="modal-box intro-box">
+      <div class="modal-header">
+        <h2>🌱 細胞防衛戰：作戰指揮指引</h2>
+      </div>
+      <div class="intro-content">
+        <div class="intro-step green">
+          <div class="step-num">1</div>
+          <div class="step-desc">
+            <b>☀️ 先答題賺取光合能量</b>
+            <p>目前細胞膜能量告急！每答對 1 題生物挑戰，立即獲得 <b>+60 陽光</b>！</p>
+          </div>
+        </div>
+        <div class="intro-step blue">
+          <div class="step-num">2</div>
+          <div class="step-desc">
+            <b>🌿 雙軌部署與直接點選草地</b>
+            <p>先選取植物卡片，即可<b>直接點選草地任意空格</b>精準種植！</p>
+          </div>
+        </div>
+        <div class="intro-step orange">
+          <div class="step-num">3</div>
+          <div class="step-desc">
+            <b>🥔 穿上防護衣 ＆ 🍒 櫻桃爆彈</b>
+            <p>點擊場上馬鈴薯可花費 40 陽光穿上<b>【合金防護衣】</b>抵擋飛天怪！危急時部署櫻桃果實爆彈清空 3x3 區域！</p>
+          </div>
+        </div>
+      </div>
+      <div class="intro-actions">
+        <button id="btnStartFirstQuiz" class="btn-action btn-gold-large">🚀 立即答題領取第一筆陽光！</button>
+        <button id="btnEnterLawnDirect" class="btn-action btn-secondary">先進入戰場觀看草地 ➡️</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- 1. 生物題目作答 Modal (題目開啟時殭屍自動 10% 龜速緩速) -->
   <div class="modal-overlay hidden" id="quizModal">
@@ -222,6 +263,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=5.0"></script>
-  <script src="game.js?v=4.7"></script>
+  <script src="game.js?v=4.8"></script>
 </body>
 </html>

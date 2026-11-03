@@ -499,3 +499,146 @@ body {
   0% { background: transparent; }
   100% { background: rgba(239, 68, 68, 0.35); }
 }
+
+
+/* ==================== V4.8 專屬樣式 ==================== */
+.intro-box {
+  max-width: 580px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: 2.5px solid #38bdf8;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.3);
+  padding: 24px;
+  color: #f8fafc;
+}
+
+.intro-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.intro-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border-left: 5px solid #38bdf8;
+}
+
+.intro-step.green { border-color: #22c55e; }
+.intro-step.blue { border-color: #38bdf8; }
+.intro-step.orange { border-color: #f59e0b; }
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.intro-step.green .step-num { background: #22c55e; color: white; }
+.intro-step.orange .step-num { background: #f59e0b; color: white; }
+
+.step-desc b { font-size: 1.05rem; display: block; margin-bottom: 2px; }
+.step-desc p { margin: 0; font-size: 0.9rem; color: #cbd5e1; line-height: 1.4; }
+
+.intro-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-gold-large {
+  flex: 1.6;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+  padding: 12px 20px;
+  border-radius: 25px;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease;
+}
+.btn-gold-large:hover { transform: scale(1.03); }
+
+/* 櫻桃倒數膨脹特效 */
+.cherry-countdown {
+  animation: cherryExpand 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes cherryExpand {
+  0% { transform: scale(0.95); filter: drop-shadow(0 0 5px #ef4444); }
+  100% { transform: scale(1.28); filter: drop-shadow(0 0 20px #dc2626) brightness(1.2); }
+}
+
+/* 櫻桃爆炸衝擊波 */
+.cherry-blast-wave {
+  position: absolute;
+  width: 28%;
+  height: 55%;
+  transform: translate(-30%, -20%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 20px #ef4444, 0 0 40px #f59e0b;
+  z-index: 50;
+  pointer-events: none;
+  animation: blastFade 0.7s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+@keyframes blastFade {
+  0% { transform: translate(-30%, -20%) scale(0.4); opacity: 0; }
+  30% { transform: translate(-30%, -20%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-30%, -20%) scale(1.6); opacity: 0; }
+}
+
+/* 螢幕震撼效果 */
+.screen-shake {
+  animation: screenShake 0.45s ease;
+}
+
+@keyframes screenShake {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-8px, 6px); }
+  40% { transform: translate(8px, -6px); }
+  60% { transform: translate(-5px, 4px); }
+  80% { transform: translate(5px, -3px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* 殭屍被炸成灰燼特效 */
+.zombie-ash {
+  animation: zombieVanish 0.4s ease forwards !important;
+}
+
+@keyframes zombieVanish {
+  0% { filter: brightness(2) contrast(2); transform: scale(1.1); }
+  100% { opacity: 0; filter: grayscale(1) brightness(0.2); transform: scale(0.6) translateY(10px); }
+}
+
+/* 馬鈴薯防護衣升級彈出反饋 */
+.plant-armored-pop {
+  animation: armorPop 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+@keyframes armorPop {
+  0% { transform: scale(0.7); }
+  50% { transform: scale(1.3); filter: drop-shadow(0 0 15px #38bdf8); }
+  100% { transform: scale(1); }
+}
