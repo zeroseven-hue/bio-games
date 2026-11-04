@@ -1072,13 +1072,24 @@ body {
 #quizModal .quiz-top-bar { flex-wrap: wrap; gap: 12px; }
 #quizModal .timer-banner { color: #784421; border: 1px solid #d8c392; background: #f3e9cb; padding: 9px 13px; border-radius: 7px; font-variant-numeric: tabular-nums; }
 #quizModal .companion-skill-bar { flex-wrap: wrap; }
-#quizModal .btn-skill { min-height: 44px; padding: 10px 14px; background: #6d4c65; }
+#quizModal .btn-skill { min-height: 44px; padding: 10px 14px; }
 #quizModal .shield-notice { padding: 8px 10px; background: #e3ebd5; color: #35513a; }
 #quizModal .quiz-stem { color: #293f31; font-size: clamp(1.15rem, 1.7vw, 1.4rem); line-height: 1.85; margin: 22px 0; overflow-wrap: anywhere; }
 #quizModal .quiz-options-grid { gap: 12px; }
 #quizModal .btn-option { min-height: 60px; padding: 16px 20px; border: 1px solid #c7ccb6; border-radius: 10px; background: #fffef9; color: #2c4032; box-shadow: 0 2px 0 #e2e0cf; font-size: 1.05rem; line-height: 1.65; transition: background .16s, border-color .16s, box-shadow .16s; }
 #quizModal .btn-option b { display: inline-block; padding-right: 12px; margin-right: 10px; border-right: 1px solid #d6dcc8; color: #5d6e4b; }
 #quizModal .btn-option:disabled { opacity: 1; cursor: default; }
+#quizModal .btn-option.pudding-eliminated {
+  opacity: 0.28 !important;
+  text-decoration: line-through !important;
+  filter: grayscale(85%) !important;
+  pointer-events: none !important;
+  background: #f1f5f9 !important;
+  border: 1px dashed #94a3b8 !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
 #quizModal .btn-option.correct { border: 2px solid #60804c; background: #e6efd8; color: #27472b; box-shadow: inset 5px 0 #60804c; animation: questAnswer .22s ease-out; }
 #quizModal .btn-option.incorrect { border: 2px solid #ad6348; background: #f8e7da; color: #6b3226; box-shadow: inset 5px 0 #ad6348; }
 #quizModal .quiz-explanation { margin: 20px 0; padding: 18px; border: 1px solid #d2bf86; border-radius: 10px; background: #f1e8cc; color: #49412c; font-size: .98rem; line-height: 1.85; }

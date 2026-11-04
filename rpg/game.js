@@ -302,6 +302,10 @@ function initEventListeners() {
   btnLeaveCamp.addEventListener("click", leaveCampToNextStage);
 
   btnUsePuddingSkill.addEventListener("click", usePudding5050);
+  btnUsePuddingSkill.addEventListener("pointerdown", (e) => {
+    // 預先啟動音效上下文並響應觸控
+    unlockAudioContext();
+  });
 
   btnAttackBoss.addEventListener("click", () => {
     if (!isCurrentQuizAnsweredCorrectly) {
@@ -718,6 +722,7 @@ function startCountdownTimer() {
 function handleQuizTimeout() {
   if (isQuizAnsweringLocked) return;
   isQuizAnsweringLocked = true;
+  btnUsePuddingSkill.classList.add("hidden");
 
   // 停用所有選項按鈕防點擊
   const allBtns = quizOptions.querySelectorAll("button.btn-option");
@@ -750,6 +755,8 @@ function handleQuizTimeout() {
 
 function usePudding5050() {
   if (!hasPudding || puddingSkillUsedInBattle || isQuizAnsweringLocked) return;
+  if (!currentActiveQuestion || typeof currentActiveQuestion.answer !== "number") return;
+
   puddingSkillUsedInBattle = true;
   btnUsePuddingSkill.classList.add("hidden");
   updateUI();
@@ -761,20 +768,23 @@ function usePudding5050() {
   toRemove.forEach(idx => {
     const btn = document.getElementById(`opt-${idx}`);
     if (btn) {
-      btn.style.opacity = "0.3";
-      btn.style.pointerEvents = "none";
+      btn.classList.add("pudding-eliminated");
       btn.disabled = true;
-      btn.innerHTML += " <small>(🐱 布丁移除)</small>";
+      btn.style.pointerEvents = "none";
+      btn.innerHTML += ' <span style="font-size:0.85em;color:#9333ea;font-weight:700;">(🐱 布丁刪除)</span>';
     }
   });
 
-  playCoinSound();
+  // 播放布丁專屬魔法音效 (雙音連續星光 chime)
+  playTone(880, "sine", 0.15, 0, 0.15);
+  playTone(1320, "triangle", 0.25, 0.08, 0.15);
 }
 
 function handleQuizSelect(selectedIndex, btnEl) {
   if (isQuizAnsweringLocked) return;
   isQuizAnsweringLocked = true;
   clearInterval(countdownTimer);
+  btnUsePuddingSkill.classList.add("hidden");
 
   // 停用全部選項，防止連續點擊或答錯改選
   const allBtns = quizOptions.querySelectorAll("button.btn-option");
