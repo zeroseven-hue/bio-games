@@ -1,0 +1,192 @@
+/* Local presentation layer. Gameplay and shared suite overlays are untouched. */
+body.bio-adventure {
+  background: #eef1e8;
+  background-image: radial-gradient(#cbd5c5 1px, transparent 1px);
+  background-size: 22px 22px;
+  padding: 24px 16px;
+  align-items: flex-start;
+  color: #193a34;
+}
+.bio-adventure > .game-wrapper {
+  width: 100%; max-width: 1120px; min-height: calc(100vh - 48px);
+  border: 1px solid #bccbbd; border-radius: 22px;
+  background: #fffef8; box-shadow: 0 12px 36px #233d2a16;
+}
+.game-wrapper .adventure-masthead {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 16px 26px; background: #fffef8;
+  border-bottom: 1px solid #dce3d6;
+}
+.game-wrapper .adventure-brand { display: flex; align-items: center; gap: 12px; }
+.game-wrapper .brand-mark {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  color: #fff8d9; background: #244c3d; border-radius: 10px;
+  box-shadow: inset 0 -4px #15382b; font: 900 24px/1 monospace;
+}
+.game-wrapper .brand-kicker { color: #566b5e; font: 700 10px/1.4 monospace; letter-spacing: .18em; }
+.game-wrapper .adventure-masthead h1 { font-size: 19px; color: #203f33; letter-spacing: .04em; line-height: 1.5; }
+.game-wrapper .adventure-caption { font-size: 12px; color: #4d6255; text-align: right; line-height: 1.7; }
+.game-wrapper .game-header {
+  flex-wrap: wrap; gap: 10px 18px; padding: 12px 24px;
+  color: #193a34; background: #f4f5ea; box-shadow: none;
+  border-bottom: 1px solid #cfdbc9;
+}
+.game-wrapper .status-left { flex-wrap: wrap; gap: 12px; }
+.game-wrapper .status-right { flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.game-wrapper .heart-box { min-width: 84px; min-height: 30px; }
+.game-wrapper .heart-box .heart { font-size: 21px; filter: none; }
+.game-wrapper .stage-badge {
+  border: 1px solid #b9cbb4; background: #e6efda; color: #203e2c;
+  border-radius: 7px; box-shadow: none; padding: 8px 12px; font-size: 13px;
+}
+.game-wrapper .coin-counter {
+  background: #fff0b9; color: #634714; border: 1px solid #d9bd6a;
+  border-radius: 8px; font-size: 17px; padding: 8px 12px;
+  font-variant-numeric: tabular-nums;
+}
+.game-wrapper .btn-tool {
+  min-height: 44px; min-width: 44px; padding: 9px 11px;
+  background: #fffef8; color: #284334; border: 1px solid #bac9b9;
+  border-radius: 8px; font-size: 13px; box-shadow: 0 2px #d8dfcf;
+  transition: background .15s, transform .15s;
+  touch-action: manipulation;
+}
+.game-wrapper .btn-freeze { color: #593e72; background: #f2eafa; border-color: #cdb8df; }
+.game-wrapper .mario-stage-scene {
+  --scene-art: url('assets/forest.svg'); --ground: #4f7750; --earth: #816545;
+  height: clamp(230px, 28vw, 290px); flex: 0 0 auto;
+  background: #d9ebcf; border: 0; isolation: isolate;
+}
+.game-wrapper .mario-stage-scene.stage-cave { --scene-art: url('assets/cave.svg'); --ground: #627785; --earth: #364a59; background: #23384c; }
+.game-wrapper .mario-stage-scene.stage-water { --scene-art: url('assets/water.svg'); --ground: #c5ba7e; --earth: #93865f; background: #367e91; }
+.game-wrapper .mario-stage-scene.stage-castle { --scene-art: url('assets/castle.svg'); --ground: #896f6a; --earth: #4d4248; background: #443345; }
+.game-wrapper .mario-stage-scene::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: var(--scene-art) center bottom / cover no-repeat;
+}
+.game-wrapper .mario-stage-scene::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 23px;
+  background: repeating-linear-gradient(90deg, transparent 0 38px, #ffffff16 38px 40px),
+    linear-gradient(var(--ground) 0 6px, var(--earth) 6px 100%);
+  border-top: 3px solid #ffffff55; z-index: 1;
+}
+.game-wrapper .scene-caption {
+  position: absolute; top: 16px; left: 24px; z-index: 3;
+  font: 700 10px/1.6 monospace; letter-spacing: .16em;
+  color: #203e2c; background: #fffef5e8; border: 1px solid #ffffffb0;
+  padding: 6px 10px; border-radius: 4px; pointer-events: none;
+}
+.game-wrapper .bg-decorations { opacity: .6; }
+.game-wrapper .stepped-path { padding: 0 16px 27px; }
+.game-wrapper .q-block-wrapper { bottom: 85px; }
+.game-wrapper .q-block {
+  width: 44px; height: 44px; border-radius: 5px;
+  background: linear-gradient(135deg, #ffe59b, #e7aa35);
+  border: 2px solid #8b5c20; box-shadow: 0 4px #835e31, inset 0 3px #fff2c3;
+  text-shadow: 0 1px #ffffff70; font-size: 23px;
+}
+.game-wrapper .q-block.bumped { background: #b4bea8; border-color: #5c7359; box-shadow: 0 3px #52684f, inset 0 2px #e0e7d4; }
+.game-wrapper .q-block.castle-block { background: #f3e3c2; border-color: #756444; box-shadow: 0 4px #655235, inset 0 3px #fff8e7; }
+.game-wrapper .step-label {
+  min-width: 28px; background: #fffef1; color: #294333; border: 1px solid #9aaa8a;
+  box-shadow: 0 2px #1b332a22; border-radius: 4px; padding: 3px 8px;
+  text-align: center; text-shadow: none; font-size: 12px;
+}
+.game-wrapper .step.active .step-label { color: #fffef1; background: #244f3c; border-color: #193e2c; }
+.game-wrapper .mario-character { bottom: 24px; filter: drop-shadow(0 3px 1px #213a3a50); }
+.game-wrapper .stickman-svg { width: 54px; height: 68px; overflow: visible; }
+.game-wrapper .quiz-card-container {
+  padding: 24px 32px 30px; gap: 20px; background: #fffef8;
+  justify-content: flex-start; border-top: 1px solid #e4e3ce;
+}
+.game-wrapper .quiz-top-info { gap: 12px; flex-wrap: wrap; align-items: flex-start; margin: 0; }
+.game-wrapper .unit-label {
+  max-width: 100%; overflow-wrap: anywhere; border: 0; border-left: 3px solid #719252;
+  background: #edf2df; color: #314d2c; border-radius: 0 5px 5px 0; padding: 7px 12px; line-height: 1.6;
+}
+.game-wrapper .pool-counter { color: #586554; font-size: 12px; padding-top: 8px; font-variant-numeric: tabular-nums; }
+.game-wrapper .quiz-question-stem {
+  color: #213d32; font-size: clamp(21px, 2.2vw, 27px); line-height: 1.7;
+  font-weight: 750; margin: 0; overflow-wrap: anywhere;
+}
+.game-wrapper .quiz-question-stem img,
+.game-wrapper .btn-option img { max-width: 100%; height: auto; }
+.game-wrapper .quiz-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: auto; }
+.game-wrapper .btn-option {
+  position: relative; min-height: 70px; min-width: 0; padding: 17px 20px;
+  color: #294337; background: #ffffff; border: 1px solid #b8c8b2;
+  border-radius: 10px; box-shadow: 0 4px #e0e5d5; font-size: 18px; line-height: 1.6;
+  overflow-wrap: anywhere; font-weight: 650; touch-action: manipulation;
+  transition: background .15s, border-color .15s, transform .15s, box-shadow .15s;
+}
+.game-wrapper .btn-option > b { display: inline-block; color: #526c42; margin-right: 10px; font-family: ui-monospace, monospace; }
+.game-wrapper .btn-option.correct { border-color: #285c39 !important; background: #e0f0d8 !important; color: #163c24 !important; box-shadow: 0 4px #71966a; }
+.game-wrapper .btn-option.incorrect { border-color: #994a3b !important; background: #f9e7df !important; color: #6a2d23 !important; box-shadow: 0 4px #c99c8e; }
+.game-wrapper .btn-option.correct::after { content: '✓'; color: #245a32; margin-left: 12px; font-weight: 900; }
+.game-wrapper .btn-option.incorrect::after { content: '×'; color: #7f3426; margin-left: 12px; font-weight: 900; }
+.game-wrapper .kw-highlight { color: #7f3024; background: #f8e1b5; border-radius: 3px; padding: 0 4px; }
+.game-wrapper .zoomed-text .quiz-question-stem { font-size: 30px; }
+.game-wrapper .zoomed-text .btn-option { font-size: 23px; }
+.game-wrapper .teacher-panel { background: #f2f5e9; border-color: #d0dbc8; }
+.game-wrapper .unit-select { min-height: 44px; max-width: 100%; background: white; color: #213d32; }
+.game-wrapper .modal-overlay { padding: 18px; overflow-y: auto; background: #172f28b8; backdrop-filter: blur(3px); }
+.game-wrapper .modal-box {
+  flex-shrink: 0; width: 100%; max-height: calc(100vh - 36px); max-height: calc(100dvh - 36px);
+  overflow-y: auto; overscroll-behavior: contain; background: #fffef8; color: #213d32;
+  border: 1px solid #becbb3; border-top: 5px solid #809b58; border-radius: 16px;
+  box-shadow: 0 20px 70px #14271b40; line-height: 1.75;
+}
+.game-wrapper .modal-box h2 { font-size: 24px; line-height: 1.5; margin-bottom: 12px; }
+.game-wrapper .memo-content { margin-top: 16px; padding: 16px; background: #f2f0e3; border-radius: 8px; }
+.game-wrapper #memoText { margin-top: 8px; font-size: 18px; }
+.game-wrapper .btn-action, .game-wrapper .btn-save-settings {
+  min-height: 48px; background: #315a3d; color: #fffef5; border-radius: 8px; touch-action: manipulation;
+}
+.game-wrapper .btn-danger { background: #8b4034; }
+.game-wrapper .btn-secondary-close { background: #566353; }
+.game-wrapper .cert-card { border: 2px solid #b79a52; }
+.game-wrapper .cert-ribbon { color: #5a4217; background: #f5e1a5; }
+.game-wrapper .cert-title { color: #365137; font-size: clamp(18px, 4vw, 25px); overflow-wrap: anywhere; }
+.game-wrapper .cert-footer p { color: #74521c; }
+.game-wrapper .cert-timestamp { color: #5a6657; }
+.game-wrapper .meta-label { color: #52614d; }
+.game-wrapper .meta-val { overflow-wrap: anywhere; }
+.game-wrapper .input-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.game-wrapper .input-row input { min-width: 0; min-height: 44px; width: 100%; padding: 8px 12px; border: 1px solid #aebeaa; border-radius: 6px; font-size: 18px; }
+.game-wrapper button:focus-visible, .game-wrapper select:focus-visible, .game-wrapper input:focus-visible { outline: 3px solid #956719; outline-offset: 4px; }
+@media (hover: hover) {
+  .game-wrapper .btn-option:hover { background: #eff4e5; border-color: #668558; transform: translateY(-2px); }
+  .game-wrapper .btn-tool:hover { background: #eaf0e0; transform: translateY(-1px); }
+}
+.game-wrapper .btn-option:active, .game-wrapper .btn-tool:active { transform: translateY(2px); box-shadow: none; }
+@media (max-width: 900px) {
+  .game-wrapper .game-header { padding: 10px 18px; gap: 10px; }
+  .game-wrapper .status-right { flex-basis: 100%; margin-left: 0; }
+  .game-wrapper .status-center { margin-left: auto; }
+}
+@media (max-width: 600px) {
+  body.bio-adventure { padding: 8px; }
+  .bio-adventure > .game-wrapper { min-height: calc(100vh - 16px); border-radius: 14px; }
+  .game-wrapper .adventure-masthead { padding: 14px 16px; }
+  .game-wrapper .adventure-caption { display: none; }
+  .game-wrapper .adventure-masthead h1 { font-size: 17px; }
+  .game-wrapper .game-header { padding: 10px 12px; }
+  .game-wrapper .status-left { gap: 8px; }
+  .game-wrapper .stage-badge { font-size: 12px; padding: 6px 8px; }
+  .game-wrapper .coin-counter { padding: 6px 9px; }
+  .game-wrapper .btn-tool { font-size: 12px; padding: 8px; }
+  .game-wrapper .scene-caption { left: 14px; top: 12px; }
+  .game-wrapper .stepped-path { padding-left: 2px; padding-right: 2px; }
+  .game-wrapper .q-block { width: 35px; height: 36px; font-size: 19px; }
+  .game-wrapper .stickman-svg { width: 44px; height: 56px; }
+  .game-wrapper .quiz-card-container { padding: 20px 16px 26px; gap: 16px; }
+  .game-wrapper .quiz-options-grid { grid-template-columns: minmax(0, 1fr); }
+  .game-wrapper .btn-option { min-height: 60px; font-size: 17px; padding: 14px; }
+  .game-wrapper .modal-overlay { padding: 12px; }
+  .game-wrapper .modal-box { padding: 20px; max-height: calc(100dvh - 24px); }
+  .game-wrapper .btn-group-row { flex-direction: column; gap: 0; }
+  .game-wrapper .cert-border { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-wrapper *, .game-wrapper *::before, .game-wrapper *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

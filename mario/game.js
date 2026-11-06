@@ -49,8 +49,11 @@ let isTeacherFrozen = false;
 let isSoundMuted = false;
 
 let dispatchedUnitTitle = "";
-let targetQCount = 10;
+let isDispatchMode = false;
+let targetQCount = 20; // 4關每關5題 = 20題，全破4關
 let totalAnsweredCount = 0;
+let activeFeedbackTimer = null;
+let activeAnimTimer = null;
 
 let allManifestUnits = [];
 let rawQuestionsByUnit = {}; // 原始題庫字典
@@ -116,12 +119,60 @@ const btnDiscardSnapshot = document.getElementById("btnDiscardSnapshot");
 
 // 頁面初始化
 window.addEventListener("DOMContentLoaded", async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const unitParam = urlParams.get("unit") || urlParams.get("file");
+
+  if (!unitParam) {
+    showNoDispatchBlocker();
+    return;
+  }
+
   initEventListeners();
   await loadManifestAndUnits();
   setupTeacherDropdowns();
-  checkSnapshotOnLoad();
-  startNewGame();
+  const hasSnapshot = checkSnapshotOnLoad();
+  if (!hasSnapshot) {
+    startNewGame();
+  }
 });
+
+function showNoDispatchBlocker() {
+  const wrapper = document.querySelector(".game-wrapper") || document.body;
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.id = "noDispatchBlockerOverlay";
+  overlay.style.zIndex = "999999";
+  overlay.innerHTML = `
+    <div class="modal-box" style="text-align:center; padding:32px 24px; max-width:440px; background:#ffffff; border:3px solid #d97706; border-radius:18px; box-shadow:0 20px 45px rgba(0,0,0,0.3);">
+      <div style="font-size:3.2rem; margin-bottom:12px;">🔒</div>
+      <h2 style="font-size:1.45rem; color:#451a03; margin-bottom:12px; font-weight:900;">課堂測驗守門員</h2>
+      <p style="font-size:1rem; color:#78350f; line-height:1.6; margin-bottom:20px;">
+        本遊戲為<b>國中生物課堂專屬評量平台</b>。<br>
+        目前尚未帶入派卷參數，學生請掃描教室白板上的 QR Code 進入作答！
+      </p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="btnTeacherFreePlay" class="btn-action" style="background:linear-gradient(135deg, #16a34a, #15803d); color:#ffffff; font-weight:800; padding:12px 20px; border-radius:12px; border:none; cursor:pointer;">
+          👩‍🏫 教師免派卷快速體驗 / 備課測試 ➜
+        </button>
+        <a href="../index.html" class="btn-action" style="display:inline-block; text-decoration:none; background:linear-gradient(135deg, #ea580c, #c2410c); color:#ffffff; font-weight:800; padding:12px 20px; border-radius:12px;">
+          🏠 返回生物遊戲大廳
+        </a>
+      </div>
+    </div>
+  `;
+  wrapper.appendChild(overlay);
+
+  document.getElementById("btnTeacherFreePlay")?.addEventListener("click", async () => {
+    overlay.remove();
+    initEventListeners();
+    await loadManifestAndUnits();
+    setupTeacherDropdowns();
+    const hasSnapshot = checkSnapshotOnLoad();
+    if (!hasSnapshot) {
+      startNewGame();
+    }
+  });
+}
 
 // 1. 初始化事件監聽
 function initEventListeners() {
@@ -156,6 +207,7 @@ function initEventListeners() {
 
   btnReset.addEventListener("click", () => {
     if (confirm("確定要重新啟動遊戲嗎？")) {
+      clearAllActiveTimers();
       startNewGame();
     }
   });
@@ -173,6 +225,7 @@ function initEventListeners() {
 
   btnRetryStage.addEventListener("click", () => {
     closeModal(failModal);
+    clearAllActiveTimers();
     hearts = 3;
     currentStepInStage = 0;
     updateUI();
@@ -184,12 +237,16 @@ function initEventListeners() {
   
   document.getElementById("btnSubmitScoreGas")?.addEventListener("click", () => {
     if (typeof showScoreSubmitModal === "function") {
-      const c = parseInt(document.getElementById("certCoins")?.textContent || "0", 10);
+      const c = parseInt(document.getElementById("certCoins")?.textContent || "0", 10) || coins;
+      const finalScore = Math.min(100, Math.round((totalAnsweredCount / targetQCount) * 100)) || Math.min(100, coins / 2);
+      const clearedAll = (currentStageIndex >= STAGE_CONFIG.length - 1 && currentStepInStage >= 5);
+      const durationText = clearedAll ? "4關全破" : `完成至第 ${currentStageIndex + 1} 關 (${totalAnsweredCount}/${targetQCount} 題)`;
       showScoreSubmitModal({
         gameTitle: "超級瑪利歐：生物冒險王",
-        score: score,
-        scoreDisplay: score + " 分 (" + c + " 🪙)",
-        duration: "4關全破",
+        gameId: "mario",
+        score: finalScore,
+        scoreDisplay: `${finalScore} 分 (${c} 🪙 · 答對 ${totalAnsweredCount}/${targetQCount} 題)`,
+        duration: durationText,
         initialClass: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().class : "") || inputClass?.value?.trim() || "701",
         initialSeat: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().seat : "") || inputSeat?.value?.trim() || "01",
         initialName: ((window.BioGameSuite && window.BioGameSuite.getStudent) ? window.BioGameSuite.getStudent().name : "") || "冒險勇士"
@@ -302,8 +359,9 @@ async function loadManifestAndUnits() {
     console.warn("Manifest 載入警告:", err);
   }
 
-  // 1. 若有 URL 派卷單元，精準載入指定題庫
+  // 1. 若有 URL 派卷單元，精準載入指定題庫並鎖定派卷
   if (unitParam) {
+    isDispatchMode = true;
     const targetUnit = decodeURIComponent(unitParam).trim();
     const fetchPath = targetUnit.endsWith('.json') ? `../questions/${targetUnit}` : `../questions/${targetUnit}.json`;
     try {
@@ -315,7 +373,7 @@ async function loadManifestAndUnits() {
         rawQuestionsByUnit[targetUnit] = sanitized;
         dispatchedUnitTitle = qData.unitTitle || targetUnit;
 
-        // 將 4 大關卡出題單元全部設定為該指定題庫
+        // 將 4 大關卡出題單元全部鎖定為該指定題庫
         STAGE_CONFIG.forEach(stage => {
           stage.unitFile = targetUnit;
         });
@@ -323,32 +381,38 @@ async function loadManifestAndUnits() {
     } catch (e) {
       console.warn("載入派發單元失敗:", e);
     }
-  }
 
-  // 2. 預載入其他單元題庫 (備用)
-  for (const u of allManifestUnits) {
-    if (!rawQuestionsByUnit[u.file]) {
-      try {
-        const qRes = await fetch(`../questions/${u.file}`);
-        if (qRes.ok) {
-          const qData = await qRes.json();
-          const rawList = qData.questions || (Array.isArray(qData) ? qData : []);
-          rawQuestionsByUnit[u.file] = sanitizeQuestions(rawList);
-        }
-      } catch (e) {}
+    // 派卷模式下停用齒輪換單元按鈕，避免派卷被手動竄改
+    if (btnToggleTeacher) {
+      btnToggleTeacher.style.display = "none";
     }
-  }
+  } else {
+    // 2. 僅在非派卷模式下預載 manifest 前 4 個單元
+    for (let i = 0; i < Math.min(4, allManifestUnits.length); i++) {
+      const u = allManifestUnits[i];
+      if (!rawQuestionsByUnit[u.file]) {
+        try {
+          const qRes = await fetch(`../questions/${u.file}`);
+          if (qRes.ok) {
+            const qData = await qRes.json();
+            const rawList = qData.questions || (Array.isArray(qData) ? qData : []);
+            rawQuestionsByUnit[u.file] = sanitizeQuestions(rawList);
+          }
+        } catch (e) {}
+      }
+    }
 
-  // 3. 若無派卷且關卡檔案不存在，自動對應 manifest 有效單元
-  if (!unitParam && allManifestUnits.length >= 4) {
-    STAGE_CONFIG[0].unitFile = allManifestUnits[0].file;
-    STAGE_CONFIG[1].unitFile = allManifestUnits[1].file;
-    STAGE_CONFIG[2].unitFile = allManifestUnits[2].file;
-    STAGE_CONFIG[3].unitFile = allManifestUnits[3].file;
+    if (allManifestUnits.length >= 4) {
+      STAGE_CONFIG[0].unitFile = allManifestUnits[0].file;
+      STAGE_CONFIG[1].unitFile = allManifestUnits[1].file;
+      STAGE_CONFIG[2].unitFile = allManifestUnits[2].file;
+      STAGE_CONFIG[3].unitFile = allManifestUnits[3].file;
+    }
   }
 }
 
 function setupTeacherDropdowns() {
+  if (isDispatchMode) return;
   const selects = [selectStageA, selectStageB, selectStageC, selectStageD];
   selects.forEach((sel, idx) => {
     sel.innerHTML = "";
@@ -363,6 +427,11 @@ function setupTeacherDropdowns() {
 }
 
 function applyTeacherSettings() {
+  if (isDispatchMode) {
+    alert("⚠️ 目前為課堂派卷鎖定模式，無法手動變更單元！");
+    teacherPanel.classList.add("hidden");
+    return;
+  }
   STAGE_CONFIG[0].unitFile = selectStageA.value;
   STAGE_CONFIG[1].unitFile = selectStageB.value;
   STAGE_CONFIG[2].unitFile = selectStageC.value;
@@ -403,7 +472,19 @@ function getFallbackQuestions() {
 }
 
 // 5. 遊戲主流程與 UI / 背景裝飾動態更新
+function clearAllActiveTimers() {
+  if (activeFeedbackTimer) {
+    clearTimeout(activeFeedbackTimer);
+    activeFeedbackTimer = null;
+  }
+  if (activeAnimTimer) {
+    clearTimeout(activeAnimTimer);
+    activeAnimTimer = null;
+  }
+}
+
 function startNewGame() {
+  clearAllActiveTimers();
   currentStageIndex = 0;
   currentStepInStage = 0;
   totalAnsweredCount = 0;
@@ -529,6 +610,7 @@ function renderCurrentQuestion() {
 function handleOptionSelect(selectedIndex, btnEl) {
   if (isAnsweringLocked || isTeacherFrozen) return;
   isAnsweringLocked = true;
+  clearAllActiveTimers();
 
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
 
@@ -538,7 +620,10 @@ function handleOptionSelect(selectedIndex, btnEl) {
 
     // 1. 火柴人向上躍進與肢體伸展動畫
     marioChar.classList.add("jumping", "running");
-    setTimeout(() => marioChar.classList.remove("jumping", "running"), 600);
+    activeAnimTimer = setTimeout(() => {
+      marioChar.classList.remove("jumping", "running");
+      activeAnimTimer = null;
+    }, 600);
 
     // 2. 頂擊 ❓ 問號方塊
     const currentStepEl = steppedPath.querySelector(`.step[data-step="${currentStepInStage + 1}"]`);
@@ -560,7 +645,8 @@ function handleOptionSelect(selectedIndex, btnEl) {
     totalAnsweredCount += 1;
     updateUI();
 
-    setTimeout(() => {
+    activeFeedbackTimer = setTimeout(() => {
+      activeFeedbackTimer = null;
       if (totalAnsweredCount >= targetQCount || currentStepInStage >= 5) {
         handleStageComplete();
       } else {
@@ -579,7 +665,8 @@ function handleOptionSelect(selectedIndex, btnEl) {
     hearts -= 1;
     updateUI();
 
-    setTimeout(() => {
+    activeFeedbackTimer = setTimeout(() => {
+      activeFeedbackTimer = null;
       if (hearts <= 0) {
         openModal(failModal);
       } else {
@@ -639,6 +726,16 @@ function generateCertificate() {
   certCode.textContent = currentCertCode;
   certCoins.textContent = `${coins} 🪙`;
 
+  const clearedAll = (currentStageIndex >= STAGE_CONFIG.length - 1 && currentStepInStage >= 5);
+  const certHonorEl = document.querySelector("#certCard .cert-meta-grid .meta-item:nth-child(4) .meta-val");
+  if (certHonorEl) {
+    certHonorEl.textContent = clearedAll ? "森林/洞穴/海底/城堡 4關全破" : `完成至第 ${currentStageIndex + 1} 關 (${totalAnsweredCount}/${targetQCount} 題)`;
+  }
+  const certModalTitle = document.querySelector("#studentIdModal h2");
+  if (certModalTitle) {
+    certModalTitle.textContent = clearedAll ? "🎉 恭喜闖破 4 大關卡！" : `🎉 恭喜完成指定挑戰 (${totalAnsweredCount}/${targetQCount} 題)！`;
+  }
+
   const now = new Date();
   certTimestamp.textContent = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
 
@@ -650,9 +747,20 @@ function generateCertificate() {
 function toggleTeacherFreeze() {
   isTeacherFrozen = !isTeacherFrozen;
   if (isTeacherFrozen) {
+    clearAllActiveTimers();
     openModal(teacherFreezeModal);
   } else {
     closeModal(teacherFreezeModal);
+    if (isAnsweringLocked) {
+      if (hearts <= 0) {
+        openModal(failModal);
+      } else if (currentStepInStage >= 5 || totalAnsweredCount >= targetQCount) {
+        handleStageComplete();
+      } else {
+        isAnsweringLocked = false;
+        renderCurrentQuestion();
+      }
+    }
   }
 }
 
@@ -661,6 +769,7 @@ function saveSnapshot() {
   const snapshot = {
     currentStageIndex,
     currentStepInStage,
+    totalAnsweredCount,
     hearts,
     coins,
     time: Date.now()
@@ -673,11 +782,13 @@ function checkSnapshotOnLoad() {
   if (raw) {
     try {
       const snap = JSON.parse(raw);
-      if (snap && snap.coins > 0) {
+      if (snap && (snap.coins > 0 || snap.totalAnsweredCount > 0 || snap.currentStageIndex > 0)) {
         openModal(snapshotModal);
+        return true;
       }
     } catch (e) {}
   }
+  return false;
 }
 
 function restoreSnapshot() {
@@ -687,10 +798,12 @@ function restoreSnapshot() {
     const snap = JSON.parse(raw);
     currentStageIndex = snap.currentStageIndex || 0;
     currentStepInStage = snap.currentStepInStage || 0;
+    totalAnsweredCount = snap.totalAnsweredCount || 0;
     hearts = snap.hearts || 3;
     coins = snap.coins || 0;
     updateUI();
     renderCurrentQuestion();
+    isAnsweringLocked = false;
   }
 }
 

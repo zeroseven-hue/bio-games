@@ -1,0 +1,13 @@
+/* Decorative effects only; original stickman animation is unchanged. */
+.game-wrapper .q-block:not(.bumped):not(.do-bump):not(.castle-block) { animation: cute-block-float 3.6s ease-in-out infinite; }
+.game-wrapper .step:nth-child(even) .q-block { animation-delay: -.9s; }
+.game-wrapper .cute-burst { position: absolute; left: 50%; top: 35%; width: 0; height: 0; pointer-events: none; z-index: 8; }
+.game-wrapper .cute-spark { position: absolute; width: 7px; height: 7px; background: var(--spark-color, #f5ce6b); border: 1px solid #ad853c; border-radius: 2px; animation: cute-spark .65s ease-out both; }
+.game-wrapper .cute-confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: inherit; }
+.game-wrapper .cute-confetti i { position: absolute; left: var(--x); top: -14px; width: 7px; height: 12px; background: var(--spark-color); animation: cute-confetti 1.4s ease-out both; animation-delay: var(--delay); }
+.game-wrapper .clear-box, .game-wrapper .cert-card { position: relative; }
+@keyframes cute-block-float { 0%,100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes cute-spark { from { transform: translate(0,0) rotate(0); opacity: 1; } to { transform: translate(var(--dx),var(--dy)) rotate(100deg) scale(.3); opacity: 0; } }
+@keyframes cute-confetti { from { transform: translateY(0) rotate(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(260px) rotate(260deg); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) { .game-wrapper .cute-spark, .game-wrapper .cute-confetti { display: none; } .game-wrapper .q-block { animation: none !important; } }

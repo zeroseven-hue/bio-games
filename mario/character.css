@@ -1,0 +1,17 @@
+/* Original stickman anatomy and animations are supplied by style.css. */
+.game-wrapper .mario-character { width: 46px; height: 58px; bottom: 24px; margin-left: -12px; }
+.game-wrapper .stickman-svg { display: block; width: 46px; height: 58px; overflow: visible; }
+.game-wrapper .explorer-shadow { position: absolute; width: 30px; height: 5px; left: 8px; bottom: -1px; border-radius: 50%; background: #183e3b35; pointer-events: none; }
+.game-wrapper .explorer-reaction {
+  position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0;
+  min-width: 54px; padding: 4px 8px; border: 1px solid #92ac7d; border-radius: 8px 8px 8px 0;
+  background: #fffbe5; color: #23462f; text-align: center;
+  font-size: 12px; font-weight: 800; white-space: nowrap; opacity: 0; pointer-events: none;
+}
+.game-wrapper .mario-character[data-feedback] .explorer-reaction { opacity: 1; }
+.game-wrapper .mario-character[data-feedback="incorrect"] .explorer-reaction { color: #7d3b2d; border-color: #cba08a; }
+.game-wrapper .quest-item { display: inline-block; width: 100%; height: 100%; object-fit: contain; }
+.game-wrapper .q-block > .quest-item { width: 34px; height: 34px; }
+.game-wrapper .pop-item-anim > .quest-item { width: 36px; height: 36px; }
+
+@media (max-width:600px) { .game-wrapper .q-block > .quest-item { width: 28px; height: 28px; } }
