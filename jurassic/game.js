@@ -1067,6 +1067,7 @@ function triggerTileQuizEvent(player, originPos) {
       player.consecutiveErrors = 0;
       updateMessage(`✅ 【${player.name}】 答對生物題！安全在第 ${cellNum} 格整備休息！`);
       addLog(`  -> 🔍 【${player.name}】 答對題目，平安留在第 ${cellNum} 格。`);
+      finishTurn();
     } else {
       handleWrongAnswerRetreat(
         player,
