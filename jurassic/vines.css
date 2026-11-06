@@ -1,0 +1,34 @@
+/* Layered botanical routes, following the game's unmodified SVG geometry. */
+.game-wrapper #svgCanvas .expedition-original-leaf { display: none; }
+.game-wrapper #svgCanvas .expedition-vine { pointer-events: none; }
+.game-wrapper #svgCanvas .expedition-vine > path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.game-wrapper #svgCanvas .vine-outline { stroke: #284b32; stroke-width: 1.85; filter: drop-shadow(0 .25px .22px #1b392445); }
+.game-wrapper #svgCanvas .vine-stem { stroke: url('#expedition-stem-fill'); stroke-width: 1.32; }
+.game-wrapper #svgCanvas .vine-fibre { stroke: #c6cf82; stroke-width: .28; stroke-dasharray: .6 2.6; opacity: .75; }
+.game-wrapper #svgCanvas .vine-original-route {
+  stroke: #c0d38b !important; stroke-width: .18 !important; stroke-dasharray: none;
+  filter: none !important; opacity: .7; transition: none !important;
+}
+.game-wrapper #svgCanvas .vine-leaf-blade { fill: url('#expedition-leaf-fill'); stroke: #3b6039; stroke-width: .15; }
+.game-wrapper #svgCanvas .vine-leaf-vein { fill: none; stroke: #dae1a5; stroke-width: .13; opacity: .8; stroke-linecap: round; }
+.game-wrapper #svgCanvas .vine-tendril { stroke: #4d7843; stroke-width: .22; }
+.game-wrapper #svgCanvas .vine-glint { fill: #fff8cf; opacity: 0; }
+.game-wrapper #svgCanvas .vine-light-trail { stroke: #fff0ab; stroke-width: .65; stroke-dasharray: 6 94; stroke-dashoffset: 100; opacity: 0; }
+.game-wrapper #svgCanvas .is-climbing .vine-outline { stroke: #617e30; }
+.game-wrapper #svgCanvas .is-climbing .vine-stem { stroke: #b1ce6e; filter: drop-shadow(0 0 .8px #dfe9a8); }
+.game-wrapper #svgCanvas .is-climbing .vine-leaf-blade { stroke: #b4cf6f; fill: #9ec065; }
+.game-wrapper #svgCanvas .is-climbing .vine-leaf-vein { stroke: #fff4c1; }
+.game-wrapper #svgCanvas .is-climbing .vine-light-trail { animation: expedition-vine-light 1.12s cubic-bezier(.2,.55,.35,1) both; }
+.game-wrapper #svgCanvas .is-climbing .vine-glint { animation: expedition-vine-glint .42s ease-out var(--vine-delay, 0s) both; }
+@keyframes expedition-vine-light {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  12% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes expedition-vine-glint { 0%,100% { opacity: 0; } 40% { opacity: 1; } }
+.game-wrapper:has(#teacherFreezeModal:not(.hidden)) #svgCanvas .is-climbing :is(.vine-light-trail,.vine-glint) { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  .game-wrapper #svgCanvas .is-climbing :is(.vine-light-trail,.vine-glint) { animation: none !important; }
+  .game-wrapper #svgCanvas .is-climbing .vine-glint { opacity: .75; }
+}

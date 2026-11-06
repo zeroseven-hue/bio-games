@@ -1,0 +1,181 @@
+/* Jurassic expedition presentation layer. Scoped to the local game shell. */
+body:has(> .game-wrapper) {
+  background: radial-gradient(ellipse at 10% 0%, #31594b 0, transparent 45%), #102e29;
+  padding: clamp(8px, 1.5vw, 24px);
+  color: #183d35;
+  align-items: flex-start;
+}
+.game-wrapper {
+  --ink: #183d35;
+  --gold: #c49a4b;
+  --paper: #f8f5eb;
+  width: 100%; max-width: 1440px; height: auto; min-height: calc(100svh - 48px);
+  padding: clamp(12px, 1.6vw, 24px); gap: 20px;
+  background: #f0efe6; border: 1px solid #c8d1bf; border-radius: 24px;
+  box-shadow: 0 24px 70px #031d2855; backdrop-filter: none;
+}
+.game-wrapper .game-header {
+  padding: 4px 0 20px; gap: 20px; border: 0; border-bottom: 1px solid #cdd5c8;
+  background: none; border-radius: 0; align-items: flex-start;
+}
+.game-wrapper .header-titles { gap: 6px; }
+.game-wrapper .header-titles::before {
+  content: 'JURASSIC / FIELD EXPEDITION'; color: #52695b; font: 700 10px/1.5 system-ui;
+  letter-spacing: .23em;
+}
+.game-wrapper .header-titles h1 {
+  font-size: clamp(23px, 2.4vw, 34px); color: #173e32; text-shadow: none;
+  letter-spacing: -.04em; line-height: 1.3;
+}
+.game-wrapper .unit-subtitle {
+  color: #526354; width: min(100%, 360px); font-size: 14px; border-color: #aab9a4;
+  padding: 5px 0;
+}
+.game-wrapper .header-controls { gap: 12px; flex: 1 1 580px; justify-content: flex-end; }
+.game-wrapper .control-group { color: #40594c; gap: 8px; font-weight: 650; }
+.game-wrapper .styled-select {
+  background: #fffef8; border: 1px solid #bdcbbb; color: #183d35;
+  border-radius: 10px; min-height: 44px; max-width: 310px; padding: 9px 12px;
+}
+.game-wrapper .control-buttons { flex-wrap: wrap; gap: 8px; }
+.game-wrapper .btn-tool {
+  min-height: 44px; border-radius: 10px; border: 1px solid #b7c8ba;
+  padding: 9px 14px; font-weight: 750; font-size: 13px; box-shadow: 0 2px 0 #153e2810;
+  background: #e4ebe0 !important; color: #214938;
+}
+.game-wrapper .btn-reset { background: #193e32 !important; color: #fffdf2; border-color: #193e32; }
+.game-wrapper .btn-freeze { background: #f4e6c6 !important; color: #59451d; border-color: #d8c28c; }
+.game-wrapper .game-main { grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.game-wrapper .board-container {
+  min-width: 0; padding: 32px 28px 30px 44px; border: 1px solid #a7b49a;
+  border-radius: 18px; overflow: visible; isolation: isolate;
+  background: url('expedition-map.svg') center / cover, #dce3cd;
+  box-shadow: inset 0 0 60px #47653d16;
+}
+.game-wrapper .board-container::before {
+  content: '保 護 區  /  逃 生 路 線'; position: absolute; top: 11px; left: 22px;
+  color: #506347; font-size: 10px; font-weight: 800; letter-spacing: .12em;
+}
+.game-wrapper .board-container::after {
+  content: 'N ↑'; position: absolute; right: 16px; bottom: 8px;
+  font: 700 11px/1.2 Georgia, serif; letter-spacing: .12em; color: #486042;
+}
+.game-wrapper .board-frame {
+  max-width: 720px; border: 7px solid #38513b; border-radius: 15px; padding: 6px;
+  background: #738569; box-shadow: 0 12px 22px #23382430, inset 0 0 0 1px #e0dcb283;
+}
+.game-wrapper .board-grid { gap: 4px; }
+.game-wrapper .cell { border-radius: 6px; border: 1px solid #ffffff60; box-shadow: inset 0 1px 0 #ffffffa0, 0 2px 2px #1733241a; }
+.game-wrapper .cell-green { background: linear-gradient(145deg, #e2ebc4, #b6ce9a); color: #254523; }
+.game-wrapper .cell-yellow { background: linear-gradient(145deg, #f3e9c2, #dac78e); color: #51431f; }
+.game-wrapper .cell-blue { background: linear-gradient(145deg, #deece6, #9ec7bc); color: #224d43; }
+.game-wrapper .cell-red { background: linear-gradient(145deg, #f1d9c5, #dca98e); color: #713b28; border-color: #b87553; }
+.game-wrapper .cell-number { color: #264731; font: 800 clamp(11px, 1.2vw, 16px)/1.2 system-ui; top: 7px; left: 7px; }
+.game-wrapper .emoji { font-size: clamp(19px, 2.7vw, 36px); filter: drop-shadow(0 3px 2px #233d2626); }
+.game-wrapper #cell-36 { background: linear-gradient(140deg, #f8e5a5, #c9a34e); border: 2px solid #8d6c27; }
+.game-wrapper #cell-36::after { content: 'EXIT'; position: absolute; left: 7px; bottom: 7px; color: #4c3b13; font: 800 9px system-ui; letter-spacing: .1em; }
+.game-wrapper .token { filter: drop-shadow(0 2px 1px #fff) drop-shadow(0 4px 3px #183b3260); }
+.game-wrapper .dashboard-panel { background: none; padding: 0; gap: 12px; box-shadow: none; overflow: visible; }
+.game-wrapper .timer-card {
+  background: #173e32; color: #fff8df; padding: 18px 20px; border-radius: 16px;
+  border: 1px solid #315841; box-shadow: 0 8px 16px #183e3218;
+}
+.game-wrapper .timer-header { color: #e4e9d4; font-size: 12px; letter-spacing: .04em; }
+.game-wrapper .sound-toggle { min-height: 32px; display: flex; align-items: center; gap: 6px; }
+.game-wrapper .sound-toggle input { width: 18px; height: 18px; accent-color: #d8b666; }
+.game-wrapper .timer-clock { color: #fff6d8; font: 600 48px/1.25 ui-monospace, Consolas, monospace; letter-spacing: .05em; margin: 8px 0 0; }
+.game-wrapper .timer-clock.rush { color: #ffd79a; animation: none; }
+.game-wrapper .rush-badge { background: #f6dca2; color: #4c3612; padding: 7px; margin-top: 10px; }
+.game-wrapper .turn-status-card { padding: 16px; border-radius: 13px; background: #fffef8; box-shadow: 0 2px 3px #1c3b2810; }
+.game-wrapper .turn-caption { color: #526451; font-size: 11px; letter-spacing: .12em; }
+.game-wrapper .turn-team-name { font-size: 23px; line-height: 1.4; margin: 3px 0; color: #183d35 !important; text-shadow: none; }
+.game-wrapper .turn-role-note { font-size: 13px; color: #405b4b; }
+.game-wrapper .dice-box { padding: 0; background: none; gap: 10px; }
+.game-wrapper .btn-dice {
+  min-height: 62px; padding: 15px 10px; border-radius: 13px;
+  background: linear-gradient(135deg, #bc8d38, #946924); border: 1px solid #8e6725;
+  color: #fffdf2; box-shadow: 0 4px 0 #72501c, inset 0 1px #ffffff50; font-size: 18px;
+}
+.game-wrapper .btn-dice:active { transform: translateY(2px); box-shadow: 0 2px 0 #72501c; }
+.game-wrapper .dice-result-val { width: 62px; height: 62px; border-radius: 13px; border: 1px solid #c9b57f; color: #60451d; background: #faf3dd; }
+.game-wrapper .event-msg-box { background: #e2e9da; border: 1px solid #c0cfb5; border-left: 3px solid #6a8956; border-radius: 10px; color: #304d32; padding: 12px; line-height: 1.65; min-height: 60px; }
+.game-wrapper .leaderboard-card { border: 1px solid #d0d8c9; border-radius: 14px; background: #fafaf3; padding: 16px; }
+.game-wrapper .leaderboard-card h3 { color: #294d3a; font-size: 14px; margin-bottom: 12px; }
+.game-wrapper .team-rank-list { gap: 8px; }
+.game-wrapper .rank-item { padding: 10px 8px; min-height: 42px; background: #edf0e6; border-radius: 8px; color: #274b38; border: 1px solid transparent; font-size: 12px; gap: 5px; }
+.game-wrapper .rank-item.active { background: #fff9e4 !important; transform: none; border-width: 1px !important; }
+.game-wrapper .rank-color-badge { flex-shrink: 0; }
+.game-wrapper .btn-download { min-height: 44px; background: transparent; color: #37563f; border: 1px solid #b2c3a9; border-radius: 10px; box-shadow: none; }
+.game-wrapper .btn-download:hover { background: #e0e8d8; }
+.game-wrapper .modal-overlay { background: #092b24b8; backdrop-filter: blur(5px); padding: 20px; overflow-y: auto; }
+.game-wrapper .modal-dialog { background: #fffdf5; border: 1px solid #cbd6be; border-top: 5px solid #b59652; border-radius: 20px; padding: clamp(20px, 3vw, 34px); color: #254332; box-shadow: 0 24px 80px #06231d60; max-height: calc(100svh - 40px); overflow-y: auto; overscroll-behavior: contain; }
+.game-wrapper .quiz-dialog { max-width: 760px; }
+.game-wrapper .quiz-top-bar { flex-wrap: wrap; gap: 10px; border-bottom: 1px solid #dde2d3; padding-bottom: 16px; }
+.game-wrapper .quiz-diff-tag { color: #5b6650; font-size: 12px; }
+.game-wrapper .quiz-timer-num { background: #f1e4c4; color: #60491b; padding: 6px 12px; font: 750 15px ui-monospace, monospace; }
+.game-wrapper .quiz-stem { color: #1a3e30; font-size: clamp(20px, 2vw, 26px); line-height: 1.65; margin: 20px 0; overflow-wrap: anywhere; }
+.game-wrapper .quiz-choices { gap: 12px; }
+.game-wrapper .btn-choice { border: 1px solid #c4cfbb; border-radius: 12px; padding: 16px 20px; min-height: 54px; color: #294536; background: #fffffc; font-size: 17px; line-height: 1.5; box-shadow: 0 3px 0 #d9e0cf; transition: background .16s, border-color .16s, transform .16s; }
+.game-wrapper .btn-choice:hover:not(:disabled) { background: #edf3e6; border-color: #658856; transform: translateY(-1px); }
+.game-wrapper .btn-choice.correct { background: #dfefd9 !important; border-color: #527e43 !important; color: #214c23; box-shadow: 0 3px 0 #a8c69b; }
+.game-wrapper .btn-choice.wrong { background: #fae5da !important; border-color: #b46b4e !important; color: #773e2a; box-shadow: 0 3px 0 #d8ad99; }
+.game-wrapper .quiz-feedback-box { padding: 18px; border-radius: 12px; background: #eaf2e1; border-color: #bed0ab; }
+.game-wrapper .feedback-banner { font-size: 19px; line-height: 1.5; }
+.game-wrapper .feedback-memo p { font-size: 16px; line-height: 1.75; }
+.game-wrapper .btn-action-continue, .game-wrapper .btn-confirm-rule, .game-wrapper .btn-unfreeze, .game-wrapper .btn-snapshot { min-height: 48px; border-radius: 10px; padding: 13px 18px; line-height: 1.5; }
+.game-wrapper .btn-action-continue { background: #24573f; }
+.game-wrapper .btn-snapshot { border: 1px solid #b7c8a9; background: #eaf1df; color: #214631; font-weight: 750; font-size: 15px; }
+.game-wrapper .btn-restore { background: #24573f; color: #fffdf5; }
+.game-wrapper .snapshot-dialog p { margin: 14px 0 20px; line-height: 1.75; }
+.game-wrapper .card-dialog-title { font-size: 23px; margin-bottom: 20px; line-height: 1.5; }
+.game-wrapper .highlight-keyword { background: #f3e2ac; color: #65461d; padding: 1px 4px; box-shadow: none; }
+.game-wrapper .freeze-dialog { background: #183f33 !important; border: 1px solid #8fa184 !important; }
+.game-wrapper .freeze-dialog h2 { color: #f4dfab; }
+.game-wrapper .freeze-dialog p { color: #e3eadb; line-height: 1.7; }
+.game-wrapper .freeze-icon { font-size: 40px; }
+.game-wrapper .summary-dialog { background: #fffdf5 !important; color: #254332 !important; }
+.game-wrapper .summary-actions, .game-wrapper .snapshot-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+.game-wrapper .summary-actions > *, .game-wrapper .snapshot-buttons > * { flex: 1 1 180px; }
+.game-wrapper .rules-content { line-height: 1.8; }
+.game-wrapper .rule-section + .rule-section { margin-top: 18px; }
+.game-wrapper .rule-section h3 { color: #2d553b; margin-bottom: 8px; }
+.game-wrapper .legend-item { display: flex; gap: 12px; padding: 8px 0; align-items: baseline; }
+.game-wrapper .legend-badge { flex: 0 0 115px; font-weight: 800; }
+.game-wrapper .btn-confirm-rule { width: 100%; margin-top: 20px; background: #24573f; border: 0; color: white; font-size: 16px; font-weight: 750; }
+.game-wrapper .modal-close-btn { min-width: 44px; min-height: 44px; top: 4px; right: 4px; }
+.game-wrapper .rules-title { padding-right: 25px; }
+.game-wrapper .nature-card-name { font-size: 27px; font-weight: 850; margin: 12px 0; }
+.game-wrapper .nature-card-desc { font-size: 18px; line-height: 1.8; }
+.game-wrapper .nature-card-icon { font-size: 34px; }
+.game-wrapper .card-box { border-width: 1px; padding: 24px; }
+.game-wrapper :is(button, select, input):focus-visible { outline: 3px solid #ac781c; outline-offset: 4px; }
+@media (max-width: 1100px) {
+  .game-wrapper .game-main { grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; }
+  .game-wrapper .header-controls { justify-content: flex-start; }
+  .game-wrapper .board-container { padding: 30px 18px 26px 30px; }
+  .game-wrapper .timer-clock { font-size: 40px; }
+  .game-wrapper .turn-team-name { font-size: 21px; }
+}
+@media (max-width: 760px) {
+  .game-wrapper { border-radius: 16px; min-height: calc(100svh - 16px); gap: 14px; }
+  .game-wrapper .game-main { grid-template-columns: minmax(0, 1fr); }
+  .game-wrapper .header-controls { min-width: 0; gap: 10px; }
+  .game-wrapper .control-group { flex: 1 1 100%; justify-content: space-between; }
+  .game-wrapper .styled-select { min-width: 0; width: 68%; max-width: none; }
+  .game-wrapper .control-buttons { width: 100%; }
+  .game-wrapper .control-buttons > button { flex: 1 1 120px; }
+  .game-wrapper .dashboard-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  .game-wrapper .dice-box, .game-wrapper .event-msg-box, .game-wrapper .leaderboard-card, .game-wrapper .btn-download { grid-column: 1 / -1; }
+  .game-wrapper .timer-card, .game-wrapper .turn-status-card { padding: 12px; min-width: 0; }
+  .game-wrapper .timer-header { flex-wrap: wrap; }
+  .game-wrapper .timer-clock { font-size: clamp(24px, 7vw, 38px); }
+  .game-wrapper .turn-team-name { font-size: 19px; }
+  .game-wrapper .emoji { font-size: clamp(19px, 6vw, 32px); }
+  .game-wrapper .cell-number { font-size: 11px; top: 3px; left: 4px; }
+  .game-wrapper .legend-item { flex-wrap: wrap; gap: 4px; }
+  .game-wrapper .modal-overlay { padding: 12px; }
+  .game-wrapper .modal-dialog { max-height: calc(100svh - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-wrapper *, .game-wrapper *::before, .game-wrapper *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

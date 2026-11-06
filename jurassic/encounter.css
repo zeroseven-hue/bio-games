@@ -1,0 +1,75 @@
+/* Original bite, sleep, claw-path and retreat hooks; no gameplay timing changes. */
+.game-wrapper .dino-container {
+  width: 70%; height: 74%; right: 0; bottom: 0; font-size: 0;
+  background: url('assets/tyrannosaur-v1.webp') center / contain no-repeat;
+  filter: drop-shadow(0 3px 2px #233d2650); transform-origin: 55% 85%;
+}
+.game-wrapper .dino-bite {
+  animation: expedition-bite 1.35s cubic-bezier(.22,.7,.3,1) both;
+  filter: drop-shadow(0 0 5px #bd603d70);
+}
+.game-wrapper .dino-bite::after {
+  content: '!'; position: absolute; right: 12%; top: -8%; color: #7d331d;
+  font: 900 clamp(18px, 3vw, 32px)/1 system-ui; text-shadow: 0 1px 2px #fff1cf;
+}
+.game-wrapper .dino-sleep { transform: rotate(-14deg) translateY(12%); opacity: .75; filter: saturate(.5) drop-shadow(0 2px 2px #17362940); }
+.game-wrapper .dino-sleep::after { content: 'z Z'; position: absolute; top: 0; right: 0; color: #28564e; font: 800 15px system-ui; letter-spacing: .15em; animation: expedition-sleep 1.4s ease-out both; }
+.game-wrapper .cell:has(.dino-bite) { overflow: visible; z-index: 12; }
+.game-wrapper .claw-path {
+  stroke: #9d452a; stroke-width: 1.1; opacity: 1 !important;
+  filter: drop-shadow(0 .4px .25px #fff4c5) drop-shadow(0 0 .65px #f47f4560) !important;
+}
+.game-wrapper .claw-path.do-slash { animation: expedition-slash .42s cubic-bezier(.14,.7,.15,1) both; }
+.game-wrapper .claw-path.do-slash:nth-child(2) { animation-delay: .065s; }
+.game-wrapper .claw-path.do-slash:nth-child(3) { animation-delay: .13s; }
+.game-wrapper .board-frame.shake { animation: expedition-impact .52s ease-out both; }
+.game-wrapper .board-frame.shake::after {
+  content: ''; position: absolute; inset: -5px; border: 3px solid #b45f38;
+  border-radius: 12px; pointer-events: none; z-index: 21;
+  box-shadow: inset 0 0 30px #b7643b45; animation: expedition-impact-ring .8s ease-out both;
+}
+.game-wrapper .token.retreating {
+  animation: expedition-retreat .6s ease-out both;
+  filter: drop-shadow(0 0 4px #b75a32) drop-shadow(0 2px 1px #fff) !important;
+}
+.game-wrapper .token.climbing { filter: drop-shadow(0 0 5px #b6db70) drop-shadow(0 2px 1px #fff); }
+.game-wrapper .expedition-encounter {
+  position: absolute; right: 6%; top: 8%; width: clamp(120px, 32%, 245px);
+  z-index: 24; pointer-events: none; visibility: hidden; opacity: 0;
+  display: grid; justify-items: center;
+}
+.game-wrapper .expedition-encounter img { width: 100%; height: auto; display: block; filter: drop-shadow(0 12px 10px #102b3e55); }
+.game-wrapper .expedition-encounter span {
+  margin-top: -10px; padding: 7px 14px; border-radius: 6px; font-size: clamp(12px, 1.4vw, 17px);
+  font-weight: 850; letter-spacing: .06em; text-align: center; color: #fff8dc;
+  background: #683522; border: 1px solid #d6a26d; box-shadow: 0 4px 12px #1a342940;
+}
+.game-wrapper .expedition-encounter.is-attacking { visibility: visible; animation: expedition-encounter 1.45s ease-out both; }
+.game-wrapper .expedition-encounter.is-attacking img { animation: expedition-portrait-bite .85s ease-out both; }
+.game-wrapper .expedition-encounter.is-sleeping { visibility: visible; animation: expedition-encounter 1.45s ease-out both; }
+.game-wrapper .expedition-encounter.is-sleeping img { transform: rotate(-12deg); filter: saturate(.55) drop-shadow(0 8px 6px #17362955); }
+.game-wrapper .expedition-encounter.is-sleeping span { color: #f6f7df; background: #254c3d; border-color: #a1b58a; }
+@keyframes expedition-bite {
+  0%, 15% { transform: translateY(0) rotate(0) scale(1); }
+  28% { transform: translate(3%, 4%) rotate(8deg) scale(.95); }
+  44% { transform: translate(-14%, -10%) rotate(-10deg) scale(1.23); }
+  63% { transform: translate(0, -3%) rotate(3deg) scale(1.08); }
+  100% { transform: translateY(0) rotate(0) scale(1); }
+}
+@keyframes expedition-slash { from { stroke-dashoffset: 150; } to { stroke-dashoffset: 0; } }
+@keyframes expedition-impact { 0%,100% { transform: translate(0); } 18% { transform: translate(-5px, 2px); } 36% { transform: translate(4px, -2px); } 54% { transform: translate(-3px, 1px); } 72% { transform: translate(2px, 0); } }
+@keyframes expedition-impact-ring { from { opacity: .85; } to { opacity: 0; } }
+@keyframes expedition-retreat { 0% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-12px) rotate(-14deg); } 65% { transform: translateY(3px) rotate(7deg); } 100% { transform: translateY(0) rotate(0); } }
+@keyframes expedition-sleep { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(-6px); } }
+@keyframes expedition-encounter { 0% { opacity: 0; transform: translate(12px, 14px) scale(.88); } 16%,76% { opacity: 1; transform: translate(0) scale(1); } 100% { opacity: 0; transform: translateY(-8px) scale(.98); } }
+@keyframes expedition-portrait-bite { 0%,22% { transform: rotate(4deg) scale(.96); } 46% { transform: translateX(-8%) rotate(-6deg) scale(1.09); } 100% { transform: translateX(0) rotate(0) scale(1); } }
+.game-wrapper:has(#teacherFreezeModal:not(.hidden)) :is(.dino-bite, .do-slash, .expedition-encounter, .expedition-encounter img, .token, .board-frame) { animation-play-state: paused !important; }
+@media (max-width: 760px) { .game-wrapper .expedition-encounter { right: 8%; top: 7%; width: 34%; } }
+@media (prefers-reduced-motion: reduce) {
+  .game-wrapper .dino-bite, .game-wrapper .dino-sleep::after, .game-wrapper .do-slash, .game-wrapper .board-frame.shake,
+  .game-wrapper .board-frame.shake::after, .game-wrapper .token.retreating,
+  .game-wrapper .expedition-encounter, .game-wrapper .expedition-encounter img { animation: none !important; }
+  .game-wrapper .claw-path.do-slash { stroke-dashoffset: 0; }
+  .game-wrapper .expedition-encounter:is(.is-attacking,.is-sleeping) { opacity: 1; }
+  .game-wrapper .board-frame.shake::after { opacity: .3; }
+}

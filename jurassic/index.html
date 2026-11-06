@@ -1,10 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>侏羅紀叢林逃生記 - 專業教學強固版</title>
   <link rel="stylesheet" href="style.css?v=4.2">
+  <link rel="stylesheet" href="expedition.css?v=1.0">
+  <link rel="stylesheet" href="encounter.css?v=1.0">
+  <link rel="stylesheet" href="vines.css?v=1.0">
 </head>
 <body>
   <div class="game-wrapper">
@@ -53,6 +56,7 @@
           <button id="btnZoomFont" class="btn-tool btn-zoom">🔍 放大題目</button>
           <button id="btnFreeze" class="btn-tool btn-freeze" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
           <button id="btnRules" class="btn-tool btn-rules">📖 逃生指南</button>
+          <button id="btnEditTeams" class="btn-tool" style="background:#5c6bc0; color:#fff;" title="自訂各小隊隊名">🏷️ 隊名設定</button>
           <button id="btnManualMove" class="btn-tool btn-manual hidden">🔢 指定步數</button>
           <button id="btnReset" class="btn-tool btn-reset">🚀 重新開始</button>
         </div>
@@ -164,7 +168,7 @@
         <div class="quiz-top-bar">
           <span class="quiz-type-tag" id="quizTypeTag">🌿 演化藤蔓挑戰</span>
           <span class="quiz-diff-tag" id="quizDiffTag">難度：中</span>
-          <span class="quiz-timer-num" id="quizTimerNum">30s</span>
+          <div style="display:flex; align-items:center; gap:8px;"><button id="btnQuizHelp" class="btn-tool" style="background:#ff9800; color:#fff; padding:3px 8px; font-size:0.8rem; border-radius:6px; cursor:pointer;" type="button">💡 刪除干擾項 (剩2次)</button><button id="btnQuizAddTime" class="btn-tool" style="background:#00897b; color:#fff; padding:3px 8px; font-size:0.8rem; border-radius:6px; cursor:pointer;" type="button">⏱️ +15s 加時</button><span class="quiz-timer-num" id="quizTimerNum">30s</span></div>
         </div>
 
         <div class="quiz-main-area">
@@ -223,6 +227,7 @@
         </div>
         <div class="summary-actions">
           <button id="btnSubmitScoreModal" class="btn-action-continue" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:white; font-weight:800;">🚀 查看結算與交卷檢核</button>
+          <button id="btnPrintWrongsModal" class="btn-action-continue" style="background:#e65100;">📄 列印/匯出 A4 課堂錯題複習單</button>
           <button id="btnDownloadLogModal" class="btn-action-continue" style="background:#0288d1;">📥 下載實況戰報 TXT</button>
           <button id="btnRestartFromSummary" class="btn-action-continue">🚀 開始新一輪戰局</button>
         </div>
@@ -242,9 +247,25 @@
       </div>
     </div>
 
+
+    <!-- 7. 自訂小隊名稱 Modal -->
+    <div class="modal-overlay hidden" id="teamEditModal">
+      <div class="modal-dialog" style="max-width:500px;">
+        <button class="modal-close-btn" data-close="teamEditModal">&times;</button>
+        <h2 style="color:#2e7d32; margin-bottom:12px;">🏷️ 自訂課堂小隊名稱</h2>
+        <p style="font-size:0.85rem; color:#666; margin-bottom:14px;">支援快速套用「第 1 組～第 N 組」或個別自訂隊名：</p>
+        <div style="margin-bottom:12px;">
+          <button id="btnSetDefaultGroups" class="btn-tool" style="background:#388e3c; color:#fff; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;" type="button">⚡ 一鍵套用：第 1 組 ～ 第 N 組</button>
+        </div>
+        <div id="teamEditList" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; padding-right:6px;"></div>
+        <button id="btnSaveTeamNames" class="btn-action-continue" style="margin-top:16px; background:#1b5e20;" type="button">💾 儲存並更新隊名</button>
+      </div>
+    </div>
   </div>
 
   <script src="../score-submit-modal.js?v=5.0"></script>
   <script src="game.js?v=4.4"></script>
+  <script src="encounter.js?v=1.0"></script>
+  <script src="vines.js?v=1.0"></script>
 </body>
 </html>

@@ -194,6 +194,9 @@ let quizTimerInterval = null;
 let quizTimeRemaining = 30;
 let currentQuizCallback = null;
 let currentCardCallback = null;
+let pendingResumeTurn = false; // ⭐ 凍結恢復時若有被卡住的回合切換，解除時補執行
+let customTeamNames = {};      // ⭐ 支援自訂小隊名稱或「第 1 組～第 N 組」
+
 let audioCtx = null;
 
 // DOM
@@ -246,6 +249,15 @@ const teacherFreezeModal = document.getElementById("teacherFreezeModal");
 const btnUnfreeze = document.getElementById("btnUnfreeze");
 const summaryModal = document.getElementById("summaryModal");
 const snapshotModal = document.getElementById("snapshotModal");
+const btnEditTeams = document.getElementById("btnEditTeams");
+const teamEditModal = document.getElementById("teamEditModal");
+const teamEditList = document.getElementById("teamEditList");
+const btnSetDefaultGroups = document.getElementById("btnSetDefaultGroups");
+const btnSaveTeamNames = document.getElementById("btnSaveTeamNames");
+const btnQuizHelp = document.getElementById("btnQuizHelp");
+const btnQuizAddTime = document.getElementById("btnQuizAddTime");
+const btnPrintWrongsModal = document.getElementById("btnPrintWrongsModal");
+
 
 // 3. 初始化
 window.addEventListener("DOMContentLoaded", () => {
@@ -253,7 +265,7 @@ window.addEventListener("DOMContentLoaded", () => {
   initEventListeners();
   loadManifestAndInitBank();
   createBoardStructure();
-  checkSnapshotOnLoad();
+  // checkSnapshotOnLoad 由 loadSingleUnit 完成後判斷呼叫
 });
 
 function parseUrlParameters() {
@@ -349,6 +361,13 @@ function initEventListeners() {
     }
   });
   document.getElementById("btnDownloadLogModal")?.addEventListener("click", downloadGameLog);
+  btnEditTeams?.addEventListener("click", openTeamEditModal);
+  btnSetDefaultGroups?.addEventListener("click", applyDefaultGroupNames);
+  btnSaveTeamNames?.addEventListener("click", saveCustomTeamNames);
+  btnQuizHelp?.addEventListener("click", handleQuizHelp);
+  btnQuizAddTime?.addEventListener("click", handleQuizAddTime);
+  btnPrintWrongsModal?.addEventListener("click", printWrongQuestionsA4);
+
 }
 
 function unlockAudio() {
@@ -366,6 +385,10 @@ function toggleFreeze() {
     openModal(teacherFreezeModal);
   } else {
     closeModal(teacherFreezeModal);
+    if (pendingResumeTurn) {
+      pendingResumeTurn = false;
+      nextTurn();
+    }
   }
 }
 
@@ -596,7 +619,7 @@ function startGame() {
     const preset = ALL_TEAM_COLORS[i % ALL_TEAM_COLORS.length];
     players.push({
       id: i,
-      name: (currentMode === "solo") ? "自主探險家" : preset.name,
+      name: (currentMode === "solo") ? "自主探險家" : (customTeamNames[i] || preset.name),
       color: preset.color,
       pos: 0,
       offset: TEAM_OFFSETS[i % TEAM_OFFSETS.length],
@@ -606,7 +629,8 @@ function startGame() {
       consecutiveErrors: 0,
       turnMemberIdx: 1,
       totalAnswers: 0,
-      correctAnswers: 0
+      correctAnswers: 0,
+      helpsLeft: 2
     });
   }
 
@@ -683,7 +707,7 @@ function updateTokenPosition(player) {
 }
 
 function nextTurn(isFirstTurn = false) {
-  if (isTeacherFrozen) return;
+  if (isTeacherFrozen) { pendingResumeTurn = true; return; }
 
   if (!isFirstTurn) {
     if (players[currentPlayerIndex].extraTurn) {
@@ -1079,6 +1103,7 @@ function setupQuizModal(question, callback) {
     quizTimerNum.textContent = `${quizTimeRemaining}s`;
     clearInterval(quizTimerInterval);
     quizTimerInterval = setInterval(() => {
+      if (isTeacherFrozen) return;
       quizTimeRemaining--;
       quizTimerNum.textContent = `${quizTimeRemaining}s`;
       if (quizTimeRemaining <= 0) {
@@ -1088,6 +1113,20 @@ function setupQuizModal(question, callback) {
     }, 1000);
   } else {
     quizTimerNum.classList.add("hidden");
+  }
+
+  
+  const curP = players[currentPlayerIndex];
+  if (btnQuizHelp) {
+    if (curP && curP.helpsLeft > 0) {
+      btnQuizHelp.disabled = false;
+      btnQuizHelp.style.opacity = "1";
+      btnQuizHelp.textContent = `💡 刪除干擾項 (剩${curP.helpsLeft}次)`;
+    } else {
+      btnQuizHelp.disabled = true;
+      btnQuizHelp.style.opacity = "0.5";
+      btnQuizHelp.textContent = "💡 刪除干擾項 (已用罄)";
+    }
   }
 
   openModal(quizModal);
@@ -1116,6 +1155,7 @@ function handleChoiceSelect(selectedIdx) {
       round: roundCounter,
       team: players[currentPlayerIndex].name,
       question: currentActiveQuestion.question,
+      options: currentActiveQuestion.options,
       correctAnswer: currentActiveQuestion.options[currentActiveQuestion.answer],
       explanation: currentActiveQuestion.explanation
     });
@@ -1167,6 +1207,7 @@ function finishTurn() {
 }
 
 function handleTimerTick() {
+  if (isTeacherFrozen) return;
   if (timeLeft > 0) {
     timeLeft--;
     updateTimerDisplay();
@@ -1379,3 +1420,187 @@ function playClimbTone() { for (let i = 0; i < 4; i++) playTone(300 + i * 100, "
 function playDinoRoarTone() { for (let i = 0; i < 6; i++) playTone(250 - i * 40, "sawtooth", 0.15, i * 0.08, 0.15); }
 function playSleepTone() { playTone(200, "sine", 0.3, 0); playTone(150, "sine", 0.4, 0.3); }
 function playRushAlarmTone() { playTone(400, "square", 0.1, 0); playTone(600, "square", 0.1, 0.1); playTone(800, "square", 0.4, 0.2); }
+
+
+// ==========================================
+// 💡 教學優化擴充函式庫 (資深生物老師量身打造)
+// ==========================================
+
+// 1. 刪除干擾項錦囊 (50/50 二選一)
+function handleQuizHelp() {
+  const curP = players[currentPlayerIndex];
+  if (!curP || curP.helpsLeft <= 0 || !currentActiveQuestion) return;
+
+  const correctIdx = currentActiveQuestion.answer;
+  const btns = Array.from(quizChoices.querySelectorAll(".btn-choice"));
+  const wrongBtns = btns.filter((btn, idx) => idx !== correctIdx && !btn.disabled);
+
+  if (wrongBtns.length <= 1) return;
+
+  // 隨機刪除 2 個錯誤選項
+  const shuffledWrong = wrongBtns.sort(() => Math.random() - 0.5);
+  const toDisable = shuffledWrong.slice(0, 2);
+  toDisable.forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = "0.25";
+    btn.style.textDecoration = "line-through";
+  });
+
+  curP.helpsLeft--;
+  if (btnQuizHelp) {
+    btnQuizHelp.textContent = curP.helpsLeft > 0 ? `💡 刪除干擾項 (剩${curP.helpsLeft}次)` : "💡 刪除干擾項 (已用罄)";
+    if (curP.helpsLeft === 0) {
+      btnQuizHelp.disabled = true;
+      btnQuizHelp.style.opacity = "0.5";
+    }
+  }
+  addLog(`💡 【${curP.name}】 發動求助錦囊，成功刪除 2 個干擾選項！`);
+}
+
+// 2. 老師端 +15s 加時討論
+function handleQuizAddTime() {
+  quizTimeRemaining += 15;
+  if (quizTimerNum) {
+    quizTimerNum.textContent = `${quizTimeRemaining}s`;
+    quizTimerNum.style.transform = "scale(1.2)";
+    setTimeout(() => { quizTimerNum.style.transform = "scale(1)"; }, 300);
+  }
+  addLog(`⏱️ 老師已為當前題目延長 15 秒討論時間！`);
+}
+
+// 3. 自訂隊伍名稱相關
+function openTeamEditModal() {
+  if (!teamEditList) return;
+  teamEditList.innerHTML = "";
+  players.forEach((p, idx) => {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.alignItems = "center";
+    row.style.gap = "8px";
+    row.innerHTML = `
+      <span style="display:inline-block; width:18px; height:18px; border-radius:4px; background:${p.color};"></span>
+      <span style="font-size:0.85rem; width:50px;">隊伍${idx+1}:</span>
+      <input type="text" class="team-name-input" data-idx="${idx}" value="${customTeamNames[idx] || p.name}" style="flex:1; padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:0.9rem;">
+    `;
+    teamEditList.appendChild(row);
+  });
+  openModal(teamEditModal);
+}
+
+function applyDefaultGroupNames() {
+  const inputs = teamEditList.querySelectorAll(".team-name-input");
+  inputs.forEach((input, idx) => {
+    input.value = `第 ${idx + 1} 組`;
+  });
+}
+
+function saveCustomTeamNames() {
+  const inputs = teamEditList.querySelectorAll(".team-name-input");
+  inputs.forEach((input) => {
+    const idx = parseInt(input.getAttribute("data-idx"), 10);
+    const val = input.value.trim();
+    if (val) {
+      customTeamNames[idx] = val;
+      if (players[idx]) players[idx].name = val;
+    }
+  });
+  updateLeaderboard();
+  if (players[currentPlayerIndex]) {
+    currentTeamName.textContent = players[currentPlayerIndex].name;
+  }
+  closeModal(teamEditModal);
+  updateMessage("✅ 已成功更新小隊自訂名稱！");
+}
+
+// 4. 一鍵排版並列印 A4 課堂錯題複習單
+function printWrongQuestionsA4() {
+  if (errorQuestionsLog.length === 0) {
+    alert("本次課堂無錯題紀錄，太優秀了！無需列印複習單。");
+    return;
+  }
+
+  // 整理高頻錯題
+  const freqMap = {};
+  errorQuestionsLog.forEach(item => {
+    const qKey = item.question;
+    if (!freqMap[qKey]) {
+      freqMap[qKey] = {
+        question: item.question,
+        options: item.options || [],
+        correctAnswer: item.correctAnswer,
+        explanation: item.explanation,
+        count: 0,
+        teams: []
+      };
+    }
+    freqMap[qKey].count++;
+    if (!freqMap[qKey].teams.includes(item.team)) {
+      freqMap[qKey].teams.push(item.team);
+    }
+  });
+
+  const list = Object.values(freqMap).sort((a, b) => b.count - a.count);
+  const curUnit = (typeof unitSubtitle !== "undefined" && unitSubtitle.value) ? unitSubtitle.value : "生物課堂逃生戰";
+
+  let printHtml = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>【課堂生物錯題複習單】${curUnit}</title>
+    <style>
+      body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; padding: 25px; color: #222; }
+      h1 { text-align: center; font-size: 20pt; margin-bottom: 5px; color: #1b5e20; }
+      .meta { text-align: center; font-size: 11pt; color: #555; margin-bottom: 20px; border-bottom: 2px solid #2e7d32; padding-bottom: 10px; }
+      .q-item { margin-bottom: 20px; page-break-inside: avoid; border: 1px solid #ccc; border-radius: 8px; padding: 12px 16px; background: #fafafa; }
+      .q-title { font-size: 13pt; font-weight: bold; margin-bottom: 8px; }
+      .q-opt { margin-left: 20px; font-size: 11pt; line-height: 1.6; }
+      .q-ans { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #bbb; font-size: 11pt; color: #2e7d32; font-weight: bold; }
+      .q-exp { font-size: 10.5pt; color: #d84315; margin-top: 4px; }
+      @media print {
+        body { padding: 0; }
+        .no-print { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="no-print" style="margin-bottom:15px; text-align:right;">
+      <button onclick="window.print()" style="padding:8px 16px; background:#2e7d32; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12pt;">🖨️ 列印此單 / 另存 PDF</button>
+    </div>
+    <h1>🦖 侏羅紀課堂生物錯題與觀念覆盤學習單 📝</h1>
+    <div class="meta">
+      <b>單元主題：</b> ${curUnit} &nbsp;|&nbsp; <b>列印日期：</b> ${new Date().toLocaleDateString()} &nbsp;|&nbsp; <b>全班總錯題數：</b> ${list.length} 題
+    </div>
+  `;
+
+  list.forEach((item, idx) => {
+    let optsHtml = "";
+    if (item.options && item.options.length > 0) {
+      optsHtml = item.options.map((opt, i) => `<div>(${["A","B","C","D"][i] || i+1}) ${opt}</div>`).join("");
+    }
+    printHtml += `
+      <div class="q-item">
+        <div class="q-title">${idx + 1}. [全班累計錯 ${item.count} 次] ${item.question}</div>
+        <div class="q-opt">${optsHtml}</div>
+        <div class="q-ans">✅ 正確答案：${item.correctAnswer}</div>
+        <div class="q-exp">💡 觀念解析：${item.explanation || "請參照課本重點複習。"}</div>
+      </div>
+    `;
+  });
+
+  printHtml += `
+    <div style="margin-top:30px; font-size:10pt; text-align:center; color:#888;">
+      【國中生物互動教學平台 ‧ 侏羅紀逃生戰課後形成性評量】
+    </div>
+  </body>
+  </html>
+  `;
+
+  const w = window.open("", "_blank");
+  if (w) {
+    w.document.write(printHtml);
+    w.document.close();
+  } else {
+    alert("瀏覽器攔截了彈出視窗，請允許彈出視窗以列印錯題單！");
+  }
+}

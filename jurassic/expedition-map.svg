@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+ <defs>
+  <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#67805c" stroke-opacity=".13" stroke-width="1"/></pattern>
+  <pattern id="terrain" width="410" height="370" patternUnits="userSpaceOnUse"><g fill="none" stroke="#69815a" stroke-width="1.2" opacity=".22"><path d="M-50 90C60-30 165 20 210 100S390 200 460 90M-40 110C55 0 150 40 190 120S380 220 450 120M-30 130C50 30 135 60 170 140S360 240 440 150M-20 150C45 60 120 80 150 160S340 260 430 180M-10 170C40 90 105 100 130 180S320 280 420 210M0 190C35 120 90 120 110 200S300 300 410 240M10 210C30 150 75 140 90 220S280 320 400 270"/></g></pattern>
+ </defs>
+ <path fill="#dde4cf" d="M0 0h1000v1000H0z"/><path fill="url(#grid)" d="M0 0h1000v1000H0z"/><path fill="url(#terrain)" d="M0 0h1000v1000H0z"/>
+ <g fill="none" stroke="#6e825d" opacity=".4"><rect x="14" y="14" width="972" height="972" rx="16"/><path d="M24 70V24h46M930 24h46v46M976 930v46h-46M70 976H24v-46" stroke-width="2"/></g>
+ <g transform="translate(938 875)" fill="none" stroke="#57714c" opacity=".45"><circle r="23"/><circle r="29" stroke-dasharray="1 5"/><path d="M0-40V40M-40 0H40"/><path d="M0-22 6 0 0 22-6 0Z" fill="#57714c"/></g>
+</svg>
