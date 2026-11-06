@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 150" fill="none">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#e5edda"/><stop offset="1" stop-color="#f9f8ee"/></linearGradient>
+ <pattern id="windows" width="18" height="19" patternUnits="userSpaceOnUse"><rect x="5" y="5" width="7" height="9" rx="1" fill="#f9efc5"/></pattern>
+ <g id="tree"><path d="M0 0v26" stroke="#6b7050" stroke-width="5"/><ellipse cy="-13" rx="18" ry="26" fill="#769364"/><ellipse cx="-6" cy="-18" rx="10" ry="19" fill="#96af79"/></g>
+</defs>
+<path d="M50 136C81 36 183 20 284 42S423 2 531 25s173 14 219 111" fill="url(#sky)"/>
+<circle cx="625" cy="35" r="21" fill="#eed796"/>
+<path d="M80 120c64-43 105-23 160-12s115-23 184-22 158 33 276 22v28H80" fill="#c6d4af"/>
+<path d="M165 112V70l29-19 29 19v42" fill="#94ac83"/>
+<path d="M234 116V49h47v67" fill="#b5c5a1"/>
+<path d="M518 115V44h39v71m8 0V69h37v46" fill="#a7bb94"/>
+<path d="M300 123V55h57v68" fill="#789581"/>
+<path d="M306 60h45v57h-45z" fill="url(#windows)"/>
+<path d="M298 55l31-13 31 13" fill="#496c54"/>
+<path d="M374 124V31h55v93" fill="#e0c58e"/>
+<path d="M368 31l33-20 34 20z" fill="#3f6c51"/>
+<path d="M382 37h39v69h-39z" fill="url(#windows)"/>
+<path d="M393 124v-16a8 8 0 0 1 16 0v16" fill="#476c53"/>
+<path d="M401 10V0m0 0h22l-7 6h-15" stroke="#446a4b" stroke-width="2" fill="#d4b46a"/>
+<path d="M445 123V65h48v58" fill="#afbb91"/>
+<path d="M441 65l28-22 28 22" fill="#42694f"/>
+<path d="M453 70h32v47h-32z" fill="url(#windows)"/>
+<path d="M205 125v-26h60v26" fill="#eadcb6"/><path d="M199 100l36-24 36 24" fill="#57785a"/>
+<path d="M540 126V98h56v28" fill="#edddb5"/><path d="M534 99l34-24 34 24" fill="#627f5b"/>
+<path d="M255 129c13-28 22-35 36-35s26 13 28 35" fill="#c7d8bc" stroke="#567b62" stroke-width="3"/>
+<path d="M287 95v33m-27-15h54" stroke="#6c8c72" stroke-width="2"/>
+<path d="M92 135h616" stroke="#9cae8c" stroke-width="3" stroke-linecap="round"/>
+<path d="M349 135l24-8h58l24 8" fill="#dbcba4"/>
+<path d="M338 145h128" stroke="#ded3b6" stroke-width="3" stroke-linecap="round"/>
+<use href="#tree" x="135" y="108"/><use href="#tree" x="175" y="113"/><use href="#tree" x="632" y="110"/><use href="#tree" x="675" y="107"/>
+<path d="M103 66q7-8 14 0m0 0q7-8 14 0m430-45q6-6 12 0m0 0q6-6 12 0" stroke="#839477" stroke-width="2" stroke-linecap="round"/>
+<path d="M111 136l5-10 5 10m563 0 5-10 5 10" fill="#79915c"/>
+</svg>
