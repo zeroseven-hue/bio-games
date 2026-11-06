@@ -41,17 +41,23 @@ const ALL_TEAMS = [
 // 12+ 閃亮機會卡 (生態良好獎勵)
 const CHANCE_CARDS = [
   "✨ 【有利突變】個體基因優化！下一題答對直接加 20 分並免費蓋房！",
-  "🤝 【互利共生】選擇一支隊伍共同得分，雙方各得 15 分！",
+  "🤝 【互利共生】選擇一支隊伍共同得分，雙方各得 20 分！",
   "⚡ 【酵素催化】光合作用加速！獲得【免答開工證】直接建立領地！",
   "🏃 【天擇優勢】高度適應環境，向前飛躍 3 格！",
   "🛡️ 【群體防禦】獲得【生物免疫護盾】一次，抵擋下次處罰！",
   "☀️ 【光合作用】吸收太陽能精華，全隊積分 +20 分！",
-  "⚖️ 【生態平衡】受大自然守護，與領先隊伍平分領地資源！",
+  "⚖️ 【生態平衡】受大自然守護，從第一名隊伍吸取 30 金幣生態基金！",
   "🧬 【基因重組】獲得一次自由指定生物題目單元的權利！",
   "🌳 【物種繁衍】領地生態大擴張，全隊積分 +15 分！",
   "🔋 【細胞分裂】獲得【雙倍得分卡】一張，下次答對得分翻倍！",
   "🕊️ 【生態系穩定】獲得大自然賜福，免費獲得額外擲骰一次！",
-  "🏞️ 【保護區設立】成立國家自然保護區，直接免費建立頂級地標！"
+  "🏞️ 【保護區設立】成立國家自然保護區，直接免費建立頂級地標！",
+  "🔬 【高倍顯微鏡】視野超清晰！直接穿透迷霧，下題自動獲得【50/50 救生圈】劃掉兩選項！",
+  "🦔 【擬態偽裝】個體融入環境！免疫敵方下一次強行佔領（敵方無法收購貴隊領地）！",
+  "🐝 【蜜蜂授粉】跨隊互助授粉！全班所有隊伍一同普發 +10 金幣生態紅利！",
+  "🦎 【斷尾求生】獲得【緊急避險符】！踩中敵方地盤時可免付買斷費平安路過！",
+  "🌱 【種子萌發】春天降臨生命力旺盛，全隊金幣 +25 分！",
+  "🦖 【化石重現】古生物大復活！獲得遠古生物賜福，金幣 +30 分！"
 ];
 
 // 12+ 驚奇命運卡 (生態趣味考驗)
@@ -67,7 +73,13 @@ const DESTINY_CARDS = [
   "🧬 【基因突變考驗】由敵隊挑選下一題的答題組員！",
   "🦠 【病原體蔓延】全隊進入防護隔離狀態，停留原格一輪！",
   "🐺 【生態失衡】狼群遷徙，全隊與最後一名隊伍互換位置！",
-  "🗑️ 【廢棄物污染】遭遇微塑膠污染，請全隊大聲喊出生物保護宣言！"
+  "🗑️ 【廢棄物污染】遭遇微塑膠污染，請全隊大聲喊出生物保護宣言！",
+  "🦟 【病媒蚊叮咬】遭遇登革熱病媒蚊叮咬，體力下降退後 1 格！",
+  "🌫️ 【顯微鏡光圈失靈】光線太暗對焦失誤！全隊答題手需閉目深呼吸 5 秒再看題！",
+  "🦅 【天敵突襲】猛禽俯衝捕食！全隊需全體起立擺出【老鷹展翅】動作才能繼續遊戲！",
+  "🍂 【落葉分解】生態循環加速！全隊支付 10 金幣當作大地堆肥維護費！",
+  "🥀 【酵素失活】環境溫度過高！本回合如果答題答錯，扣除分數加倍（-20 金幣）！",
+  "🪸 【珊瑚白化】海水升溫危機！請全隊說出一項節能減碳的日常具體作法！"
 ];
 
 // 10+ 課堂新奇互動任務
@@ -278,6 +290,8 @@ function initEventListeners() {
     const txt = destinyDesc.textContent || "";
     if (txt.includes("退後 2 格")) {
       startBackwardJumping(2, true);
+    } else if (txt.includes("退後 1 格")) {
+      startBackwardJumping(1, true);
     } else {
       endTurn();
     }
@@ -792,21 +806,37 @@ function applyChanceCardEffect(cardText, curTeam) {
     // Handled on modal close
   } else if (cardText.includes("生物免疫護盾")) {
     curTeam.shields = (curTeam.shields || 0) + 1;
-  } else if (cardText.includes("光合作用") && cardText.includes("全隊積分 +20")) {
-    curTeam.score += 20;
-  } else if (cardText.includes("物種繁衍") && cardText.includes("全隊積分 +15")) {
-    curTeam.score += 15;
+  } else if (cardText.includes("高倍顯微鏡")) {
+    curTeam.consecutiveWrongCount = Math.max(curTeam.consecutiveWrongCount || 0, 3); // 觸發刪去二選項
+    addHistoryLog(curTeam.name, "🔬【高倍顯微鏡啟動】下題自動解鎖雙重選項刪除！");
+  } else if (cardText.includes("蜜蜂授粉")) {
+    teams.forEach(t => { t.score += 10; });
+    addHistoryLog(curTeam.name, "🐝【跨隊授粉】全班所有隊伍各得 +10 金幣生態紅利！");
+  } else if (cardText.includes("生態平衡") && cardText.includes("第一名隊伍")) {
+    const sorted = [...teams].sort((a, b) => b.score - a.score);
+    const topTeam = sorted[0];
+    if (topTeam && topTeam.id !== curTeam.id) {
+      const tax = Math.min(topTeam.score, 30);
+      topTeam.score -= tax;
+      curTeam.score += tax;
+      addHistoryLog(curTeam.name, `⚖️【生態平衡】從領先的【${topTeam.name}】徵收 ${tax} 金幣！`);
+    } else {
+      curTeam.score += 20;
+    }
   } else if (cardText.includes("雙倍得分卡")) {
     curTeam.doubleScore = true;
   } else if (cardText.includes("互利共生")) {
-    // 與另一隊各加 15
     const otherTeam = teams.find(t => t.id !== curTeam.id);
-    if (otherTeam) otherTeam.score += 15;
-    curTeam.score += 15;
-  } else if (cardText.includes("有利突變")) {
+    if (otherTeam) otherTeam.score += 20;
     curTeam.score += 20;
-    curTeam.freeBuild = true;
-  } else if (cardText.includes("保護區設立")) {
+  } else if (cardText.includes("化石重現")) {
+    curTeam.score += 30;
+  } else if (cardText.includes("種子萌發")) {
+    curTeam.score += 25;
+  } else if (cardText.includes("物種繁衍")) {
+    curTeam.score += 15;
+  } else if (cardText.includes("有利突變") || cardText.includes("保護區設立")) {
+    curTeam.score += 20;
     curTeam.freeBuild = true;
   } else {
     curTeam.score += 20; // 基礎幸運金
@@ -826,11 +856,11 @@ function applyDestinyCardEffect(cardText, curTeam) {
 
   if (cardText.includes("暫停一輪") || cardText.includes("停留原格一輪")) {
     curTeam.skipTurns = (curTeam.skipTurns || 0) + 1;
-  } else if (cardText.includes("外來種入侵") || cardText.includes("扣除 10 分")) {
+  } else if (cardText.includes("外來種入侵") || cardText.includes("扣除 10 分") || cardText.includes("落葉分解")) {
     curTeam.score = Math.max(0, curTeam.score - 10);
   } else if (cardText.includes("優養化打擊") || cardText.includes("扣除分數 15")) {
     curTeam.score = Math.max(0, curTeam.score - 15);
-  } else if (cardText.includes("退後 2 格")) {
+  } else if (cardText.includes("退後 2 格") || cardText.includes("退後 1 格")) {
     // Handled on modal close via startBackwardJumping
   } else if (cardText.includes("互換位置")) {
     const sorted = [...teams].sort((a, b) => a.score - b.score);
