@@ -1145,12 +1145,14 @@ function handleChoiceSelect(selectedIdx) {
   });
 
   if (isCorrect) {
+    playCorrectSound();
     feedbackBanner.style.color = "var(--accent-green)";
     feedbackBanner.textContent = "🎉 答案正確！演化適應成功！";
   } else {
     feedbackBanner.style.color = "var(--accent-red)";
     feedbackBanner.textContent = (selectedIdx === -1) ? "⌛ 時間到！未能在時限內解答！" : "❌ 回答錯誤！觀念需要加強喔！";
     quizFeedbackBox.classList.add("error-theme");
+    playWrongSound();
 
     errorQuestionsLog.push({
       round: roundCounter,
@@ -1414,6 +1416,17 @@ function playTone(freq, type, duration, delay = 0, vol = 0.1) {
   gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
   gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + duration);
   osc.stop(audioCtx.currentTime + delay + duration);
+}
+
+
+function playCorrectSound() {
+  playTone(523.25, "triangle", 0.12, 0, 0.15);
+  playTone(659.25, "triangle", 0.12, 0.08, 0.15);
+  playTone(783.99, "triangle", 0.25, 0.16, 0.18);
+}
+function playWrongSound() {
+  playTone(220, "sawtooth", 0.15, 0, 0.18);
+  playTone(180, "sawtooth", 0.25, 0.12, 0.18);
 }
 
 function playDiceTone() { playTone(600, "sine", 0.1, 0); playTone(800, "sine", 0.1, 0.08); }
