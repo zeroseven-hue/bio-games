@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>動物方城市生物大富翁 - Zootopia Bio Monopoly</title>
   <link rel="stylesheet" href="style.css?v=4.2">
-  <link rel="stylesheet" href="polish.css?v=1.0">
+  <link rel="stylesheet" href="polish.css?v=2.0">
   <!-- XLSX Library for Roster Import -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -17,11 +17,7 @@
     <!-- 頂部主控列 (包含 🔍 放大題目、📖 遊戲規則 按鈕) -->
     <header class="game-header">
       <div class="header-left">
-        <h1 class="game-logo">🐰 動物城生物大富翁 🦊</h1>
-        <div class="mode-tag" id="modeTag">👥 小組競賽模式 (4 隊)</div>
-      </div>
-
-      <div class="header-center">
+        <h1 class="game-logo">🐰 動物城大富翁</h1>
         <div class="turn-indicator" id="turnIndicator">
           <span class="turn-icon" id="currentTurnIcon">🐰</span>
           <span class="turn-name" id="currentTurnName">茱蒂兔兔隊 回合</span>
@@ -30,13 +26,14 @@
 
       <div class="header-right">
         <button id="btnZoomText" class="btn-tool" title="放大題目與字體">🔍 放大題目</button>
-        <button id="btnSubmitScore" class="btn-tool" style="background:linear-gradient(135deg, #16a34a, #15803d); color:white; font-weight:800;" title="登錄小組或個人戰績">🚀 登錄成績</button>
         <button id="btnRules" class="btn-tool btn-green" title="查看遊戲規則與玩法">📖 遊戲規則</button>
-        <button id="btnFreeze" class="btn-tool btn-purple" title="快捷鍵：空白鍵 (Space)">⏸️ 凍結畫面</button>
+        <button id="btnFreeze" class="btn-tool btn-purple" title="教師專用：一鍵凍結 (快捷鍵 Space)">⏸️ 凍結</button>
         <button id="btnSound" class="btn-tool" title="音效開關">🔊</button>
         <button id="btnTimer" class="btn-tool" title="計時器開關">⏱️</button>
-        <button id="btnHistory" class="btn-tool btn-orange" title="查看課堂戰報">📜 戰報</button>
-        <button id="btnSettings" class="btn-tool btn-blue" title="遊戲設定">⚙️ 設定</button>
+        <!-- 教師管理按鈕 (預設隱藏，按 T 或 URL 加 ?admin=1 開啟，學生端不干擾) -->
+        <button id="btnHistory" class="btn-tool btn-orange teacher-only hidden" title="課堂戰報">📜 戰報</button>
+        <button id="btnSettings" class="btn-tool btn-blue teacher-only hidden" title="模式設定">⚙️ 設定</button>
+        <button id="btnSubmitScore" class="btn-tool btn-submit-score" title="登錄小組或個人戰績">🚀 登錄成績</button>
       </div>
     </header>
 
@@ -71,20 +68,22 @@
         <div class="team-score-bar" id="teamScoreBar"></div>
 
         <div class="dice-control-box">
-          <!-- 精巧 3D 擬真動態滾骰子展示區 -->
-          <div class="dice-stage" id="diceStage" title="點擊擲骰子">
-            <div class="dice-cube" id="diceCube">
-              <div class="dice-face face-1"><span class="dot red"></span></div>
-              <div class="dice-face face-2"><span class="dot"></span><span class="dot"></span></div>
-              <div class="dice-face face-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-              <div class="dice-face face-4"><div class="dot-col"><span class="dot red"></span><span class="dot red"></span></div><div class="dot-col"><span class="dot red"></span><span class="dot red"></span></div></div>
-              <div class="dice-face face-5"><div class="dot-col"><span class="dot"></span><span class="dot"></span></div><div class="dot-col"><span class="dot"></span></div><div class="dot-col"><span class="dot"></span><span class="dot"></span></div></div>
-              <div class="dice-face face-6"><div class="dot-col"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="dot-col"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+          <!-- 整合型 3D 動態骰子按鈕 (骰子內嵌於主按鈕，杜絕重複) -->
+          <button class="btn-dice-roll unified-dice-btn" id="btnRollDice" title="點擊擲骰子並在棋盤上前進">
+            <div class="dice-mini-stage" id="diceStage">
+              <div class="dice-cube" id="diceCube">
+                <div class="dice-face face-1"><span class="dot red"></span></div>
+                <div class="dice-face face-2"><span class="dot"></span><span class="dot"></span></div>
+                <div class="dice-face face-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <div class="dice-face face-4"><div class="dot-col"><span class="dot red"></span><span class="dot red"></span></div><div class="dot-col"><span class="dot red"></span><span class="dot red"></span></div></div>
+                <div class="dice-face face-5"><div class="dot-col"><span class="dot"></span><span class="dot"></span></div><div class="dot-col"><span class="dot"></span></div><div class="dot-col"><span class="dot"></span><span class="dot"></span></div></div>
+                <div class="dice-face face-6"><div class="dot-col"><span class="dot"></span><span class="dot"></span></div><div class="dot-col"><span class="dot"></span></div><div class="dot-col"><span class="dot"></span><span class="dot"></span></div></div>
+              </div>
             </div>
-          </div>
-          <button class="btn-dice-roll" id="btnRollDice">🎲 點我擲骰子前進</button>
-          <button class="btn-dice-quick" id="btnQuickRoll">⚡ 快速前進</button>
-          <button class="btn-dice-shuffle" id="btnShuffle">🔀 打散隊伍</button>
+            <span class="roll-btn-label" id="rollBtnLabel">擲骰子前進</span>
+          </button>
+          <button class="btn-dice-quick" id="btnQuickRoll" title="快速前進">⚡ 快速前進</button>
+          <button class="btn-dice-shuffle" id="btnShuffle" title="打散順序">🔀 打散隊伍</button>
         </div>
 
         <div class="dice-result-banner" id="diceResultBanner">準備就緒！請點擊擲骰子開始挑戰！</div>
@@ -290,6 +289,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=5.0"></script>
-  <script src="game.js?v=4.6"></script>
+  <script src="game.js?v=4.7"></script>
 </body>
 </html>

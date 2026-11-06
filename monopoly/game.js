@@ -197,6 +197,19 @@ const btnDiscardSnapshot = document.getElementById("btnDiscardSnapshot");
 // 頁面初始化
 window.addEventListener("DOMContentLoaded", async () => {
   initEventListeners();
+  // 檢查是否以老師管理模式開啟 (?admin=1 或按下鍵盤 T 鍵切換戰報/設定按鈕)
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdmin = urlParams.get("admin") === "1" || urlParams.get("teacher") === "1";
+  if (isAdmin) {
+    document.querySelectorAll(".teacher-only").forEach(el => el.classList.remove("hidden"));
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if ((e.key === "t" || e.key === "T") && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+      document.querySelectorAll(".teacher-only").forEach(el => el.classList.toggle("hidden"));
+    }
+  });
+
   await loadManifestAndUnits();
   initTeamsAndBoard();
   checkSnapshotOnLoad();

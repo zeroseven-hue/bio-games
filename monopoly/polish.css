@@ -9,21 +9,96 @@ body.monopoly-polish {
   box-shadow: 0 20px 60px #284c3020, 0 2px 0 #fff inset; background: #faf9f2;
 }
 .monopoly-polish .game-header {
-  height: auto; min-height: 108px; display: grid; grid-template-columns: 1fr auto;
-  gap: 10px 20px; padding: 14px 22px; background: #fbfaf5;
-  color: #16382f; border-bottom: 1px solid #d8dfcd; box-shadow: none;
+  height: 56px; min-height: 56px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 0 16px; background: #fbfaf5;
+  color: #16382f; border-bottom: 1px solid #d8dfcd; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
-.monopoly-polish .header-left { flex-wrap: wrap; gap: 8px 14px; min-width: 0; }
-.monopoly-polish .game-logo { color: #163e32; text-shadow: none; font-size: clamp(18px, 2vw, 25px); letter-spacing: -.5px; }
-.monopoly-polish .mode-tag { background: #e9eedf; color: #294939; border: 1px solid #c4d1b8; border-radius: 8px; }
-.monopoly-polish .header-center { grid-column: 2; grid-row: 1; }
-.monopoly-polish .turn-indicator { background: #173d32; border: 0; padding: 8px 14px; border-radius: 12px; box-shadow: 0 3px 0 #0b281e; }
-.monopoly-polish .turn-name { text-shadow: none; color: #fff !important; }
-.monopoly-polish .header-right { grid-column: 1 / -1; flex-wrap: wrap; gap: 7px; }
-.monopoly-polish .btn-tool { min-height: 44px; min-width: 44px; padding: 8px 12px; background: #eef1e8; color: #183e31; border: 1px solid #c6d2bf; border-radius: 10px; font-size: 13px; }
+.monopoly-polish .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.monopoly-polish .game-logo { color: #163e32; text-shadow: none; font-size: 18px; font-weight: 900; letter-spacing: -0.3px; white-space: nowrap; margin: 0; }
+.monopoly-polish .turn-indicator {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #173d32; border: 0; padding: 5px 12px; border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+}
+.monopoly-polish .turn-icon { font-size: 16px; line-height: 1; }
+.monopoly-polish .turn-name { font-size: 13px; font-weight: 800; text-shadow: none; color: #fff !important; white-space: nowrap; }
+.monopoly-polish .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.monopoly-polish .btn-tool {
+  height: 36px; min-height: 36px; padding: 0 10px;
+  background: #eef1e8; color: #183e31; border: 1px solid #c6d2bf;
+  border-radius: 8px; font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s ease;
+}
 .monopoly-polish .btn-tool:hover { background: #dfe8d7; transform: translateY(-1px); }
-.monopoly-polish #btnSubmitScore { margin-left: auto; background: #205a43 !important; color: #fff !important; order: 1; }
 .monopoly-polish .btn-tool.active-zoom { background: #dcebd9; border-color: #42694b; box-shadow: 0 0 0 2px #42694b25; }
+.monopoly-polish .btn-submit-score {
+  background: linear-gradient(135deg, #15803d, #166534) !important;
+  color: #fff !important; border: 0 !important; font-weight: 800;
+  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.35);
+}
+.monopoly-polish .btn-submit-score:hover { background: linear-gradient(135deg, #16a34a, #15803d) !important; }
+
+/* 🎲 整合型 3D 骰子按鈕樣式 */
+.unified-dice-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 8px 24px !important;
+  min-height: 52px !important;
+  background: linear-gradient(135deg, #1b4d38, #163e2c) !important;
+  color: #ffffff !important;
+  border: 1px solid #2e6b4f !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(27, 77, 56, 0.3), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+.unified-dice-btn:hover {
+  background: linear-gradient(135deg, #225f46, #1a4a35) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(27, 77, 56, 0.4) !important;
+}
+.unified-dice-btn:active {
+  transform: translateY(1px) !important;
+}
+.dice-mini-stage {
+  perspective: 300px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.dice-mini-stage .dice-cube {
+  width: 28px;
+  height: 28px;
+  transform: rotateX(-20deg) rotateY(25deg);
+}
+.dice-mini-stage .dice-face {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  padding: 3px;
+}
+.dice-mini-stage .face-1 { transform: translateZ(14px); }
+.dice-mini-stage .face-6 { transform: rotateY(180deg) translateZ(14px); }
+.dice-mini-stage .face-2 { transform: rotateY(-90deg) translateZ(14px); justify-content: space-between; }
+.dice-mini-stage .face-5 { transform: rotateY(90deg) translateZ(14px); justify-content: space-between; }
+.dice-mini-stage .face-3 { transform: rotateX(90deg) translateZ(14px); justify-content: space-between; }
+.dice-mini-stage .face-4 { transform: rotateX(-90deg) translateZ(14px); justify-content: space-between; }
+.dice-mini-stage .dot { width: 5px; height: 5px; }
+.dice-mini-stage .dot.red { width: 6.5px; height: 6.5px; }
+
+.roll-btn-label {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
 .monopoly-polish .board-container {
   gap: 5px; padding: 9px; background: #dce4d1;
   background-image: repeating-linear-gradient(45deg, transparent 0 5px, #36543a05 5px 6px);
