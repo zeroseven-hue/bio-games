@@ -71,6 +71,17 @@
         <div class="team-score-bar" id="teamScoreBar"></div>
 
         <div class="dice-control-box">
+          <!-- 精巧 3D 擬真動態滾骰子展示區 -->
+          <div class="dice-stage" id="diceStage" title="點擊擲骰子">
+            <div class="dice-cube" id="diceCube">
+              <div class="dice-face face-1"><span class="dot red"></span></div>
+              <div class="dice-face face-2"><span class="dot"></span><span class="dot"></span></div>
+              <div class="dice-face face-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+              <div class="dice-face face-4"><div class="dot-col"><span class="dot red"></span><span class="dot red"></span></div><div class="dot-col"><span class="dot red"></span><span class="dot red"></span></div></div>
+              <div class="dice-face face-5"><div class="dot-col"><span class="dot"></span><span class="dot"></span></div><div class="dot-col"><span class="dot"></span></div><div class="dot-col"><span class="dot"></span><span class="dot"></span></div></div>
+              <div class="dice-face face-6"><div class="dot-col"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="dot-col"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            </div>
+          </div>
           <button class="btn-dice-roll" id="btnRollDice">🎲 點我擲骰子前進</button>
           <button class="btn-dice-quick" id="btnQuickRoll">⚡ 快速前進</button>
           <button class="btn-dice-shuffle" id="btnShuffle">🔀 打散隊伍</button>
@@ -279,6 +290,6 @@
   </div>
 
   <script src="../score-submit-modal.js?v=5.0"></script>
-  <script src="game.js?v=4.5"></script>
+  <script src="game.js?v=4.6"></script>
 </body>
 </html>

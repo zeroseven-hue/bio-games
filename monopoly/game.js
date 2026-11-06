@@ -28,14 +28,14 @@ function cleanUnitTitle(raw) {
 
 // 8 大 Zootopia 競賽隊伍 / 角色設定
 const ALL_TEAMS = [
-  { id: 0, name: "茱蒂兔兔隊", icon: "🐰", color: "#38bdf8" },
-  { id: 1, name: "尼克狐狸隊", icon: "🦊", color: "#f97316" },
-  { id: 2, name: "快快樹懶隊", icon: "🦥", color: "#eab308" },
-  { id: 3, name: "蠻牛局長隊", icon: "🦬", color: "#38bdf8" },
-  { id: 4, name: "獅丁市長隊", icon: "🦁", color: "#ef4444" },
-  { id: 5, name: "洪金豹警官隊", icon: "🐆", color: "#f59e0b" },
-  { id: 6, name: "狼群警衛隊", icon: "🐺", color: "#94a3b8" },
-  { id: 7, name: "羊駝探險隊", icon: "🦙", color: "#c084fc" }
+  { id: 0, name: "茱蒂兔兔隊", icon: "🐰", color: "#0284c7" },
+  { id: 1, name: "尼克狐狸隊", icon: "🦊", color: "#ea580c" },
+  { id: 2, name: "快快樹懶隊", icon: "🦥", color: "#ca8a04" },
+  { id: 3, name: "蠻牛局長隊", icon: "🦬", color: "#16a34a" },
+  { id: 4, name: "獅丁市長隊", icon: "🦁", color: "#dc2626" },
+  { id: 5, name: "洪金豹警官隊", icon: "🐆", color: "#d97706" },
+  { id: 6, name: "狼群警衛隊", icon: "🐺", color: "#475569" },
+  { id: 7, name: "羊駝探險隊", icon: "🦙", color: "#9333ea" }
 ];
 
 // 12+ 閃亮機會卡 (生態良好獎勵)
@@ -219,6 +219,7 @@ function initEventListeners() {
   });
 
   btnRollDice.addEventListener("click", () => startDraw(false));
+  document.getElementById("diceStage")?.addEventListener("click", () => startDraw(false));
   btnQuickRoll.addEventListener("click", () => startDraw(true));
   btnShuffle.addEventListener("click", shuffleTeams);
 
@@ -570,7 +571,14 @@ function generateBoardGrid() {
 
   for (let i = 0; i < 8; i++) {
     const tok = document.getElementById(`token-${i}`);
-    if (tok) tok.style.display = i < activeTeamCount ? "flex" : "none";
+    if (tok) {
+      tok.style.display = i < activeTeamCount ? "flex" : "none";
+      const teamObj = teams.find(t => t.id === i) || ALL_TEAMS[i];
+      if (teamObj) {
+        tok.style.borderColor = teamObj.color;
+        tok.style.boxShadow = `0 4px 10px ${teamObj.color}55, 0 0 0 2.5px ${teamObj.color}`;
+      }
+    }
   }
 
   setTimeout(updateCoordinates, 250);
@@ -622,10 +630,38 @@ function startDraw(isQuick = false) {
   isNoBuildMoveTurn = false;
 
   const diceVal = Math.floor(Math.random() * 6) + 1;
+  const diceCube = document.getElementById("diceCube");
+
+  // 3D 旋轉各點數對應角度
+  const diceRotations = {
+    1: "rotateX(0deg) rotateY(0deg)",
+    2: "rotateX(0deg) rotateY(90deg)",
+    3: "rotateX(-90deg) rotateY(0deg)",
+    4: "rotateX(90deg) rotateY(0deg)",
+    5: "rotateX(0deg) rotateY(-90deg)",
+    6: "rotateX(0deg) rotateY(180deg)"
+  };
 
   playWinSound();
-  diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
-  startJumping(diceVal, isQuick);
+
+  if (diceCube && !isQuick) {
+    diceCube.classList.remove("is-rolling");
+    void diceCube.offsetWidth;
+    diceCube.style.setProperty("--dice-final-transform", diceRotations[diceVal]);
+    diceCube.classList.add("is-rolling");
+    diceResultBanner.textContent = `🎲 ${curTeam.name} 正在擲骰子...`;
+
+    setTimeout(() => {
+      diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
+      startJumping(diceVal, isQuick);
+    }, 550);
+  } else {
+    if (diceCube) {
+      diceCube.style.transform = diceRotations[diceVal];
+    }
+    diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
+    startJumping(diceVal, isQuick);
+  }
 }
 
 function startJumping(steps, isQuick, isNoBuildMove = false) {
@@ -639,8 +675,12 @@ function startJumping(steps, isQuick, isNoBuildMove = false) {
       document.getElementById(`box-${curTeam.pos}`).style.display = "none";
     }
     curTeam.pos = (curTeam.pos + 1) % 28;
-    if (document.getElementById(`box-${curTeam.pos}`)) {
-      document.getElementById(`box-${curTeam.pos}`).style.display = "block";
+    const boxEl = document.getElementById(`box-${curTeam.pos}`);
+    if (boxEl) {
+      boxEl.style.display = "block";
+      boxEl.style.borderColor = curTeam.color;
+      boxEl.style.backgroundColor = curTeam.color + "33";
+      boxEl.style.boxShadow = `0 0 12px ${curTeam.color}88 inset, 0 0 8px ${curTeam.color}66`;
     }
 
     playTickSound();
@@ -693,8 +733,12 @@ function startBackwardJumping(steps, isQuick = true) {
       document.getElementById(`box-${curTeam.pos}`).style.display = "none";
     }
     curTeam.pos = (curTeam.pos - 1 + 28) % 28;
-    if (document.getElementById(`box-${curTeam.pos}`)) {
-      document.getElementById(`box-${curTeam.pos}`).style.display = "block";
+    const boxEl = document.getElementById(`box-${curTeam.pos}`);
+    if (boxEl) {
+      boxEl.style.display = "block";
+      boxEl.style.borderColor = curTeam.color;
+      boxEl.style.backgroundColor = curTeam.color + "33";
+      boxEl.style.boxShadow = `0 0 12px ${curTeam.color}88 inset, 0 0 8px ${curTeam.color}66`;
     }
 
     playTickSound();
@@ -1089,6 +1133,12 @@ function executeTakeoverOptionA() {
     cost: 150
   };
 
+  const cellEl = document.getElementById(`cell-${cellId}`);
+  if (cellEl) {
+    cellEl.style.border = `2px solid ${curTeam.color}`;
+    cellEl.style.borderBottom = `4px solid ${curTeam.color}`;
+    cellEl.style.backgroundColor = curTeam.color + "18";
+  }
   const buildArea = document.getElementById(`build-${cellId}`);
   if (buildArea) {
     buildArea.innerHTML = "";
@@ -1096,6 +1146,7 @@ function executeTakeoverOptionA() {
     badge.className = "building-badge";
     badge.innerHTML = `${curTeam.icon} 🏠 ${bName}`;
     badge.style.backgroundColor = curTeam.color;
+    badge.style.boxShadow = `0 2px 6px ${curTeam.color}66`;
     buildArea.appendChild(badge);
   }
 
@@ -1160,13 +1211,20 @@ function confirmBuildHouse() {
   usedBuildingNames.add(bName);
 
   const cellId = currentPendingBuildCellId;
+  const cellEl = document.getElementById(`cell-${cellId}`);
+  if (cellEl) {
+    cellEl.style.border = `2px solid ${curTeam.color}`;
+    cellEl.style.borderBottom = `4px solid ${curTeam.color}`;
+    cellEl.style.backgroundColor = curTeam.color + "18";
+  }
   const buildArea = document.getElementById(`build-${cellId}`);
   if (buildArea) {
-    buildArea.innerHTML = ""; // 強佔時替換舊建物
+    buildArea.innerHTML = "";
     const badge = document.createElement("div");
     badge.className = "building-badge";
     badge.innerHTML = `${curTeam.icon} 🏠 ${bName}`;
     badge.style.backgroundColor = curTeam.color;
+    badge.style.boxShadow = `0 2px 6px ${curTeam.color}66`;
     buildArea.appendChild(badge);
   }
 
@@ -1328,6 +1386,12 @@ function restoreSnapshot() {
     setTimeout(() => {
       Object.keys(cellOwners).forEach(cellId => {
         const owner = cellOwners[cellId];
+        const cellEl = document.getElementById(`cell-${cellId}`);
+        if (cellEl && owner) {
+          cellEl.style.border = `2px solid ${owner.color || "#0284c7"}`;
+          cellEl.style.borderBottom = `4px solid ${owner.color || "#0284c7"}`;
+          cellEl.style.backgroundColor = (owner.color || "#0284c7") + "18";
+        }
         const buildArea = document.getElementById(`build-${cellId}`);
         if (buildArea && owner) {
           buildArea.innerHTML = "";
@@ -1335,6 +1399,7 @@ function restoreSnapshot() {
           badge.className = "building-badge";
           badge.innerHTML = `${owner.teamIcon || "🏠"} 🏠 ${owner.buildingName}`;
           badge.style.backgroundColor = owner.color || "#0284c7";
+          badge.style.boxShadow = `0 2px 6px ${owner.color || "#0284c7"}66`;
           buildArea.appendChild(badge);
         }
       });
