@@ -135,9 +135,9 @@ const btnRules = document.getElementById("btnRules");
 const btnFreeze = document.getElementById("btnFreeze");
 const btnSound = document.getElementById("btnSound");
 const btnTimer = document.getElementById("btnTimer");
-const btnHistory = document.getElementById("btnSubmitScore")?.addEventListener("click", triggerMonopolyScoreSubmit);
-  document.getElementById("btnSubmitFromHistory")?.addEventListener("click", triggerMonopolyScoreSubmit);
-  document.getElementById("btnHistory");
+const btnHistory = document.getElementById("btnHistory");
+const btnSubmitScore = document.getElementById("btnSubmitScore");
+const btnSubmitFromHistory = document.getElementById("btnSubmitFromHistory");
 const btnSettings = document.getElementById("btnSettings");
 
 // Modals
@@ -238,7 +238,9 @@ function initEventListeners() {
 
   btnSound.addEventListener("click", toggleSound);
   btnTimer.addEventListener("click", toggleTimer);
-  btnHistory.addEventListener("click", openHistory);
+  if (btnHistory) btnHistory.addEventListener("click", openHistory);
+  if (btnSubmitScore) btnSubmitScore.addEventListener("click", triggerMonopolyScoreSubmit);
+  if (btnSubmitFromHistory) btnSubmitFromHistory.addEventListener("click", triggerMonopolyScoreSubmit);
   btnSettings.addEventListener("click", openSettings);
 
   btnCloseSettings.addEventListener("click", () => closeModal(settingsModal));
@@ -250,6 +252,8 @@ function initEventListeners() {
     const txt = chanceDesc.textContent || "";
     if (txt.includes("向前飛躍 3 格")) {
       startJumping(3, true, true);
+    } else if (txt.includes("自由指定生物題目單元")) {
+      openSettings();
     } else {
       endTurn();
     }
@@ -259,7 +263,7 @@ function initEventListeners() {
     closeModal(destinyModal);
     const txt = destinyDesc.textContent || "";
     if (txt.includes("退後 2 格")) {
-      startJumping(26, true, true);
+      startBackwardJumping(2, true);
     } else {
       endTurn();
     }
@@ -312,7 +316,7 @@ function initEventListeners() {
   btnRestoreSnapshot.addEventListener("click", restoreSnapshot);
   btnDiscardSnapshot.addEventListener("click", () => {
     closeModal(snapshotModal);
-    localStorage.removeItem("monopoly_snapshot_v3.8");
+    localStorage.removeItem("monopoly_snapshot_v3.9");
   });
 }
 
@@ -437,20 +441,65 @@ let isNoBuildMoveTurn = false;
 let isCurrentQuizAnsweredCorrectly = false;
 
 // 4. 初始化競賽隊伍與 10x8 棋盤 (共 28 格)
+let studentRoster = [];
+let soloCurrentStudent = null;
+
+function parseStudentRoster() {
+  const txt = (inputStudents && inputStudents.value) ? inputStudents.value.trim() : "";
+  if (!txt) return [];
+  const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  return lines.map((line, idx) => {
+    const parts = line.split(/[,，\t\s]+/);
+    if (parts.length >= 2) {
+      return { seat: parts[0].trim(), name: parts[1].trim() };
+    }
+    return { seat: String(idx + 1).padStart(2, "0"), name: line };
+  });
+}
+
 function initTeamsAndBoard() {
-  teams = ALL_TEAMS.slice(0, activeTeamCount).map(t => ({
-    ...t,
-    score: 600, // 每隊初始給予 600 金幣 (提高開局容錯率與資金)
-    pos: 0,
-    buildingsCount: 0
-  }));
+  studentRoster = parseStudentRoster();
+  
+  if (gameMode === "solo" && studentRoster.length > 0) {
+    // 個人模式：直接從名單中挑選或建立隊伍（上限可支援全班或8組隨機個人）
+    const count = Math.min(activeTeamCount, studentRoster.length);
+    teams = studentRoster.slice(0, count).map((st, idx) => {
+      const template = ALL_TEAMS[idx % ALL_TEAMS.length];
+      return {
+        id: idx,
+        name: `${st.seat}號 ${st.name}`,
+        icon: template.icon,
+        color: template.color,
+        score: 600,
+        pos: 0,
+        buildingsCount: 0,
+        consecutiveWrongCount: 0,
+        shields: 0,
+        doubleScore: false,
+        skipTurns: 0,
+        freeBuild: false
+      };
+    });
+  } else {
+    teams = ALL_TEAMS.slice(0, activeTeamCount).map(t => ({
+      ...t,
+      score: 600,
+      pos: 0,
+      buildingsCount: 0,
+      consecutiveWrongCount: 0,
+      shields: 0,
+      doubleScore: false,
+      skipTurns: 0,
+      freeBuild: false
+    }));
+  }
 
   currentTurnIndex = 0;
   currentTileIndex = 0;
   usedBuildingNames = new Set();
   cellOwners = {};
 
-  modeTag.textContent = gameMode === "group" ? `👥 小組競賽 (${activeTeamCount} 隊)` : `👤 個人抽籤模式`;
+  modeTag.textContent = gameMode === "group" ? `👥 小組競賽 (${teams.length} 隊)` : `👤 個人競賽 (${teams.length} 人)`;
   renderScoreBar();
   generateBoardGrid();
 }
@@ -462,8 +511,12 @@ function renderScoreBar() {
     const card = document.createElement("div");
     card.className = `score-card ${idx === currentTurnIndex ? "active-turn" : ""}`;
     card.style.borderColor = t.color;
+    const shieldTag = (t.shields > 0) ? `<span style="color:#38bdf8;" title="持有生物免疫護盾"> 🛡️x${t.shields}</span>` : "";
+    const doubleTag = t.doubleScore ? `<span style="color:#ec4899;" title="下題得分翻倍"> ⚡x2</span>` : "";
+    const freeBuildTag = t.freeBuild ? `<span style="color:#10b981;" title="持有免答開工證"> 🏗️</span>` : "";
+    const assistTag = (t.consecutiveWrongCount >= 2) ? `<span style="color:#ef4444;font-size:11px;" title="已觸發答錯扶助鷹架"> 🆘扶助中</span>` : "";
     card.innerHTML = `
-      <span>${t.icon} ${t.name}</span>
+      <span>${t.icon} ${t.name}${shieldTag}${doubleTag}${freeBuildTag}${assistTag}</span>
       <span style="color:#e67e22;">💰 <b>${t.score}</b> 金幣</span>
       <span class="b-count">🏠 ${t.buildingsCount} 棟</span>
     `;
@@ -552,12 +605,23 @@ function updateCoordinates() {
 // 5. 擲骰子與動態彈跳位移 (極速流暢模式)
 function startDraw(isQuick = false) {
   if (isDrawing || isTeacherFrozen) return;
+  const curTeam = teams[currentTurnIndex];
+  if (!curTeam) return;
+
+  // 檢查是否處於暫停回合狀態 (例如極端氣候/病原體考驗)
+  if (curTeam.skipTurns && curTeam.skipTurns > 0) {
+    curTeam.skipTurns--;
+    alert(`❄️【暫停一輪】${curTeam.name} 目前處於生態休眠/暫停狀態，跳過本輪擲骰！`);
+    addHistoryLog(curTeam.name, `❄️ 處於暫停狀態，跳過本輪行動。`);
+    endTurn();
+    return;
+  }
+
   unlockAudioContext();
   isDrawing = true;
   isNoBuildMoveTurn = false;
 
   const diceVal = Math.floor(Math.random() * 6) + 1;
-  const curTeam = teams[currentTurnIndex];
 
   playWinSound();
   diceResultBanner.textContent = `🎲 ${curTeam.name} 擲出了 ${diceVal} 點！前進 ${diceVal} 格！`;
@@ -571,9 +635,13 @@ function startJumping(steps, isQuick, isNoBuildMove = false) {
   if (isNoBuildMove) isNoBuildMoveTurn = true;
 
   const stepRun = () => {
-    document.getElementById(`box-${curTeam.pos}`).style.display = "none";
+    if (document.getElementById(`box-${curTeam.pos}`)) {
+      document.getElementById(`box-${curTeam.pos}`).style.display = "none";
+    }
     curTeam.pos = (curTeam.pos + 1) % 28;
-    document.getElementById(`box-${curTeam.pos}`).style.display = "block";
+    if (document.getElementById(`box-${curTeam.pos}`)) {
+      document.getElementById(`box-${curTeam.pos}`).style.display = "block";
+    }
 
     playTickSound();
 
@@ -604,7 +672,6 @@ function startJumping(steps, isQuick, isNoBuildMove = false) {
     } else {
       setTimeout(() => {
         if (isNoBuildMoveTurn) {
-          alert(`⚡ 機會/命運卡免答題位移！到站平安，本輪僅純粹位移，禁止建立或強佔領地！`);
           endTurn();
         } else {
           handleTileLanding();
@@ -615,7 +682,113 @@ function startJumping(steps, isQuick, isNoBuildMove = false) {
   stepRun();
 }
 
+function startBackwardJumping(steps, isQuick = true) {
+  let speed = isQuick ? 80 : 120;
+  const curTeam = teams[currentTurnIndex];
+  const tok = document.getElementById(`token-${curTeam.id}`);
+  isNoBuildMoveTurn = true;
+
+  const stepBackRun = () => {
+    if (document.getElementById(`box-${curTeam.pos}`)) {
+      document.getElementById(`box-${curTeam.pos}`).style.display = "none";
+    }
+    curTeam.pos = (curTeam.pos - 1 + 28) % 28;
+    if (document.getElementById(`box-${curTeam.pos}`)) {
+      document.getElementById(`box-${curTeam.pos}`).style.display = "block";
+    }
+
+    playTickSound();
+
+    if (cellCoordinates[curTeam.pos]) {
+      const coord = cellCoordinates[curTeam.pos];
+      const offsetX = (currentTurnIndex % 3 - 1) * 8;
+      const offsetY = (Math.floor(currentTurnIndex / 3) - 1) * 8;
+      tok.style.left = `${coord.x + offsetX}px`;
+      tok.style.top = `${coord.y + offsetY}px`;
+
+      tok.classList.remove("is-hopping");
+      void tok.offsetWidth;
+      tok.classList.add("is-hopping");
+    }
+
+    steps--;
+    if (steps > 0) {
+      setTimeout(stepBackRun, speed);
+    } else {
+      setTimeout(() => {
+        addHistoryLog(curTeam.name, `🔙 倒退就定位，安全抵達第 ${curTeam.pos + 1} 格 (不領起點獎勵)`);
+        endTurn();
+      }, 400);
+    }
+  };
+  stepBackRun();
+}
+
 // 6. 踩格觸發事件與彈窗
+let currentActiveCardType = null;
+let currentActiveCardText = "";
+
+function applyChanceCardEffect(cardText, curTeam) {
+  if (cardText.includes("光合作用加速") || cardText.includes("免答開工證")) {
+    curTeam.freeBuild = true;
+  } else if (cardText.includes("向前飛躍 3 格")) {
+    // Handled on modal close
+  } else if (cardText.includes("生物免疫護盾")) {
+    curTeam.shields = (curTeam.shields || 0) + 1;
+  } else if (cardText.includes("光合作用") && cardText.includes("全隊積分 +20")) {
+    curTeam.score += 20;
+  } else if (cardText.includes("物種繁衍") && cardText.includes("全隊積分 +15")) {
+    curTeam.score += 15;
+  } else if (cardText.includes("雙倍得分卡")) {
+    curTeam.doubleScore = true;
+  } else if (cardText.includes("互利共生")) {
+    // 與另一隊各加 15
+    const otherTeam = teams.find(t => t.id !== curTeam.id);
+    if (otherTeam) otherTeam.score += 15;
+    curTeam.score += 15;
+  } else if (cardText.includes("有利突變")) {
+    curTeam.score += 20;
+    curTeam.freeBuild = true;
+  } else if (cardText.includes("保護區設立")) {
+    curTeam.freeBuild = true;
+  } else {
+    curTeam.score += 20; // 基礎幸運金
+  }
+  renderScoreBar();
+}
+
+function applyDestinyCardEffect(cardText, curTeam) {
+  // 若持有護盾，優先抵銷處罰！
+  if (curTeam.shields && curTeam.shields > 0) {
+    curTeam.shields--;
+    alert(`🛡️【生物免疫護盾啟動】成功抵擋本次生態考驗與處罰！`);
+    addHistoryLog(curTeam.name, `🛡️ 生物免疫護盾抵擋了：${cardText}`);
+    renderScoreBar();
+    return;
+  }
+
+  if (cardText.includes("暫停一輪") || cardText.includes("停留原格一輪")) {
+    curTeam.skipTurns = (curTeam.skipTurns || 0) + 1;
+  } else if (cardText.includes("外來種入侵") || cardText.includes("扣除 10 分")) {
+    curTeam.score = Math.max(0, curTeam.score - 10);
+  } else if (cardText.includes("優養化打擊") || cardText.includes("扣除分數 15")) {
+    curTeam.score = Math.max(0, curTeam.score - 15);
+  } else if (cardText.includes("退後 2 格")) {
+    // Handled on modal close via startBackwardJumping
+  } else if (cardText.includes("互換位置")) {
+    const sorted = [...teams].sort((a, b) => a.score - b.score);
+    const lastTeam = sorted[0];
+    if (lastTeam && lastTeam.id !== curTeam.id) {
+      const tempPos = curTeam.pos;
+      curTeam.pos = lastTeam.pos;
+      lastTeam.pos = tempPos;
+      updateCoordinates();
+      addHistoryLog(curTeam.name, `🐺 與【${lastTeam.name}】互換了棋盤位置！`);
+    }
+  }
+  renderScoreBar();
+}
+
 function handleTileLanding() {
   const curTeam = teams[currentTurnIndex];
   const pos = curTeam.pos;
@@ -623,19 +796,34 @@ function handleTileLanding() {
   if (pos === 14) {
     playWinSound();
     const cardText = CHANCE_CARDS[Math.floor(Math.random() * CHANCE_CARDS.length)];
+    currentActiveCardType = "chance";
+    currentActiveCardText = cardText;
     chanceDesc.textContent = cardText;
-    curTeam.score += 20;
+    applyChanceCardEffect(cardText, curTeam);
     addHistoryLog(curTeam.name, `✨ 踩中【閃亮機會】：${cardText}`);
     openModal(chanceModal);
 
   } else if ([7, 21].includes(pos)) {
     playWrongSound();
     const cardText = DESTINY_CARDS[Math.floor(Math.random() * DESTINY_CARDS.length)];
+    currentActiveCardType = "destiny";
+    currentActiveCardText = cardText;
     destinyDesc.textContent = cardText;
+    applyDestinyCardEffect(cardText, curTeam);
     addHistoryLog(curTeam.name, `💢 踩中【驚奇命運】：${cardText}`);
     openModal(destinyModal);
 
   } else {
+    // 若持有免答開工證，可直接進入建設領地！
+    if (curTeam.freeBuild) {
+      curTeam.freeBuild = false;
+      renderScoreBar();
+      alert(`⚡【免答開工證發威】${curTeam.name} 直接獲得建設領地資格，無需答題！`);
+      isCurrentQuizAnsweredCorrectly = true;
+      openBuildModal();
+      return;
+    }
+
     // 檢查格子是否有業主
     const owner = cellOwners[pos];
     if (owner && owner.teamId !== curTeam.id) {
@@ -689,13 +877,48 @@ function triggerQuizEvent(isTakeover = false) {
   btnConfirmAnswer.setAttribute("disabled", "true");
   btnCloseWrong.classList.add("hidden");
 
+  // 鷹架扶助計算：連續答錯 2 次及以上，啟動二選一刪去救生圈
+  const curTeam = teams[currentTurnIndex];
+  const wrongStreak = curTeam ? (curTeam.consecutiveWrongCount || 0) : 0;
+  let eliminatedIndices = new Set();
+
+  if (wrongStreak >= 2 && currentActiveQuestion.options && currentActiveQuestion.options.length > 2) {
+    const wrongIndices = [];
+    currentActiveQuestion.options.forEach((_, idx) => {
+      if (idx !== currentActiveQuestion.answer) wrongIndices.push(idx);
+    });
+    // 隨機刪除 1~2 個錯誤選項
+    wrongIndices.sort(() => Math.random() - 0.5);
+    const toEliminateCount = Math.min(wrongIndices.length - 1, (wrongStreak >= 3 ? 2 : 1));
+    for (let i = 0; i < toEliminateCount; i++) {
+      eliminatedIndices.add(wrongIndices[i]);
+    }
+  }
+
   currentActiveQuestion.options.forEach((optText, idx) => {
     const btn = document.createElement("button");
     btn.className = "btn-option";
-    btn.innerHTML = `<b>${String.fromCharCode(65 + idx)}.</b> ${optText}`;
-    btn.addEventListener("click", () => handleQuizSelect(idx, btn));
+    
+    if (eliminatedIndices.has(idx)) {
+      btn.innerHTML = `<del><b>${String.fromCharCode(65 + idx)}.</b> ${optText}</del> <span style="font-size:12px;color:#ef4444;">(智慧刪去)</span>`;
+      btn.disabled = true;
+      btn.style.opacity = "0.35";
+      btn.style.filter = "grayscale(100%)";
+      btn.style.cursor = "not-allowed";
+    } else {
+      btn.innerHTML = `<b>${String.fromCharCode(65 + idx)}.</b> ${optText}`;
+      btn.addEventListener("click", () => handleQuizSelect(idx, btn));
+    }
     quizOptions.appendChild(btn);
   });
+
+  if (eliminatedIndices.size > 0) {
+    const aidBadge = document.createElement("div");
+    aidBadge.className = "aid-badge-banner";
+    aidBadge.style.cssText = "background:#fef2f2;border:1.5px dashed #ef4444;color:#b91c1c;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:700;margin-bottom:10px;text-align:center;";
+    aidBadge.innerHTML = `🆘【生態守護扶助已啟動】因連續答錯 ${wrongStreak} 次，系統已為貴隊智慧刪除 ${eliminatedIndices.size} 個干擾選項，並延長時間！`;
+    quizOptions.prepend(aidBadge);
+  }
 
   quizBox.classList.toggle("zoomed-text", isTextZoomed);
   startCountdownTimer();
@@ -707,23 +930,61 @@ function startCountdownTimer() {
     quizTimerBanner.textContent = "⏱️ 計時器：無限制時間";
     return;
   }
-  let timeLeft = 30;
-  quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒`;
+  const curTeam = teams[currentTurnIndex];
+  // 若有連續答錯扶助，時間額外 +10 秒
+  const extraTime = (curTeam && curTeam.consecutiveWrongCount >= 2) ? 10 : 0;
+  let timeLeft = 30 + extraTime;
+  quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒${extraTime > 0 ? " (已補貼10秒援助)" : ""}`;
   clearInterval(countdownTimer);
 
   countdownTimer = setInterval(() => {
+    if (isTeacherFrozen) return; // 教師凍結時倒數暫停！
     timeLeft--;
-    quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒`;
+    quizTimerBanner.textContent = `⏱️ 倒數計時：${timeLeft} 秒${extraTime > 0 ? " (已補貼10秒援助)" : ""}`;
     if (timeLeft <= 0) {
       clearInterval(countdownTimer);
-      quizTimerBanner.textContent = "🚨 時間到！請立即結算作答！";
+      handleQuizTimeout();
     }
   }, 1000);
 }
 
-// 8. 答題結算 (嚴格防偷雞鎖定：答錯 100% 強制隱藏並禁用蓋房按鈕！)
+function handleQuizTimeout() {
+  quizTimerBanner.textContent = "🚨 時間到！作答逾時！";
+  const curTeam = teams[currentTurnIndex];
+  isCurrentQuizAnsweredCorrectly = false;
+
+  // 逾時停用所有選項按鈕
+  quizOptions.querySelectorAll("button").forEach(btn => {
+    btn.disabled = true;
+    btn.style.pointerEvents = "none";
+  });
+
+  playWrongSound();
+  explanationText.textContent = "作答時間已截止！觀念提示：" + (currentActiveQuestion.explanation || "平時多複習生物核心觀念，下次加快速度！");
+  quizExplanation.classList.remove("hidden");
+
+  // 累加連續答錯
+  if (curTeam) curTeam.consecutiveWrongCount = (curTeam.consecutiveWrongCount || 0) + 1;
+
+  btnConfirmAnswer.classList.add("hidden");
+  btnConfirmAnswer.setAttribute("disabled", "true");
+  btnCloseWrong.textContent = "⌛ 作答逾時！關閉結束本輪 ➡️";
+  btnCloseWrong.classList.remove("hidden");
+
+  addHistoryLog(curTeam ? curTeam.name : "隊伍", `⌛ 作答逾時：【${currentActiveQuestion.question.slice(0, 15)}...】`);
+  renderScoreBar();
+}
+
+// 8. 答題結算 (嚴格防偷雞鎖定：首次點選即停用所有選項，防止改答或連點)
 function handleQuizSelect(selectedIndex, btnEl) {
   clearInterval(countdownTimer);
+
+  // 🔒 核心防弊：立即停用全部選項，防偷點、連點、改答！
+  quizOptions.querySelectorAll("button").forEach(btn => {
+    btn.disabled = true;
+    btn.style.pointerEvents = "none";
+  });
+
   const isCorrect = (selectedIndex === currentActiveQuestion.answer);
   const curTeam = teams[currentTurnIndex];
 
@@ -734,14 +995,24 @@ function handleQuizSelect(selectedIndex, btnEl) {
     explanationText.textContent = currentActiveQuestion.explanation || "恭喜答對！獲得建置生態領地的資格！";
     quizExplanation.classList.remove("hidden");
 
-    curTeam.score += 50; // 答對獲得 +50 金幣！ (大提升學習獎勵動機)
-    addHistoryLog(curTeam.name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+50金幣)`);
+    let rewardCoins = 50;
+    if (curTeam.doubleScore) {
+      rewardCoins = 100;
+      curTeam.doubleScore = false;
+      addHistoryLog(curTeam.name, "⚡【雙倍得分卡生效】本題答對獎金翻倍為 +100 金幣！");
+    }
+
+    curTeam.score += rewardCoins;
+    
+    // 答對時重置連續答錯計數
+    curTeam.consecutiveWrongCount = 0;
+
+    addHistoryLog(curTeam.name, `✅ 答對題目：【${currentActiveQuestion.question.slice(0, 15)}...】(+${rewardCoins}金幣)`);
     renderScoreBar();
 
     const requiredCost = isTakeoverMode ? 150 : 100;
     if (curTeam.score < requiredCost) {
-      // 💰 金幣不足以蓋房，動態切換按鈕文字為領獎金結束，防範死鎖！
-      btnConfirmAnswer.textContent = `💰 答對領取 +50 金幣！（金幣不足 ${requiredCost} 無法蓋房，結束本輪 ➡️）`;
+      btnConfirmAnswer.textContent = `💰 答對領取 +${rewardCoins} 金幣！（金幣不足 ${requiredCost} 無法蓋房，結束本輪 ➡️）`;
     } else {
       if (isTakeoverMode) {
         btnConfirmAnswer.textContent = "⚔️ 答對成功！支付 150 金幣強行佔領領地 🏰";
@@ -750,7 +1021,6 @@ function handleQuizSelect(selectedIndex, btnEl) {
       }
     }
 
-    // 答對解鎖蓋房/強佔按鈕，隱藏關閉按鈕
     btnConfirmAnswer.classList.remove("hidden");
     btnConfirmAnswer.removeAttribute("disabled");
     btnCloseWrong.classList.add("hidden");
@@ -758,17 +1028,28 @@ function handleQuizSelect(selectedIndex, btnEl) {
   } else {
     isCurrentQuizAnsweredCorrectly = false;
     btnEl.classList.add("incorrect");
+
+    // 高亮顯示正解，供課堂教學觀摩
+    const allBtns = quizOptions.querySelectorAll("button");
+    if (allBtns[currentActiveQuestion.answer]) {
+      allBtns[currentActiveQuestion.answer].classList.add("correct");
+    }
+
     playWrongSound();
     explanationText.textContent = currentActiveQuestion.explanation || "答錯囉，請詳閱觀念解析再接再勵！";
     quizExplanation.classList.remove("hidden");
 
-    // 🔒 答錯 100% 鎖死蓋房！強制隱藏與禁用綠色蓋房按鈕，學生絕無法偷雞蓋房！
+    // 累加連續答錯計數
+    curTeam.consecutiveWrongCount = (curTeam.consecutiveWrongCount || 0) + 1;
+
+    // 🔒 答錯 100% 鎖死蓋房！強制隱藏與禁用綠色蓋房按鈕
     btnConfirmAnswer.classList.add("hidden");
     btnConfirmAnswer.setAttribute("disabled", "true");
     btnCloseWrong.textContent = "❌ 答錯扣分！關閉結束本輪 ➡️";
     btnCloseWrong.classList.remove("hidden");
 
-    addHistoryLog(teams[currentTurnIndex].name, `❌ 答錯題目：【${currentActiveQuestion.question.slice(0, 15)}...】`);
+    addHistoryLog(teams[currentTurnIndex].name, `❌ 答錯題目：【${currentActiveQuestion.question.slice(0, 15)}...】(累計答錯 ${curTeam.consecutiveWrongCount} 次)`);
+    renderScoreBar();
   }
 }
 
@@ -792,6 +1073,12 @@ function executeTakeoverOptionA() {
 
   const bName = owner.buildingName; // 方案 A：直接沿用原被佔領建築名稱
   curTeam.score -= cost;
+
+  // 扣除原業主棟數，確保雙方統計絕對精準
+  const prevOwnerTeam = teams.find(t => t.id === owner.teamId);
+  if (prevOwnerTeam && prevOwnerTeam.buildingsCount > 0) {
+    prevOwnerTeam.buildingsCount -= 1;
+  }
 
   cellOwners[cellId] = {
     teamId: curTeam.id,
@@ -881,6 +1168,14 @@ function confirmBuildHouse() {
     badge.innerHTML = `${curTeam.icon} 🏠 ${bName}`;
     badge.style.backgroundColor = curTeam.color;
     buildArea.appendChild(badge);
+  }
+
+  const prevCellOwner = cellOwners[cellId];
+  if (prevCellOwner && prevCellOwner.teamId !== curTeam.id) {
+    const prevOwnerTeam = teams.find(t => t.id === prevCellOwner.teamId);
+    if (prevOwnerTeam && prevOwnerTeam.buildingsCount > 0) {
+      prevOwnerTeam.buildingsCount -= 1;
+    }
   }
 
   cellOwners[cellId] = {
@@ -986,6 +1281,7 @@ function saveSnapshot() {
     activeTeamCount,
     currentTurnIndex,
     teams,
+    cellOwners,
     usedBuildingNames: Array.from(usedBuildingNames),
     gameHistory,
     time: Date.now()
@@ -1013,11 +1309,37 @@ function restoreSnapshot() {
     gameMode = snap.gameMode || "group";
     activeTeamCount = snap.activeTeamCount || 4;
     currentTurnIndex = snap.currentTurnIndex || 0;
-    teams = snap.teams || [];
+    teams = (snap.teams || []).map(t => ({
+      consecutiveWrongCount: 0,
+      shields: 0,
+      doubleScore: false,
+      skipTurns: 0,
+      freeBuild: false,
+      ...t
+    }));
+    cellOwners = snap.cellOwners || {};
     usedBuildingNames = new Set(snap.usedBuildingNames || []);
     gameHistory = snap.gameHistory || [];
+    modeTag.textContent = gameMode === "group" ? `👥 小組競賽 (${teams.length} 隊)` : `👤 個人競賽 (${teams.length} 人)`;
     renderScoreBar();
     generateBoardGrid();
+
+    // 重新繪製已建立的領地建築徽章
+    setTimeout(() => {
+      Object.keys(cellOwners).forEach(cellId => {
+        const owner = cellOwners[cellId];
+        const buildArea = document.getElementById(`build-${cellId}`);
+        if (buildArea && owner) {
+          buildArea.innerHTML = "";
+          const badge = document.createElement("div");
+          badge.className = "building-badge";
+          badge.innerHTML = `${owner.teamIcon || "🏠"} 🏠 ${owner.buildingName}`;
+          badge.style.backgroundColor = owner.color || "#0284c7";
+          buildArea.appendChild(badge);
+        }
+      });
+      addHistoryLog("系統", "🔄 已成功恢復上一局進度與所有生態領地！");
+    }, 300);
   }
 }
 
@@ -1025,13 +1347,13 @@ function openModal(el) { el.classList.remove("hidden"); }
 function closeModal(el) { el.classList.add("hidden"); }
 function triggerMonopolyScoreSubmit() {
   if (typeof showScoreSubmitModal === "function") {
-    const sorted = [...teams].sort((a, b) => (b.funds + b.houses * 200) - (a.funds + a.houses * 200));
+    const sorted = [...teams].sort((a, b) => ((b.score || 0) + (b.buildingsCount || 0) * 200) - ((a.score || 0) + (a.buildingsCount || 0) * 200));
     const top = sorted[0] || teams[0];
-    const topVal = top ? (top.funds + top.houses * 200) : 600;
+    const topVal = top ? ((top.score || 0) + (top.buildingsCount || 0) * 200) : 600;
     showScoreSubmitModal({
       gameTitle: "動物城生物大富翁",
       score: topVal,
-      scoreDisplay: (top ? top.name : "隊伍") + "：" + topVal + " 分 (" + (top ? top.houses : 0) + " 棟生態建築)",
+      scoreDisplay: (top ? top.name : "隊伍") + "：" + topVal + " 分 (" + (top ? (top.buildingsCount || 0) : 0) + " 棟生態建築)",
       duration: "小組競賽領地戰"
     });
   }
