@@ -875,3 +875,94 @@ body {
 .cat-dashboard-link:active {
   transform: translateY(0);
 }
+
+
+/* 🔒 教師安全防護 PIN 密碼鎖樣式 */
+.pin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.96) !important;
+  backdrop-filter: blur(16px);
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999 !important;
+}
+.pin-modal-overlay.hidden {
+  display: none !important;
+}
+.pin-modal-card {
+  background: #1e293b;
+  border: 2px solid #38bdf8;
+  border-radius: 24px;
+  padding: 36px 28px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  animation: pinPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pinPopIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+.pin-icon {
+  font-size: 3.2rem;
+  margin-bottom: 12px;
+}
+.pin-modal-card h2 {
+  font-size: 1.5rem;
+  color: #f8fafc;
+  margin: 0 0 10px 0;
+  font-weight: 800;
+}
+.pin-modal-card p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.pin-modal-card input {
+  width: 82%;
+  padding: 12px;
+  font-size: 1.6rem;
+  text-align: center;
+  letter-spacing: 6px;
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  color: #38bdf8;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.pin-modal-card input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+.pin-error-text {
+  color: #f87171;
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-height: 22px;
+  margin-bottom: 14px;
+}
+.btn-pin-submit {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-pin-submit:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+.btn-pin-submit:active {
+  transform: translateY(0);
+}

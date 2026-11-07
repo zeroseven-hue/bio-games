@@ -641,3 +641,72 @@ function toggleTeacherPinLock() {
         alert('❌ 密碼錯誤！');
     }
 }
+
+
+// ==================== 🔒 教師安全驗證門禁系統 (預設8088，無洩漏) ====================
+(function initGlobalHallGatekeeper() {
+  const SESSION_AUTH_KEY = 'bio_teacher_auth_passed';
+  const PIN_KEY = 'teacher_global_pin';
+  const DEFAULT_PIN = '8088';
+
+  function isAuthed() {
+    return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
+  }
+
+  function setAuthed() {
+    sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+  }
+
+  function setup() {
+    const modal = document.getElementById('pinLockModal');
+    const pinInput = document.getElementById('pinInput');
+    const btnSubmit = document.getElementById('btnSubmitPin');
+    const errMsg = document.getElementById('pinErrorMsg');
+
+    if (!modal) return;
+
+    if (isAuthed()) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+      return;
+    }
+
+    // 未驗證：強制鎖定畫面
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (pinInput) setTimeout(() => pinInput.focus(), 200);
+
+    function verifyPin() {
+      const entered = (pinInput ? pinInput.value.trim() : '');
+      const validPin = localStorage.getItem(PIN_KEY) || localStorage.getItem('bio_classroom_teacher_pin') || DEFAULT_PIN;
+      if (entered === validPin) {
+        setAuthed();
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        if (pinInput) pinInput.value = '';
+        if (errMsg) errMsg.textContent = '';
+      } else {
+        if (errMsg) errMsg.textContent = '❌ 密碼不正確，請重新輸入！';
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      }
+    }
+
+    if (btnSubmit) {
+      btnSubmit.onclick = verifyPin;
+    }
+    if (pinInput) {
+      pinInput.onkeydown = (e) => {
+        if (e.key === 'Enter') verifyPin();
+      };
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
