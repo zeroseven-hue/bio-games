@@ -7,7 +7,11 @@
     "badgeColor": "#27ae60",
     "icon": "🦖",
     "description": "探險隊在叢林中避開暴龍爪痕、攀爬藤蔓升級！整合 10 張生物環境變遷卡與課堂錯題分析歷程戰報。",
-    "tags": ["👥 小組輪流", "🖥️ 投影主持", "📋 錯題戰報 TXT"],
+    "tags": [
+      "👥 小組輪流",
+      "🖥️ 投影主持",
+      "📋 錯題戰報 TXT"
+    ],
     "btnText": "🚀 直接進入遊戲",
     "btnColor": "#27ae60",
     "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
@@ -20,7 +24,11 @@
     "badgeColor": "#d35400",
     "icon": "🐰",
     "description": "茱蒂帶領全班探索生態區域，進行隨機抽籤、生物知識答題蓋房子，打造專屬生態領地！",
-    "tags": ["🎲 隨機抽籤", "🏠 答題蓋房", "✨ 閃亮機會"],
+    "tags": [
+      "🎲 隨機抽籤",
+      "🏠 答題蓋房",
+      "✨ 閃亮機會"
+    ],
     "btnText": "🎲 直接進入遊戲",
     "btnColor": "#d35400",
     "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
@@ -33,9 +41,30 @@
     "badgeColor": "#c0392b",
     "icon": "🍄",
     "description": "冒險家馬力歐進行 A/B/C/D 四大關卡連貫闖關，答對跳躍前進收集金幣，全破生成防偽認證碼截圖繳交！",
-    "tags": ["🏃 4大關卡闖關", "🪙 金幣積累", "📜 GC 截圖繳交"],
+    "tags": [
+      "🏃 4大關卡闖關",
+      "🪙 金幣積累",
+      "📜 GC 截圖繳交"
+    ],
     "btnText": "🍄 直接進入遊戲",
     "btnColor": "#c0392b",
     "url": "https://zeroseven-hue.github.io/bio-digestive-game/"
+  },
+  {
+    "id": "bio_zuma",
+    "title": "生物能量祖瑪：光合呼吸大冒險",
+    "category": "shared",
+    "badgeText": "全新登場",
+    "badgeColor": "#0284c7",
+    "icon": "🧬",
+    "description": "3D 晶球質感與和弦音階的祖瑪射擊！短文快答瞄準正解消除通關，考驗反射神經與生物能量代謝知識。",
+    "tags": [
+      "⚡ 閃電快答",
+      "🔥 連鎖 Combo",
+      "🎯 遠程神射"
+    ],
+    "btnText": "🚀 進入神殿挑戰",
+    "btnColor": "#0284c7",
+    "url": "zuma/index.html"
   }
 ]

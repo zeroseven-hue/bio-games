@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>生物能量祖瑪：光合呼吸大冒險 - Bio-Zuma Quest</title>
+    <link rel="stylesheet" href="style.css?v=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="zuma-body">
+    <div id="game-container">
+        <!-- 頂部沉浸式古文明 HUD 抬頭顯示器 -->
+        <header id="hud-panel">
+            <div class="hud-top-bar">
+                <div class="hud-left">
+                    <div class="hud-badge pulse-glow">
+                        <span class="badge-icon">🏛️</span>
+                        <span id="stage-display">進度：第 1 / 10 題</span>
+                    </div>
+                    <div class="unit-tag" id="current-unit-title">生物素養核心題庫</div>
+                </div>
+
+                <div class="hud-stats">
+                    <div class="stat-item energy-item">
+                        <span class="stat-label">生物能量心核</span>
+                        <div id="lives-display" class="heart-container">
+                            <span class="bio-heart full">💎</span>
+                            <span class="bio-heart full">💎</span>
+                            <span class="bio-heart full">💎</span>
+                        </div>
+                    </div>
+                    <div class="stat-item score-item">
+                        <span class="stat-label">探險總分</span>
+                        <span id="score-display" class="stat-value highlight-gold">0</span>
+                    </div>
+                    <div class="stat-item combo-item">
+                        <span class="stat-label">連擊 COMBO</span>
+                        <span id="combo-display" class="stat-value highlight-cyan">0</span>
+                    </div>
+                </div>
+
+                <div class="hud-right">
+                    <button id="btn-sound-toggle" class="hud-icon-btn" title="切換音效">🔊</button>
+                    <button id="btn-quit-game" class="hud-icon-btn btn-exit" title="返回大廳">🚪</button>
+                </div>
+            </div>
+
+            <!-- 核心快問快答題幹區 (大字短文、秒讀秒答) -->
+            <div id="question-banner" class="question-box">
+                <div class="question-header">
+                    <span class="q-tag">🎯 即時任務</span>
+                    <span id="speed-tip" class="speed-tip">⚡ 擊中正解同色球消除立即過關！</span>
+                </div>
+                <div id="question-text" class="question-title">
+                    載入生物題目中...
+                </div>
+            </div>
+
+            <!-- ABCD 四色對應標籤列 -->
+            <div id="options-grid" class="options-container">
+                <!-- 由 JS 動態生成四色選項卡片 -->
+            </div>
+        </header>
+
+        <!-- 祖瑪 Canvas 主舞台 -->
+        <main id="canvas-wrapper">
+            <canvas id="gameCanvas" width="960" height="540"></canvas>
+            
+            <!-- 瞄準與操作提示浮層 -->
+            <div id="control-hint" class="control-hint">
+                <span>🖱️ 移動滑鼠瞄準 ‧ 左鍵點擊發射 ‧ 長按可暫停凍結瞄準</span>
+            </div>
+        </main>
+
+        <!-- 開局說明與準備覆蓋層 -->
+        <div id="overlay-screen" class="overlay-modal active">
+            <div class="modal-card temple-card">
+                <div class="temple-emblem">🧬</div>
+                <h1 class="modal-title">生物能量祖瑪 ‧ 古蹟神殿</h1>
+                <p class="modal-subtitle">BIO-ZUMA ENZYME & METABOLISM QUEST</p>
+
+                <div class="rules-preview-grid">
+                    <div class="rule-box">
+                        <div class="rule-icon">🎯</div>
+                        <div class="rule-title">短題快答</div>
+                        <div class="rule-desc">瞄準正確答案對應顏色的彩球，命中並湊滿消除立即通關換題！</div>
+                    </div>
+                    <div class="rule-box">
+                        <div class="rule-icon">🔥</div>
+                        <div class="rule-title">連擊與神射</div>
+                        <div class="rule-desc">連續命中、遠程狙擊 (Long Shot) 與連鎖碰合可獲得階梯和弦與巨額積分！</div>
+                    </div>
+                    <div class="rule-box">
+                        <div class="rule-icon">💎</div>
+                        <div class="rule-title">特殊能量球</div>
+                        <div class="rule-desc">❄️ 冰凍代謝球（時鐘暫停）、⏪ 靜脈逆流球（軌道倒退）、💣 ATP 爆破球（範圍淨化）。</div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="start-btn" class="btn-temple-start">
+                        <span class="btn-glow"></span>
+                        <span class="btn-text">🚀 啟動能量砲台 ‧ 開始冒險</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引用大廳一標準身分驗證與成績回傳外殼 -->
+    <script src="../score-submit-modal.js?v=5.0"></script>
+    <!-- 祖瑪遊戲核心引擎 -->
+    <script src="game.js?v=1.0"></script>
+</body>
+</html>
