@@ -630,3 +630,14 @@ function initGameCategoryAccordion() {
   } catch (e) {}
   setActiveCategory(savedCat);
 }
+
+// 🔒 大廳一 教師安全鎖 (預設 8088，無提示洩漏)
+function toggleTeacherPinLock() {
+    const cur = localStorage.getItem('teacher_global_pin') || '8088';
+    const pwd = prompt('🔒 請輸入教師管理解鎖密碼：');
+    if (pwd === cur) {
+        alert('✅ 密碼正確，已解鎖教師管理功能！');
+    } else if (pwd !== null) {
+        alert('❌ 密碼錯誤！');
+    }
+}
