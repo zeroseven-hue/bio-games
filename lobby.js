@@ -710,3 +710,28 @@ function toggleTeacherPinLock() {
     setup();
   }
 })();
+
+
+// 🌓 大廳一 主題切換邏輯
+function initHall1Theme() {
+  const saved = localStorage.getItem('bio_hall1_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeButtonUI(saved);
+}
+function toggleHall1Theme() {
+  const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', cur);
+  localStorage.setItem('bio_hall1_theme', cur);
+  updateThemeButtonUI(cur);
+}
+function updateThemeButtonUI(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    btn.innerHTML = theme === 'dark' ? '☀️ 明亮模式' : '🌙 暗黑模式';
+  }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHall1Theme);
+} else {
+  initHall1Theme();
+}

@@ -990,3 +990,141 @@ body {
   background: #be185d !important;
   box-shadow: 0 8px 22px rgba(219, 39, 119, 0.45), 0 0 18px rgba(244, 114, 182, 0.65) !important;
 }
+
+
+/* ========================================================
+   🌓 全域統一大廳導覽列 & 大廳一 (Green) 雙主題支援 (Light / Dark)
+   ======================================================== */
+:root, [data-theme="light"] {
+  --primary-color: #16a34a;
+  --primary-hover: #15803d;
+  --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #e2e8f0 40%, #cbd5e1 100%);
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --header-bg: #ffffff;
+}
+
+[data-theme="dark"] {
+  --primary-color: #22c55e;
+  --primary-hover: #16a34a;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #14281d 0%, #090d16 80%);
+  --card-bg: #111827;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --header-bg: rgba(17, 24, 39, 0.85);
+}
+
+[data-theme="dark"] body {
+  background: var(--bg-gradient);
+  background-color: #090d16;
+  color: var(--text-main);
+}
+[data-theme="dark"] .lobby-header,
+[data-theme="dark"] .dispatch-card,
+[data-theme="dark"] .category-group-header,
+[data-theme="dark"] .publisher-sections-container {
+  background: var(--header-bg) !important;
+  border-color: var(--card-border) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="dark"] .game-card {
+  background: #111827 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+[data-theme="dark"] .game-card h3,
+[data-theme="dark"] .group-title,
+[data-theme="dark"] .games-section h2,
+[data-theme="dark"] .dispatch-card h2,
+[data-theme="dark"] .manifest-overview-section h2 {
+  color: #f8fafc !important;
+}
+[data-theme="dark"] .game-card p,
+[data-theme="dark"] .dispatch-subtitle {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .styled-select {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .cat-tab {
+  background: rgba(255,255,255,0.05) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+[data-theme="dark"] .cat-tab.active {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #22c55e !important;
+}
+[data-theme="dark"] .btn-collapse-tool {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+/* 🌟 全大廳統一 1~5 導覽列規格 (包含微按壓與專屬邊框暈染) */
+.unified-hall-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(100, 116, 139, 0.25);
+}
+
+.nav-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .nav-chip {
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.nav-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-chip:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+/* 各大廳專屬亮起與邊框暈染效果 */
+.hall-chip-1:hover { border-color: #16a34a; color: #16a34a; box-shadow: 0 4px 14px rgba(22,163,74,0.25); }
+.hall-chip-1.active { background: #16a34a !important; color: #ffffff !important; border-color: #15803d !important; box-shadow: 0 4px 14px rgba(22,163,74,0.4) !important; }
+
+.hall-chip-2:hover { border-color: #db2777; color: #db2777; box-shadow: 0 4px 14px rgba(219,39,119,0.25); }
+.hall-chip-2.active { background: #db2777 !important; color: #ffffff !important; border-color: #be185d !important; box-shadow: 0 4px 14px rgba(219,39,119,0.4) !important; }
+
+.hall-chip-3:hover { border-color: #2563eb; color: #2563eb; box-shadow: 0 4px 14px rgba(37,99,235,0.25); }
+.hall-chip-3.active { background: #2563eb !important; color: #ffffff !important; border-color: #1d4ed8 !important; box-shadow: 0 4px 14px rgba(37,99,235,0.4) !important; }
+
+.hall-chip-4:hover { border-color: #dc2626; color: #dc2626; box-shadow: 0 4px 14px rgba(220,38,38,0.25); }
+.hall-chip-4.active { background: #dc2626 !important; color: #ffffff !important; border-color: #b91c1c !important; box-shadow: 0 4px 14px rgba(220,38,38,0.4) !important; }
+
+.hall-chip-5:hover { border-color: #f59e0b; color: #f59e0b; box-shadow: 0 4px 14px rgba(245,158,11,0.25); }
+.hall-chip-5.active { background: #f59e0b !important; color: #ffffff !important; border-color: #d97706 !important; box-shadow: 0 4px 14px rgba(245,158,11,0.4) !important; }
+
+.hall-chip-timer:hover { border-color: #0284c7; color: #0284c7; box-shadow: 0 4px 14px rgba(2,132,199,0.25); }
