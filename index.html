@@ -16,9 +16,14 @@
 <body>
   <div class="lobby-container">
     <header class="lobby-header">
-      <div class="logo-area">
-        <h1>🌱 國中生物課堂網頁遊戲平台 <code>bio-games</code></h1>
-        <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式與 Google Classroom 作業繳交</p>
+      <div class="logo-area" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div style="flex:1; min-width:280px; text-align:left;">
+          <h1>🌱 國中生物課堂網頁遊戲平台 <code>bio-games</code></h1>
+          <p>跨平台支援 iPad 觸控、大螢幕互動投影、融合教育特教無壓力模式與 Google Classroom 作業繳交</p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="btnTeacherPinLock" class="btn-security-lock" style="background:#1e293b; color:#f8fafc; border:1px solid #475569; padding:7px 16px; border-radius:20px; font-weight:700; cursor:pointer; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(0,0,0,0.15);" onclick="toggleTeacherPinLock()">🔒 教師管理鎖</button>
+        </div>
       </div>
       <div class="header-nav" style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a href="https://zeroseven-hue.github.io/bio-standalone-games/" class="btn-timer-link btn-standalone-link" style="background: #db2777;">🧩 大廳二：獨立遊戲</a>
@@ -27,8 +32,7 @@
         <a href="https://zeroseven-hue.github.io/bio-dashboard/" class="btn-timer-link" style="background: #d97706;">📊 大廳五：課堂評量神器</a>
         <a href="timer/index.html" class="btn-timer-link">⏱️ 專注計時器</a>
       </div>
-      <div style="text-align:right; padding:6px 16px;"><button id="btnTeacherPinLock" class="btn-security-lock" style="background:#1e293b; color:#f8fafc; border:1px solid #475569; padding:6px 14px; border-radius:6px; font-weight:700; cursor:pointer;" onclick="toggleTeacherPinLock()">🔒 教師管理鎖</button></div>
-</header>
+      </header>
 
     <main class="lobby-main">
       <!-- 遊戲卡片區域 -->
@@ -529,10 +533,7 @@
       </section>
     </main>
 
-    <footer class="lobby-footer">
-      <p>bio-games 國中生物網頁遊戲平台 &copy; 2026 | 專為 GitHub Pages 部署設計 | 相容 Windows, iPad & 觸控大螢幕</p>
-    </footer>
-  </div>
+    </div>
 
   <script src="lobby.js?v=5.1"></script>
 
@@ -549,8 +550,9 @@
   </div>
 
 
-<!-- 版權與研發宣告頁尾 -->
-<footer class="platform-copyright-footer" style="margin-top: 50px; padding: 26px 16px; text-align: center; color: var(--text-muted, #64748b); font-size: 0.88rem; border-top: 1px dashed rgba(100, 116, 139, 0.25); line-height: 1.8;">
+
+<!-- 全站統一版權與研發宣告頁尾 -->
+<footer class="platform-copyright-footer" style="margin-top: 50px; padding: 26px 16px; text-align: center; color: var(--text-muted, var(--text-sub, #64748b)); font-size: 0.88rem; border-top: 1px dashed rgba(100, 116, 139, 0.25); line-height: 1.8;">
   <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 3px;">🧬 國中生物課堂數位互動教學平台</div>
   <div>研發設計：<b>零柒老師 Selin</b></div>
   <div style="font-size: 0.78rem; opacity: 0.85; margin-top: 4px;">
