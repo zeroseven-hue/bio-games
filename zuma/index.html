@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>生物能量祖瑪：光合呼吸大冒險 - Bio-Zuma Quest</title>
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="stylesheet" href="style.css?v=3.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
                         <span id="stage-display">進度：第 1 / 10 題</span>
                     </div>
 
-                    <!-- 共用題庫下拉選單 (支援全冊別、版本自動切換) -->
+                    <!-- 共用題庫下拉選單 -->
                     <div class="unit-select-wrap">
                         <label for="unitSelect" class="unit-label">📚 單元題庫：</label>
                         <select id="unitSelect" class="unit-dropdown" title="選擇單元題庫">
@@ -59,14 +59,14 @@
             <div id="question-banner" class="question-box">
                 <div class="question-header">
                     <span class="q-tag">🎯 即時任務</span>
-                    <span id="speed-tip" class="speed-tip">⚡ 擊中正解同色彩球引發消除，立即過關換題！</span>
+                    <span id="speed-tip" class="speed-tip">⚡ 右鍵可換球！射擊正解球命中軌道同色球立即通關！</span>
                 </div>
                 <div id="question-text" class="question-title">
                     載入生物題目中...
                 </div>
             </div>
 
-            <!-- ABCD 四色對應標籤列 -->
+            <!-- ABCD 四色選項卡片列 (絕不提前洩漏正確答案) -->
             <div id="options-grid" class="options-container">
                 <!-- 由 JS 動態生成四色選項卡片 -->
             </div>
@@ -76,13 +76,13 @@
         <main id="canvas-wrapper">
             <canvas id="gameCanvas" width="960" height="540"></canvas>
             
-            <!-- 瞄準與操作提示浮層 -->
+            <!-- 瞄準與操作提示浮層 (包含換球提示) -->
             <div id="control-hint" class="control-hint">
-                <span>🖱️ 滑鼠瞄準 ‧ 左鍵射擊 ‧ 擊中同色 3 顆消除 ‧ 正解消除即通關 ‧ 點擊「📖 玩法說明」看詳細秘笈</span>
+                <span>🖱️ <b>滑鼠左鍵</b>射擊 ‧ <b>滑鼠右鍵 / 空白鍵</b>切換備用球 ‧ 命中正解球立即過關換題</span>
             </div>
         </main>
 
-        <!-- 遊戲玩法詳細說明 Modal (圖文引導，專為學生設計) -->
+        <!-- 遊戲玩法詳細說明 Modal (圖文引導，登入後才彈出，無快閃) -->
         <div id="rules-modal" class="overlay-modal">
             <div class="modal-card rules-card">
                 <div class="modal-header">
@@ -96,17 +96,27 @@
                     <div class="guide-card card-target">
                         <div class="guide-icon">🎯</div>
                         <div class="guide-body">
-                            <h3>1. 核心過關目標（答對即通關）</h3>
-                            <p>看清上方題目的【正確答案】（A、B、C 或 D）。</p>
-                            <p class="guide-highlight">砲台會銜著對應顏色的彩球，瞄準軌道上的同色彩球射出！只要讓該顏色湊滿 <b>3 顆連鎖消除</b>，即可立即判定<b>答對過關，換下一題！</b>（不用痛苦清全場）</p>
+                            <h3>1. 看懂題目 ‧ 射擊正解立即過關！</h3>
+                            <p>閱讀上方題目的【A、B、C、D】選項，判斷誰才是正確答案。</p>
+                            <p class="guide-highlight">砲台發射正解顏色的球，只要<b>精準擊中軌道上的同色球</b>（或湊滿 3 顆消除），就立即觸發<b>正解共鳴破壞</b>，判定<b>答對過關換下一題！</b></p>
                         </div>
                     </div>
 
-                    <!-- 規則 2: 四色選項對應表 -->
+                    <!-- 規則 2: 隨時切換備用球 (右鍵換球) -->
+                    <div class="guide-card card-swap">
+                        <div class="guide-icon">🔄</div>
+                        <div class="guide-body">
+                            <h3>2. 隨時切換備用球（右鍵 / 空白鍵）</h3>
+                            <p>砲台身旁有一顆備用的小彩球。如果當前砲台填裝的不是你想要的選項顏色：</p>
+                            <p class="guide-highlight">按<b>【滑鼠右鍵】</b>或鍵盤<b>【空白鍵】</b>，即可瞬間調換當前球與備用球！</p>
+                        </div>
+                    </div>
+
+                    <!-- 規則 3: 四色選項對應表 -->
                     <div class="guide-card card-colors">
                         <div class="guide-icon">🎨</div>
                         <div class="guide-body">
-                            <h3>2. 選項色彩對應關係</h3>
+                            <h3>3. 選項色彩對應關係</h3>
                             <div class="color-badges-row">
                                 <span class="c-badge badge-red">🔴 A 選項（紅寶石）</span>
                                 <span class="c-badge badge-blue">🔵 B 選項（藍晶石）</span>
@@ -117,11 +127,11 @@
                         </div>
                     </div>
 
-                    <!-- 規則 3: 特殊技能能量球 -->
+                    <!-- 規則 4: 特殊技能能量球 -->
                     <div class="guide-card card-skills">
                         <div class="guide-icon">✨</div>
                         <div class="guide-body">
-                            <h3>3. 神奇生物能量球（擊中觸發）</h3>
+                            <h3>4. 神奇生物能量球（擊中觸發）</h3>
                             <ul class="skills-list">
                                 <li><b>❄️ 冰凍代謝球</b>：擊中後使整條軌道上的彩球<b>凍結暫停推進 5 秒</b>，爭取思考時間！</li>
                                 <li><b>⏪ 靜脈逆流球</b>：觸發瓣膜逆流，強制軌道彩球<b>全體大幅後退</b>！</li>
@@ -130,22 +140,13 @@
                         </div>
                     </div>
 
-                    <!-- 規則 4: 連擊與技巧神射 -->
+                    <!-- 規則 5: 連擊與技巧神射 -->
                     <div class="guide-card card-combos">
                         <div class="guide-icon">🔥</div>
                         <div class="guide-body">
-                            <h3>4. 連擊與遠程神射加分</h3>
+                            <h3>5. 連擊與遠程神射加分</h3>
                             <p><b>登！登！登！多段和弦 Combo</b>：連續消除或斷層磁吸引發二次消除，會觸發動態和弦音階與成倍翻倍積分！</p>
                             <p><b>🎯 遠程神射 (Long Shot)</b>：從中央砲台遠距離超精準命中軌道球，額外獎勵 <b>+500 分</b>！</p>
-                        </div>
-                    </div>
-
-                    <!-- 規則 5: 生命值與結算 -->
-                    <div class="guide-card card-lives">
-                        <div class="guide-icon">💎</div>
-                        <div class="guide-body">
-                            <h3>5. 能量心核與成績結算</h3>
-                            <p>頭球抵達終點黑洞時會扣除 1 顆能量心核（強制後退補救）。共完成 10 題後，將跳出<b>班級座號成績單</b>，一鍵傳送至老師後台儀表板！</p>
                         </div>
                     </div>
                 </div>
@@ -158,8 +159,8 @@
             </div>
         </div>
 
-        <!-- 開局說明與準備覆蓋層 -->
-        <div id="overlay-screen" class="overlay-modal active">
+        <!-- 初始無快閃遮罩 (預設無 active，避免在輸入座號前快閃) -->
+        <div id="overlay-screen" class="overlay-modal">
             <div class="modal-card temple-card">
                 <div class="temple-emblem">🧬</div>
                 <h1 class="modal-title">生物能量祖瑪 ‧ 古蹟神殿</h1>
@@ -169,17 +170,17 @@
                     <div class="rule-box">
                         <div class="rule-icon">🎯</div>
                         <div class="rule-title">短題快答</div>
-                        <div class="rule-desc">瞄準正確答案顏色的彩球，命中引發 3 連消除立即過關！</div>
+                        <div class="rule-desc">瞄準正確答案顏色的彩球，命中同色球立即過關換題！</div>
+                    </div>
+                    <div class="rule-box">
+                        <div class="rule-icon">🔄</div>
+                        <div class="rule-title">右鍵換球</div>
+                        <div class="rule-desc">按右鍵或空白鍵可調換砲台彩球，隨時切換想要的選項！</div>
                     </div>
                     <div class="rule-box">
                         <div class="rule-icon">🔥</div>
                         <div class="rule-title">連鎖和弦</div>
                         <div class="rule-desc">連續命中與磁吸碰合，觸發「登！登！登！」和弦與神射加分！</div>
-                    </div>
-                    <div class="rule-box">
-                        <div class="rule-icon">💎</div>
-                        <div class="rule-title">特殊能量球</div>
-                        <div class="rule-desc">❄️ 冰凍停滯、⏪ 瓣膜逆流、💣 ATP 爆破清除危機。</div>
                     </div>
                 </div>
 
@@ -196,6 +197,6 @@
     <!-- 引用大廳一標準身分驗證與成績回傳外殼 -->
     <script src="../score-submit-modal.js?v=5.0"></script>
     <!-- 祖瑪遊戲核心引擎 -->
-    <script src="game.js?v=2.0"></script>
+    <script src="game.js?v=3.0"></script>
 </body>
 </html>

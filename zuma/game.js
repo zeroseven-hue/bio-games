@@ -1,16 +1,16 @@
 /**
- * 生物能量祖瑪 (Bio-Zuma Quest) - 核心遊戲引擎 V2.0
- * 支援：
- * 1. 中央共享題庫 (../questions/manifest.json) 版本、冊別、章節自動切換
- * 2. 完整遊戲規則圖文彈窗 (How-to-play Modal)
- * 3. 3D 浮雕石刻古文明軌道 + 晶瑩琉璃珠 (Specular Radial + Shadow + Spin)
- * 4. 多段和弦階梯 Combo 音階 (登！登！登！街機爽感)
- * 5. 命中正解即通關 (快節奏秒讀秒答)
- * 6. 大廳一標準身分與防作弊上傳 (score-submit-modal.js)
+ * 生物能量祖瑪 (Bio-Zuma Quest) - 核心遊戲引擎 V3.0
+ * 針對老師檢測反饋全面升級：
+ * 1. 軌道向中央緊湊收縮，降低瞄準射擊距離與打擊難度。
+ * 2. 徹底移除正解選項顏色高亮，公平測驗，絕不劇透洩漏答案。
+ * 3. 題幹與選項文字智慧緊縮（15-28字），保證秒讀秒答。
+ * 4. 支援「滑鼠右鍵 / 空白鍵」調換砲台彩球，避免卡球。
+ * 5. 正解球命中軌道同色球即觸發【正解共鳴破壞】過關換題；若射中錯誤球則正常入鏈推進。
+ * 6. 徹底消除登入前快閃，輸入座號後才優雅跳出玩法秘笈。
  */
 
 // =============================================================================
-// 1. Web Audio API 音效合成器 (多段和弦音階階梯 + 零延遲)
+// 1. Web Audio API 音效合成器
 // =============================================================================
 class SoundEngine {
     constructor() {
@@ -35,7 +35,6 @@ class SoundEngine {
         return !this.isMuted;
     }
 
-    // 發射咻聲 (雷射滑音)
     playShoot() {
         if (!this.ctx || this.isMuted) return;
         const now = this.ctx.currentTime;
@@ -55,7 +54,25 @@ class SoundEngine {
         osc.stop(now + 0.12);
     }
 
-    // 彩球撞擊入鏈 (短促清脆木質/晶體打擊)
+    playSwap() {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+    }
+
     playImpact() {
         if (!this.ctx || this.isMuted) return;
         const now = this.ctx.currentTime;
@@ -75,16 +92,15 @@ class SoundEngine {
         osc.stop(now + 0.08);
     }
 
-    // 經典祖瑪 Combo 階梯和弦 (登！登！登！多音階疊加)
     playComboChord(combo) {
         if (!this.ctx || this.isMuted) return;
         const now = this.ctx.currentTime;
 
         const chordFreqs = [
-            [523.25, 659.25],          // Combo 1 (C5, E5)
-            [659.25, 783.99],          // Combo 2 (E5, G5)
-            [783.99, 1046.50],         // Combo 3 (G5, C6)
-            [1046.50, 1318.51, 1567.98] // Combo 4+ 終極三和弦
+            [523.25, 659.25],          // Combo 1
+            [659.25, 783.99],          // Combo 2
+            [783.99, 1046.50],         // Combo 3
+            [1046.50, 1318.51, 1567.98] // Combo 4+
         ];
 
         const notes = chordFreqs[Math.min(combo - 1, chordFreqs.length - 1)];
@@ -106,7 +122,6 @@ class SoundEngine {
         });
     }
 
-    // 遠程神射音效 (清脆雙音泛音)
     playLongShot() {
         if (!this.ctx || this.isMuted) return;
         const now = this.ctx.currentTime;
@@ -124,7 +139,6 @@ class SoundEngine {
         });
     }
 
-    // 終點黑洞危機脈衝警報
     playWarning() {
         if (!this.ctx || this.isMuted) return;
         const now = this.ctx.currentTime;
@@ -144,7 +158,6 @@ class SoundEngine {
         osc.stop(now + 0.2);
     }
 
-    // 題目答對通關音 (清脆升階通關和音)
     playStageClear() {
         if (!this.ctx || this.isMuted) return;
         const now = this.ctx.currentTime;
@@ -164,7 +177,7 @@ class SoundEngine {
 }
 
 // =============================================================================
-// 2. 備份生物快問快答短題庫 (秒讀秒答)
+// 2. 備用生物快問快答題庫 (題幹與選項精簡版)
 // =============================================================================
 const FAST_BIOLOGY_QUESTIONS = [
     {
@@ -173,13 +186,13 @@ const FAST_BIOLOGY_QUESTIONS = [
         answer: 0
     },
     {
-        question: "細胞內被譽為「能量貨幣」的高能分子是？",
-        options: ["DNA 脫氧核糖核酸", "ATP 腺苷三磷酸", "葡萄糖 Glucose", "RNA 核糖核酸"],
+        question: "細胞內被譽為「能量貨幣」的高能化合物是？",
+        options: ["DNA", "ATP 腺苷三磷酸", "葡萄糖 Glucose", "RNA"],
         answer: 1
     },
     {
         question: "生物體內酵素（Enzyme）最主要的作用機制是？",
-        options: ["增加反應物濃度", "降低活化能以加速反應", "提供反應所需能量", "改變生成物的種類"],
+        options: ["增加反應物濃度", "降低活化能以加速反應", "提供反應所需能量", "改變生成物種類"],
         answer: 1
     },
     {
@@ -220,7 +233,7 @@ const FAST_BIOLOGY_QUESTIONS = [
 ];
 
 // =============================================================================
-// 3. 遊戲全局常態與設定
+// 3. 遊戲全局設定與狀態
 // =============================================================================
 const TOTAL_STAGES = 10;
 const COLOR_CONFIG = {
@@ -275,7 +288,7 @@ const turret = {
 };
 
 // =============================================================================
-// 4. 生成雙螺旋古典雕刻軌道 (Parametric Dual Curve)
+// 4. 生成緊湊適中的祖瑪雙迴旋軌道 (縮減距離，容易瞄準擊中)
 // =============================================================================
 function generateTrackPath() {
     pathPoints = [];
@@ -283,11 +296,12 @@ function generateTrackPath() {
     const centerY = 270;
     const totalSteps = 1200;
 
+    // 將半徑緊縮：外圈由 410 縮減至 340，內圈 220 縮減至 175，方便射擊
     for (let i = 0; i < totalSteps; i++) {
         const t = i / totalSteps;
-        const angle = t * Math.PI * 4.6;
-        const radiusX = 410 - t * 240;
-        const radiusY = 220 - t * 125;
+        const angle = t * Math.PI * 4.4;
+        const radiusX = 340 - t * 200;
+        const radiusY = 185 - t * 105;
 
         const x = centerX + Math.cos(angle) * radiusX;
         const y = centerY + Math.sin(angle) * radiusY;
@@ -306,7 +320,7 @@ class Ball {
         this.specialType = specialType;
         this.x = 0;
         this.y = 0;
-        this.spin = (distance * 0.1) % (Math.PI * 2);
+        this.spin = 0;
         this.updatePosition();
     }
 
@@ -336,16 +350,7 @@ class Ball {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
         ctx.fill();
 
-        // 2. 正解外發光暈
-        const isTargetColor = (questions[currentQuestionIndex] && this.color === questions[currentQuestionIndex].answer);
-        if (isTargetColor) {
-            ctx.beginPath();
-            ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2);
-            ctx.fillStyle = config.glow;
-            ctx.fill();
-        }
-
-        // 3. 擬真 3D 琉璃漸層
+        // 2. 擬真 3D 琉璃漸層
         const grad = ctx.createRadialGradient(-4, -5, 2, 0, 0, this.radius);
         grad.addColorStop(0, '#ffffff');
         grad.addColorStop(0.28, config.gradientStart);
@@ -357,13 +362,13 @@ class Ball {
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // 4. 高光弧斑
+        // 3. 高光弧斑
         ctx.beginPath();
         ctx.ellipse(-3, -5, 6, 3, Math.PI / 4, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.fill();
 
-        // 5. 標籤文字 (A, B, C, D) 或特殊符號
+        // 4. 標籤文字 (A, B, C, D) 或特殊符號
         ctx.fillStyle = '#ffffff';
         ctx.font = '900 11px Orbitron, sans-serif';
         ctx.textAlign = 'center';
@@ -392,7 +397,7 @@ class Bullet {
         this.y = y;
         this.angle = angle;
         this.color = color;
-        this.speed = 18;
+        this.speed = 19;
         this.radius = 13;
         this.active = true;
     }
@@ -507,7 +512,7 @@ class FloatingText {
 }
 
 // =============================================================================
-// 8. 中央共用題庫管理 (../questions/manifest.json)
+// 8. 中央共用題庫管理
 // =============================================================================
 async function initQuestionBankSystem() {
     const unitSelect = document.getElementById('unitSelect');
@@ -520,7 +525,6 @@ async function initQuestionBankSystem() {
         manifestUnits = [];
         unitSelect.innerHTML = '';
 
-        // 扁平化收集版本所有單元
         if (manifest.publishers) {
             manifest.publishers.forEach(pub => {
                 if (pub.semesters) {
@@ -539,7 +543,6 @@ async function initQuestionBankSystem() {
             });
         }
 
-        // 填入下拉選單
         manifestUnits.forEach(u => {
             const opt = document.createElement('option');
             opt.value = u.file;
@@ -547,7 +550,6 @@ async function initQuestionBankSystem() {
             unitSelect.appendChild(opt);
         });
 
-        // 檢查 URL 參數是否指定單元
         const params = new URLSearchParams(window.location.search);
         const urlUnit = params.get('unit') || params.get('file');
 
@@ -560,7 +562,6 @@ async function initQuestionBankSystem() {
             }
         }
 
-        // 預設載入第一個單元或熱門單元
         if (manifestUnits.length > 0) {
             unitSelect.value = manifestUnits[0].file;
             await loadQuestionsFromFile(manifestUnits[0].file);
@@ -573,7 +574,6 @@ async function initQuestionBankSystem() {
         fallbackLocalQuestions();
     }
 
-    // 監聽單元切換
     unitSelect.addEventListener('change', async (e) => {
         if (e.target.value) {
             await loadQuestionsFromFile(e.target.value);
@@ -609,6 +609,7 @@ function fallbackLocalQuestions() {
     renderQuestionHUD();
 }
 
+// 智慧修剪題幹與選項文字，適合快節奏祖瑪
 function filterQuestionsForZuma(rawList) {
     const list = [];
     rawList.forEach(q => {
@@ -624,14 +625,24 @@ function filterQuestionsForZuma(rawList) {
             ansIdx = q.answer;
         }
 
-        const text = q.question || q.title || '';
-        const opts = q.options || ['A', 'B', 'C', 'D'];
+        let text = q.question || q.title || '';
+        let opts = (q.options || ['A', 'B', 'C', 'D']).map(o => {
+            const s = String(o).trim();
+            return s.length > 20 ? s.slice(0, 18) + '..' : s;
+        });
+
+        // 確保題目至少有 4 個選項
+        while (opts.length < 4) {
+            opts.push(`選項${['A','B','C','D'][opts.length]}`);
+        }
 
         if (text && opts.length >= 4) {
+            // 精簡題幹長度
+            const cleanText = text.length > 35 ? text.slice(0, 32) + '...' : text;
             list.push({
-                question: text.length > 48 ? text.slice(0, 45) + '...' : text,
+                question: cleanText,
                 options: opts.slice(0, 4),
-                answer: ansIdx
+                answer: ansIdx % 4
             });
         }
     });
@@ -641,7 +652,7 @@ function filterQuestionsForZuma(rawList) {
 }
 
 // =============================================================================
-// 9. HUD 介面渲染更新
+// 9. HUD 介面渲染更新 (公平無劇透)
 // =============================================================================
 function renderQuestionHUD() {
     if (!questions || questions.length === 0) return;
@@ -656,10 +667,12 @@ function renderQuestionHUD() {
     const letters = ['A', 'B', 'C', 'D'];
     const cssClasses = ['opt-a', 'opt-b', 'opt-c', 'opt-d'];
 
+    // 依據題目四選項全部平等渲染，絕對不預先標註正確答案
     q.options.forEach((optText, idx) => {
         const card = document.createElement('div');
-        const isTarget = (idx === q.answer);
-        card.className = `opt-card ${cssClasses[idx]} ${isTarget ? 'target-answer' : ''}`;
+        const isLoaded = (idx === turret.currentBallColor);
+        card.className = `opt-card ${cssClasses[idx]} ${isLoaded ? 'currently-loaded' : ''}`;
+        card.id = `opt-card-${idx}`;
         card.innerHTML = `
             <div class="opt-letter">${letters[idx]}</div>
             <div class="opt-text">${optText}</div>
@@ -682,10 +695,22 @@ function updateHUDStats() {
         span.innerText = '💎';
         heartContainer.appendChild(span);
     }
+
+    // 更新當前填裝選項的提示光暈
+    for (let i = 0; i < 4; i++) {
+        const card = document.getElementById(`opt-card-${i}`);
+        if (card) {
+            if (i === turret.currentBallColor) {
+                card.classList.add('currently-loaded');
+            } else {
+                card.classList.remove('currently-loaded');
+            }
+        }
+    }
 }
 
 // =============================================================================
-// 10. 彩球鏈初始化與發射邏輯
+// 10. 彩球鏈初始化與砲台控制 (支援右鍵換球)
 // =============================================================================
 function spawnBallChain(count = 22) {
     balls = [];
@@ -704,13 +729,28 @@ function spawnBallChain(count = 22) {
     }
 }
 
+// 出球權重：正確答案稍微提升 (40%)，其餘三色各 20%
 function getRandomColorBiased() {
     if (!questions[currentQuestionIndex]) return Math.floor(Math.random() * 4);
     const correctAns = questions[currentQuestionIndex].answer;
-    if (Math.random() < 0.45) {
+    if (Math.random() < 0.40) {
         return correctAns;
     }
     return Math.floor(Math.random() * 4);
+}
+
+// 換球功能 (調換當前球與備用球)
+function swapTurretBalls() {
+    if (!isGameRunning) return;
+    sfx.init();
+    sfx.playSwap();
+
+    const temp = turret.currentBallColor;
+    turret.currentBallColor = turret.nextBallColor;
+    turret.nextBallColor = temp;
+
+    floatingTexts.push(new FloatingText(turret.x, turret.y - 35, '🔄 已切換彩球！', '#38bdf8'));
+    updateHUDStats();
 }
 
 function shootBullet() {
@@ -724,10 +764,11 @@ function shootBullet() {
 
     turret.currentBallColor = turret.nextBallColor;
     turret.nextBallColor = getRandomColorBiased();
+    updateHUDStats();
 }
 
 // =============================================================================
-// 11. 核心物理循環與碰撞消除
+// 11. 核心物理循環與碰撞判定 (直覺過關核心)
 // =============================================================================
 let lastTimestamp = 0;
 function gameLoop(timestamp) {
@@ -753,7 +794,7 @@ function update(dt) {
         turret.recoil = Math.max(0, turret.recoil - dt * 25);
     }
 
-    let moveSpeed = 48;
+    let moveSpeed = 44;
     if (freezeTimer > 0) {
         moveSpeed = 0;
     } else if (reverseTimer > 0) {
@@ -807,13 +848,30 @@ function update(dt) {
                 b.active = false;
                 sfx.playImpact();
 
-                if (b.getTravelDistance() > 280) {
+                if (b.getTravelDistance() > 220) {
                     longShotsAchieved++;
                     score += 500;
                     sfx.playLongShot();
                     floatingTexts.push(new FloatingText(ball.x, ball.y - 20, '🎯 LONG SHOT! +500', '#fbbf24'));
                 }
 
+                // 核心判定邏輯：
+                const correctAns = questions[currentQuestionIndex].answer;
+                const isBulletCorrect = (b.color === correctAns);
+                const isHitTargetMatch = (ball.color === correctAns);
+
+                // 【直覺過關爽快機制】：如果發射的是正解球，且擊中了軌道上的同色球，觸發正解共鳴破壞直接通關！
+                if (isBulletCorrect && isHitTargetMatch) {
+                    createExplosionParticles(ball.x, ball.y, COLOR_CONFIG[ball.color].hex);
+                    balls.splice(j, 1);
+                    comboCount++;
+                    score += 500;
+                    sfx.playComboChord(Math.min(comboCount, 4));
+                    triggerStageClearSuccess();
+                    break;
+                }
+
+                // 若非直接共鳴，正常插入彩球鏈進行祖瑪消除運算
                 const newBall = new Ball(b.color, ball.distance - 14);
                 balls.splice(j, 0, newBall);
                 checkElimination(j);
@@ -870,7 +928,6 @@ function checkElimination(startIndex) {
         balls.splice(left, count);
         updateHUDStats();
 
-        // 核心：若消除正確答案，立即過關換題
         if (isCorrectAns) {
             triggerStageClearSuccess();
             return;
@@ -965,7 +1022,7 @@ function createExplosionParticles(x, y, color) {
 }
 
 // =============================================================================
-// 12. 畫面繪製渲染 (古典神殿石溝 + 晶瑩珠寶物理 + 守護圖騰)
+// 12. 畫面繪製渲染
 // =============================================================================
 function render() {
     ctx.save();
@@ -980,9 +1037,8 @@ function render() {
     ctx.fillStyle = '#050914';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. 神殿古蹟凹槽軌道
+    // 2. 緊湊雕刻石刻軌道
     if (pathPoints.length > 0) {
-        // 浮雕石刻亮邊
         ctx.beginPath();
         ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
         for (let i = 1; i < pathPoints.length; i++) {
@@ -993,19 +1049,17 @@ function render() {
         ctx.lineCap = 'round';
         ctx.stroke();
 
-        // 凹槽深度黑影
         ctx.lineWidth = 32;
         ctx.strokeStyle = '#020617';
         ctx.stroke();
 
-        // 軌道能量引導線
         ctx.lineWidth = 2;
         ctx.strokeStyle = safePeriodTimer > 0 ? 'rgba(56, 189, 248, 0.65)' : 'rgba(51, 65, 85, 0.45)';
         ctx.setLineDash([4, 6]);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // 終點吞噬深淵傳送門
+        // 終點吞噬深淵
         const endPt = pathPoints[pathPoints.length - 1];
         const portalGrad = ctx.createRadialGradient(endPt.x, endPt.y, 4, endPt.x, endPt.y, 30);
         portalGrad.addColorStop(0, '#000000');
@@ -1024,7 +1078,7 @@ function render() {
         balls[i].draw(ctx);
     }
 
-    // 4. 繪製中央守護圖騰砲台
+    // 4. 繪製中央守護砲台
     renderTotemTurret();
 
     // 5. 子彈、粒子、懸浮字
@@ -1060,7 +1114,7 @@ function renderTotemTurret() {
     ctx.strokeStyle = '#0284c7';
     ctx.stroke();
 
-    // 旋轉圖騰砲首
+    // 旋轉砲首
     ctx.save();
     ctx.rotate(turret.angle);
     ctx.translate(-turret.recoil, 0);
@@ -1100,21 +1154,28 @@ function renderTotemTurret() {
     ctx.textBaseline = 'middle';
     ctx.fillText(mainConfig.name, 0, 1);
 
-    // 備用次顆晶球
+    // 備用次顆晶球 (帶旋轉提示框)
     const nextConfig = COLOR_CONFIG[turret.nextBallColor];
     ctx.beginPath();
-    ctx.arc(28, 28, 8, 0, Math.PI * 2);
+    ctx.arc(28, 28, 9, 0, Math.PI * 2);
     ctx.fillStyle = nextConfig.hex;
     ctx.fill();
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    // 備用球文字
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 9px Orbitron, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(nextConfig.name, 28, 28);
+
     ctx.restore();
 }
 
 // =============================================================================
-// 13. 遊戲結算 (對接大廳一 score-submit-modal.js)
+// 13. 遊戲結算
 // =============================================================================
 function endGameAndShowResult(isVictory) {
     isGameRunning = false;
@@ -1151,7 +1212,7 @@ function restartGameStage() {
 }
 
 // =============================================================================
-// 14. 事件綁定與玩法說明彈窗交互
+// 14. 事件綁定 (滑鼠左鍵射擊、滑鼠右鍵/空白鍵換球)
 // =============================================================================
 function setupEventListeners() {
     function updateAim(clientX, clientY) {
@@ -1167,16 +1228,38 @@ function setupEventListeners() {
         updateAim(e.clientX, e.clientY);
     });
 
+    // 左鍵發射、右鍵換球
     canvas.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        updateAim(e.clientX, e.clientY);
-        shootBullet();
+        if (e.button === 0) {
+            updateAim(e.clientX, e.clientY);
+            shootBullet();
+        } else if (e.button === 2) {
+            e.preventDefault();
+            swapTurretBalls();
+        }
     });
 
+    // 禁用 Canvas 預設右鍵選單
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+
+    // 鍵盤空白鍵亦可調換備用球
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            swapTurretBalls();
+        }
+    });
+
+    // 觸控螢幕支援
     canvas.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) {
+        if (e.touches.length === 1) {
             updateAim(e.touches[0].clientX, e.touches[0].clientY);
             shootBullet();
+        } else if (e.touches.length > 1) {
+            // 雙指觸控換球
+            swapTurretBalls();
         }
     }, { passive: true });
 
@@ -1219,7 +1302,6 @@ function setupEventListeners() {
         isGameRunning = true;
     });
 
-    // 開始遊戲按鈕
     document.getElementById('start-btn').addEventListener('click', () => {
         sfx.init();
         document.getElementById('overlay-screen').classList.remove('active');
@@ -1227,11 +1309,16 @@ function setupEventListeners() {
     });
 }
 
-// 支援外部自動登入開始事件
+// 監聽學生在班級座號外殼登入完成後的通知 (優雅彈出玩法秘笈，絕不快閃)
 window.addEventListener('biogame:start', () => {
     sfx.init();
-    document.getElementById('overlay-screen').classList.remove('active');
-    isGameRunning = true;
+    // 登入完成後，彈出玩法說明供學生檢視
+    const rulesModal = document.getElementById('rules-modal');
+    if (rulesModal) {
+        rulesModal.classList.add('active');
+    } else {
+        isGameRunning = true;
+    }
 });
 
 // =============================================================================
