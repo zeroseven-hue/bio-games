@@ -1,32 +1,36 @@
 <!DOCTYPE html>
-<html lang="zh-TW" data-theme="light">
+<html lang="zh-TW" data-hall-theme="green" data-color-mode="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🏆 國中生物測驗與遊戲即時儀表板</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
   <style>
-    :root, [data-theme="light"] {
+    /* ========================================================
+       🎨 雙大廳色系定義：大廳一 (翠綠) vs 大廳二 (玫瑰粉)
+       🌓 雙模式支援：明亮模式 (預設) vs 深色模式
+       ======================================================== */
+    
+    /* 1. 大廳一 ‧ 翠綠主題 (明亮) */
+    :root, [data-hall-theme="green"][data-color-mode="light"] {
       --bg-page: radial-gradient(circle at 50% 0%, #f0fdf4 0%, #f8fafc 60%, #e2e8f0 100%);
       --body-bg: #f8fafc;
       --card-bg: #ffffff;
-      --card-border: #e2e8f0;
-      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.12);
-      --inner-bg: #f8fafc;
-      --inner-border: #e2e8f0;
+      --card-border: #bbf7d0;
+      --card-shadow: 0 4px 20px rgba(22, 163, 74, 0.08);
+      --inner-bg: #f0fdf4;
+      --inner-border: #dcfce7;
       
-      --text-main: #0f172a;
-      --text-sub: #334155;
-      --text-muted: #64748b;
-      --text-light: #475569;
+      --text-main: #14532d;
+      --text-sub: #166534;
+      --text-muted: #15803d;
+      --text-light: #16a34a;
       
       --primary: #16a34a;
       --primary-hover: #15803d;
       --accent-green: #16a34a;
       --accent-red: #dc2626;
       --accent-blue: #2563eb;
-      --accent-amber: #d97706;
       
       --card-submitted-bg: #dcfce7;
       --card-submitted-border: #16a34a;
@@ -39,55 +43,136 @@
       --card-absent-tag: #dc2626;
       
       --card-pending-bg: #ffffff;
-      --card-pending-border: #cbd5e1;
-      --card-pending-text: #64748b;
-      --card-pending-tag: #475569;
+      --card-pending-border: #bbf7d0;
+      --card-pending-text: #166534;
+      --card-pending-tag: #15803d;
 
       --theme-toggle-bg: #ffffff;
-      --theme-toggle-border: #cbd5e1;
-      --theme-toggle-text: #0f172a;
+      --theme-toggle-border: #86efac;
+      --theme-toggle-text: #14532d;
     }
 
-    [data-theme="dark"] {
-      --bg-page: radial-gradient(circle at top, #1e293b 0%, #090d16 100%);
-      --body-bg: #090d16;
-      --card-bg: #111827;
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-      --card-shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.6);
-      --inner-bg: rgba(15, 23, 42, 0.7);
-      --inner-border: rgba(255, 255, 255, 0.08);
+    /* 2. 大廳二 ‧ 玫瑰粉主題 (明亮) */
+    [data-hall-theme="pink"][data-color-mode="light"] {
+      --bg-page: radial-gradient(circle at 50% 0%, #fdf2f8 0%, #fff1f2 60%, #fce7f3 100%);
+      --body-bg: #fff1f2;
+      --card-bg: #ffffff;
+      --card-border: #fbcfe8;
+      --card-shadow: 0 4px 20px rgba(219, 39, 119, 0.08);
+      --inner-bg: #fdf2f8;
+      --inner-border: #fce7f3;
       
-      --text-main: #f8fafc;
-      --text-sub: #e2e8f0;
-      --text-muted: #94a3b8;
-      --text-light: #cbd5e1;
+      --text-main: #831843;
+      --text-sub: #9d174d;
+      --text-muted: #be185d;
+      --text-light: #db2777;
+      
+      --primary: #db2777;
+      --primary-hover: #be185d;
+      --accent-green: #db2777;
+      --accent-red: #dc2626;
+      --accent-blue: #7c3aed;
+      
+      --card-submitted-bg: #fce7f3;
+      --card-submitted-border: #db2777;
+      --card-submitted-text: #831843;
+      --card-submitted-tag: #be185d;
+      
+      --card-absent-bg: #fee2e2;
+      --card-absent-border: #ef4444;
+      --card-absent-text: #991b1b;
+      --card-absent-tag: #dc2626;
+      
+      --card-pending-bg: #ffffff;
+      --card-pending-border: #fbcfe8;
+      --card-pending-text: #9d174d;
+      --card-pending-tag: #db2777;
+
+      --theme-toggle-bg: #ffffff;
+      --theme-toggle-border: #f472b6;
+      --theme-toggle-text: #831843;
+    }
+
+    /* 3. 大廳一 ‧ 翠綠主題 (深色星艦) */
+    [data-hall-theme="green"][data-color-mode="dark"] {
+      --bg-page: radial-gradient(circle at top, #062413 0%, #031109 100%);
+      --body-bg: #031109;
+      --card-bg: rgba(6, 36, 19, 0.9);
+      --card-border: rgba(34, 197, 94, 0.3);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      --inner-bg: rgba(4, 25, 13, 0.75);
+      --inner-border: rgba(34, 197, 94, 0.2);
+      
+      --text-main: #dcfce7;
+      --text-sub: #bbf7d0;
+      --text-muted: #86efac;
+      --text-light: #4ade80;
       
       --primary: #22c55e;
       --primary-hover: #16a34a;
       --accent-green: #22c55e;
       --accent-red: #f87171;
       --accent-blue: #38bdf8;
-      --accent-amber: #fbbf24;
       
-      --card-submitted-bg: rgba(34, 197, 94, 0.2);
+      --card-submitted-bg: rgba(34, 197, 94, 0.25);
       --card-submitted-border: #22c55e;
-      --card-submitted-text: #86efac;
+      --card-submitted-text: #dcfce7;
       --card-submitted-tag: #4ade80;
       
-      --card-absent-bg: rgba(239, 68, 68, 0.2);
+      --card-absent-bg: rgba(239, 68, 68, 0.22);
       --card-absent-border: #ef4444;
       --card-absent-text: #fca5a5;
       --card-absent-tag: #f87171;
       
       --card-pending-bg: rgba(255, 255, 255, 0.04);
-      --card-pending-border: rgba(255, 255, 255, 0.12);
-      --card-pending-text: #94a3b8;
-      --card-pending-tag: #cbd5e1;
+      --card-pending-border: rgba(34, 197, 94, 0.2);
+      --card-pending-text: #86efac;
+      --card-pending-tag: #4ade80;
 
-      --theme-toggle-bg: #1e293b;
-      --theme-toggle-border: #475569;
-      --theme-toggle-text: #f8fafc;
+      --theme-toggle-bg: #062413;
+      --theme-toggle-border: #16a34a;
+      --theme-toggle-text: #dcfce7;
+    }
+
+    /* 4. 大廳二 ‧ 玫瑰粉主題 (深色星艦) */
+    [data-hall-theme="pink"][data-color-mode="dark"] {
+      --bg-page: radial-gradient(circle at top, #2d0b1a 0%, #15030b 100%);
+      --body-bg: #15030b;
+      --card-bg: rgba(45, 11, 26, 0.9);
+      --card-border: rgba(236, 72, 153, 0.35);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      --inner-bg: rgba(30, 6, 17, 0.75);
+      --inner-border: rgba(236, 72, 153, 0.25);
+      
+      --text-main: #fce7f3;
+      --text-sub: #fbcfe8;
+      --text-muted: #f472b6;
+      --text-light: #f9a8d4;
+      
+      --primary: #f472b6;
+      --primary-hover: #ec4899;
+      --accent-green: #f472b6;
+      --accent-red: #f87171;
+      --accent-blue: #c084fc;
+      
+      --card-submitted-bg: rgba(236, 72, 153, 0.25);
+      --card-submitted-border: #f472b6;
+      --card-submitted-text: #fce7f3;
+      --card-submitted-tag: #f9a8d4;
+      
+      --card-absent-bg: rgba(239, 68, 68, 0.22);
+      --card-absent-border: #ef4444;
+      --card-absent-text: #fca5a5;
+      --card-absent-tag: #f87171;
+      
+      --card-pending-bg: rgba(255, 255, 255, 0.04);
+      --card-pending-border: rgba(236, 72, 153, 0.2);
+      --card-pending-text: #f472b6;
+      --card-pending-tag: #f9a8d4;
+
+      --theme-toggle-bg: #2d0b1a;
+      --theme-toggle-border: #db2777;
+      --theme-toggle-text: #fce7f3;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -121,12 +206,6 @@
       margin-bottom: 20px;
     }
 
-    .header-title {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
     .header-title h1 {
       font-size: 1.55rem;
       font-weight: 900;
@@ -134,14 +213,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      letter-spacing: -0.5px;
-    }
-
-    .header-title p {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      letter-spacing: 0.2px;
     }
 
     .header-controls {
@@ -164,51 +235,33 @@
       white-space: nowrap;
     }
 
-    .select-unit {
+    .select-hall, .select-unit, .select-class {
       background: var(--inner-bg);
       border: 2px solid var(--primary);
       color: var(--text-main);
       font-size: 0.95rem;
       font-weight: 800;
-      padding: 8px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      outline: none;
-      transition: all 0.2s ease;
-      max-width: 320px;
-    }
-    .select-unit:hover {
-      border-color: var(--primary-hover);
-    }
-
-    .select-class {
-      background: var(--inner-bg);
-      border: 2px solid var(--primary);
-      color: var(--text-main);
-      font-size: 0.95rem;
-      font-weight: 900;
-      padding: 8px 14px;
+      padding: 8px 12px;
       border-radius: 12px;
       cursor: pointer;
       outline: none;
       transition: all 0.2s ease;
     }
-    .select-class:hover {
-      border-color: var(--primary-hover);
-    }
+    .select-hall { font-weight: 900; }
+    .select-unit { max-width: 280px; }
 
     .seat-count-box {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       font-size: 0.88rem;
       font-weight: 800;
       color: var(--text-main);
     }
 
     .input-seat-count {
-      width: 65px;
-      padding: 7px 8px;
+      width: 58px;
+      padding: 7px 6px;
       text-align: center;
       border: 2px solid var(--card-border);
       border-radius: 10px;
@@ -239,15 +292,18 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
-    .btn-refresh {
-      background: linear-gradient(135deg, #16a34a, #15803d);
+    .btn-hall-switch {
+      background: linear-gradient(135deg, #16a34a, #db2777);
       color: #ffffff;
       border: none;
-      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+      box-shadow: 0 4px 14px rgba(219, 39, 119, 0.25);
     }
-    .btn-refresh:hover {
-      background: linear-gradient(135deg, #15803d, #14532d);
-      transform: translateY(-2px);
+
+    .btn-refresh {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
     }
 
     /* 繳交率進度面板 */
@@ -298,7 +354,7 @@
     .progress-bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #16a34a, #22c55e);
+      background: linear-gradient(90deg, var(--primary), var(--primary-hover));
       border-radius: 10px;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -725,17 +781,28 @@
     <!-- 頂部導航與總控列 -->
     <header class="header-bar">
       <div class="header-title">
-        <h1>🏆 國中生物測驗與遊戲即時儀表板</h1>
-        <p>大廳一共用題庫 ‧ 大廳二獨立遊戲 ‧ 雙模點名即時補登</p>
+        <h1 id="dashboardMainTitle">🌿 大廳一：互動遊戲即時儀表板</h1>
+        <p id="dashboardSubTitle">共用題庫遊戲 ‧ 即時大螢幕點名 ‧ 雙大廳色系聯動</p>
       </div>
       <div class="header-controls">
+        <!-- 第一層：大廳切換 (大廳一 vs 大廳二) -->
         <div class="select-group">
-          <label class="control-label" for="unitSelect">🎮 遊戲主題：</label>
-          <select class="select-unit" id="unitSelect" onchange="onUnitChange()">
-            <option value="ALL">🌐 全遊戲/單元彙整總覽</option>
+          <label class="control-label" for="hallSelect">🏛️ 目標大廳：</label>
+          <select class="select-hall" id="hallSelect" onchange="onHallChange()">
+            <option value="hall1">🌿 大廳一：共用題庫遊戲 (綠)</option>
+            <option value="hall2">🌸 大廳二：獨立單元遊戲 (粉)</option>
           </select>
         </div>
 
+        <!-- 第二層：該大廳底下的遊戲主題下拉選單 -->
+        <div class="select-group">
+          <label class="control-label" for="unitSelect">🎮 遊戲主題：</label>
+          <select class="select-unit" id="unitSelect" onchange="onUnitChange()">
+            <option value="ALL">🌐 全遊戲彙整總覽</option>
+          </select>
+        </div>
+
+        <!-- 第三層：班級下拉選單 -->
         <div class="select-group">
           <label class="control-label" for="classSelect">🏫 班級：</label>
           <select class="select-class" id="classSelect" onchange="onClassChange()">
@@ -761,8 +828,14 @@
           <span>人</span>
         </div>
 
-        <button type="button" class="btn-control" id="btnThemeToggle" onclick="toggleDashboardTheme()">
-          <span id="themeToggleIcon">🌙</span> <span id="themeToggleText">切換為深色模式</span>
+        <!-- 🌸 切換大廳色 (綠/粉) 快捷按鈕 -->
+        <button type="button" class="btn-control btn-hall-switch" id="btnHallColorToggle" onclick="toggleHallColor()">
+          🌸 切換大廳色 (綠/粉)
+        </button>
+
+        <!-- 🌓 明暗模式切換按鈕 -->
+        <button type="button" class="btn-control" id="btnThemeToggle" onclick="toggleColorMode()">
+          <span id="themeToggleIcon">🌙</span> <span id="themeToggleText">深色模式</span>
         </button>
 
         <button type="button" class="btn-control" id="btnScoreToggle" onclick="toggleTeacherScore()">
@@ -869,30 +942,153 @@
   <script>
     let rawRecords = [];
     let isTeacherScoreShown = false;
-    let currentTheme = localStorage.getItem("bio_dash_theme") || "light";
+    let currentHall = localStorage.getItem("bio_dash_selected_hall") || "hall1"; // 'hall1' (綠) | 'hall2' (粉)
+    let currentColorMode = localStorage.getItem("bio_dash_color_mode") || "light"; // 'light' | 'dark'
 
-    // 0. 主題初始化與切換
-    function initTheme() {
+    // 大廳一 17 款共用題庫遊戲清單
+    const HALL1_GAMES = [
+      "🏰 皇家古堡：生物密室逃脫",
+      "🔬 微觀特攻隊：細胞世界大暴走",
+      "🐇 奇幻仙境：愛麗絲生物密室逃脫",
+      "🏫 現代校園：生物密室逃脫",
+      "🐑 羊羊農場：生物大逃脫",
+      "🫘 淘氣豆：生物敲敲研究所",
+      "🐝 生物小蜜蜂：星際防衛隊",
+      "🚀 生物星際大逃亡：逃離黑洞",
+      "👾 生物小精靈塔防：微觀免疫大作戰",
+      "🧬 生物大墜落：細胞深淵下樓梯",
+      "🎣 生物大釣手：黃金深海大捕撈",
+      "🌱 植物大戰殭屍：細胞防衛戰",
+      "🗡️ 樂透大冒險：生物勇者傳奇",
+      "🍄 超級馬力歐生物闖關",
+      "🐰 動物方城市生物大富翁",
+      "🧬 生物能量祖瑪：光合呼吸大冒險",
+      "🦖 侏羅紀叢林逃生記"
+    ];
+
+    // 大廳二 3 款獨立單元遊戲清單
+    const HALL2_GAMES = [
+      "💩 人體消化大冒險 (54格完備版)",
+      "🧋 珍珠奶茶大對決 (喝光奶茶擂台版)",
+      "🔬 五界生物研究餐廳 (48種樣本・迴轉研究大餐)"
+    ];
+
+    // 0. 主題樣式應用與切換
+    function applyThemes() {
       const root = document.documentElement;
-      root.setAttribute("data-theme", currentTheme);
+      root.setAttribute("data-hall-theme", currentHall === "hall2" ? "pink" : "green");
+      root.setAttribute("data-color-mode", currentColorMode);
+
+      const titleEl = document.getElementById("dashboardMainTitle");
+      const subTitleEl = document.getElementById("dashboardSubTitle");
+      const hallSelect = document.getElementById("hallSelect");
+      if (hallSelect) hallSelect.value = currentHall;
+
+      if (currentHall === "hall2") {
+        if (titleEl) titleEl.textContent = "🌸 大廳二：獨立遊戲即時儀表板";
+        if (subTitleEl) subTitleEl.textContent = "獨立單元遊戲 ‧ 即時大螢幕點名 ‧ 專屬單元題庫";
+      } else {
+        if (titleEl) titleEl.textContent = "🌿 大廳一：互動遊戲即時儀表板";
+        if (subTitleEl) subTitleEl.textContent = "共用題庫遊戲 ‧ 即時大螢幕點名 ‧ 雙大廳色系聯動";
+      }
+
       const icon = document.getElementById("themeToggleIcon");
       const text = document.getElementById("themeToggleText");
-      if (currentTheme === "dark") {
-        document.body.classList.add("theme-dark");
+      if (currentColorMode === "dark") {
         if (icon) icon.textContent = "☀️";
-        if (text) text.textContent = "切換為明亮模式";
+        if (text) text.textContent = "明亮模式";
       } else {
-        document.body.classList.remove("theme-dark");
         if (icon) icon.textContent = "🌙";
-        if (text) text.textContent = "切換為深色模式";
+        if (text) text.textContent = "深色模式";
       }
     }
 
-    function toggleDashboardTheme() {
-      currentTheme = (currentTheme === "dark") ? "light" : "dark";
-      localStorage.setItem("bio_dash_theme", currentTheme);
-      initTheme();
-      showToast(currentTheme === "dark" ? "🌙 已切換為深色模式" : "☀️ 已切換為明亮抗眩光模式");
+    // 🌸 切換大廳色快捷鍵 (綠/粉一鍵切換)
+    function toggleHallColor() {
+      currentHall = (currentHall === "hall1") ? "hall2" : "hall1";
+      localStorage.setItem("bio_dash_selected_hall", currentHall);
+      applyThemes();
+      updateUnitDropdown();
+      renderDashboard();
+      showToast(currentHall === "hall2" ? "🌸 已切換為【大廳二：玫瑰粉】主題" : "🌿 已切換為【大廳一：森林綠】主題");
+    }
+
+    // 🌓 明暗色彩模式切換
+    function toggleColorMode() {
+      currentColorMode = (currentColorMode === "dark") ? "light" : "dark";
+      localStorage.setItem("bio_dash_color_mode", currentColorMode);
+      applyThemes();
+      showToast(currentColorMode === "dark" ? "🌙 已啟用深色夜間模式" : "☀️ 已啟用明亮色彩模式");
+    }
+
+    // 第一層：手動改變大廳下拉
+    function onHallChange() {
+      const sel = document.getElementById("hallSelect");
+      currentHall = sel.value;
+      localStorage.setItem("bio_dash_selected_hall", currentHall);
+      applyThemes();
+      updateUnitDropdown();
+      renderDashboard();
+    }
+
+    // 第二層：動態根據目前大廳填入專屬遊戲清單
+    function updateUnitDropdown() {
+      const unitSelect = document.getElementById("unitSelect");
+      if (!unitSelect) return;
+
+      const currentVal = unitSelect.value || "ALL";
+      unitSelect.innerHTML = '<option value="ALL">🌐 全遊戲彙整總覽</option>';
+
+      const targetList = (currentHall === "hall2") ? HALL2_GAMES : HALL1_GAMES;
+      const groupLabel = (currentHall === "hall2") ? "🧩 大廳二：獨立遊戲 (3款)" : "🎮 大廳一：共用題庫遊戲 (17款)";
+
+      const optGroup = document.createElement("optgroup");
+      optGroup.label = "── " + groupLabel + " ──";
+      targetList.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g;
+        opt.textContent = g;
+        optGroup.appendChild(opt);
+      });
+      unitSelect.appendChild(optGroup);
+
+      // 檢查試算表中是否有額外單元分頁
+      const classRegex = /^(7\d{2}|七[甲乙丙]|\d+班|[一二三四五六七八九]班)/;
+      const extraSet = new Set();
+      rawRecords.forEach(r => {
+        const u = String(r.units || "").trim();
+        if (u && !classRegex.test(u) && !u.includes("班級") && !u.includes("座號") && u !== "ALL") {
+          if (!HALL1_GAMES.some(g => g.includes(u)) && !HALL2_GAMES.some(g => g.includes(u))) {
+            extraSet.add(u);
+          }
+        }
+      });
+
+      if (extraSet.size > 0) {
+        const optGroupExtra = document.createElement("optgroup");
+        optGroupExtra.label = "── 📚 試算表其他測驗分頁 ──";
+        extraSet.forEach(u => {
+          const opt = document.createElement("option");
+          opt.value = u;
+          opt.textContent = "📚 " + u;
+          optGroupExtra.appendChild(opt);
+        });
+        unitSelect.appendChild(optGroupExtra);
+      }
+
+      // 若先前選中的選項在新清單中存在則保留，否則預設回 ALL
+      const exists = Array.from(unitSelect.options).some(o => o.value === currentVal);
+      unitSelect.value = exists ? currentVal : "ALL";
+    }
+
+    function onUnitChange() {
+      const unitSelect = document.getElementById("unitSelect");
+      const val = unitSelect.value;
+      const rankTip = document.getElementById("rankUnitFilterTip");
+      if (rankTip) {
+        rankTip.textContent = (val === "ALL") ? "全班實力競技" : val;
+      }
+      renderDashboard();
     }
 
     // 1. 班級字串統一正規化對照函式 (相容 "710", "7年10班", "七年十班", "710班", "7-10")
@@ -928,100 +1124,7 @@
       return match ? parseInt(match[0], 10) : null;
     }
 
-    // 3. 遊戲主題清單萃取與選單動態更新 (嚴格過濾班級字串)
-    function populateUnitOptions() {
-      const unitSelect = document.getElementById("unitSelect");
-      if (!unitSelect) return;
-
-      const classRegex = /^(7\d{2}|七[甲乙丙]|\d+班|[一二三四五六七八九]班)/;
-      const unitsSet = new Set();
-
-      rawRecords.forEach(r => {
-        const u = String(r.units || "").trim();
-        if (u && !classRegex.test(u) && !u.includes("班級") && !u.includes("座號") && u !== "ALL") {
-          unitsSet.add(u);
-        }
-      });
-
-      const currentVal = unitSelect.value || "ALL";
-      unitSelect.innerHTML = '<option value="ALL">🌐 全遊戲/單元彙整總覽</option>';
-
-      // 大廳二 3 款獨立遊戲
-      const hall2Games = [
-        "💩 人體消化大冒險 (54格完備版)",
-        "🧋 珍珠奶茶大對決 (喝光奶茶擂台版)",
-        "🔬 五界生物研究餐廳 (48種樣本・迴轉研究大餐)"
-      ];
-
-      // 大廳一 17 款遊戲
-      const hall1Games = [
-        "🏰 皇家古堡：生物密室逃脫",
-        "🔬 微觀特攻隊：細胞世界大暴走",
-        "🐇 奇幻仙境：愛麗絲生物密室逃脫",
-        "🏫 現代校園：生物密室逃脫",
-        "🐑 羊羊農場：生物大逃脫",
-        "🫘 淘氣豆：生物敲敲研究所",
-        "🐝 生物小蜜蜂：星際防衛隊",
-        "🚀 生物星際大逃亡：逃離黑洞",
-        "👾 生物小精靈塔防：微觀免疫大作戰",
-        "🧬 生物大墜落：細胞深淵下樓梯",
-        "🎣 生物大釣手：黃金深海大捕撈",
-        "🌱 植物大戰殭屍：細胞防衛戰",
-        "🗡️ 樂透大冒險：生物勇者傳奇",
-        "🍄 超級馬力歐生物闖關",
-        "🐰 動物方城市生物大富翁",
-        "🧬 生物能量祖瑪：光合呼吸大冒險",
-        "🦖 侏羅紀叢林逃生記"
-      ];
-
-      const optGroupHall2 = document.createElement("optgroup");
-      optGroupHall2.label = "── 🧩 大廳二：獨立單元遊戲 ──";
-      hall2Games.forEach(g => {
-        const opt = document.createElement("option");
-        opt.value = g;
-        opt.textContent = g;
-        optGroupHall2.appendChild(opt);
-      });
-      unitSelect.appendChild(optGroupHall2);
-
-      const optGroupHall1 = document.createElement("optgroup");
-      optGroupHall1.label = "── 🎮 大廳一：共用題庫遊戲 ──";
-      hall1Games.forEach(g => {
-        const opt = document.createElement("option");
-        opt.value = g;
-        opt.textContent = g;
-        optGroupHall1.appendChild(opt);
-      });
-      unitSelect.appendChild(optGroupHall1);
-
-      // 若試算表還有其他測驗分頁單元，額外列出
-      const extraUnits = Array.from(unitsSet).filter(u => !hall1Games.some(g => g.includes(u)) && !hall2Games.some(g => g.includes(u)));
-      if (extraUnits.length > 0) {
-        const optGroupExtra = document.createElement("optgroup");
-        optGroupExtra.label = "── 📚 試算表其他測驗分頁 ──";
-        extraUnits.forEach(u => {
-          const opt = document.createElement("option");
-          opt.value = u;
-          opt.textContent = "📚 " + u;
-          optGroupExtra.appendChild(opt);
-        });
-        unitSelect.appendChild(optGroupExtra);
-      }
-
-      unitSelect.value = currentVal;
-    }
-
-    function onUnitChange() {
-      const unitSelect = document.getElementById("unitSelect");
-      const val = unitSelect.value;
-      const rankTip = document.getElementById("rankUnitFilterTip");
-      if (rankTip) {
-        rankTip.textContent = (val === "ALL") ? "全班實力競技" : val;
-      }
-      renderDashboard();
-    }
-
-    // 4. 連線抓取 Google 試算表最新成績
+    // 3. 連線抓取 Google 試算表最新成績
     function fetchLiveScores() {
       const btn = document.getElementById("btnRefresh");
       btn.textContent = "⏳ 刷新中...";
@@ -1034,8 +1137,8 @@
             btn.disabled = false;
             if (resp && resp.records) {
               rawRecords = resp.records;
-              showToast("✅ 已即時同步最新資料 (" + rawRecords.length + " 筆紀錄)");
-              populateUnitOptions();
+              showToast("✅ 已同步最新資料 (" + rawRecords.length + " 筆紀錄)");
+              updateUnitDropdown();
               renderDashboard();
             }
           })
@@ -1052,7 +1155,7 @@
       }
     }
 
-    // 5. 渲染儀表板所有卡片與統計數字
+    // 4. 渲染儀表板所有卡片與統計數字
     function renderDashboard() {
       const selectedClassRaw = document.getElementById("classSelect").value;
       const targetClassNorm = normalizeClassStr(selectedClassRaw);
@@ -1065,11 +1168,18 @@
       // 依班級正規化過濾
       let classRecords = rawRecords.filter(r => normalizeClassStr(r.className) === targetClassNorm);
 
-      // 若有選擇指定遊戲主題，進一步精準過濾
+      // 若有選擇指定遊戲主題，精準過濾
       if (selectedUnit && selectedUnit !== "ALL") {
         classRecords = classRecords.filter(r => {
           const u = String(r.units || "").trim();
           return u === selectedUnit.trim() || selectedUnit.includes(u) || u.includes(selectedUnit);
+        });
+      } else {
+        // 若選 ALL，依據當前大廳做範圍過濾
+        const targetList = (currentHall === "hall2") ? HALL2_GAMES : HALL1_GAMES;
+        classRecords = classRecords.filter(r => {
+          const u = String(r.units || "").trim();
+          return targetList.some(g => g.includes(u) || u.includes(g));
         });
       }
 
@@ -1185,7 +1295,7 @@
       }
     }
 
-    // 6. 點擊座號卡：未交者點擊切換請假，已交者點擊查看學生詳情
+    // 5. 點擊座號卡：未交者點擊切換請假，已交者點擊查看學生詳情
     function handleSeatCardClick(seatNum, isSubmitted, isAbsent) {
       if (isSubmitted) {
         const record = rawRecords.find(r => 
@@ -1210,7 +1320,7 @@
       toggleAbsentSeat(seatNum);
     }
 
-    // 7. 切換請假狀態
+    // 6. 切換請假狀態
     function toggleAbsentSeat(seatNum) {
       const input = document.getElementById("absentSeatsInput");
       const currentSet = new Set(
@@ -1233,7 +1343,7 @@
       renderDashboard();
     }
 
-    // 8. 班級組態儲存與讀取 (LocalStorage)
+    // 7. 班級組態儲存與讀取 (LocalStorage)
     function onClassChange() {
       loadClassConfig();
       renderDashboard();
@@ -1255,7 +1365,7 @@
       document.getElementById("absentSeatsInput").value = savedAbsent;
     }
 
-    // 9. 導師分數切換
+    // 8. 導師分數切換
     function toggleTeacherScore() {
       isTeacherScoreShown = !isTeacherScoreShown;
       const btn = document.getElementById("btnScoreToggle");
@@ -1270,7 +1380,7 @@
       }
     }
 
-    // 10. 複製未交名單到剪貼簿
+    // 9. 複製未交名單到剪貼簿
     function copyUnsubmittedList() {
       const selectedClassRaw = document.getElementById("classSelect").value;
       const targetClassNorm = normalizeClassStr(selectedClassRaw);
@@ -1319,7 +1429,7 @@
       });
     }
 
-    // 11. 匯出 CSV 成績表
+    // 10. 匯出 CSV 成績表
     function exportScoresCsv() {
       const selectedClassRaw = document.getElementById("classSelect").value;
       const targetClassNorm = normalizeClassStr(selectedClassRaw);
@@ -1368,7 +1478,7 @@
       showToast("📥 CSV 報表匯出成功！");
     }
 
-    // 12. 手動補登彈窗邏輯
+    // 11. 手動補登彈窗邏輯
     function openManualGradeModal() {
       const modal = document.getElementById("manualModal");
       modal.classList.add("active");
@@ -1452,8 +1562,9 @@
     }
 
     // 頁面初始化
-    initTheme();
+    applyThemes();
     loadClassConfig();
+    updateUnitDropdown();
     fetchLiveScores();
     setInterval(fetchLiveScores, 15000); // 每 15 秒自動重新整理
   </script>
