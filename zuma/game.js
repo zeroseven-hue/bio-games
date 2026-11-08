@@ -850,9 +850,9 @@ function update(dt) {
 
                 if (b.getTravelDistance() > 220) {
                     longShotsAchieved++;
-                    score += 500;
+                    score += 20;
                     sfx.playLongShot();
-                    floatingTexts.push(new FloatingText(ball.x, ball.y - 20, '🎯 LONG SHOT! +500', '#fbbf24'));
+                    floatingTexts.push(new FloatingText(ball.x, ball.y - 20, '🎯 LONG SHOT! +20', '#fbbf24'));
                 }
 
                 // 核心判定邏輯：
@@ -865,7 +865,7 @@ function update(dt) {
                     createExplosionParticles(ball.x, ball.y, COLOR_CONFIG[ball.color].hex);
                     balls.splice(j, 1);
                     comboCount++;
-                    score += 500;
+                    score += 35;
                     sfx.playComboChord(Math.min(comboCount, 4));
                     triggerStageClearSuccess();
                     break;
@@ -910,8 +910,8 @@ function checkElimination(startIndex) {
         maxComboAchieved = Math.max(maxComboAchieved, comboCount);
 
         const isCorrectAns = (targetColor === correctAns);
-        const baseScore = isCorrectAns ? 400 : 150;
-        const addScore = baseScore * count * comboCount;
+        const baseScore = isCorrectAns ? 25 : 10;
+        const addScore = Math.min(60, baseScore * count + (comboCount - 1) * 5);
         score += addScore;
 
         sfx.playComboChord(comboCount);
@@ -969,7 +969,7 @@ function triggerBombExplosion(centerX, centerY) {
         if (dist < 90) {
             createExplosionParticles(b.x, b.y, COLOR_CONFIG[b.color].hex);
             balls.splice(i, 1);
-            score += 100;
+            score += 5;
         }
     }
     updateHUDStats();
@@ -1180,8 +1180,11 @@ function renderTotemTurret() {
 function endGameAndShowResult(isVictory) {
     isGameRunning = false;
 
-    const lifeBonus = lives * 300;
-    const finalScore = score + (isVictory ? 1000 : 0) + lifeBonus;
+    const lifeBonus = lives * 25; // 剩餘心核加成 (最多 75 分)
+    const victoryBonus = isVictory ? 120 : 40; // 通關加成
+    // 結算總分嚴格調控於 300 ~ 600 分區間 (符合課堂評量標準)
+    const rawTotal = score + victoryBonus + lifeBonus;
+    const finalScore = Math.min(600, Math.max(300, 300 + Math.round(rawTotal * 0.6)));
 
     const summaryText = isVictory
         ? `🏆 達成 10 題滿貫闖關！最高連擊 Combo x${maxComboAchieved}，遠程神射 ${longShotsAchieved} 次！`
