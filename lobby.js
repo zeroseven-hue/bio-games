@@ -1,4 +1,4 @@
-/**
+﻿/**
  * lobby.js - 遊戲大廳與 QR Code 動態產生與多版本題庫摺疊卡片邏輯
  */
 
@@ -671,10 +671,10 @@ function toggleTeacherPinLock() {
       return;
     }
 
-    // 未驗證：強制鎖定畫面
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    if (pinInput) setTimeout(() => pinInput.focus(), 200);
+      // 學生及公開訪問完全不彈窗，預設保持隱藏
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+      // if (pinInput) setTimeout(() => pinInput.focus(), 200);
 
     function verifyPin() {
       const entered = (pinInput ? pinInput.value.trim() : '');
