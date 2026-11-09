@@ -671,10 +671,10 @@ function toggleTeacherPinLock() {
       return;
     }
 
-      // 學生及公開訪問完全不彈窗，預設保持隱藏
-      modal.classList.add('hidden');
-      document.body.style.overflow = 'auto';
-      // if (pinInput) setTimeout(() => pinInput.focus(), 200);
+      // 未驗證：強制鎖定大廳首頁（防止學生窺探教師大廳派發板）
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (pinInput) setTimeout(() => pinInput.focus(), 200);
 
     function verifyPin() {
       const entered = (pinInput ? pinInput.value.trim() : '');
