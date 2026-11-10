@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🧬 《生物星際大逃亡：逃離黑洞》核心控制器 V5.1 (三明治終極標準模組版)
  * 1. 課堂派卷守門員 + 純數字 701~710 / 01~35 + 誠信公約開局
  * 2. 街機高速流暢手感：答錯秒記黑盒子觀念日誌，不中斷航行節奏
@@ -56,6 +56,8 @@ let streak = 0;
 let shields = 0;
 let oxygen = 100;
 let emergencyTriggered = false;
+let currentQuestionErrors = 0; // 當前題目的答錯次數 (0, 1, 2, 3...)
+let isCoolingDown = false;      // 是否正處於過熱強制散熱
 
 // 動態航行與黑洞變數
 let shipProgress = 15;      // 15% ~ 100%
@@ -423,6 +425,8 @@ async function initGame(isBonus = false) {
   shields = 0;
   oxygen = 100;
   emergencyTriggered = false;
+  currentQuestionErrors = 0;
+  isCoolingDown = false;
   shipProgress = 15;
   blackholeProgress = 0;
   activeSeconds = 0;

@@ -67,6 +67,17 @@
   <!-- 飛行即時特效提示 (推進/受損/護盾) -->
   <div id="flightEffects" class="flight-effects" aria-hidden="true"></div>
 
+  <!-- 🚨 推進器強制散熱 HUD 覆蓋層 (同一題錯 3 次時觸發) -->
+  <div id="cooldownModal" class="overlay-cooldown">
+    <h2 class="alert-title">🚨 推進器嚴重過熱！</h2>
+    <div class="cooldown-timer" id="cooldownCount">3</div>
+    <p style="color:#fca5a5; font-size:1.1rem; margin:0 0 10px 0;">AI 導航介入強制散熱，請趁現在冷靜閱讀生物觀念！</p>
+    <div class="concept-box">
+      <div class="concept-title" id="cooldownHintTitle">💡 本題核心觀念解鎖：</div>
+      <div id="cooldownHintText" style="color:#f8fafc; font-size:1.15rem; line-height:1.7;">概念加載中...</div>
+    </div>
+  </div>
+
   <!-- 教師空白鍵全螢幕凍結講解覆蓋層 -->
   <div id="pauseOverlay" class="pause-overlay" hidden>
     <h1>👨‍🏫 老師講解中，請看黑板</h1>
