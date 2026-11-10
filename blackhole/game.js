@@ -522,6 +522,7 @@ function renderQuestion() {
     return finishGame(true);
   }
 
+  currentQuestionErrors = 0; // 換新題目時重置當前題錯誤累計
   const q = roundQuestions[currentIndex];
   $('qText').textContent = `${currentIndex + 1} / ${roundQuestions.length}　${q.question}`;
 
@@ -529,6 +530,9 @@ function renderQuestion() {
     const btn = $('btn' + i);
     if (i < q.options.length) {
       btn.hidden = false;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.filter = 'none';
       btn.querySelector('.opt-text').textContent = q.options[i];
     } else {
       btn.hidden = true;
@@ -536,28 +540,70 @@ function renderQuestion() {
   }
 
   isLocked = false;
-  setAnswers(!paused);
+  setAnswers(!paused && !isCoolingDown);
+}
+
+// 觸發 3 秒強制冷卻散熱與核心觀念解鎖
+function triggerEngineCooldown(q) {
+  isCoolingDown = true;
+  isLocked = true;
+  setAnswers(false);
+
+  const modal = $('cooldownModal');
+  const countEl = $('cooldownCount');
+  const hintText = $('cooldownHintText');
+
+  let explanation = q.explanation || '請對照各生物構造特性、代謝條件與生命現象關鍵字。';
+  hintText.textContent = `【正解方向】：${q.options[q.answer]}\n【關鍵觀念】：${explanation}`;
+  modal.classList.add('active');
+
+  let remain = 3;
+  countEl.textContent = remain;
+
+  const timer = setInterval(() => {
+    remain--;
+    if (remain > 0) {
+      countEl.textContent = remain;
+      playTone(300, 'sine', 0.05, 0, 0.04);
+    } else {
+      clearInterval(timer);
+      modal.classList.remove('active');
+      isCoolingDown = false;
+      isLocked = false;
+      setAnswers(!paused);
+      effect('boost');
+    }
+  }, 1000);
 }
 
 function handleSelect(choiceIdx) {
-  if (phase !== 'playing' || paused || isLocked || Date.now() - lastAnswerTime < 350) return;
+  if (phase !== 'playing' || paused || isLocked || isCoolingDown || Date.now() - lastAnswerTime < 300) return;
   lastAnswerTime = Date.now();
 
   unlockAudioContext();
-  isLocked = true;
-  setAnswers(false);
   attempts++;
 
   const q = roundQuestions[currentIndex];
   const qKey = q.question;
 
   if (choiceIdx === q.answer) {
-    // 答對處理
+    // ══════════════════════════════════════════════════
+    // ✅ 答對處理：只有答對才能推進！
+    // ══════════════════════════════════════════════════
+    isLocked = true;
+    setAnswers(false);
+
     if (!answeredWrong.has(qKey)) {
       firstCorrect++;
     }
     streak++;
-    if (streak % 3 === 0) {
+
+    // 認真同學連擊獎勵：連對 2 題以上啟動曲速增壓
+    if (streak >= 3) {
+      effect('boost');
+      playTone(880, 'sine', 0.15, 0, 0.12);
+      playTone(1174, 'sine', 0.2, 0.1, 0.14);
+    } else if (streak % 2 === 0) {
       shields = Math.min(2, shields + 1);
       effect('shield');
       playShieldSound();
@@ -566,7 +612,7 @@ function handleSelect(choiceIdx) {
       playBoostSound();
     }
 
-    // 推進飛船
+    // 推進飛船（答對才前進）
     currentIndex++;
     shipProgress = 15 + Math.round((85 * currentIndex) / roundQuestions.length);
     updateUI();
@@ -576,10 +622,14 @@ function handleSelect(choiceIdx) {
     }, 450);
 
   } else {
-    // 答錯處理：街機流暢連貫手感，秒記黑盒子觀念日誌，不以長彈窗中斷航行！
+    // ══════════════════════════════════════════════════
+    // ❌ 答錯處理：【三階梯溫和引導 + 封殺亂猜速通】
+    // ══════════════════════════════════════════════════
     streak = 0;
     answeredWrong.add(qKey);
+    currentQuestionErrors++;
 
+    // 記錄錯題日誌
     let log = wrongLogs.find(x => x.question === q.question);
     if (log) {
       log.count++;
@@ -596,24 +646,55 @@ function handleSelect(choiceIdx) {
 
     triggerScreenShake();
 
+    // 扣除護盾或氧氣
     if (shields > 0) {
       shields--;
       effect('shield');
       playShieldSound();
     } else {
-      oxygen = Math.max(15, oxygen - 10);
-      effect('damage');
+      oxygen = Math.max(15, oxygen - 8);
       playAlarmSound();
     }
 
-    // 自動前往下一題，保持作答爽快感
-    currentIndex++;
-    shipProgress = 15 + Math.round((85 * currentIndex) / roundQuestions.length);
+    // 🛑 核心改變：答錯「不換題」、「不往前推」，飛船因熄火稍微被黑洞引力倒扯 2%
+    shipProgress = Math.max(15, shipProgress - 2);
+    // 黑洞趁勢稍微推進 1%
+    blackholeProgress = Math.min(shipProgress - 2, blackholeProgress + 1);
     updateUI();
 
-    setTimeout(() => {
-      renderQuestion();
-    }, 600);
+    // 錯誤選項即刻反灰刪除（二選一 / 三選一引導）
+    const wrongBtn = $('btn' + choiceIdx);
+    if (wrongBtn) {
+      wrongBtn.disabled = true;
+      wrongBtn.style.opacity = '0.3';
+      wrongBtn.style.filter = 'grayscale(100%)';
+    }
+
+    // 階梯一：第一次答錯 -> 輕微震動，扣除該選項，0.5秒防連點解鎖，讓學生重新思考
+    if (currentQuestionErrors === 1) {
+      effect('damage');
+      $('lblShipName').textContent = "⚠️ 推進器輕微過熱 (警告 1/3)！請重新審題";
+      isLocked = true;
+      setTimeout(() => {
+        isLocked = false;
+        setAnswers(!paused && !isCoolingDown);
+      }, 500);
+    }
+    // 階梯二：第二次答錯 -> 黃色預警，黑洞逼近，提示即將冷卻
+    else if (currentQuestionErrors === 2) {
+      effect('damage');
+      $('lblShipName').textContent = "🚨 推進器達 85% 警戒 (警告 2/3)！再錯將強制散熱";
+      isLocked = true;
+      setTimeout(() => {
+        isLocked = false;
+        setAnswers(!paused && !isCoolingDown);
+      }, 700);
+    }
+    // 階梯三：同一題答錯 3 次 -> 進入 3 秒強制散熱，顯示核心概念提示！
+    else {
+      $('lblShipName').textContent = "❄️ 引擎嚴重過載！強制散熱檢討中...";
+      triggerEngineCooldown(q);
+    }
   }
 }
 
