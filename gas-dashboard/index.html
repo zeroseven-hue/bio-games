@@ -942,6 +942,8 @@
   <div class="toast-msg" id="toastMsg"></div>
 
   <script>
+    // 💡 GAS 後端 Web App API 網址 (支援 GitHub Pages 跨域呼叫與 google.script.run 雙軌相容)
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzDHUfJKbGtgfYM5a1PHpQzbW2JGZL3zFTh582r95vcOKupGRfZVa0ToHbbfX1MirzbbQ/exec";
     let rawRecords = [];
     let isTeacherScoreShown = false;
     let currentHall = localStorage.getItem("bio_dash_selected_hall") || "hall1"; // 'hall1' (綠) | 'hall2' (粉)
@@ -1129,31 +1131,50 @@
     // 3. 連線抓取 Google 試算表最新成績
     function fetchLiveScores() {
       const btn = document.getElementById("btnRefresh");
-      btn.textContent = "⏳ 刷新中...";
-      btn.disabled = true;
+      if (btn) {
+        btn.textContent = "⏳ 刷新中...";
+        btn.disabled = true;
+      }
 
+      function handleData(resp) {
+        if (btn) {
+          btn.textContent = "🔄 刷新資料";
+          btn.disabled = false;
+        }
+        if (resp && resp.records) {
+          rawRecords = resp.records;
+          showToast("✅ 已同步最新資料 (" + rawRecords.length + " 筆紀錄)");
+          updateUnitDropdown();
+          renderDashboard();
+        } else {
+          showToast("⚠️ 未取得成績紀錄或資料為空");
+        }
+      }
+
+      function handleError(err) {
+        if (btn) {
+          btn.textContent = "🔄 刷新資料";
+          btn.disabled = false;
+        }
+        console.error("fetchLiveScores error:", err);
+        showToast("⚠️ 取得資料發生問題：" + err);
+      }
+
+      // 情況 A：若在 Google Apps Script 環境中運行
       if (typeof google !== "undefined" && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(function(resp) {
-            btn.textContent = "🔄 刷新資料";
-            btn.disabled = false;
-            if (resp && resp.records) {
-              rawRecords = resp.records;
-              showToast("✅ 已同步最新資料 (" + rawRecords.length + " 筆紀錄)");
-              updateUnitDropdown();
-              renderDashboard();
-            }
-          })
-          .withFailureHandler(function(err) {
-            btn.textContent = "🔄 刷新資料";
-            btn.disabled = false;
-            console.error("fetchLiveScores error:", err);
-            showToast("⚠️ 取得資料發生問題：" + err);
-          })
+          .withSuccessHandler(handleData)
+          .withFailureHandler(handleError)
           .getScoresData();
       } else {
-        btn.textContent = "🔄 刷新資料";
-        btn.disabled = false;
+        // 情況 B：若在 GitHub Pages 或外部網頁運行，直接使用 fetch 呼叫 GAS API
+        fetch(GAS_API_URL + "?action=getLiveScores&t=" + Date.now())
+          .then(res => {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+          })
+          .then(handleData)
+          .catch(handleError);
       }
     }
 
@@ -1524,6 +1545,15 @@
       }
 
       const seatFormatted = String(seat).padStart(2, "0");
+      const payload = {
+        className: cls,
+        seat: seatFormatted,
+        name: name,
+        score: score,
+        units: remark,
+        note: "老師手動補登"
+      };
+
       if (typeof google !== "undefined" && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function(res) {
@@ -1538,14 +1568,27 @@
           .withFailureHandler(function(err) {
             alert("補登連線失敗：" + err);
           })
-          .saveManualScoreBackend({
-            className: cls,
-            seat: seatFormatted,
-            name: name,
-            score: score,
-            units: remark,
-            note: "老師手動補登"
-          });
+          .saveManualScoreBackend(payload);
+      } else {
+        // GitHub Pages 模式：以 POST 方式送出補登
+        fetch(GAS_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.status === "success") {
+            showToast("✅ " + seatFormatted + " 號 " + name + " 成績補登成功！");
+            closeManualGradeModal();
+            fetchLiveScores();
+          } else {
+            alert("補登失敗：" + (res ? res.message : "未知錯誤"));
+          }
+        })
+        .catch(err => {
+          alert("補登連線失敗：" + err);
+        });
       }
     }
 
