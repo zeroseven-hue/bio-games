@@ -341,6 +341,203 @@ function getScoresData() {
 }
 
 
+
+// ==========================================================================
+// 🌿 試算表自訂功能選單與一鍵美化優化引擎
+// ==========================================================================
+
+// 1. 試算表頂端選單擴充：方便老師在 Google 試算表一鍵執行美化、修復與重新自然排序
+function onOpen() {
+  try {
+    var ui = SpreadsheetApp.getUi();
+    ui.createMenu("🌿 生物課堂試算表小幫手")
+      .addItem("✨ 一鍵套用頂級美化排版 (當前分頁)", "美化當前分頁")
+      .addItem("🎨 一鍵美化所有測驗分頁", "美化所有分頁")
+      .addSeparator()
+      .addItem("🔄 重新依班級座號排序當前分頁", "重新排序當前分頁")
+      .addItem("🛠️ 一鍵修復並自動補齊所有分頁", "一鍵修復並美化所有分頁")
+      .addToUi();
+  } catch (e) {}
+}
+
+// 2. 一鍵美化當前工作表
+function 美化當前分頁() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  applyUltraBeautification(sheet);
+  try {
+    SpreadsheetApp.getUi().alert("🎉 美化完成！已套用深翡翠綠奢華表頭、護眼斑馬紋、最適欄寬、座號姓名凍結與滿分高亮！");
+  } catch (_) {}
+}
+
+// 3. 一鍵美化所有工作表
+function 美化所有分頁() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var count = 0;
+  sheets.forEach(function(s) {
+    var name = s.getName();
+    if (!name.includes("說明") && !name.includes("範本")) {
+      applyUltraBeautification(s);
+      count++;
+    }
+  });
+  try {
+    SpreadsheetApp.getUi().alert("🎉 全數完成！已為 " + count + " 個分頁套用頂級現代排版、斑馬紋與高低分智慧標色！");
+  } catch (_) {}
+}
+
+// 4. 重新依「班級 ➔ 座號」排序當前分頁
+function 重新排序當前分頁() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 2) {
+    var headers = sheet.getRange(1, 1, 1, Math.min(sheet.getLastColumn(), 12)).getValues()[0];
+    var isNewFormat = headers[0] === "座號" && headers[2] && String(headers[2]).includes("採計");
+    if (isNewFormat) {
+      sheet.getRange(2, 1, lastRow - 1, 12).sort([
+        { column: 4, ascending: true }, // 班級
+        { column: 1, ascending: true }  // 座號
+      ]);
+    } else {
+      sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).sort([
+        { column: 2, ascending: true }, // 班級
+        { column: 3, ascending: true }  // 座號
+      ]);
+    }
+  }
+  applyUltraBeautification(sheet);
+  try {
+    SpreadsheetApp.getUi().alert("✅ 排序完成！已將當前分頁依「班級 ➔ 座號 (01~35)」精準自然升冪排列。");
+  } catch (_) {}
+}
+
+// 5. 一鍵修復並美化所有分頁
+function 一鍵修復並美化所有分頁() {
+  美化所有分頁();
+}
+
+// 6. 頂級美化排版核心引擎（深翡翠綠/琥珀金、護眼斑馬紋、最適欄寬、座號姓名雙凍結、高低分條件格式化）
+function applyUltraBeautification(sheet) {
+  if (!sheet) return;
+  var lastRow = Math.max(sheet.getLastRow(), 1);
+  var numCols = Math.max(sheet.getLastColumn(), 12);
+
+  // 1. 表頭高度與雙向凍結 (表頭 40px 大氣舒適，凍結前兩欄座號與姓名)
+  sheet.setRowHeight(1, 40);
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(2);
+
+  // 2. 表頭現代深翡翠綠風格 (#0F766E)
+  var headerRange = sheet.getRange(1, 1, 1, numCols);
+  headerRange
+    .setBackground("#0F766E")
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setFontSize(10.5)
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle")
+    .setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
+
+  // 3. 黃金比例最適欄寬
+  var colWidths = [
+    65,  // A: 座號 (01~35)
+    85,  // B: 姓名
+    115, // C: 採計總分(最高分)
+    65,  // D: 班級 (701~710)
+    140, // E: 交卷時間
+    95,  // F: 原始得分(第1階段)
+    95,  // G: 訂正後得分(第2階段)
+    95,  // H: 加分後總分(第3階段)
+    70,  // I: 錯題數
+    180, // J: 錯題與補救訂正關鍵字
+    95,  // K: 跳出視窗次數
+    125  // L: 狀態備註
+  ];
+  for (var c = 0; c < colWidths.length; c++) {
+    sheet.setColumnWidth(c + 1, colWidths[c]);
+  }
+
+  // 4. 資料列排版、行高、斑馬紋與高低分條件格式化
+  if (lastRow > 1) {
+    sheet.setRowHeights(2, lastRow - 1, 28); // 舒適列高 28px
+
+    var dataRange = sheet.getRange(2, 1, lastRow - 1, numCols);
+    dataRange
+      .setVerticalAlignment("middle")
+      .setFontSize(10);
+
+    // 細項欄位排版
+    sheet.getRange(2, 1, lastRow - 1, 1).setHorizontalAlignment("center"); // 座號
+    sheet.getRange(2, 2, lastRow - 1, 1).setHorizontalAlignment("center"); // 姓名
+    sheet.getRange(2, 3, lastRow - 1, 1).setHorizontalAlignment("center").setFontWeight("bold").setFontSize(11); // 採計最高分
+    sheet.getRange(2, 4, lastRow - 1, 1).setHorizontalAlignment("center"); // 班級
+    sheet.getRange(2, 5, lastRow - 1, 1).setHorizontalAlignment("center").setFontColor("#64748B"); // 時間灰
+    sheet.getRange(2, 6, lastRow - 1, 3).setHorizontalAlignment("center"); // 得分置中
+    sheet.getRange(2, 9, lastRow - 1, 1).setHorizontalAlignment("center"); // 錯題數
+    sheet.getRange(2, 10, lastRow - 1, 1).setHorizontalAlignment("left");  // 關鍵字靠左
+    sheet.getRange(2, 11, lastRow - 1, 2).setHorizontalAlignment("center"); // 跳窗、備註
+
+    // 清除舊斑馬紋並套用清新護眼斑馬紋
+    try {
+      var bandings = sheet.getBandings();
+      for (var b = 0; b < bandings.length; b++) {
+        bandings[b].remove();
+      }
+      var fullTableRange = sheet.getRange(1, 1, lastRow, numCols);
+      var newBanding = fullTableRange.applyRowBanding();
+      newBanding
+        .setHeaderRowColor("#0F766E")
+        .setFirstRowColor("#FFFFFF")
+        .setSecondRowColor("#F8FAFC");
+    } catch (_) {}
+
+    // 條件式格式化 (滿分金黃高亮、不及格粉紅高亮、跳窗警示)
+    try {
+      var rules = [];
+      var scoreRange = sheet.getRange("C2:C" + lastRow);
+      
+      // 滿分 (>=100)：香檳金底 + 琥珀金深字 + 粗體
+      var rule100 = SpreadsheetApp.newConditionalFormatRule()
+        .whenNumberGreaterThanOrEqualTo(100)
+        .setBackground("#FEF3C7")
+        .setFontColor("#92400E")
+        .setBold(true)
+        .setRanges([scoreRange])
+        .build();
+      rules.push(rule100);
+
+      // 不及格 (<60)：櫻粉色底 + 警示深紅字
+      var ruleFail = SpreadsheetApp.newConditionalFormatRule()
+        .whenNumberLessThan(60)
+        .setBackground("#FEE2E2")
+        .setFontColor("#991B1B")
+        .setRanges([scoreRange])
+        .build();
+      rules.push(ruleFail);
+
+      // 跳窗警示：柔和橙黃底 + 橘紅字
+      var switchRange = sheet.getRange("K2:K" + lastRow);
+      var ruleSwitch = SpreadsheetApp.newConditionalFormatRule()
+        .whenTextContains("警示")
+        .setBackground("#FFEDD5")
+        .setFontColor("#C2410C")
+        .setBold(true)
+        .setRanges([switchRange])
+        .build();
+      rules.push(ruleSwitch);
+
+      sheet.setConditionalFormatRules(rules);
+    } catch (_) {}
+
+    // 自動開啟表頭下拉篩選箭頭
+    try {
+      if (!sheet.getFilter()) {
+        sheet.getRange(1, 1, lastRow, numCols).createFilter();
+      }
+    } catch (_) {}
+  }
+}
+
 // 7. 儀表板 HTML 介面與外部接口（支援 JSONP 跨域免疫、JSON API 與 直接大螢幕看板）
 function doGet(e) {
   var callback = e && e.parameter ? e.parameter.callback : "";
