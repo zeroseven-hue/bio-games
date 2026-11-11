@@ -49,7 +49,159 @@ function normalizeClassStr(input) {
   return s;
 }
 
-// 4. 學生測驗端提交成績 (POST) - 方案 A 自動建立分頁 + 採計最高分
+// 4. 輔助函式：確保分頁具備標準化表頭
+function ensureStandardHeader(sheet, isClassSheet) {
+  if (!sheet) return;
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      "座號", "姓名", "採計總分(最高分)", "班級", "交卷時間", 
+      "原始得分(第1階段)", "訂正後得分(第2階段)", "加分後總分(第3階段)", 
+      "錯題數", "錯題與補救訂正關鍵字", "跳出視窗次數", "狀態備註", "測驗主題/遊戲"
+    ]);
+    var headerColor = isClassSheet ? "#0f766e" : "#b45309"; // 班級分頁為翡翠綠，單元/彙整總表為琥珀金
+    sheet.getRange(1, 1, 1, 13).setBackground(headerColor).setFontColor("#FFFFFF").setFontWeight("bold");
+    sheet.setFrozenRows(1);
+    sheet.setFrozenColumns(3); // 凍結座號、姓名、最高採計分
+  }
+}
+
+// 4-1. 輔助函式：就地更新 (In-Place Update) 或新增資料至指定分頁
+function saveRecordToSheet(sheet, data, isClassSheet) {
+  if (!sheet) return { bestScore: 0, isUpdate: false };
+  ensureStandardHeader(sheet, isClassSheet);
+
+  var targetClass = String(data.className || "").trim();
+  var targetClassNorm = normalizeClassStr(targetClass);
+  var targetSeat = formatSeatWithPadding(data.seat);
+  var targetName = String(data.name || "").trim();
+  var nowTime = data.timestamp || new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+  var switchCount = data.switchCount || 0;
+  var switchAlert = switchCount > 3 ? (switchCount + " 次 (警示)") : (switchCount > 0 ? switchCount + " 次" : "0 次 (正常)");
+  var unitTitle = String(data.units || data.gameTitle || "課堂測驗").trim();
+
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0].map(function(h) { return String(h).trim(); });
+  var isNewFormat = headers[0] === "座號" && headers[2] && headers[2].includes("採計");
+
+  var existingRowIndex = -1;
+  var existingOriginal = 0;
+  var existingCorrection = 0;
+  var existingBonus = 0;
+  var existingBest = 0;
+
+  for (var i = 1; i < rows.length; i++) {
+    if (isNewFormat) {
+      var rSeat = formatSeatWithPadding(rows[i][0]);
+      var rName = String(rows[i][1] || "").trim();
+      var rClass = String(rows[i][3] || "").trim();
+      
+      // 比對條件：
+      // 在「班級分頁」中，同座號 + 同姓名即為該學生（精確就地更新成績）
+      // 在「單元分頁」或「總表」中，同班級 + 同座號 + 同姓名即為該學生
+      var isMatch = isClassSheet ? (rSeat === targetSeat && rName === targetName)
+                                 : (normalizeClassStr(rClass) === targetClassNorm && rSeat === targetSeat && rName === targetName);
+      if (isMatch) {
+        existingRowIndex = i + 1;
+        existingBest = Number(rows[i][2]) || 0;
+        existingOriginal = Number(rows[i][5]) || 0;
+        existingCorrection = Number(rows[i][6]) || 0;
+        existingBonus = Number(rows[i][7]) || 0;
+        break;
+      }
+    } else {
+      var rClassOld = String(rows[i][1] || "").trim();
+      var rSeatOld = formatSeatWithPadding(rows[i][2]);
+      var rNameOld = String(rows[i][3] || "").trim();
+      if (normalizeClassStr(rClassOld) === targetClassNorm && rSeatOld === targetSeat && rNameOld === targetName) {
+        existingRowIndex = i + 1;
+        existingOriginal = Number(rows[i][5]) || 0;
+        existingBest = Number(rows[i][6]) || existingOriginal;
+        break;
+      }
+    }
+  }
+
+  var incomingScore = data.finalScore !== undefined ? Number(data.finalScore) : (data.score !== undefined ? Number(data.score) : (data.originalScore !== undefined ? Number(data.originalScore) : 0));
+  var currentOriginal = data.originalScore !== undefined ? Number(data.originalScore) : (data.score !== undefined ? Number(data.score) : existingOriginal);
+  var currentCorrection = data.isCorrectionPhase ? Number(data.finalScore || incomingScore) : existingCorrection;
+  var currentBonus = data.isFinalBonus ? Number(data.finalScore || currentCorrection) : existingBonus;
+
+  // 核心最高分採計邏輯：自動取學生所有階段達到的最優最高分
+  var currentBest = Math.max(existingBest, currentOriginal, currentCorrection, currentBonus, incomingScore);
+
+  var statusNote = "正常繳交";
+  if (data.isFinalBonus) statusNote = "🏆 已完成加分題";
+  else if (data.isCorrectionPhase) statusNote = "✏️ 訂正完成送出";
+  else if (data.isInitialSync) statusNote = "⚡ 第1階段成績已送出";
+  if (data.note) statusNote = data.note;
+
+  // 情況 A：已有舊紀錄 -> 就地更新 (In-Place Update)
+  if (existingRowIndex > 0) {
+    if (isNewFormat) {
+      sheet.getRange(existingRowIndex, 3).setValue(currentBest); // C欄最高採計分
+      sheet.getRange(existingRowIndex, 5).setValue(nowTime);     // E欄交卷時間
+      if (data.originalScore !== undefined) sheet.getRange(existingRowIndex, 6).setValue(currentOriginal);
+      if (data.isCorrectionPhase) sheet.getRange(existingRowIndex, 7).setValue(currentCorrection);
+      if (data.isFinalBonus) sheet.getRange(existingRowIndex, 8).setValue(currentBonus);
+      if (data.errorCount !== undefined) sheet.getRange(existingRowIndex, 9).setValue(data.errorCount);
+      if (data.keywords) sheet.getRange(existingRowIndex, 10).setValue(data.keywords);
+      sheet.getRange(existingRowIndex, 11).setValue(switchAlert);
+      sheet.getRange(existingRowIndex, 12).setValue(statusNote);
+      if (sheet.getLastColumn() >= 13) {
+        sheet.getRange(existingRowIndex, 13).setValue(unitTitle);
+      }
+      if (switchCount >= 3) {
+        sheet.getRange(existingRowIndex, 1, 1, sheet.getLastColumn()).setBackground("#FEF3C7");
+      }
+    } else {
+      sheet.getRange(existingRowIndex, 1).setValue(nowTime);
+      sheet.getRange(existingRowIndex, 6).setValue(currentOriginal);
+      sheet.getRange(existingRowIndex, 7).setValue(currentBest);
+      sheet.getRange(existingRowIndex, 10).setValue(switchAlert);
+      sheet.getRange(existingRowIndex, 11).setValue(statusNote);
+    }
+    return { bestScore: currentBest, isUpdate: true };
+  }
+
+  // 情況 B：全新紀錄 -> 新增一列
+  if (isNewFormat) {
+    var newRow = [
+      targetSeat,                                              // A: 座號 (01號)
+      targetName,                                              // B: 姓名
+      currentBest,                                             // C: 採計總分(最高分)
+      targetClass,                                             // D: 班級
+      nowTime,                                                 // E: 交卷時間
+      currentOriginal,                                         // F: 原始得分
+      data.isCorrectionPhase ? currentCorrection : "-",        // G: 訂正後得分
+      data.isFinalBonus ? currentBonus : "-",                  // H: 加分後總分
+      data.errorCount !== undefined ? data.errorCount : 0,     // I: 錯題數
+      data.keywords || "全對無錯題",                           // J: 錯題訂正心得
+      switchAlert,                                             // K: 跳視窗次數
+      statusNote,                                              // L: 狀態備註
+      unitTitle                                                // M: 測驗主題/遊戲
+    ];
+    sheet.appendRow(newRow);
+
+    if (switchCount >= 3) {
+      sheet.getRange(sheet.getLastRow(), 1, 1, 13).setBackground("#FEF3C7");
+    }
+
+    // 自動按座號 (A 欄) 排序 (01, 02, 03... 30, 35)，與點名冊完全一致
+    if (sheet.getLastRow() > 2) {
+      sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).sort({ column: 1, ascending: true });
+    }
+  } else {
+    sheet.appendRow([
+      nowTime, targetClass, targetSeat, targetName, unitTitle,
+      currentOriginal, currentBest, data.errorCount || 0, data.keywords || "全對無錯題",
+      switchAlert, statusNote
+    ]);
+  }
+
+  return { bestScore: currentBest, isUpdate: false };
+}
+
+// 4. 學生測驗端提交成績 (POST) - 雙軌精準分流：自動更新班級分頁 + 彙整總表
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
@@ -73,149 +225,46 @@ function doPost(e) {
     }
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var targetSheetName = cleanSheetName(data.units);
-    var sheet = ss.getSheetByName(targetSheetName);
-    
-    // 若該單元專屬分頁不存在，自動建立並設定「最適合登記成績」的專業表頭
-    if (!sheet) {
-      sheet = ss.insertSheet(targetSheetName);
-      sheet.appendRow([
-        "座號", "姓名", "採計總分(最高分)", "班級", "交卷時間", 
-        "原始得分(第1階段)", "訂正後得分(第2階段)", "加分後總分(第3階段)", 
-        "錯題數", "錯題與補救訂正關鍵字", "跳出視窗次數", "狀態備註"
-      ]);
-      sheet.getRange(1, 1, 1, 12).setBackground("#b45309").setFontColor("#FFFFFF").setFontWeight("bold");
-      sheet.setFrozenRows(1);
-    }
-    
-    var targetClass = String(data.className || "").trim();
-    var targetClassNorm = normalizeClassStr(targetClass);
-    var targetSeat = formatSeatWithPadding(data.seat);
-    var targetName = String(data.name || "").trim();
-    var nowTime = data.timestamp || new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
-    var switchCount = data.switchCount || 0;
-    var switchAlert = switchCount > 3 ? (switchCount + " 次 (警示)") : (switchCount > 0 ? switchCount + " 次" : "0 次 (正常)");
-    
-    // 檢查分頁欄位格式 (新格式：A=座號, B=姓名, C=採計總分...)
-    var rows = sheet.getDataRange().getValues();
-    var headers = rows[0].map(function(h) { return String(h).trim(); });
-    var isNewFormat = headers[0] === "座號" && headers[2] && headers[2].includes("採計");
-    
-    var existingRowIndex = -1;
-    var existingOriginal = 0;
-    var existingCorrection = 0;
-    var existingBonus = 0;
-    var existingBest = 0;
-    
-    for (var i = 1; i < rows.length; i++) {
-      if (isNewFormat) {
-        var rSeat = formatSeatWithPadding(rows[i][0]);
-        var rName = String(rows[i][1] || "").trim();
-        var rClass = String(rows[i][3] || "").trim();
-        if (normalizeClassStr(rClass) === targetClassNorm && rSeat === targetSeat && rName === targetName) {
-          existingRowIndex = i + 1;
-          existingBest = Number(rows[i][2]) || 0;
-          existingOriginal = Number(rows[i][5]) || 0;
-          existingCorrection = Number(rows[i][6]) || 0;
-          existingBonus = Number(rows[i][7]) || 0;
-          break;
-        }
-      } else {
-        var rClassOld = String(rows[i][1] || "").trim();
-        var rSeatOld = formatSeatWithPadding(rows[i][2]);
-        var rNameOld = String(rows[i][3] || "").trim();
-        if (normalizeClassStr(rClassOld) === targetClassNorm && rSeatOld === targetSeat && rNameOld === targetName) {
-          existingRowIndex = i + 1;
-          existingOriginal = Number(rows[i][5]) || 0;
-          existingBest = Number(rows[i][6]) || existingOriginal;
-          break;
-        }
+    var rawClass = String(data.className || "").trim();
+    var unitTitle = String(data.units || data.gameTitle || "").trim();
+
+    // 1️⃣ 第一軌：尋找或建立該學生的【班級專屬分頁】（如 701, 702, 七乙, 七丙）
+    // 進行「座號就地更新 (In-Place Update)」，一人一列，保持乾淨排序！
+    var classSheet = null;
+    if (rawClass) {
+      classSheet = ss.getSheetByName(rawClass);
+      if (!classSheet) {
+        var normCls = normalizeClassStr(rawClass);
+        classSheet = ss.getSheetByName(normCls);
+      }
+      if (!classSheet) {
+        classSheet = ss.insertSheet(rawClass);
       }
     }
-    
-    var incomingScore = data.finalScore !== undefined ? Number(data.finalScore) : (data.score !== undefined ? Number(data.score) : (data.originalScore !== undefined ? Number(data.originalScore) : 0));
-    var currentOriginal = data.originalScore !== undefined ? Number(data.originalScore) : (data.score !== undefined ? Number(data.score) : existingOriginal);
-    var currentCorrection = data.isCorrectionPhase ? Number(data.finalScore || incomingScore) : existingCorrection;
-    var currentBonus = data.isFinalBonus ? Number(data.finalScore || currentCorrection) : existingBonus;
-    
-    // 核心最高分採計邏輯：自動取學生所有階段達到的最優最高分！
-    var currentBest = Math.max(existingBest, currentOriginal, currentCorrection, currentBonus, incomingScore);
-    
-    var statusNote = "正常繳交";
-    if (data.isFinalBonus) statusNote = "🏆 已完成加分題";
-    else if (data.isCorrectionPhase) statusNote = "✏️ 訂正完成送出";
-    else if (data.isInitialSync) statusNote = "⚡ 第1階段成績已送出";
-    
-    // 情況 A：已有舊紀錄 -> 就地更新 (In-Place Update)，不製造多列重複！
-    if (existingRowIndex > 0) {
-      if (isNewFormat) {
-        sheet.getRange(existingRowIndex, 3).setValue(currentBest); // C欄最高採計分
-        sheet.getRange(existingRowIndex, 5).setValue(nowTime);
-        if (data.originalScore !== undefined) sheet.getRange(existingRowIndex, 6).setValue(currentOriginal);
-        if (data.isCorrectionPhase) sheet.getRange(existingRowIndex, 7).setValue(currentCorrection);
-        if (data.isFinalBonus) sheet.getRange(existingRowIndex, 8).setValue(currentBonus);
-        if (data.errorCount !== undefined) sheet.getRange(existingRowIndex, 9).setValue(data.errorCount);
-        if (data.keywords) sheet.getRange(existingRowIndex, 10).setValue(data.keywords);
-        sheet.getRange(existingRowIndex, 11).setValue(switchAlert);
-        sheet.getRange(existingRowIndex, 12).setValue(statusNote);
-        if (switchCount >= 3) {
-          sheet.getRange(existingRowIndex, 1, 1, 12).setBackground("#FEF3C7");
-        }
-      } else {
-        sheet.getRange(existingRowIndex, 1).setValue(nowTime);
-        sheet.getRange(existingRowIndex, 6).setValue(currentOriginal);
-        sheet.getRange(existingRowIndex, 7).setValue(currentBest);
-        sheet.getRange(existingRowIndex, 10).setValue(switchAlert);
-        sheet.getRange(existingRowIndex, 11).setValue(statusNote);
-      }
-      
-      return ContentService.createTextOutput(JSON.stringify({ 
-        "status": "success", 
-        "message": "成績已就地更新至最高採計分：" + currentBest + "分！",
-        "bestScore": currentBest,
-        "isUpdate": true
-      })).setMimeType(ContentService.MimeType.JSON);
+
+    var classRes = { bestScore: 0, isUpdate: false };
+    if (classSheet) {
+      classRes = saveRecordToSheet(classSheet, data, true);
     }
-    
-    // 情況 B：全新紀錄 -> 新增一列
-    if (isNewFormat) {
-      var newRow = [
-        targetSeat,                                              // A: 座號 (01號)
-        targetName,                                              // B: 姓名
-        currentBest,                                             // C: 採計總分(最高分) ⭐ 老師一秒全選複製！
-        targetClass,                                             // D: 班級
-        nowTime,                                                 // E: 交卷時間
-        currentOriginal,                                         // F: 原始得分
-        data.isCorrectionPhase ? currentCorrection : "-",        // G: 訂正後得分
-        data.isFinalBonus ? currentBonus : "-",                  // H: 加分後總分
-        data.errorCount !== undefined ? data.errorCount : 0,     // I: 錯題數
-        data.keywords || "全對無錯題",                           // J: 錯題訂正心得
-        switchAlert,                                             // K: 跳視窗次數
-        statusNote                                               // L: 狀態備註
-      ];
-      sheet.appendRow(newRow);
-      
-      if (switchCount >= 3) {
-        sheet.getRange(sheet.getLastRow(), 1, 1, 12).setBackground("#FEF3C7");
-      }
-      
-      // 自動按座號 (A 欄) 排序 (01, 02, 03... 30, 35)，與點名冊完全一致
-      if (sheet.getLastRow() > 2) {
-        sheet.getRange(2, 1, sheet.getLastRow() - 1, 12).sort({ column: 1, ascending: true });
-      }
-    } else {
-      sheet.appendRow([
-        nowTime, targetClass, targetSeat, targetName, data.units || "自訂範圍",
-        currentOriginal, currentBest, data.errorCount || 0, data.keywords || "全對無錯題",
-        switchAlert, statusNote
-      ]);
+
+    // 2️⃣ 第二軌：同步寫入【單元分頁】或【所有成績彙整】/【測驗成績紀錄】總表
+    var secondarySheetName = cleanSheetName(unitTitle);
+    if (!secondarySheetName || secondarySheetName === "測驗成績紀錄") {
+      secondarySheetName = ss.getSheetByName("所有成績彙整") ? "所有成績彙整" : "測驗成績紀錄";
     }
-    
+    var secondarySheet = ss.getSheetByName(secondarySheetName);
+    if (!secondarySheet) {
+      secondarySheet = ss.insertSheet(secondarySheetName);
+    }
+    var secRes = saveRecordToSheet(secondarySheet, data, false);
+
+    var finalBest = Math.max(classRes.bestScore, secRes.bestScore);
+
     return ContentService.createTextOutput(JSON.stringify({ 
       "status": "success", 
-      "message": "成績已成功存入專屬分頁【" + targetSheetName + "】！",
-      "bestScore": currentBest,
-      "isUpdate": false
+      "message": "成績已成功存入班級分頁【" + (classSheet ? classSheet.getName() : "") + "】與彙整分頁【" + secondarySheetName + "】！最高採計分：" + finalBest + "分！",
+      "bestScore": finalBest,
+      "isUpdate": classRes.isUpdate
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
@@ -228,48 +277,41 @@ function doPost(e) {
   }
 }
 
-// 5. 處理儀表板手動補登成績請求（含自訂備註與補登標記，相容方案 A 獨立分頁）
+// 5. 處理儀表板手動補登成績請求（同步就地更新班級分頁與彙整分頁）
 function saveManualScoreBackend(data) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var targetSheetName = cleanSheetName(data.units);
-    var sheet = ss.getSheetByName(targetSheetName) || ss.getSheetByName("測驗成績紀錄") || ss.getActiveSheet();
-    
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "座號", "姓名", "採計總分(最高分)", "班級", "交卷時間", 
-        "原始得分(第1階段)", "訂正後得分(第2階段)", "加分後總分(第3階段)", 
-        "錯題數", "錯題與補救訂正關鍵字", "跳出視窗次數", "狀態備註"
-      ]);
-      sheet.getRange(1, 1, 1, 12).setBackground("#b45309").setFontColor("#FFFFFF").setFontWeight("bold");
-      sheet.setFrozenRows(1);
+    var rawClass = String(data.className || "").trim();
+    var unitTitle = String(data.units || data.gameTitle || "課堂實體手動補登").trim();
+
+    var classSheet = null;
+    if (rawClass) {
+      classSheet = ss.getSheetByName(rawClass) || ss.getSheetByName(normalizeClassStr(rawClass));
+      if (!classSheet) classSheet = ss.insertSheet(rawClass);
     }
-    
-    var timestamp = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
-    var customNote = data.note ? ("✍️ " + data.note) : "✍️ 老師手動補登";
-    var seatFormatted = formatSeatWithPadding(data.seat);
-    var scoreNum = Number(data.score) || 0;
-    
-    var rows = sheet.getDataRange().getValues();
-    var headers = rows[0].map(function(h) { return String(h).trim(); });
-    var isNewFormat = headers[0] === "座號" && headers[2] && headers[2].includes("採計");
-    
-    if (isNewFormat) {
-      sheet.appendRow([
-        seatFormatted, data.name, scoreNum, data.className, timestamp,
-        scoreNum, "-", "-", 0, "老師手動補登", "0 次 (正常)", customNote
-      ]);
-      if (sheet.getLastRow() > 2) {
-        sheet.getRange(2, 1, sheet.getLastRow() - 1, 12).sort({ column: 1, ascending: true });
-      }
-    } else {
-      sheet.appendRow([
-        timestamp, data.className, seatFormatted, data.name, data.units || "課堂測驗 (老師補登)",
-        scoreNum, scoreNum, 0, "老師手動補登", "0 次 (正常)", customNote
-      ]);
+
+    var manualData = {
+      className: rawClass,
+      seat: data.seat,
+      name: data.name,
+      originalScore: Number(data.score) || 0,
+      finalScore: Number(data.score) || 0,
+      units: unitTitle,
+      errorCount: 0,
+      keywords: "老師手動補登",
+      switchCount: 0,
+      note: data.note ? ("✍️ " + data.note) : "✍️ 老師手動補登"
+    };
+
+    if (classSheet) {
+      saveRecordToSheet(classSheet, manualData, true);
     }
-    
-    return { status: "success", message: "手動補登成功！" };
+
+    var secSheet = ss.getSheetByName(cleanSheetName(unitTitle)) || ss.getSheetByName("所有成績彙整") || ss.getSheetByName("測驗成績紀錄");
+    if (!secSheet) secSheet = ss.insertSheet("測驗成績紀錄");
+    saveRecordToSheet(secSheet, manualData, false);
+
+    return { status: "success", message: "手動補登成功！已同步更新至班級專屬分頁。" };
   } catch (error) {
     return { status: "error", message: error.toString() };
   }
@@ -354,10 +396,79 @@ function onOpen() {
       .addItem("✨ 一鍵套用頂級美化排版 (當前分頁)", "美化當前分頁")
       .addItem("🎨 一鍵美化所有測驗分頁", "美化所有分頁")
       .addSeparator()
-      .addItem("🔄 重新依班級座號排序當前分頁", "重新排序當前分頁")
+      .addItem("🚀 一鍵自動分流歷史成績到各班分頁", "一鍵將歷史成績分流至各班")
+      .addItem("🔄 重新依座號排序當前分頁", "重新排序當前分頁")
       .addItem("🛠️ 一鍵修復並自動補齊所有分頁", "一鍵修復並美化所有分頁")
       .addToUi();
   } catch (e) {}
+}
+
+// 輔助功能：將「測驗成績紀錄」或「所有成績彙整」中的現有舊成績，自動分流填入對應班級分頁（701~710、七乙、七丙等）
+function 一鍵將歷史成績分流至各班() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var masterSheet = ss.getSheetByName("測驗成績紀錄") || ss.getSheetByName("所有成績彙整");
+  if (!masterSheet) {
+    SpreadsheetApp.getUi().alert("找不到【測驗成績紀錄】或【所有成績彙整】分頁！");
+    return;
+  }
+  
+  var rows = masterSheet.getDataRange().getValues();
+  if (rows.length <= 1) {
+    SpreadsheetApp.getUi().alert("總表中無成績資料可分流！");
+    return;
+  }
+  
+  var headers = rows[0].map(function(h) { return String(h).trim(); });
+  var isNewFormat = headers[0] === "座號" && headers[2] && headers[2].includes("採計");
+  
+  var count = 0;
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    var data = {};
+    if (isNewFormat) {
+      data = {
+        seat: r[0],
+        name: r[1],
+        finalScore: r[2],
+        className: r[3],
+        timestamp: r[4],
+        originalScore: r[5],
+        isCorrectionPhase: r[6] && r[6] !== "-",
+        isFinalBonus: r[7] && r[7] !== "-",
+        errorCount: r[8],
+        keywords: r[9],
+        switchCount: r[10],
+        note: r[11],
+        units: r[12] || masterSheet.getName()
+      };
+    } else {
+      data = {
+        timestamp: r[0],
+        className: r[1],
+        seat: r[2],
+        name: r[3],
+        units: r[4],
+        originalScore: r[5],
+        finalScore: r[6],
+        errorCount: r[7],
+        keywords: r[8],
+        switchCount: r[9],
+        note: r[10]
+      };
+    }
+    
+    var rawClass = String(data.className || "").trim();
+    if (!rawClass) continue;
+    
+    var classSheet = ss.getSheetByName(rawClass) || ss.getSheetByName(normalizeClassStr(rawClass));
+    if (!classSheet) {
+      classSheet = ss.insertSheet(rawClass);
+    }
+    saveRecordToSheet(classSheet, data, true);
+    count++;
+  }
+  
+  SpreadsheetApp.getUi().alert("🎉 分流完成！已成功將 " + count + " 筆學生成績按座號就地歸納更新至所屬班級分頁！");
 }
 
 // 2. 一鍵美化當前工作表
