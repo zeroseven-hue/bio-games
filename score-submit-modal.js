@@ -1581,6 +1581,9 @@
     const btnReturnTablet = overlay.querySelector('#bgsBtnReturnTablet');
     const btnLockAndReset = overlay.querySelector('#bgsBtnLockAndReset');
 
+    const chosenGameTitle = options.gameTitle || '課堂生物挑戰';
+    const chosenUnitTitle = cleanUnitTitle(currentStudent.unitTitle || currentStudent.unit || chosenGameTitle);
+
     // 階段一：背景自動提交至 GAS
     const payload = {
       action: 'submitScore',
@@ -1589,13 +1592,17 @@
       seat: currentStudent.seat,
       name: currentStudent.name,
       studentName: currentStudent.name,
-      gameTitle: options.gameTitle || '課堂生物挑戰',
+      gameTitle: chosenGameTitle,
       gameId: options.gameId || location.pathname.split('/').filter(Boolean).pop() || 'biogame',
       score: score,
+      originalScore: score,
+      finalScore: score,
       duration: duration,
       accuracy: options.accuracy || '--',
-      unit: currentStudent.unit || 'general',
-      unitTitle: cleanUnitTitle(currentStudent.unitTitle || ''),
+      unit: chosenGameTitle,
+      units: chosenGameTitle,
+      unitTitle: chosenUnitTitle,
+      topic: chosenUnitTitle,
       errorCount: options.errorCount !== undefined ? options.errorCount : 0,
       keywords: options.keywords || '全對無錯題',
       timestamp: new Date().toISOString()

@@ -1157,6 +1157,21 @@
       }
     }
 
+    function isUnitMatching(recordUnit, targetUnit) {
+      if (!targetUnit || targetUnit === 'ALL') return true;
+      const u = String(recordUnit || '').trim();
+      const t = String(targetUnit || '').trim();
+      if (u === t || u.includes(t) || t.includes(u)) return true;
+      // 萃取中文核心名稱比對（排除 Emoji 與副標題冒號前後）
+      const cleanCore = (s) => s.replace(/^[\p{Emoji}\s]+/u, '').split(/[:：]/)[0].trim();
+      const uCore = cleanCore(u);
+      const tCore = cleanCore(t);
+      if (uCore && tCore && (uCore.includes(tCore) || tCore.includes(uCore))) return true;
+      // 若學生記錄在通用『測驗成績紀錄』分頁，且該遊戲也是近期測驗，寬容採計
+      if (u === '測驗成績紀錄' || u === '自訂範圍') return true;
+      return false;
+    }
+
     // 4. 渲染儀表板所有卡片與統計數字
     function renderDashboard() {
       const selectedClassRaw = document.getElementById("classSelect").value;
@@ -1172,16 +1187,14 @@
 
       // 若有選擇指定遊戲主題，精準過濾
       if (selectedUnit && selectedUnit !== "ALL") {
-        classRecords = classRecords.filter(r => {
-          const u = String(r.units || "").trim();
-          return u === selectedUnit.trim() || selectedUnit.includes(u) || u.includes(selectedUnit);
-        });
+        classRecords = classRecords.filter(r => isUnitMatching(r.units, selectedUnit));
       } else {
-        // 若選 ALL，依據當前大廳做範圍過濾
+        // 若選 ALL，保留此班所有紀錄或當前大廳紀錄
         const targetList = (currentHall === "hall2") ? HALL2_GAMES : HALL1_GAMES;
         classRecords = classRecords.filter(r => {
           const u = String(r.units || "").trim();
-          return targetList.some(g => g.includes(u) || u.includes(g));
+          if (u === '測驗成績紀錄' || u === '自訂範圍') return true;
+          return targetList.some(g => isUnitMatching(u, g));
         });
       }
 
@@ -1440,10 +1453,7 @@
 
       let classRecords = rawRecords.filter(r => normalizeClassStr(r.className) === targetClassNorm);
       if (selectedUnit && selectedUnit !== "ALL") {
-        classRecords = classRecords.filter(r => {
-          const u = String(r.units || "").trim();
-          return u === selectedUnit.trim() || selectedUnit.includes(u) || u.includes(selectedUnit);
-        });
+        classRecords = classRecords.filter(r => isUnitMatching(r.units, selectedUnit));
       }
 
       if (classRecords.length === 0) {
