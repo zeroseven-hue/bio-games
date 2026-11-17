@@ -810,8 +810,11 @@ function spawnFateStairPair(y) {
   const leftX = 18;
   const rightX = 417; // 18 + 365 = 383, 417 + 365 = 782
 
+  const pairId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+
   const leftObj = {
     id: stairIdCounter++,
+    pairId: pairId,
     type: "FATE_OPTION",
     x: leftX,
     y,
@@ -828,6 +831,7 @@ function spawnFateStairPair(y) {
 
   const rightObj = {
     id: stairIdCounter++,
+    pairId: pairId,
     type: "FATE_OPTION",
     x: rightX,
     y,
@@ -1102,11 +1106,28 @@ function handleStairCollision(s) {
       showConceptToast("⚠️ 踩中易碎階梯！階梯劇烈震動塌陷中，快跳！");
     }
   } else if (s.type === "FATE_OPTION") {
-    // 命運問答階梯：站立時平穩上升，絕不重複發動起跳！
+    // 命運問答階梯：若該題已被作答過，直接忽略不重複結算
+    if (s.pairId) {
+      const alreadyAnswered = stairs.some(other => other.pairId === s.pairId && other.isTriggered);
+      if (alreadyAnswered && !s.isTriggered) {
+        // 同一組題目的另一個選項在已被答對後，純當作普通踏板供下樓梯通行
+        return;
+      }
+    }
+
     if (s.isCorrect) {
       if (!s.isTriggered) {
         s.isTriggered = true;
         s.answeredState = "correct";
+        // 將同組的另一階梯也標記已結算，防止學生踩過去當作答錯
+        if (s.pairId) {
+          stairs.forEach(other => {
+            if (other.pairId === s.pairId && other.id !== s.id) {
+              other.isTriggered = true;
+              other.answeredState = "settled"; // 已結算，不再觸發答錯扣血
+            }
+          });
+        }
         correctAnswersCount++;
         showFeedback("correct");
         playFanfare();
@@ -1129,6 +1150,14 @@ function handleStairCollision(s) {
       if (!s.isTriggered) {
         s.isTriggered = true;
         s.answeredState = "wrong";
+        // 同組另一階梯也鎖定
+        if (s.pairId) {
+          stairs.forEach(other => {
+            if (other.pairId === s.pairId && other.id !== s.id) {
+              other.isTriggered = true;
+            }
+          });
+        }
         playHitSound();
         takeDamage();
         player.vy = 3.5; // 踩錯落空下墜
@@ -1292,13 +1321,16 @@ function renderCanvas() {
 
       ctx.restore();
     } else if (s.type === "FATE_OPTION") {
-      // 依作答狀態決定背景色：未作答時為中立深邃冷夜藍（絕不提前劇透正解），作答後答對變翡翠綠、答錯變警示緋紅
+      // 依作答狀態決定背景色：未作答時為中立深邃冷夜藍（絕不提前劇透正解），作答後答對變翡翠綠、答錯變警示緋紅、同組已過關變低調灰色
       if (!s.isTriggered) {
         ctx.fillStyle = "#1e293b"; // 深邃冷夜藍
         ctx.strokeStyle = "#f59e0b"; // 燙金微光邊框
       } else if (s.answeredState === "correct") {
         ctx.fillStyle = "#15803d"; // 正確：翡翠綠
         ctx.strokeStyle = "#4ade80";
+      } else if (s.answeredState === "settled") {
+        ctx.fillStyle = "#334155"; // 已通關平息：低調深石板灰
+        ctx.strokeStyle = "#64748b";
       } else {
         ctx.fillStyle = "#991b1b"; // 錯誤：深緋紅
         ctx.strokeStyle = "#ef4444";
@@ -1309,10 +1341,15 @@ function renderCanvas() {
       ctx.strokeRect(s.x, s.y, s.width, s.height);
 
       // 選項文字
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = s.answeredState === "settled" ? "#94a3b8" : "#ffffff";
       const label = s.optionLabel || "";
       const content = s.optionText || "";
-      const statusPrefix = s.isTriggered ? (s.answeredState === "correct" ? "✅ " : "💥 ") : "";
+      let statusPrefix = "";
+      if (s.isTriggered) {
+        if (s.answeredState === "correct") statusPrefix = "✅ ";
+        else if (s.answeredState === "wrong") statusPrefix = "💥 ";
+        else if (s.answeredState === "settled") statusPrefix = "⚪ ";
+      }
 
       if (content.length <= 15) {
         let fSize = isTextZoomed ? 16 : 14.5;
