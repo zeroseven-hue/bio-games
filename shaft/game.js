@@ -1136,7 +1136,18 @@ function handleStairCollision(s) {
         isBulletTime = false;
         speedMultiplier = 1.0;
         spawnStarParticles(player.x + 14, player.y);
-        showConceptToast(`✅ 答對第 ${correctAnswersCount}/${TARGET_CORRECT_GOAL} 題！觀念解析：${s.question.explanation || "恭喜答對！"}`);
+
+        // 每答對 2 題獎勵 +1 💖（上限最多可暫存突破至 9💖）
+        let extraHeartBonusText = "";
+        if (correctAnswersCount % 2 === 0) {
+          if (hearts < 9) {
+            hearts++;
+            playHeartSound();
+            extraHeartBonusText = " 💖【答對連擊獎勵】生命值 +1！";
+          }
+        }
+
+        showConceptToast(`✅ 答對第 ${correctAnswersCount}/${TARGET_CORRECT_GOAL} 題！${extraHeartBonusText}觀念解析：${s.question.explanation || "恭喜答對！"}`);
         isFateStairActive = false;
         updateUI();
 
