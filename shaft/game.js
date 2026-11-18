@@ -804,11 +804,11 @@ function spawnFateStairPair(y) {
 
   const isLeftCorrect = Math.random() < 0.5;
 
-  // 100% 畫面均勻分佈無落空 (單座寬度 365px, 高度 48px，左右對稱)
-  const stairWidth = 365;
+  // 100% 畫面均勻分佈且預留 100px 寬廣中央天井下樓通道 (單座寬度 330px, 高度 48px，左右對稱)
+  const stairWidth = 330;
   const stairHeight = 48;
-  const leftX = 18;
-  const rightX = 417; // 18 + 365 = 383, 417 + 365 = 782
+  const leftX = 20;
+  const rightX = 450; // 20 + 330 = 350; 450 - 350 = 100px 中央通道，右邊界 450 + 330 = 780 (右側剩 20px)
 
   const pairId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
 
@@ -826,6 +826,7 @@ function spawnFateStairPair(y) {
     question: currentFateQuestion,
     isCrumbled: false,
     isTriggered: false,
+    crumbleTimer: 0,
     answeredState: "unanswered"
   };
 
@@ -843,6 +844,7 @@ function spawnFateStairPair(y) {
     question: currentFateQuestion,
     isCrumbled: false,
     isTriggered: false,
+    crumbleTimer: 0,
     answeredState: "unanswered"
   };
 
@@ -1004,6 +1006,20 @@ function updatePhysics(dt) {
     if (s.type === "CRUMBLE" && s.isTriggered && !s.isCrumbled) {
       s.crumbleTimer += dt;
       if (s.crumbleTimer >= 0.45) {
+        s.isCrumbled = true;
+        spawnCrumbleDebris(s.x, s.y, s.width, s.height);
+        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
+          player.isGrounded = false;
+        }
+        stairs.splice(i, 1);
+        continue;
+      }
+    }
+
+    // 命運問答階梯：作答後給予 1.6 秒站立/閱讀觀念緩衝，隨後自動碎裂下沉，100% 杜絕卡頂撞尖刺
+    if (s.type === "FATE_OPTION" && s.isTriggered && !s.isCrumbled) {
+      s.crumbleTimer = (s.crumbleTimer || 0) + dt;
+      if (s.crumbleTimer >= 1.6) {
         s.isCrumbled = true;
         spawnCrumbleDebris(s.x, s.y, s.width, s.height);
         if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
@@ -1332,6 +1348,11 @@ function renderCanvas() {
 
       ctx.restore();
     } else if (s.type === "FATE_OPTION") {
+      ctx.save();
+      // 作答後微幅顫動提示即將瓦解下樓
+      const shakeOffset = (s.isTriggered && s.crumbleTimer > 0.8) ? Math.sin(s.crumbleTimer * 28) * 2 : 0;
+      ctx.translate(shakeOffset, 0);
+
       // 依作答狀態決定背景色：未作答時為中立深邃冷夜藍（絕不提前劇透正解），作答後答對變翡翠綠、答錯變警示緋紅、同組已過關變低調灰色
       if (!s.isTriggered) {
         ctx.fillStyle = "#1e293b"; // 深邃冷夜藍
@@ -1373,6 +1394,7 @@ function renderCanvas() {
         ctx.fillText(`${statusPrefix}${label} ${optL1}`, s.x + 10, s.y + 20);
         ctx.fillText(`   ${optL2}`, s.x + 10, s.y + 38, s.width - 20);
       }
+      ctx.restore();
     }
     ctx.restore();
     ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(s.x + 3,s.y + 2,s.width - 6,2);
