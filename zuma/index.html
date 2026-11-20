@@ -2,12 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生物能量祖瑪：光合呼吸大冒險 - Bio-Zuma Quest</title>
-    <link rel="stylesheet" href="style.css?v=3.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.6">
 </head>
 <body class="zuma-body">
     <div id="game-container">
@@ -16,7 +13,7 @@
             <div class="hud-top-bar">
                 <div class="hud-left">
                     <div class="hud-badge pulse-glow">
-                        <span class="badge-icon">🏛️</span>
+                        <span class="badge-icon">🌿</span>
                         <span id="stage-display">進度：第 1 / 10 題</span>
                     </div>
 
@@ -58,8 +55,8 @@
             <!-- 核心快問快答題幹區 (大字短文、秒讀秒答) -->
             <div id="question-banner" class="question-box">
                 <div class="question-header">
-                    <span class="q-tag">🎯 即時任務</span>
-                    <span id="speed-tip" class="speed-tip">⚡ 右鍵可換球！射擊正解球命中軌道同色球立即通關！</span>
+                    <span class="q-tag">生物挑戰</span>
+                    <span id="question-source" class="speed-tip"></span>
                 </div>
                 <div id="question-text" class="question-title">
                     載入生物題目中...
@@ -74,96 +71,71 @@
 
         <!-- 祖瑪 Canvas 主舞台 -->
         <main id="canvas-wrapper">
-            <canvas id="gameCanvas" width="960" height="540"></canvas>
+            <div class="stage-frame">
+                <canvas id="gameCanvas" width="960" height="540" aria-label="森林神殿晶球軌道"></canvas>
+            </div>
             
-            <!-- 瞄準與操作提示浮層 (包含換球提示) -->
+            <!-- 裝填、命中與答題回饋 -->
             <div id="control-hint" class="control-hint">
-                <span>🖱️ <b>滑鼠左鍵</b>射擊 ‧ <b>滑鼠右鍵 / 空白鍵</b>切換備用球 ‧ 命中正解球立即過關換題</span>
+                <p id="shot-feedback" role="status">先讀題，再點選答案裝填。</p>
             </div>
         </main>
 
-        <!-- 遊戲玩法詳細說明 Modal (圖文引導，登入後才彈出，無快閃) -->
-        <div id="rules-modal" class="overlay-modal">
-            <div class="modal-card rules-card">
-                <div class="modal-header">
-                    <div class="rules-badge">🧬 生物秘境探險指南</div>
-                    <h2 class="modal-title">祖瑪射擊 ‧ 遊戲玩法說明</h2>
-                    <button id="btn-close-rules" class="btn-close">&times;</button>
-                </div>
-
-                <div class="rules-grid-scroll">
-                    <!-- 規則 1: 核心過關目標 -->
-                    <div class="guide-card card-target">
-                        <div class="guide-icon">🎯</div>
-                        <div class="guide-body">
-                            <h3>1. 看懂題目 ‧ 射擊正解立即過關！</h3>
-                            <p>閱讀上方題目的【A、B、C、D】選項，判斷誰才是正確答案。</p>
-                            <p class="guide-highlight">砲台發射正解顏色的球，只要<b>精準擊中軌道上的同色球</b>（或湊滿 3 顆消除），就立即觸發<b>正解共鳴破壞</b>，判定<b>答對過關換下一題！</b></p>
-                        </div>
+        <div id="rules-modal" class="overlay-modal" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+            <div class="modal-card rules-card field-guide">
+                <header class="field-guide-header">
+                    <img class="field-guide-mascot" src="art/jade-guardian-v2.webp" width="72" height="72" alt="">
+                    <div>
+                        <h2 id="rules-title">看題目，射晶球！</h2>
+                        <p>找出正解的字母，用同字母的晶球命中軌道目標。</p>
                     </div>
+                    <button id="btn-close-rules" class="btn-close" type="button" aria-label="關閉玩法說明">&times;</button>
+                </header>
 
-                    <!-- 規則 2: 隨時切換備用球 (右鍵換球) -->
-                    <div class="guide-card card-swap">
-                        <div class="guide-icon">🔄</div>
-                        <div class="guide-body">
-                            <h3>2. 隨時切換備用球（右鍵 / 空白鍵）</h3>
-                            <p>砲台身旁有一顆備用的小彩球。如果當前砲台填裝的不是你想要的選項顏色：</p>
-                            <p class="guide-highlight">按<b>【滑鼠右鍵】</b>或鍵盤<b>【空白鍵】</b>，即可瞬間調換當前球與備用球！</p>
+                <ol class="field-guide-steps">
+                    <li>
+                        <div class="field-guide-demo" aria-hidden="true">
+                            <span class="guide-gem gem-a">A</span>
+                            <span class="guide-gem gem-b">B</span>
+                            <span class="guide-gem gem-c">C</span>
+                            <span class="guide-gem gem-d">D</span>
                         </div>
-                    </div>
-
-                    <!-- 規則 3: 四色選項對應表 -->
-                    <div class="guide-card card-colors">
-                        <div class="guide-icon">🎨</div>
-                        <div class="guide-body">
-                            <h3>3. 選項色彩對應關係</h3>
-                            <div class="color-badges-row">
-                                <span class="c-badge badge-red">🔴 A 選項（紅寶石）</span>
-                                <span class="c-badge badge-blue">🔵 B 選項（藍晶石）</span>
-                                <span class="c-badge badge-green">🟢 C 選項（翡翠綠）</span>
-                                <span class="c-badge badge-gold">🟡 D 選項（琥珀金）</span>
-                            </div>
-                            <p class="guide-sub">若射出錯誤選項的球，彩球只會堆積越長越快逼近黑洞，請謹慎瞄準！</p>
+                        <h3>先選答案</h3>
+                        <p>讀上方題目，記住你選的字母。</p>
+                    </li>
+                    <li>
+                        <div class="field-guide-demo" aria-hidden="true">
+                            <span class="guide-demo-button">B　已裝填</span>
                         </div>
-                    </div>
-
-                    <!-- 規則 4: 特殊技能能量球 -->
-                    <div class="guide-card card-skills">
-                        <div class="guide-icon">✨</div>
-                        <div class="guide-body">
-                            <h3>4. 神奇生物能量球（擊中觸發）</h3>
-                            <ul class="skills-list">
-                                <li><b>❄️ 冰凍代謝球</b>：擊中後使整條軌道上的彩球<b>凍結暫停推進 5 秒</b>，爭取思考時間！</li>
-                                <li><b>⏪ 靜脈逆流球</b>：觸發瓣膜逆流，強制軌道彩球<b>全體大幅後退</b>！</li>
-                                <li><b>💣 ATP 高能爆破球</b>：釋放巨額化學能，<b>引爆周圍大範圍內所有彩球</b>！</li>
-                            </ul>
+                        <h3>點選後裝填</h3>
+                        <p>點一下選項，砲台就裝上該字母的晶球。</p>
+                    </li>
+                    <li>
+                        <div class="field-guide-demo guide-demo-shot" aria-hidden="true">
+                            <span class="guide-gem gem-b">B</span>
+                            <span class="guide-aim-line"></span>
+                            <span class="guide-target"><span class="guide-gem gem-b">B</span></span>
                         </div>
-                    </div>
+                        <h3>射向同字母</h3>
+                        <p>例如裝好 B，就點軌道上的 B。答對並命中就能清球，接著換題。</p>
+                    </li>
+                </ol>
 
-                    <!-- 規則 5: 連擊與技巧神射 -->
-                    <div class="guide-card card-combos">
-                        <div class="guide-icon">🔥</div>
-                        <div class="guide-body">
-                            <h3>5. 連擊與遠程神射加分</h3>
-                            <p><b>登！登！登！多段和弦 Combo</b>：連續消除或斷層磁吸引發二次消除，會觸發動態和弦音階與成倍翻倍積分！</p>
-                            <p><b>🎯 遠程神射 (Long Shot)</b>：從中央砲台遠距離超精準命中軌道球，額外獎勵 <b>+20 分</b>！</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button id="btn-understood" class="btn-temple-start">
-                        <span class="btn-text">我知道了，開始挑戰！🚀</span>
-                    </button>
-                </div>
+                <details class="field-guide-extra">
+                    <summary>特殊晶球</summary>
+                    <p>消除特殊球時，雪花會讓球鏈暫停、倒帶會讓球鏈後退、炸彈會清掉附近的球。</p>
+                </details>
+                <footer class="field-guide-footer">
+                    <button id="btn-understood" class="btn-temple-start" type="button">開始挑戰 <span aria-hidden="true">→</span></button>
+                </footer>
             </div>
         </div>
 
         <!-- 初始無快閃遮罩 (預設無 active，避免在輸入座號前快閃) -->
         <div id="overlay-screen" class="overlay-modal">
             <div class="modal-card temple-card">
-                <div class="temple-emblem">🧬</div>
-                <h1 class="modal-title">生物能量祖瑪 ‧ 古蹟神殿</h1>
+                <img class="temple-emblem" src="art/jade-guardian-v2.webp" width="112" height="112" alt="">
+                <h1 class="modal-title">生物能量祖瑪 ‧ 森林神殿</h1>
                 <p class="modal-subtitle">BIO-ZUMA ENZYME & METABOLISM QUEST</p>
 
                 <div class="rules-preview-grid">
@@ -174,13 +146,13 @@
                     </div>
                     <div class="rule-box">
                         <div class="rule-icon">🔄</div>
-                        <div class="rule-title">右鍵換球</div>
-                        <div class="rule-desc">按右鍵或空白鍵可調換砲台彩球，隨時切換想要的選項！</div>
+                        <div class="rule-title">選答案裝填</div>
+                        <div class="rule-desc">點選一個答案，砲台就裝上對應的晶球。</div>
                     </div>
                     <div class="rule-box">
                         <div class="rule-icon">🔥</div>
-                        <div class="rule-title">連鎖和弦</div>
-                        <div class="rule-desc">連續命中與磁吸碰合，觸發「登！登！登！」和弦與神射加分！</div>
+                        <div class="rule-title">連續答對</div>
+                        <div class="rule-desc">連續答對會累積連擊，遠距離命中還有技巧加分。</div>
                     </div>
                 </div>
 
@@ -197,6 +169,6 @@
     <!-- 引用大廳一標準身分驗證與成績回傳外殼 -->
     <script src="../score-submit-modal.js?v=5.0"></script>
     <!-- 祖瑪遊戲核心引擎 -->
-    <script src="game.js?v=3.0"></script>
+    <script src="game.js?v=3.5"></script>
 </body>
 </html>

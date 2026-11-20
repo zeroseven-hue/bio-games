@@ -653,3 +653,557 @@ html, body {
     display: flex;
     justify-content: center;
 }
+
+/* Forest temple. Light reading surfaces surround the darker playfield. */
+.zuma-body {
+    background: #dce9df;
+    font-family: system-ui, "Microsoft JhengHei", sans-serif;
+}
+.zuma-body #game-container {
+    width: min(100%, 1240px);
+    height: 100%;
+    height: 100dvh;
+    max-height: 960px;
+    border: 1px solid #769783;
+    border-radius: 16px;
+    background: #f6f7ef;
+    box-shadow: 0 18px 48px #183c282c;
+    overflow: auto;
+}
+#game-container #hud-panel {
+    flex: none;
+    padding: 12px clamp(10px, 2vw, 22px);
+    gap: 9px;
+    color: #172d22;
+    background: #fcfcf5;
+    border-bottom: 1px solid #a9bdae;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+#hud-panel .hud-top-bar,
+#hud-panel .hud-left { flex-wrap: wrap; }
+#hud-panel .hud-badge {
+    background: #194a33;
+    border-color: #194a33;
+    color: #fff;
+    box-shadow: none;
+}
+#hud-panel .unit-select-wrap {
+    min-width: 0;
+    background: #eaf2e7;
+    border-color: #c2d4c5;
+}
+#hud-panel .unit-label,
+#hud-panel .stat-label { color: #365445; }
+#hud-panel .unit-dropdown {
+    min-width: 0;
+    min-height: 36px;
+    max-width: min(200px, 42vw);
+    background: #fff;
+    color: #172d22;
+    border-color: #a9bdae;
+}
+#hud-panel .stat-value {
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    color: #214d38;
+    text-shadow: none;
+}
+#hud-panel .highlight-gold { color: #724706; }
+#game-container .hud-icon-btn,
+#game-container #btn-close-rules {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    background: #fffdf3;
+    color: #173b29;
+    border: 1px solid #a9bdae;
+    border-radius: 9px;
+    white-space: nowrap;
+}
+#game-container .hud-icon-btn:hover { background: #e6f1e5; transform: none; }
+#game-container button:focus-visible,
+#game-container select:focus-visible {
+    outline: 3px solid #347b52;
+    outline-offset: 2px;
+}
+#game-container .question-box {
+    background: #edf5e8;
+    border: 1px solid #bdcfbf;
+    border-left: 4px solid #288052;
+    padding: 8px 12px;
+}
+#game-container .question-header { flex-wrap: wrap; gap: 4px 14px; }
+#game-container .q-tag,
+#game-container .speed-tip { color: #355a46; }
+#game-container .question-title {
+    color: #142a1e;
+    font-size: clamp(1.05rem, 0.92rem + 0.45vw, 1.35rem);
+    line-height: 1.45;
+    text-shadow: none;
+    overflow-wrap: anywhere;
+}
+#game-container .options-container {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+#game-container .opt-card {
+    position: relative;
+    min-height: 46px;
+    padding: 7px 9px;
+    background: #fffdf5;
+    border: 1px solid #cbd6c9;
+    transition: none;
+}
+#game-container .opt-letter {
+    background: var(--option-color);
+    box-shadow: none;
+    font: 800 0.9rem system-ui, sans-serif;
+}
+#game-container .opt-a { --option-color: #a32936; }
+#game-container .opt-b { --option-color: #20559e; }
+#game-container .opt-c { --option-color: #176749; }
+#game-container .opt-d { --option-color: #855303; }
+#game-container .opt-text {
+    display: block;
+    color: #172d22;
+    font-size: clamp(0.9rem, 0.84rem + 0.25vw, 1.02rem);
+    overflow: visible;
+    overflow-wrap: anywhere;
+}
+#game-container .opt-card.currently-loaded {
+    background: #e8f3e8;
+    border-color: #397c57;
+    box-shadow: inset 0 0 0 1px #397c57;
+    transform: none;
+}
+#game-container #canvas-wrapper {
+    flex: 1 0 auto;
+    min-height: clamp(244px, 33vw, 400px);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch;
+    justify-content: stretch;
+    background: #142a22;
+}
+#game-container .stage-frame {
+    display: grid;
+    place-items: center;
+    container-type: size;
+    min-height: 0;
+    background: radial-gradient(ellipse, #284b3c, #142a22 76%);
+}
+#game-container #gameCanvas {
+    width: min(100cqw, calc(100cqh * 16 / 9));
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: fill;
+}
+#game-container .control-hint {
+    position: static;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 4px clamp(10px, 2vw, 22px);
+    background: #18392b;
+    color: #dcead4;
+    backdrop-filter: none;
+    border: 0;
+    border-top: 1px solid #557b61;
+    border-radius: 0;
+    pointer-events: auto;
+}
+#game-container .control-hint b { color: #fffdf3; }
+#game-container .control-hint button { font-variant-numeric: tabular-nums; }
+#game-container > .overlay-modal {
+    position: fixed;
+    visibility: hidden;
+    padding: 12px;
+    background: #142a22e8;
+    overflow: auto;
+}
+#game-container > .overlay-modal.active { visibility: visible; }
+#game-container > .overlay-modal .modal-card {
+    width: min(100%, 700px);
+    max-height: 100%;
+    overflow: auto;
+    color: #172d22;
+    background: #fffcf1;
+    border: 1px solid #8fae93;
+    padding: clamp(16px, 3vw, 30px);
+    box-shadow: 0 24px 68px #0e251db3;
+}
+#game-container .modal-header { border-color: #c7d6c5; gap: 12px; }
+#game-container .rules-badge { display: none; }
+#game-container .modal-title {
+    color: #194330;
+    font-family: inherit;
+    line-height: 1.25;
+    text-shadow: none;
+}
+#game-container .modal-subtitle { color: #4b6454; font-family: inherit; }
+#game-container .temple-emblem { filter: none; }
+#game-container .rule-box,
+#game-container .guide-card {
+    background: #edf3e8;
+    color: #172d22;
+    border-color: #c7d6c5;
+}
+#game-container .rule-title,
+#game-container .rule-desc,
+#game-container .guide-body :is(h3, p, li) { color: #234333; }
+#game-container .guide-highlight { background: #e0ebda; }
+#game-container .badge-red { color: #8b2530; }
+#game-container .badge-blue { color: #1e4f93; }
+#game-container .badge-green { color: #145c41; }
+#game-container .badge-gold { color: #6e4606; }
+#game-container .btn-temple-start,
+#game-container .btn-temple-start:hover {
+    min-height: 44px;
+    background: #1d573a;
+    color: #fff;
+    border-color: #1d573a;
+    box-shadow: none;
+}
+#game-container .btn-secondary-help,
+#game-container .btn-secondary-help:hover {
+    min-height: 44px;
+    background: #e8f0e3;
+    color: #1b4831;
+    border-color: #a2bba5;
+}
+#game-container .modal-actions-row { flex-wrap: wrap; }
+
+@media (max-width: 760px) {
+    #game-container .options-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #game-container .hud-top-bar { gap: 7px; }
+    #game-container .hud-stats { gap: 10px; }
+}
+@media (max-width: 520px) {
+    .zuma-body #game-container { border: 0; border-radius: 0; }
+    #game-container .rules-preview-grid { grid-template-columns: 1fr; }
+    #game-container .modal-title { font-size: 1.35rem; }
+}
+@media (pointer: coarse) {
+    #game-container .keyboard-hint { display: none; }
+    #hud-panel .unit-dropdown { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #game-container :is(.overlay-modal, .modal-card, .hud-icon-btn, .bio-heart, .btn-temple-start, .btn-secondary-help) {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* Illustrated quick-start guide for the temple. */
+#game-container > #rules-modal { z-index: 101; }
+#game-container > #rules-modal .field-guide {
+    display: block;
+    width: min(100%, 760px);
+    padding: clamp(14px, 3vw, 30px);
+    border: 1px solid #baa679;
+    border-radius: 22px;
+    background: #f9f3e6;
+}
+.field-guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+.field-guide-header h2 {
+    font-size: clamp(1.55rem, 4vw, 2.25rem);
+    line-height: 1.16;
+    color: #1e4435;
+}
+.field-guide-header p,
+.field-guide-steps p,
+.field-guide-extra p {
+    margin-top: 5px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: #34483d;
+}
+.field-guide-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 16px 0 10px;
+    list-style: none;
+}
+.field-guide-steps li {
+    padding: 10px 12px 12px;
+    border: 1px solid #d5c8a9;
+    border-radius: 14px;
+    background: #fffaf0;
+}
+.field-guide-steps h3 {
+    margin-top: 8px;
+    color: #1e4435;
+    font-size: 1.05rem;
+}
+.field-guide-demo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    height: 58px;
+    border: 1px solid #b99a5e;
+    border-radius: 10px;
+    background: linear-gradient(155deg, #376757, #16372a);
+}
+.guide-gem {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 27px;
+    height: 27px;
+    border: 1px solid #ffffffa0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 33% 24%, var(--gem-light), var(--gem-dark) 67%);
+    box-shadow: 0 3px 4px #101b17a0;
+    color: white;
+    text-shadow: 0 1px 3px #101b17;
+    font: 800 0.85rem system-ui, sans-serif;
+}
+.guide-gem.gem-a { --gem-light: #f89189; --gem-dark: #8f2336; }
+.guide-gem.gem-b { --gem-light: #8bc8e9; --gem-dark: #20518b; }
+.guide-gem.gem-c { --gem-light: #8bd4a4; --gem-dark: #1d6644; }
+.guide-gem.gem-d { --gem-light: #e4ba64; --gem-dark: #815104; }
+.guide-demo-button {
+    padding: 4px 10px;
+    border: 1px solid #bea063;
+    border-radius: 7px;
+    background: #f5e6bf;
+    color: #203b30;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.guide-aim-line {
+    width: clamp(12px, 4vw, 42px);
+    border-top: 2px dashed #ebdfb7;
+}
+.guide-target {
+    display: flex;
+    padding: 3px;
+    border: 1px solid #ead291;
+    border-radius: 50%;
+}
+.field-guide-extra {
+    border-top: 1px solid #d5c8a9;
+    color: #2c4c3d;
+}
+.field-guide-extra summary {
+    display: list-item;
+    cursor: pointer;
+    padding: 10px 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+.field-guide-extra p { margin: 0 4px 10px; }
+.field-guide-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+#game-container .field-guide-footer .btn-temple-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 22px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+}
+@media (max-width: 560px) {
+    .field-guide-steps { grid-template-columns: 1fr; gap: 6px; margin-top: 10px; }
+    .field-guide-steps li {
+        display: grid;
+        grid-template-columns: minmax(88px, 110px) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        column-gap: 9px;
+        padding: 7px;
+    }
+    .field-guide-steps h3 { margin: 0; }
+    .field-guide-steps p { margin-top: 2px; }
+    .field-guide-demo { grid-row: span 2; height: 48px; align-self: center; }
+    .guide-gem { width: 19px; height: 19px; font-size: 0.7rem; }
+    .field-guide-demo { gap: 2px; }
+    .guide-demo-button { font-size: 0.72rem; padding-inline: 4px; }
+    .field-guide-footer .btn-temple-start { width: 100%; justify-content: center; }
+}
+
+/* A warm brass frame and jade surfaces connect the board and answer controls. */
+.zuma-body {
+    background: radial-gradient(ellipse at 50% 12%, #547261, #253b33 62%, #182d26);
+}
+.zuma-body #game-container {
+    border-color: #9e926f;
+    border-radius: 20px;
+    box-shadow: 0 30px 80px #0d2219a0;
+}
+#game-container #hud-panel {
+    background: linear-gradient(120deg, #fffaf0, #f2ecdc);
+    border-bottom: 2px solid #b9a575;
+}
+#game-container .question-box {
+    background: #fffdf5;
+    border-color: #d6c5a4;
+    border-left: 4px solid #496f58;
+    border-radius: 12px;
+}
+#game-container .q-tag { color: #355641; }
+#game-container .unit-select-wrap { background: #ebeede; }
+#game-container .opt-card {
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    align-items: center;
+    min-height: 48px;
+    border-color: #d0c3a6;
+    background: #fdf9eb;
+    box-shadow: 0 2px 0 #cbbd9d80;
+}
+#game-container .opt-card.currently-loaded {
+    background: #dbeadd;
+    border-color: #284f3a;
+    box-shadow: inset 0 0 0 1px #284f3a;
+}
+#game-container .opt-card.currently-loaded .opt-letter {
+    outline: 2px solid #284f3a;
+    outline-offset: 2px;
+}
+@media (hover: hover) {
+    #game-container .opt-card:hover { border-color: #456c52; }
+}
+#game-container #gameCanvas { touch-action: manipulation; }
+#game-container .control-hint {
+    min-height: 46px;
+    padding-block: 8px;
+    border-top: 1px solid #93875d;
+    color: #f8efd6;
+    background: #193c2f;
+}
+#shot-feedback {
+    max-width: 100%;
+    font-size: clamp(0.86rem, 0.8rem + 0.25vw, 1.03rem);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+#shot-feedback[data-tone="aim"] { color: #f6dd9e; }
+#shot-feedback[data-tone="success"] { color: #d3f5c7; font-weight: 750; }
+#shot-feedback[data-tone="retry"] { color: #ffdbcd; }
+@media (max-width: 520px) {
+    .zuma-body #game-container { border-radius: 0; }
+}
+
+/* A dark stone mat frames the painted courtyard. */
+#game-container .stage-frame {
+    background: radial-gradient(ellipse at 50% 42%, #354437, #17231c 75%);
+}
+#game-container #gameCanvas {
+    box-shadow: 0 0 0 1px #c1aa754a, 0 14px 38px #0b1712a0;
+}
+
+/* The slate stage, warm stone cards and jade controls share the guardian's palette. */
+#game-container #hud-panel {
+    gap: 10px;
+    background: linear-gradient(115deg, #f6edda, #fff9ea 55%, #eadcc0);
+    border-bottom: 2px solid #a48955;
+}
+#hud-panel .hud-top-bar {
+    padding: 7px 10px;
+    border: 1px solid #b49865;
+    border-radius: 12px;
+    background: linear-gradient(120deg, #26513f, #18372d 72%);
+    box-shadow: inset 0 1px #fff4bf29, 0 3px 8px #553d2426;
+}
+#hud-panel .hud-badge {
+    background: #f2dfb3;
+    border-color: #c0a06a;
+    color: #263f32;
+}
+#hud-panel .unit-select-wrap {
+    background: #142d25;
+    border-color: #658471;
+}
+#hud-panel .unit-label,
+#hud-panel .stat-label { color: #d5e4d6; }
+#hud-panel .stat-value { color: #f1e1b5; }
+#hud-panel .highlight-gold { color: #f8d58a; }
+#game-container #hud-panel .hud-icon-btn {
+    background: #244d3e;
+    color: #fff2d3;
+    border-color: #788b69;
+}
+#game-container #hud-panel .hud-icon-btn:hover { background: #396651; }
+#game-container .question-box {
+    border-color: #d6bd8b;
+    border-left: 4px solid #937747;
+    background: linear-gradient(110deg, #fffdf5, #f9f0dc);
+}
+#game-container .opt-card {
+    border-color: #caba97;
+    background: linear-gradient(#fffdf5, #f7eed9);
+    box-shadow: 0 2px 0 #b69e764d;
+}
+#game-container .opt-letter {
+    border: 1px solid #fff6da99;
+    background: radial-gradient(circle at 32% 23%, #ffffff38, transparent 49%), var(--option-color);
+    box-shadow: 0 2px 3px #34282038, inset 0 -3px 5px #0003;
+    text-shadow: 0 1px 2px #0006;
+}
+#game-container .opt-card.currently-loaded {
+    background: linear-gradient(115deg, #dcecdf, #eff5e8);
+    border-color: #38684e;
+    box-shadow: inset 0 -3px #38684e;
+}
+#game-container .control-hint {
+    background: linear-gradient(110deg, #193c30, #12291f);
+}
+#game-container #shot-feedback {
+    padding-inline-start: 10px;
+    border-inline-start: 3px solid currentColor;
+}
+#game-container .temple-emblem {
+    display: block;
+    width: min(112px, 24vw);
+    height: auto;
+    margin: 0 auto 10px;
+    filter: drop-shadow(0 5px 5px #203e3040);
+}
+#game-container .field-guide-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #b79861;
+    border-radius: 14px;
+    background:
+        linear-gradient(90deg, #173c30c4, #173c30ef 32%),
+        url("art/forest-observatory.webp") center 25% / cover;
+}
+.field-guide-mascot {
+    width: clamp(46px, 8vw, 72px);
+    height: auto;
+    filter: drop-shadow(0 3px 4px #101b17a0);
+}
+#game-container .field-guide-header h2,
+#game-container .field-guide-header p { color: #fff4db; }
+#game-container #rules-modal .btn-close {
+    align-self: start;
+    background: #274d3e;
+    color: #fff4db;
+    border-color: #9d8c65;
+}
+#game-container .field-guide-demo {
+    border-color: #a99060;
+    background: radial-gradient(ellipse at 50% 10%, #527466, #203f33 80%);
+}
+@media (max-width: 520px) {
+    #hud-panel .hud-top-bar { padding: 6px; }
+    #game-container .field-guide-header { gap: 7px; padding: 7px; }
+    #game-container .field-guide-header h2 { font-size: 1.24rem; }
+    #game-container .field-guide-header p { font-size: 0.85rem; }
+}

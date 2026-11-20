@@ -253,6 +253,18 @@ const SPECIAL_TYPES = {
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const sfx = new SoundEngine();
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const stageBackdrop = document.createElement('canvas');
+let trackStroke;
+stageBackdrop.width = canvas.width;
+stageBackdrop.height = canvas.height;
+const forestFloor = new Image();
+const guardianSprite = new Image();
+forestFloor.addEventListener('load', () => {
+    if (pathPoints.length) paintStageBackdrop();
+});
+forestFloor.src = 'art/forest-observatory.webp';
+guardianSprite.src = 'art/jade-guardian-v2.webp';
 
 let isGameRunning = false;
 let freezeTimer = 0;
@@ -268,6 +280,17 @@ let maxComboAchieved = 0;
 let longShotsAchieved = 0;
 let lives = 3;
 let safePeriodTimer = 0;
+let answerArmed = false;
+let roundAdvance = 0;
+let isPractice = false;
+let practiceCompleted = false;
+let firstAnswerCorrect = 0;
+let answeredThisQuestion = false;
+const practiceQuestion = {
+    question: '暖身試射：點選 B 裝填，再射向軌道上的 B。',
+    options: ['A 球', 'B 球', 'C 球', 'D 球'],
+    answer: 1
+};
 
 let manifestUnits = [];
 let questions = [];
@@ -283,7 +306,6 @@ const turret = {
     y: 270,
     angle: 0,
     currentBallColor: 0,
-    nextBallColor: 1,
     recoil: 0
 };
 
@@ -307,6 +329,7 @@ function generateTrackPath() {
         const y = centerY + Math.sin(angle) * radiusY;
         pathPoints.push({ x, y, angle });
     }
+    paintStageBackdrop();
 }
 
 // =============================================================================
@@ -370,7 +393,7 @@ class Ball {
 
         // 4. 標籤文字 (A, B, C, D) 或特殊符號
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 11px Orbitron, sans-serif';
+        ctx.font = '900 11px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
@@ -381,7 +404,11 @@ class Ball {
         if (this.specialType === SPECIAL_TYPES.REVERSE) displaySymbol = '⏪';
         if (this.specialType === SPECIAL_TYPES.BOMB) displaySymbol = '💣';
 
-        ctx.fillText(displaySymbol, 0, 1);
+        ctx.fillText(config.name, 0, 1);
+        if (this.specialType !== SPECIAL_TYPES.NORMAL) {
+            ctx.font = '11px system-ui, sans-serif';
+            ctx.fillText(displaySymbol, 9, -10);
+        }
         ctx.restore();
     }
 }
@@ -436,7 +463,7 @@ class Bullet {
         ctx.fill();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 10px Orbitron, sans-serif';
+        ctx.font = '900 10px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(config.name, 0, 1);
@@ -501,7 +528,7 @@ class FloatingText {
         ctx.globalAlpha = Math.max(0, this.alpha);
         ctx.translate(this.x, this.y);
         ctx.scale(this.scale, this.scale);
-        ctx.font = '900 16px "Zen Maru Gothic", Orbitron, sans-serif';
+        ctx.font = '900 16px "Zen Maru Gothic", system-ui, sans-serif';
         ctx.fillStyle = this.color;
         ctx.textAlign = 'center';
         ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
@@ -592,8 +619,10 @@ async function loadQuestionsFromFile(filePath) {
 
         if (rawList.length > 0) {
             questions = filterQuestionsForZuma(rawList);
+            if (!questions.length) throw new Error('題庫沒有有效的四選一題目');
             console.log(`已成功載入共用題庫單元：${filePath}，篩選出 ${questions.length} 題速答題`);
             currentQuestionIndex = 0;
+            document.getElementById('question-source').textContent = questions.length + ' 題可用';
             renderQuestionHUD();
             return;
         }
@@ -605,50 +634,39 @@ async function loadQuestionsFromFile(filePath) {
 
 function fallbackLocalQuestions() {
     questions = [...FAST_BIOLOGY_QUESTIONS];
+    document.getElementById('question-source').textContent = '使用內建備援題庫';
     currentQuestionIndex = 0;
     renderQuestionHUD();
 }
 
-// 智慧修剪題幹與選項文字，適合快節奏祖瑪
 function filterQuestionsForZuma(rawList) {
     const list = [];
-    rawList.forEach(q => {
-        let ansIdx = 0;
-        if (typeof q.answer === 'string') {
-            const upper = q.answer.trim().toUpperCase();
-            if (upper === 'A') ansIdx = 0;
-            else if (upper === 'B') ansIdx = 1;
-            else if (upper === 'C') ansIdx = 2;
-            else if (upper === 'D') ansIdx = 3;
-            else ansIdx = parseInt(upper, 10) || 0;
-        } else if (typeof q.answer === 'number') {
-            ansIdx = q.answer;
-        }
+    for (const q of rawList) {
+        const text = q?.question || q?.title;
+        const options = q?.options;
+        const key = String(q?.answer ?? '').trim().toUpperCase();
+        const answer = /^[A-D]$/.test(key) ? key.charCodeAt(0) - 65 : /^[0-3]$/.test(key) ? Number(key) : -1;
+        if (typeof text !== 'string' || !text.trim() || answer < 0 ||
+            !Array.isArray(options) || options.length !== 4 ||
+            options.some(option => typeof option !== 'string' || !option.trim())) continue;
+        list.push({ question: text.trim(), options, answer,
+            explanation: typeof q.explanation === 'string' ? q.explanation.trim() : '' });
+    }
+    for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+}
 
-        let text = q.question || q.title || '';
-        let opts = (q.options || ['A', 'B', 'C', 'D']).map(o => {
-            const s = String(o).trim();
-            return s.length > 20 ? s.slice(0, 18) + '..' : s;
-        });
+function currentQuestion() {
+    return isPractice ? practiceQuestion : questions[currentQuestionIndex];
+}
 
-        // 確保題目至少有 4 個選項
-        while (opts.length < 4) {
-            opts.push(`選項${['A','B','C','D'][opts.length]}`);
-        }
-
-        if (text && opts.length >= 4) {
-            // 精簡題幹長度
-            const cleanText = text.length > 35 ? text.slice(0, 32) + '...' : text;
-            list.push({
-                question: cleanText,
-                options: opts.slice(0, 4),
-                answer: ansIdx % 4
-            });
-        }
-    });
-
-    list.sort(() => Math.random() - 0.5);
-    return list.length >= 10 ? list : [...FAST_BIOLOGY_QUESTIONS];
+function setFeedback(message, tone = '') {
+    const status = document.getElementById('shot-feedback');
+    status.textContent = message;
+    status.dataset.tone = tone;
 }
 
 // =============================================================================
@@ -656,10 +674,12 @@ function filterQuestionsForZuma(rawList) {
 // =============================================================================
 function renderQuestionHUD() {
     if (!questions || questions.length === 0) return;
-    const q = questions[currentQuestionIndex];
+    const q = currentQuestion();
 
-    document.getElementById('stage-display').innerText = `進度：第 ${currentStage} / ${TOTAL_STAGES} 題`;
-    document.getElementById('question-text').innerText = `Q${currentStage}. ${q.question}`;
+    document.getElementById('stage-display').textContent = isPractice
+        ? '不計分暖身' : '第 ' + currentStage + ' / ' + Math.min(TOTAL_STAGES, questions.length) + ' 題';
+    document.getElementById('question-text').textContent = q.question;
+    setFeedback(isPractice ? '先點 B 裝填，試射一球。' : '先讀題，再點選答案裝填。');
 
     const optionsGrid = document.getElementById('options-grid');
     optionsGrid.innerHTML = '';
@@ -669,14 +689,18 @@ function renderQuestionHUD() {
 
     // 依據題目四選項全部平等渲染，絕對不預先標註正確答案
     q.options.forEach((optText, idx) => {
-        const card = document.createElement('div');
-        const isLoaded = (idx === turret.currentBallColor);
-        card.className = `opt-card ${cssClasses[idx]} ${isLoaded ? 'currently-loaded' : ''}`;
-        card.id = `opt-card-${idx}`;
-        card.innerHTML = `
-            <div class="opt-letter">${letters[idx]}</div>
-            <div class="opt-text">${optText}</div>
-        `;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'opt-card ' + cssClasses[idx];
+        card.id = 'opt-card-' + idx;
+        const letter = document.createElement('span');
+        letter.className = 'opt-letter';
+        letter.textContent = letters[idx];
+        const label = document.createElement('span');
+        label.className = 'opt-text';
+        label.textContent = optText;
+        card.append(letter, label);
+        card.addEventListener('click', () => armAnswer(idx));
         optionsGrid.appendChild(card);
     });
 
@@ -696,75 +720,73 @@ function updateHUDStats() {
         heartContainer.appendChild(span);
     }
 
-    // 更新當前填裝選項的提示光暈
     for (let i = 0; i < 4; i++) {
-        const card = document.getElementById(`opt-card-${i}`);
-        if (card) {
-            if (i === turret.currentBallColor) {
-                card.classList.add('currently-loaded');
-            } else {
-                card.classList.remove('currently-loaded');
-            }
-        }
+        const card = document.getElementById('opt-card-' + i);
+        if (!card) continue;
+        const selected = answerArmed && i === turret.currentBallColor;
+        card.classList.toggle('currently-loaded', selected);
+        card.setAttribute('aria-pressed', String(selected));
     }
 }
 
-// =============================================================================
-// 10. 彩球鏈初始化與砲台控制 (支援右鍵換球)
-// =============================================================================
-function spawnBallChain(count = 22) {
-    balls = [];
-    const spacing = 28;
-    for (let i = 0; i < count; i++) {
-        const color = getRandomColorBiased();
-        let specialType = SPECIAL_TYPES.NORMAL;
-
-        const rand = Math.random();
-        if (rand < 0.025) specialType = SPECIAL_TYPES.FREEZE;
-        else if (rand < 0.05) specialType = SPECIAL_TYPES.REVERSE;
-        else if (rand < 0.075) specialType = SPECIAL_TYPES.BOMB;
-
-        const distance = -i * spacing;
-        balls.push(new Ball(color, distance, specialType));
+function armAnswer(color) {
+    if (!isGameRunning || roundAdvance > 0 || bullets.length ||
+        document.getElementById('rules-modal').classList.contains('active')) return;
+    if (isPractice && color !== practiceQuestion.answer) {
+        setFeedback('暖身指定 B。請點 B 裝填。');
+        return;
     }
-}
-
-// 出球權重：正確答案稍微提升 (40%)，其餘三色各 20%
-function getRandomColorBiased() {
-    if (!questions[currentQuestionIndex]) return Math.floor(Math.random() * 4);
-    const correctAns = questions[currentQuestionIndex].answer;
-    if (Math.random() < 0.40) {
-        return correctAns;
-    }
-    return Math.floor(Math.random() * 4);
-}
-
-// 換球功能 (調換當前球與備用球)
-function swapTurretBalls() {
-    if (!isGameRunning) return;
     sfx.init();
     sfx.playSwap();
-
-    const temp = turret.currentBallColor;
-    turret.currentBallColor = turret.nextBallColor;
-    turret.nextBallColor = temp;
-
-    floatingTexts.push(new FloatingText(turret.x, turret.y - 35, '🔄 已切換彩球！', '#38bdf8'));
+    turret.currentBallColor = color;
+    answerArmed = true;
+    setFeedback('已裝填 ' + COLOR_CONFIG[color].name + '，點軌道上的同字母球。', 'aim');
     updateHUDStats();
+}
+
+function spawnBallChain(count = 22) {
+    const colors = [0, 1, 2, 3];
+    for (let i = colors.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [colors[i], colors[j]] = [colors[j], colors[i]];
+    }
+    balls = Array.from({ length: count }, (_, i) => {
+        const rand = Math.random();
+        const special = i < 8 || isPractice ? SPECIAL_TYPES.NORMAL :
+            rand < 0.025 ? SPECIAL_TYPES.FREEZE :
+            rand < 0.05 ? SPECIAL_TYPES.REVERSE :
+            rand < 0.075 ? SPECIAL_TYPES.BOMB : SPECIAL_TYPES.NORMAL;
+        return new Ball(colors[i % 4], 196 - i * 28, special);
+    });
+}
+
+function makeTargetsReachable() {
+    if (balls.length < 8) {
+        spawnBallChain();
+        return;
+    }
+    const head = Math.max(196, balls[0].distance);
+    const first = balls.slice(0, 8);
+    const visible = new Set(first.map(ball => ball.color));
+    for (let color = 0; color < 4; color++) {
+        if (!visible.has(color)) balls.splice(4, 0, new Ball(color));
+    }
+    balls.forEach((ball, i) => {
+        ball.distance = head - i * 28;
+        ball.updatePosition();
+    });
 }
 
 function shootBullet() {
-    if (!isGameRunning) return;
+    if (!isGameRunning || roundAdvance > 0 || bullets.length) return;
+    if (!answerArmed) {
+        setFeedback('先點選一個答案裝填晶球。');
+        return;
+    }
     sfx.init();
     sfx.playShoot();
-
     turret.recoil = 6;
-    const b = new Bullet(turret.x, turret.y, turret.angle, turret.currentBallColor);
-    bullets.push(b);
-
-    turret.currentBallColor = turret.nextBallColor;
-    turret.nextBallColor = getRandomColorBiased();
-    updateHUDStats();
+    bullets.push(new Bullet(turret.x, turret.y, turret.angle, turret.currentBallColor));
 }
 
 // =============================================================================
@@ -776,7 +798,7 @@ function gameLoop(timestamp) {
     const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.1);
     lastTimestamp = timestamp;
 
-    if (isGameRunning) {
+    if (isGameRunning && !document.getElementById('rules-modal').classList.contains('active')) {
         update(dt);
     }
     render();
@@ -785,16 +807,20 @@ function gameLoop(timestamp) {
 }
 
 function update(dt) {
-    if (freezeTimer > 0) freezeTimer -= dt;
-    if (reverseTimer > 0) reverseTimer -= dt;
-    if (safePeriodTimer > 0) safePeriodTimer -= dt;
+    if (roundAdvance > 0) {
+        roundAdvance = Math.max(0, roundAdvance - dt);
+        if (roundAdvance === 0) advanceRound();
+    }
+    if (answerArmed && freezeTimer > 0) freezeTimer -= dt;
+    if (answerArmed && reverseTimer > 0) reverseTimer -= dt;
+    if (answerArmed && safePeriodTimer > 0) safePeriodTimer -= dt;
     if (screenShakeTimer > 0) screenShakeTimer -= dt;
 
     if (turret.recoil > 0) {
         turret.recoil = Math.max(0, turret.recoil - dt * 25);
     }
 
-    let moveSpeed = 44;
+    let moveSpeed = 34;
     if (freezeTimer > 0) {
         moveSpeed = 0;
     } else if (reverseTimer > 0) {
@@ -803,9 +829,11 @@ function update(dt) {
         moveSpeed = 15;
     }
 
+    if (isPractice || !answerArmed || roundAdvance > 0) moveSpeed = 0;
+
     if (balls.length > 0) {
         const head = balls[0];
-        head.distance += moveSpeed * dt;
+        head.distance = Math.max(196, head.distance + moveSpeed * dt);
         head.updatePosition();
 
         for (let i = 1; i < balls.length; i++) {
@@ -823,6 +851,7 @@ function update(dt) {
 
         if (head.distance >= pathPoints.length - 1) {
             triggerBallInHole();
+            return;
         } else if (head.distance > pathPoints.length * 0.82) {
             sfx.playWarning();
         }
@@ -830,53 +859,17 @@ function update(dt) {
         spawnBallChain(15);
     }
 
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        const b = bullets[i];
-        b.update();
-
-        if (!b.active) {
-            bullets.splice(i, 1);
-            continue;
-        }
-
-        for (let j = 0; j < balls.length; j++) {
-            const ball = balls[j];
-            if (ball.distance < 0) continue;
-
-            const dist = Math.hypot(b.x - ball.x, b.y - ball.y);
-            if (dist < b.radius + ball.radius) {
-                b.active = false;
-                sfx.playImpact();
-
-                if (b.getTravelDistance() > 220) {
-                    longShotsAchieved++;
-                    score += 20;
-                    sfx.playLongShot();
-                    floatingTexts.push(new FloatingText(ball.x, ball.y - 20, '🎯 LONG SHOT! +20', '#fbbf24'));
-                }
-
-                // 核心判定邏輯：
-                const correctAns = questions[currentQuestionIndex].answer;
-                const isBulletCorrect = (b.color === correctAns);
-                const isHitTargetMatch = (ball.color === correctAns);
-
-                // 【直覺過關爽快機制】：如果發射的是正解球，且擊中了軌道上的同色球，觸發正解共鳴破壞直接通關！
-                if (isBulletCorrect && isHitTargetMatch) {
-                    createExplosionParticles(ball.x, ball.y, COLOR_CONFIG[ball.color].hex);
-                    balls.splice(j, 1);
-                    comboCount++;
-                    score += 35;
-                    sfx.playComboChord(Math.min(comboCount, 4));
-                    triggerStageClearSuccess();
-                    break;
-                }
-
-                // 若非直接共鳴，正常插入彩球鏈進行祖瑪消除運算
-                const newBall = new Ball(b.color, ball.distance - 14);
-                balls.splice(j, 0, newBall);
-                checkElimination(j);
-                break;
-            }
+    const shot = bullets[0];
+    if (shot) {
+        shot.update();
+        const target = balls.findIndex(ball => ball.distance >= 0 &&
+            Math.hypot(shot.x - ball.x, shot.y - ball.y) < shot.radius + ball.radius);
+        if (target >= 0) {
+            bullets.length = 0;
+            resolveShot(shot, target);
+        } else if (!shot.active) {
+            bullets.length = 0;
+            setFeedback('這球射偏了。保留目前裝填，再瞄一次。', 'aim');
         }
     }
 
@@ -891,60 +884,44 @@ function update(dt) {
     }
 }
 
-function checkElimination(startIndex) {
-    if (startIndex < 0 || startIndex >= balls.length) return;
-
-    const targetColor = balls[startIndex].color;
-    const correctAns = questions[currentQuestionIndex].answer;
-
-    let left = startIndex;
-    let right = startIndex;
-
-    while (left > 0 && balls[left - 1].color === targetColor) left--;
-    while (right < balls.length - 1 && balls[right + 1].color === targetColor) right++;
-
-    const count = right - left + 1;
-
-    if (count >= 3) {
-        comboCount++;
-        maxComboAchieved = Math.max(maxComboAchieved, comboCount);
-
-        const isCorrectAns = (targetColor === correctAns);
-        const baseScore = isCorrectAns ? 25 : 10;
-        const addScore = Math.min(60, baseScore * count + (comboCount - 1) * 5);
-        score += addScore;
-
-        sfx.playComboChord(comboCount);
-
-        let text = `COMBO x${comboCount}! +${addScore}`;
-        if (comboCount >= 3) text = `🔥 SUPER COMBO x${comboCount}! +${addScore}`;
-        floatingTexts.push(new FloatingText(balls[startIndex].x, balls[startIndex].y, text, isCorrectAns ? '#34d399' : '#38bdf8'));
-
-        for (let i = left; i <= right; i++) {
-            createExplosionParticles(balls[i].x, balls[i].y, COLOR_CONFIG[balls[i].color].hex);
-            handleSpecialBall(balls[i]);
-        }
-
-        balls.splice(left, count);
-        updateHUDStats();
-
-        if (isCorrectAns) {
-            triggerStageClearSuccess();
-            return;
-        }
-
-        setTimeout(() => {
-            if (left > 0 && left < balls.length) {
-                if (balls[left - 1].color === balls[left].color) {
-                    checkElimination(left);
-                }
-            }
-        }, 220);
-
-    } else {
+function resolveShot(shot, target) {
+    const hit = balls[target];
+    if (hit.color !== shot.color) {
+        setFeedback('碰到 ' + COLOR_CONFIG[hit.color].name + '。請瞄準同字母球。', 'aim');
+        return;
+    }
+    sfx.playImpact();
+    const question = currentQuestion();
+    const correct = shot.color === question.answer;
+    if (!isPractice && !answeredThisQuestion) {
+        firstAnswerCorrect += Number(correct);
+        answeredThisQuestion = true;
+    }
+    if (!correct) {
+        answerArmed = false;
         comboCount = 0;
         updateHUDStats();
+        setFeedback('這個選項不符合題意。再讀一次，換個答案試試。', 'retry');
+        return;
     }
+
+    const cleared = balls.splice(Math.max(0, target - 1), 3);
+    for (const ball of cleared) {
+        if (ball.distance >= 0) createExplosionParticles(ball.x, ball.y, COLOR_CONFIG[ball.color].hex);
+        if (!isPractice) handleSpecialBall(ball);
+    }
+    if (isPractice) {
+        setFeedback('試射成功！準備進入第一題。', 'success');
+    } else {
+        const longShot = shot.getTravelDistance() > 220;
+        score += longShot ? 55 : 35;
+        longShotsAchieved += Number(longShot);
+        comboCount++;
+        maxComboAchieved = Math.max(maxComboAchieved, comboCount);
+        const explanation = question.explanation || '正解是「' + question.options[question.answer] + '」。';
+        setFeedback('答對！清除 ' + cleared.length + ' 顆。' + explanation, 'success');
+    }
+    triggerStageClearSuccess();
 }
 
 function handleSpecialBall(ball) {
@@ -977,42 +954,47 @@ function triggerBombExplosion(centerX, centerY) {
 
 function triggerStageClearSuccess() {
     sfx.playStageClear();
-    floatingTexts.push(new FloatingText(480, 230, '🎉 答對通關！PERFECT！', '#fbbf24'));
+    answerArmed = false;
+    roundAdvance = 2.2;
+    screenShakeTimer = 0.18;
+    screenShakeMagnitude = 3;
+    updateHUDStats();
+}
 
-    screenShakeTimer = 0.25;
-    screenShakeMagnitude = 4;
-
-    balls.forEach(b => b.distance -= 180);
-    safePeriodTimer = 3.0;
-
-    if (currentStage >= TOTAL_STAGES) {
-        setTimeout(() => {
-            endGameAndShowResult(true);
-        }, 800);
+function advanceRound() {
+    if (isPractice) {
+        isPractice = false;
+        practiceCompleted = true;
+        spawnBallChain();
     } else {
+        if (currentStage >= Math.min(TOTAL_STAGES, questions.length)) {
+            endGameAndShowResult(true);
+            return;
+        }
         currentStage++;
-        currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
-        renderQuestionHUD();
+        currentQuestionIndex++;
+        balls.forEach(ball => { ball.distance -= 180; });
+        makeTargetsReachable();
+        safePeriodTimer = 3;
     }
+    answeredThisQuestion = false;
+    renderQuestionHUD();
 }
 
 function triggerBallInHole() {
     lives--;
+    bullets.length = 0;
+    answerArmed = false;
     sfx.playWarning();
-    screenShakeTimer = 0.4;
-    screenShakeMagnitude = 8;
-
-    floatingTexts.push(new FloatingText(480, 270, '⚠️ 能量流失！心核受損', '#ef4444'));
-
     if (lives <= 0) {
         updateHUDStats();
-        setTimeout(() => {
-            endGameAndShowResult(false);
-        }, 600);
-    } else {
-        balls.forEach(b => b.distance -= 380);
-        updateHUDStats();
+        endGameAndShowResult(false);
+        return;
     }
+    balls.forEach(ball => { ball.distance -= 380; });
+    makeTargetsReachable();
+    updateHUDStats();
+    setFeedback('球鏈抵達終點，失去一顆心核。重新裝填後再試。', 'retry');
 }
 
 function createExplosionParticles(x, y, color) {
@@ -1024,53 +1006,89 @@ function createExplosionParticles(x, y, color) {
 // =============================================================================
 // 12. 畫面繪製渲染
 // =============================================================================
+// Static stonework is painted once when the track is generated.
+function paintStageBackdrop() {
+    const stage = stageBackdrop.getContext('2d');
+    const { width, height } = stageBackdrop;
+    const light = stage.createRadialGradient(480, 235, 26, 480, 290, 515);
+    light.addColorStop(0, '#57715b');
+    light.addColorStop(0.55, '#25463a');
+    light.addColorStop(1, '#10221d');
+    stage.fillStyle = light;
+    stage.fillRect(0, 0, width, height);
+
+    if (forestFloor.naturalWidth) {
+        stage.drawImage(forestFloor, 0, 0, width, height);
+        stage.fillStyle = '#11291f24';
+        stage.fillRect(0, 0, width, height);
+    }
+
+    trackStroke = new Path2D();
+    trackStroke.moveTo(pathPoints[0].x, pathPoints[0].y);
+    for (const point of pathPoints) trackStroke.lineTo(point.x, point.y);
+    stage.lineCap = 'round';
+    stage.lineJoin = 'round';
+    // Cast shadow, weathered stone shoulders, and a recessed ball channel.
+    stage.save();
+    stage.translate(0, 4);
+    stage.strokeStyle = '#08160fc9';
+    stage.lineWidth = 46;
+    stage.shadowColor = '#091910b3';
+    stage.shadowBlur = 11;
+    stage.stroke(trackStroke);
+    stage.restore();
+
+    const stone = stage.createLinearGradient(0, 65, 0, 490);
+    stone.addColorStop(0, '#c7b78b');
+    stone.addColorStop(0.48, '#7a826b');
+    stone.addColorStop(1, '#505847');
+    for (const [size, color] of [[44, '#333d30'], [41, stone], [33, '#414f3e'], [29, '#192a22']]) {
+        stage.lineWidth = size;
+        stage.strokeStyle = color;
+        stage.stroke(trackStroke);
+    }
+    stage.lineWidth = 1;
+    stage.strokeStyle = '#c1c3a34b';
+    stage.setLineDash([2, 13]);
+    stage.stroke(trackStroke);
+    stage.setLineDash([]);
+
+    const end = pathPoints[pathPoints.length - 1];
+    const well = stage.createRadialGradient(end.x, end.y, 4, end.x, end.y, 23);
+    well.addColorStop(0.35, '#080e0d');
+    well.addColorStop(0.72, '#602f26');
+    well.addColorStop(1, '#d39a6c');
+    stage.beginPath();
+    stage.arc(end.x, end.y, 23, 0, Math.PI * 2);
+    stage.fillStyle = well;
+    stage.fill();
+    stage.lineWidth = 4;
+    stage.strokeStyle = '#74644d';
+    stage.stroke();
+    stage.beginPath();
+    stage.arc(end.x, end.y, 26, 0, Math.PI * 2);
+    stage.lineWidth = 1;
+    stage.strokeStyle = '#c6a677';
+    stage.stroke();
+}
+
 function render() {
     ctx.save();
 
-    if (screenShakeTimer > 0) {
+    if (screenShakeTimer > 0 && !reducedMotion.matches) {
         const dx = (Math.random() - 0.5) * screenShakeMagnitude;
         const dy = (Math.random() - 0.5) * screenShakeMagnitude;
         ctx.translate(dx, dy);
     }
 
-    // 1. 深邃秘境背景
-    ctx.fillStyle = '#050914';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 2. 緊湊雕刻石刻軌道
-    if (pathPoints.length > 0) {
-        ctx.beginPath();
-        ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
-        for (let i = 1; i < pathPoints.length; i++) {
-            ctx.lineTo(pathPoints[i].x, pathPoints[i].y);
-        }
-        ctx.lineWidth = 38;
-        ctx.strokeStyle = 'rgba(30, 41, 59, 0.75)';
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        ctx.lineWidth = 32;
-        ctx.strokeStyle = '#020617';
-        ctx.stroke();
-
+    ctx.drawImage(stageBackdrop, 0, 0);
+    if (safePeriodTimer > 0 && trackStroke) {
+        ctx.save();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = safePeriodTimer > 0 ? 'rgba(56, 189, 248, 0.65)' : 'rgba(51, 65, 85, 0.45)';
-        ctx.setLineDash([4, 6]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // 終點吞噬深淵
-        const endPt = pathPoints[pathPoints.length - 1];
-        const portalGrad = ctx.createRadialGradient(endPt.x, endPt.y, 4, endPt.x, endPt.y, 30);
-        portalGrad.addColorStop(0, '#000000');
-        portalGrad.addColorStop(0.5, '#7f1d1d');
-        portalGrad.addColorStop(0.85, '#ef4444');
-        portalGrad.addColorStop(1, 'transparent');
-
-        ctx.beginPath();
-        ctx.arc(endPt.x, endPt.y, 30, 0, Math.PI * 2);
-        ctx.fillStyle = portalGrad;
-        ctx.fill();
+        ctx.strokeStyle = '#d6efaeab';
+        ctx.setLineDash([3, 7]);
+        ctx.stroke(trackStroke);
+        ctx.restore();
     }
 
     // 3. 繪製彩球
@@ -1093,48 +1111,44 @@ function renderTotemTurret() {
     ctx.save();
     ctx.translate(turret.x, turret.y);
 
-    // 瞄準導引線
-    ctx.save();
-    ctx.rotate(turret.angle);
-    ctx.beginPath();
-    ctx.moveTo(34, 0);
-    ctx.lineTo(800, 0);
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
-    ctx.setLineDash([6, 8]);
-    ctx.stroke();
-    ctx.restore();
+    if (answerArmed) {
+        ctx.save();
+        ctx.rotate(turret.angle);
+        ctx.beginPath();
+        ctx.moveTo(48, 0);
+        ctx.lineTo(800, 0);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#fff0bfa8';
+        ctx.setLineDash([5, 8]);
+        ctx.stroke();
+        ctx.restore();
+    }
 
-    // 基座圖騰外環
+    ctx.save();
     ctx.beginPath();
-    ctx.arc(0, 0, 38, 0, Math.PI * 2);
-    ctx.fillStyle = '#0f172a';
+    ctx.ellipse(0, 7, 49, 38, 0, 0, Math.PI * 2);
+    const shadow = ctx.createRadialGradient(0, 7, 10, 0, 7, 49);
+    shadow.addColorStop(0, '#081711ba');
+    shadow.addColorStop(1, '#08171100');
+    ctx.fillStyle = shadow;
     ctx.fill();
-    ctx.lineWidth = 3.5;
-    ctx.strokeStyle = '#0284c7';
-    ctx.stroke();
-
-    // 旋轉砲首
-    ctx.save();
     ctx.rotate(turret.angle);
     ctx.translate(-turret.recoil, 0);
-
-    ctx.fillStyle = '#1e293b';
-    ctx.beginPath();
-    ctx.moveTo(14, -14);
-    ctx.lineTo(36, -8);
-    ctx.lineTo(36, 8);
-    ctx.lineTo(14, 14);
-    ctx.closePath();
-    ctx.fill();
-    ctx.lineWidth = 2.5;
-    ctx.strokeStyle = '#38bdf8';
-    ctx.stroke();
-
+    if (guardianSprite.naturalWidth) {
+        ctx.drawImage(guardianSprite, -52, -54, 108, 108);
+    } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, 38, 0, Math.PI * 2);
+        ctx.fillStyle = '#315848';
+        ctx.fill();
+        ctx.strokeStyle = '#c6a677';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    }
     ctx.restore();
 
     // 砲口主發射晶球
-    const mainConfig = COLOR_CONFIG[turret.currentBallColor];
+    const mainConfig = answerArmed ? COLOR_CONFIG[turret.currentBallColor] : { gradientStart: '#92b5a4', gradientEnd: '#274b3d', name: '·' };
     const mainGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, 14);
     mainGrad.addColorStop(0, '#ffffff');
     mainGrad.addColorStop(0.4, mainConfig.gradientStart);
@@ -1149,27 +1163,10 @@ function renderTotemTurret() {
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '900 11px Orbitron, sans-serif';
+    ctx.font = '900 11px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(mainConfig.name, 0, 1);
-
-    // 備用次顆晶球 (帶旋轉提示框)
-    const nextConfig = COLOR_CONFIG[turret.nextBallColor];
-    ctx.beginPath();
-    ctx.arc(28, 28, 9, 0, Math.PI * 2);
-    ctx.fillStyle = nextConfig.hex;
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // 備用球文字
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '900 9px Orbitron, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(nextConfig.name, 28, 28);
 
     ctx.restore();
 }
@@ -1187,8 +1184,8 @@ function endGameAndShowResult(isVictory) {
     const finalScore = Math.min(600, Math.max(300, 300 + Math.round(rawTotal * 0.6)));
 
     const summaryText = isVictory
-        ? `🏆 達成 10 題滿貫闖關！最高連擊 Combo x${maxComboAchieved}，遠程神射 ${longShotsAchieved} 次！`
-        : `⚔️ 達成 ${currentStage - 1} 題挑戰，能量耗盡！最高連擊 Combo x${maxComboAchieved}！`;
+        ? `🏆 完成 ${currentStage} 題！首次答對 ${firstAnswerCorrect} 題。最高連擊 Combo x${maxComboAchieved}，遠程神射 ${longShotsAchieved} 次！`
+        : `⚔️ 達成 ${currentStage - 1} 題挑戰，首次答對 ${firstAnswerCorrect} 題。最高連擊 Combo x${maxComboAchieved}！`;
 
     if (typeof window.showScoreSubmitModal === 'function') {
         window.showScoreSubmitModal({
@@ -1205,6 +1202,15 @@ function endGameAndShowResult(isVictory) {
 
 function restartGameStage() {
     currentStage = 1;
+    currentQuestionIndex = 0;
+    answerArmed = false;
+    answeredThisQuestion = false;
+    firstAnswerCorrect = 0;
+    roundAdvance = 0;
+    bullets.length = 0;
+    particles.length = 0;
+    floatingTexts.length = 0;
+    freezeTimer = reverseTimer = safePeriodTimer = screenShakeTimer = 0;
     score = 0;
     comboCount = 0;
     maxComboAchieved = 0;
@@ -1215,7 +1221,7 @@ function restartGameStage() {
 }
 
 // =============================================================================
-// 14. 事件綁定 (滑鼠左鍵射擊、滑鼠右鍵/空白鍵換球)
+// 14. 事件綁定 (滑鼠與觸控共用射擊入口)
 // =============================================================================
 function setupEventListeners() {
     function updateAim(clientX, clientY) {
@@ -1227,50 +1233,14 @@ function setupEventListeners() {
         turret.angle = Math.atan2(mouseY - turret.y, mouseX - turret.x);
     }
 
-    canvas.addEventListener('mousemove', (e) => {
-        updateAim(e.clientX, e.clientY);
+    canvas.addEventListener('pointermove', event => {
+        updateAim(event.clientX, event.clientY);
     });
-
-    // 左鍵發射、右鍵換球
-    canvas.addEventListener('mousedown', (e) => {
-        if (e.button === 0) {
-            updateAim(e.clientX, e.clientY);
-            shootBullet();
-        } else if (e.button === 2) {
-            e.preventDefault();
-            swapTurretBalls();
-        }
+    canvas.addEventListener('pointerdown', event => {
+        if (!event.isPrimary || event.button !== 0) return;
+        updateAim(event.clientX, event.clientY);
+        shootBullet();
     });
-
-    // 禁用 Canvas 預設右鍵選單
-    canvas.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
-
-    // 鍵盤空白鍵亦可調換備用球
-    window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-            e.preventDefault();
-            swapTurretBalls();
-        }
-    });
-
-    // 觸控螢幕支援
-    canvas.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-            updateAim(e.touches[0].clientX, e.touches[0].clientY);
-            shootBullet();
-        } else if (e.touches.length > 1) {
-            // 雙指觸控換球
-            swapTurretBalls();
-        }
-    }, { passive: true });
-
-    canvas.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-            updateAim(e.touches[0].clientX, e.touches[0].clientY);
-        }
-    }, { passive: true });
 
     // 音效開關
     document.getElementById('btn-sound-toggle').addEventListener('click', () => {
@@ -1298,18 +1268,17 @@ function setupEventListeners() {
     document.getElementById('btn-how-to-play').addEventListener('click', openRules);
     document.getElementById('btn-start-how-to').addEventListener('click', openRules);
     document.getElementById('btn-close-rules').addEventListener('click', closeRules);
-    document.getElementById('btn-understood').addEventListener('click', () => {
+    const start = () => {
         closeRules();
         sfx.init();
         document.getElementById('overlay-screen').classList.remove('active');
+        if (isGameRunning) return;
+        isPractice = !practiceCompleted;
+        restartGameStage();
         isGameRunning = true;
-    });
-
-    document.getElementById('start-btn').addEventListener('click', () => {
-        sfx.init();
-        document.getElementById('overlay-screen').classList.remove('active');
-        isGameRunning = true;
-    });
+    };
+    document.getElementById('btn-understood').addEventListener('click', start);
+    document.getElementById('start-btn').addEventListener('click', start);
 }
 
 // 監聽學生在班級座號外殼登入完成後的通知 (優雅彈出玩法秘笈，絕不快閃)
@@ -1330,7 +1299,6 @@ window.addEventListener('biogame:start', () => {
 window.addEventListener('DOMContentLoaded', async () => {
     generateTrackPath();
     turret.currentBallColor = 0;
-    turret.nextBallColor = 1;
     await initQuestionBankSystem();
     spawnBallChain(22);
     setupEventListeners();
