@@ -424,7 +424,7 @@ class Bullet {
         this.y = y;
         this.angle = angle;
         this.color = color;
-        this.speed = 19;
+        this.speed = 26;
         this.radius = 13;
         this.active = true;
     }
