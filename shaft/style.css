@@ -1,4 +1,4 @@
-/* ==================== 🧬 生物大墜落：細胞深淵下樓梯 CSS V7.0 ==================== */
+/* ==================== 🧬 生物大墜落：細胞深淵下樓梯 CSS V8.1 ==================== */
 :root {
   --bg-dark: #0f172a;
   --bg-panel: #1e293b;
@@ -609,7 +609,7 @@ body {
   margin-bottom: 16px;
 }
 
-/* Cell Abyss · research station interface, v7 */
+/* Cell Abyss · research station interface, V8.1 */
 :root { --bg-panel:#fffdf8; --text-main:#173c47; --accent-green:#087f75; }
 * { touch-action:auto; }
 body { background:#e9f0ed; color:#173c47; }

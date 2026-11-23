@@ -20,13 +20,11 @@ function cleanUnitTitle(raw) {
 
 /**
  * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V8.1
- * 7. 🛡️ 徹底根治邊界卡住問題：左右兩側預留 65px 天井通道，著地判定引入 FOOT_INSET，走至階梯邊緣即自然流暢下墜！
- * 1. 🍄 升級為最新三明治終極標準模組 (BioGameSuite / ScoreSubmitModal) 與復古像素街機風首尾連動！
- * 2. 🛡️ 開局前物理完全凍結 (Pre-Login Freeze) + 結算時強制凍結 (Post-Game Freeze)。
- * 3. 🎯 課堂派卷守門鎖定 (?unit=xxx)，自動鎖定指定單元並防止中途切換偷看題庫。
- * 4. 🏆 全新 Classroom Light Mode 抗日光燈眩光護眼評量認證卡 + 單一核心結算檢核入口。
- * 5. 🚀 完整連動 Google Apps Script (GAS) 最高分同單元覆蓋與四項平板交回自我檢核。
- * 6. 🛑 徹底消除原生 alert/confirm，剪貼簿複製改為行內安靜狀態提示。
+ * 1. 🪜 邊界下落優化：左右兩側預留 65px 天井通道，著地判定引入 FOOT_INSET，杜絕卡牆自然流暢下墜。
+ * 2. 🍄 三明治標準架構：整合 BioGameSuite / ScoreSubmitModal，開局前與結算時皆完整凍結物理與計時。
+ * 3. 🎯 課堂派卷鎖定：支援 ?unit= 與 ?qcount= 動態目標題數，防止學生切換題庫。
+ * 4. ⏱️ 統一物理步長：基於 dt/timeFactor 換算位移與重力，消除不同螢幕更新率（60Hz/120Hz）難度差異。
+ * 5. 🏆 抗眩光評量認證：Classroom Light Mode 護眼認證卡，連動 GAS 成績同單元最高分覆蓋與自我檢核。
  */
 
 const CANVAS_WIDTH = 800;
