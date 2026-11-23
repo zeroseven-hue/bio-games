@@ -19,7 +19,8 @@ function cleanUnitTitle(raw) {
 }
 
 /**
- * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V8.0
+ * 生物大墜落：細胞深淵下樓梯 (Bio-Shaft: Cell Abyss) - 遊戲引擎 V8.1
+ * 7. 🛡️ 徹底根治邊界卡住問題：左右兩側預留 65px 天井通道，著地判定引入 FOOT_INSET，走至階梯邊緣即自然流暢下墜！
  * 1. 🍄 升級為最新三明治終極標準模組 (BioGameSuite / ScoreSubmitModal) 與復古像素街機風首尾連動！
  * 2. 🛡️ 開局前物理完全凍結 (Pre-Login Freeze) + 結算時強制凍結 (Post-Game Freeze)。
  * 3. 🎯 課堂派卷守門鎖定 (?unit=xxx)，自動鎖定指定單元並防止中途切換偷看題庫。
@@ -30,6 +31,9 @@ function cleanUnitTitle(raw) {
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
+const WALL_MARGIN = 10; // 左右牆壁邊界
+const SIDE_CHUTE_GAP = 65; // 兩側下落天井通道寬度 (確保玩家 28px 能順暢通行，預留 37px 充裕餘裕，絕不卡牆)
+const FOOT_INSET = 6; // 腳底著地邊距 (避免單一像素浮空卡住，踩空即自然下墜)
 let TARGET_CORRECT_GOAL = 10; // 答對題數全勝通關目標 (支援 ?qcount= 動態配置)
 
 let hearts = 7;
@@ -685,8 +689,10 @@ function resetGame(autoStart = true) {
   // 2. 初始化其他 5 座垂直均勻分佈的加寬階梯 (距離 85px)
   for (let i = 1; i < 6; i++) {
     const y = 245 + i * 85;
-    const width = 190;
-    const x = Math.random() * (CANVAS_WIDTH - width - 60) + 30;
+    const width = 185;
+    const minX = SIDE_CHUTE_GAP;
+    const maxX = CANVAS_WIDTH - width - SIDE_CHUTE_GAP;
+    const x = minX + Math.random() * (maxX - minX);
     stairs.push({
       id: stairIdCounter++,
       type: "NORMAL",
@@ -737,7 +743,7 @@ function spawnBottomStair(spawnY) {
 
   const rand = Math.random();
   let type = "NORMAL";
-  let width = 180 + Math.random() * 40;
+  let width = 175 + Math.random() * 40;
 
   if (rand < 0.60) type = "NORMAL";
   else if (rand < 0.75) type = "HEART";
@@ -746,7 +752,9 @@ function spawnBottomStair(spawnY) {
   else if (rand < 0.95) type = "SPRING";
   else type = "CRUMBLE";
 
-  const x = Math.random() * (CANVAS_WIDTH - width - 60) + 30;
+  const minX = SIDE_CHUTE_GAP;
+  const maxX = CANVAS_WIDTH - width - SIDE_CHUTE_GAP;
+  const x = minX + Math.random() * (maxX - minX);
   stairs.push({
     id: stairIdCounter++,
     type,
@@ -804,11 +812,11 @@ function spawnFateStairPair(y) {
 
   const isLeftCorrect = Math.random() < 0.5;
 
-  // 100% 畫面均勻分佈且預留 100px 寬廣中央天井下樓通道 (單座寬度 330px, 高度 48px，左右對稱)
-  const stairWidth = 330;
+  // 100% 畫面均勻分佈：左右兩側各留 65px 天井通道，中央預留 90px 寬廣天井下樓通道 (單座寬度 290px, 高度 48px)
+  const stairWidth = 290;
   const stairHeight = 48;
-  const leftX = 20;
-  const rightX = 450; // 20 + 330 = 350; 450 - 350 = 100px 中央通道，右邊界 450 + 330 = 780 (右側剩 20px)
+  const leftX = SIDE_CHUTE_GAP; // 65px (左側天井通道 65px)
+  const rightX = leftX + stairWidth + 90; // 65 + 290 + 90 = 445px; 445 + 290 = 735px (右側天井通道 800 - 735 = 65px)
 
   const pairId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
 
@@ -974,7 +982,7 @@ function updatePhysics(dt) {
   }
 
   player.x += player.vx * timeFactor;
-  player.x = Math.max(10, Math.min(CANVAS_WIDTH - player.width - 10, player.x));
+  player.x = Math.max(WALL_MARGIN, Math.min(CANVAS_WIDTH - player.width - WALL_MARGIN, player.x));
 
   // 2. 重力加速度 (依 timeFactor 換算)
   player.vy += 0.48 * timeFactor;
@@ -995,7 +1003,7 @@ function updatePhysics(dt) {
       if (s.crumbleTimer >= 1.5) {
         s.isCrumbled = true;
         spawnCrumbleDebris(s.x, s.y, s.width, s.height);
-        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
+        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width - FOOT_INSET > s.x && player.x + FOOT_INSET < s.x + s.width) {
           player.isGrounded = false;
         }
         stairs.splice(i, 1);
@@ -1008,7 +1016,7 @@ function updatePhysics(dt) {
       if (s.crumbleTimer >= 0.45) {
         s.isCrumbled = true;
         spawnCrumbleDebris(s.x, s.y, s.width, s.height);
-        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
+        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width - FOOT_INSET > s.x && player.x + FOOT_INSET < s.x + s.width) {
           player.isGrounded = false;
         }
         stairs.splice(i, 1);
@@ -1022,7 +1030,7 @@ function updatePhysics(dt) {
       if (s.crumbleTimer >= 1.6) {
         s.isCrumbled = true;
         spawnCrumbleDebris(s.x, s.y, s.width, s.height);
-        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width > s.x && player.x < s.x + s.width) {
+        if (player.isGrounded && player.y + player.height <= s.y + 12 && player.x + player.width - FOOT_INSET > s.x && player.x + FOOT_INSET < s.x + s.width) {
           player.isGrounded = false;
         }
         stairs.splice(i, 1);
@@ -1035,8 +1043,8 @@ function updatePhysics(dt) {
       player.vy >= 0 &&
       prevY + player.height <= s.y + 8 &&
       player.y + player.height >= s.y &&
-      player.x + player.width > s.x &&
-      player.x < s.x + s.width &&
+      player.x + player.width - FOOT_INSET > s.x &&
+      player.x + FOOT_INSET < s.x + s.width &&
       !s.isCrumbled &&
       !(s.type === "FATE_OPTION" && s.answeredState === "wrong")
     ) {
@@ -1227,7 +1235,9 @@ function updateParticles(dt) {
 }
 
 function createSafetyStair(x, y, width) {
-  const safeX = Math.max(20, Math.min(CANVAS_WIDTH - width - 20, x));
+  const minX = SIDE_CHUTE_GAP;
+  const maxX = CANVAS_WIDTH - width - SIDE_CHUTE_GAP;
+  const safeX = Math.max(minX, Math.min(maxX, x));
   stairs.push({
     id: stairIdCounter++,
     type: "NORMAL",
